@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" width="120" height="100" fill="none">
+  <!-- Stems & Leaves -->
+  <!-- Left (Green Apple) Stem & Leaves -->
+  <path d="M38 52 C37 40 33 32 35 20" stroke="#22C55E" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <!-- Leaf pointing left -->
+  <path d="M36 38 C22 35 22 47 36 43 Z" fill="#22C55E"/>
+  <!-- Leaf pointing right -->
+  <path d="M36 29 C48 24 47 37 36 34 Z" fill="#22C55E"/>
+  <!-- Top Leaf -->
+  <path d="M35 20 C24 13 32 6 42 16 Z" fill="#22C55E"/>
+
+  <!-- Right (Red Apple) Stem & Leaves -->
+  <path d="M68 40 C70 28 74 20 76 12" stroke="#22C55E" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <!-- Leaf pointing left on red apple -->
+  <path d="M73 24 C60 22 61 11 74 17 Z" fill="#22C55E"/>
+  <!-- Leaf pointing right on red apple -->
+  <path d="M74 22 C92 14 97 27 75 28 Z" fill="#22C55E"/>
+
+  <!-- Red Apple (Heart shape, slightly tilted right) -->
+  <path d="M68 38 C60 30 46 38 50 54 C53 66 64 78 72 84 C80 78 96 66 94 50 C92 36 78 30 68 38 Z" fill="#EE2B3A"/>
+
+  <!-- Green Apple (Heart shape, slightly smaller, on the left, slightly tilted left) -->
+  <path d="M38 48 C32 40 20 46 22 58 C24 68 34 76 40 81 C46 76 56 68 54 56 C52 44 42 40 38 48 Z" fill="#32CD32"/>
+</svg>

@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  /* Semantic Design Tokens (AGENTS.md § 10) — Airbnb-Inspired Template */
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f7f7f7;
+  --color-text: #222222;
+  --color-text-muted: #717171;
+  --color-border: #ebebeb;
+  --color-border-hover: #b0b0b0;
+
+  /* Airbnb Signature Rausch Coral */
+  --color-primary: #ff385c;
+  --color-primary-hover: #e00b41;
+  --color-primary-text: #ffffff;
+
+  --color-success: #008a05;
+  --color-warning: #e07a5f;
+  --color-danger: #c13515;
+
+  /* Status Colors (§ 15) */
+  --color-tier-bronze: #a86326;
+  --color-tier-silver: #717171;
+  --color-tier-gold: #c28b1e;
+  --color-tier-vip: #222222;
+
+  /* Border Radius System (AGENTS.md § 4) */
+  --radius-button: 12px;
+  --radius-input: 12px;
+  --radius-card: 16px;
+  --radius-dialog: 20px;
+
+  /* Base Next.js variables */
+  --background: var(--color-background);
+  --foreground: var(--color-text);
+}
+
+@theme inline {
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-hover: var(--color-surface-hover);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-border-hover: var(--color-border-hover);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-text: var(--color-primary-text);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #141414;
+    --color-surface: #1e1e1e;
+    --color-surface-hover: #2b2b2b;
+    --color-text: #f7f7f7;
+    --color-text-muted: #b0b0b0;
+    --color-border: #2c2c2c;
+    --color-border-hover: #484848;
+
+    --color-primary: #ff385c;
+    --color-primary-hover: #e00b41;
+    --color-primary-text: #ffffff;
+
+    --color-tier-vip: #f7f7f7;
+
+    --background: var(--color-background);
+    --foreground: var(--color-text);
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
