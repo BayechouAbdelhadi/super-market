@@ -764,3 +764,214 @@ Characteristics:
 - fast
 
 It should look intentionally designed, not like a collection of default UI components.
+
+---
+
+# 25. Responsive Layout & Cross-Device Rules
+
+These rules are **non-negotiable**. They encode hard-won fixes for real layout bugs on mobile, iPad, and iOS Safari. Any agent modifying the layout must read and respect every rule in this section before writing a single line of CSS or JSX.
+
+---
+
+## 25.1 The Viewport Containment Contract
+
+The application is a **fixed-height shell** — it must never overflow the device viewport. Content scrolls *inside* the shell, not the page itself.
+
+### The correct pattern — always use this
+
+```
+html          → height: 100vh; height: 100svh;   (set once in globals.css)
+body          → height: 100%;  overflow: hidden;
+App shell     → h-full w-full overflow-hidden flex flex-col (or flex-row)
+  Header      → shrink-0
+  Main        → flex-1 min-h-0 overflow-y-auto      ← THE scroll container
+  Footer      → shrink-0
+```
+
+### The forbidden anti-patterns
+
+```diff
+- min-h-screen           → allows the page to grow taller than the viewport
+- h-screen               → = 100vh, broken on iOS Safari (includes browser chrome)
+- h-dvh / 100dvh         → jumps when iOS toolbar shows/hides inside overflow-hidden
+- w-screen               → includes scrollbar width, causes horizontal overflow on iOS
+- position: fixed on body/html  → fights with app shells, breaks scroll containment
+- overflow: auto on the root shell → creates double scrollbars on desktop
+```
+
+### The single source of truth for viewport height
+
+**`globals.css` owns the height. App shells inherit it.**
+
+```css
+/* globals.css — NEVER change this without understanding the cascade */
+html {
+  height: 100vh;
+  height: 100svh;   /* svh = small viewport height, safe on all iOS/iPadOS */
+  overflow: hidden;
+}
+body {
+  height: 100%;
+  overflow: hidden;
+}
+```
+
+- `100svh` = the viewport height **excluding** the browser toolbar. It never changes as the toolbar slides in/out. This is the safest unit for fixed app shells on all Apple devices.
+- App shells use `h-full` (not `h-screen`, `h-dvh`, or any other unit) to inherit from the chain above.
+
+---
+
+## 25.2 The `min-h-0` Rule (Flex Gotcha)
+
+In a flex column, `flex-1` children will grow but **will not shrink below their content size** by default. This causes overflow.
+
+**Always add `min-h-0` to scrollable flex children:**
+
+```html
+<div class="flex flex-col h-full">
+  <header class="shrink-0">...</header>
+  <main class="flex-1 min-h-0 overflow-y-auto">   <!-- min-h-0 is required -->
+    ...long content...
+  </main>
+</div>
+```
+
+Same rule applies in a `flex-row`: use `min-w-0` on `flex-1` children to prevent horizontal overflow.
+
+---
+
+## 25.3 Sidebar Positioning Rules
+
+The sidebar has **two distinct modes** that must be kept completely separate.
+
+### Mobile drawer (< md breakpoint)
+
+- Position: `fixed top-0 bottom-0 left-0` (overlay, out of flow)
+- Hidden by default: `-translate-x-full`
+- Shown when open: `translate-x-0`
+- Requires: backdrop overlay + close button
+- Height: explicit `h-full` (since it's `fixed`)
+
+### Desktop sidebar (≥ md breakpoint)
+
+- Position: `md:static` — a normal flex child in the row
+- Height: driven by the flex container's `align-items: stretch` (do not set explicit `h-full`)
+- Width: `md:w-[72px]` (collapsed) or `w-64` (expanded)
+
+### The forbidden pattern
+
+```diff
+- fixed inset-y-0 left-0 md:relative
+```
+
+This is broken: `inset-y-0` (`top:0; bottom:0`) stays applied even when `md:relative` overrides `fixed`. On iOS/iPadOS Safari, `top:0; bottom:0` on a `relative` flex child corrupts the height calculation.
+
+### The correct pattern
+
+```jsx
+<aside className={`
+  /* Desktop: normal static flex child */
+  md:static md:h-auto md:translate-x-0 md:flex md:shrink-0
+  /* Mobile: fixed overlay drawer */
+  fixed top-0 bottom-0 left-0 z-50 h-full
+  flex flex-col shrink-0 transition-all duration-300
+  ${isOpen ? "translate-x-0" : "-translate-x-full"}
+`}>
+```
+
+---
+
+## 25.4 Sticky Positioning Rules
+
+`position: sticky` does **not work** inside an `overflow: hidden` ancestor. On iOS Safari, it silently falls back to `relative` with no error.
+
+**Rule:** If the outer shell is `overflow-hidden` (which it always is in this app), do not use `sticky` on anything inside it.
+
+- Headers inside the shell → already at the top of a `flex-col`, they never scroll away. No `sticky` needed.
+- If you need something to stick while content scrolls → apply `sticky` inside the **scrollable element** (`overflow-y-auto` main), not on an ancestor of it.
+
+```diff
+- <header class="sticky top-0 z-40">  ← broken inside overflow-hidden shell
++ <header class="shrink-0 z-40">      ← correct: stays at top naturally in flex-col
+```
+
+---
+
+## 25.5 Breakpoint Reference for This App
+
+| Breakpoint | Min width | Device context |
+|---|---|---|
+| *(default)* | 0px | Mobile phones |
+| `sm:` | 640px | Large phones, small tablets |
+| `md:` | 768px | iPad mini, standard tablets |
+| `lg:` | 1024px | iPad Pro 11", laptops |
+| `xl:` | 1280px | iPad Pro 13" landscape, desktops |
+| `2xl:` | 1536px | Large desktops |
+
+**iPad Pro 13" (1032×1376 portrait)** → hits `lg:` breakpoint. The sidebar is in **desktop mode** (`md:static`). The main content is `flex-1 min-h-0 min-w-0 overflow-y-auto`.
+
+At `md:` and above, the outer `DashboardLayout` shell is `flex-row` (sidebar + main side by side). At `< md:`, it is `flex-col` (mobile top bar + main stacked vertically).
+
+---
+
+## 25.6 Lists & Scrollable Content
+
+Any list that can grow unboundedly must be wrapped in a scroll container.
+
+**Pattern:**
+
+```html
+<div class="flex-1 min-h-0 overflow-y-auto">
+  <!-- list items -->
+</div>
+```
+
+Do not:
+- Set `max-h-[60vh]` on lists — `vh` units are not reliable inside fixed shells on iOS
+- Use `overflow-y-scroll` (always shows scrollbar) — prefer `overflow-y-auto`
+- Put `overflow-y-auto` on the outer shell — it must be `overflow-hidden`
+
+**The entire page must never scroll.** Only designated inner containers scroll.
+
+---
+
+## 25.7 Touch Target Sizes
+
+Every interactive element must have a minimum tap target of **44×44px** on touch devices. This includes:
+
+- Buttons: `min-h-[44px]`
+- Navigation links in the sidebar: `py-2 px-3` at minimum
+- Collapse/toggle buttons: `h-7 w-7` is the absolute minimum, prefer `h-10 w-10` on mobile
+- Search inputs: `min-h-[44px]`
+
+Never rely on hover-only interactions. Every action must be accessible via touch.
+
+---
+
+## 25.8 Before You Edit Any Layout File
+
+Run through this checklist:
+
+1. **Does the outer shell use `h-full`?** (not `h-screen`, `h-dvh`, `min-h-screen`)
+2. **Does `globals.css` still own the viewport height via `100svh`?** Do not change it.
+3. **Does the scrollable `<main>` have `flex-1 min-h-0 overflow-y-auto`?** All three classes required.
+4. **Does the sidebar use `md:static` (not `md:relative`) at desktop breakpoints?**
+5. **Is `sticky` only used inside a scrollable container, never on a shell ancestor?**
+6. **Are all interactive elements at least 44px tall?**
+7. **Does the layout work at 375px (iPhone SE), 768px (iPad mini), and 1032px (iPad Pro 13" portrait)?**
+
+If any answer is "no", fix it before submitting.
+
+---
+
+## 25.9 File Ownership
+
+| File | Owns |
+|---|---|
+| `app/globals.css` | Viewport height (`100svh`), overflow on html/body, design tokens |
+| `components/ui/DashboardLayout.tsx` | Admin/cashier shell: `h-full flex-col md:flex-row` |
+| `components/ui/Sidebar.tsx` | Mobile drawer + desktop static sidebar |
+| `components/loyalty/CashierDashboard.tsx` | Loyalty cashier shell: `h-full flex-col` |
+| `app/layout.tsx` | Root html/body classes (must stay minimal, CSS does the work) |
+
+**Do not duplicate viewport height logic across these files.** If you need to change how height works, change `globals.css` and let the chain cascade.

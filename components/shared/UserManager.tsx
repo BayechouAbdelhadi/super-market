@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
+import { PaginatedList } from '@/components/ui/PaginatedList'
 import { createUser, editUser } from '@/app/admin/actions'
 
 interface UserManagerProps {
@@ -76,9 +77,13 @@ export function UserManager({ initialUsers, roleToManage, title, description }: 
         <Button onClick={openCreate}>+ Ajouter un {roleToManage === 'CASHIER' ? 'caissier' : 'client'}</Button>
       </div>
 
-      <div className="space-y-3 overflow-y-auto max-h-[60vh] sm:max-h-[500px] pr-2 custom-scrollbar">
-        {initialUsers.map(u => (
-          <div key={u.id} className="flex justify-between items-center p-3 border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)]">
+      <PaginatedList
+        items={initialUsers}
+        keyExtractor={(u) => u.id}
+        defaultPageSize={8}
+        pageSizeOptions={[8, 20, 50]}
+        renderItem={(u) => (
+          <div className="flex justify-between items-center p-3 border border-[var(--color-border)] rounded-[var(--radius-card,16px)] bg-[var(--color-surface)]">
             <div>
               <p className="text-sm font-semibold text-[var(--color-text)]">{u.first_name} {u.last_name}</p>
               <div className="flex gap-4 text-xs text-[var(--color-text-muted)] mt-0.5">
@@ -95,13 +100,13 @@ export function UserManager({ initialUsers, roleToManage, title, description }: 
               </Button>
             </div>
           </div>
-        ))}
-        {initialUsers.length === 0 && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center text-sm text-gray-500">
+        )}
+        emptyState={
+          <div className="border border-dashed border-[var(--color-border)] rounded-[var(--radius-card,16px)] p-10 text-center text-sm text-[var(--color-text-muted)]">
             Aucun utilisateur pour le moment.
           </div>
-        )}
-      </div>
+        }
+      />
 
       <Modal 
         isOpen={isOpen} 

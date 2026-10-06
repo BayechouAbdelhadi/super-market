@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -21,6 +22,12 @@ export function Modal({
   maxWidth = "md",
   children,
 }: ModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && isOpen) {
@@ -28,16 +35,14 @@ export function Modal({
       }
     }
     if (isOpen) {
-      document.body.style.overflow = "hidden";
       window.addEventListener("keydown", handleKeyDown);
     }
     return () => {
-      document.body.style.overflow = "unset";
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const maxWidthClasses = {
     sm: "max-w-md",
@@ -45,15 +50,15 @@ export function Modal({
     lg: "max-w-2xl",
   }[maxWidth];
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-150"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className={`bg-[var(--color-surface)] flex flex-col border border-[var(--color-border)] rounded-[var(--radius-dialog,20px)] w-full ${maxWidthClasses} shadow-xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-150`}
+        className={`bg-[var(--color-surface)] flex flex-col border border-[var(--color-border)] rounded-[var(--radius-dialog,20px)] w-full ${maxWidthClasses} shadow-xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-150`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -87,6 +92,8 @@ export function Modal({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
+

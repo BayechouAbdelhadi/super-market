@@ -1,12 +1,22 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Card } from '@/components/ui/Card'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { UserManager } from '@/components/shared/UserManager'
 
 export function CustomerWorkspace({ initialCustomers = [] }: { initialCustomers?: any[] }) {
   const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredCustomers = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim()
+    if (!q) return initialCustomers
+    return initialCustomers.filter((c) =>
+      [c.first_name, c.last_name, c.email, c.phone_number]
+        .filter(Boolean)
+        .some((field: string) => field.toLowerCase().includes(q))
+    )
+  }, [initialCustomers, searchQuery])
 
   return (
     <div className="space-y-8">
@@ -16,7 +26,7 @@ export function CustomerWorkspace({ initialCustomers = [] }: { initialCustomers?
       </div>
 
       <div className="w-full">
-        <SearchInput 
+        <SearchInput
           placeholder="Nom, prénom, téléphone ou email..."
           value={searchQuery}
           onChange={setSearchQuery}
@@ -24,11 +34,15 @@ export function CustomerWorkspace({ initialCustomers = [] }: { initialCustomers?
       </div>
 
       <Card className="p-6">
-        <UserManager 
-          initialUsers={initialCustomers} 
-          roleToManage="CUSTOMER"  
-          title="Nouveau Client" 
-          description="Créer un nouveau profil client directement depuis la caisse." 
+        <UserManager
+          initialUsers={filteredCustomers}
+          roleToManage="CUSTOMER"
+          title="Nouveau Client"
+          description={
+            searchQuery
+              ? `${filteredCustomers.length} résultat(s) pour « ${searchQuery} »`
+              : "Créer un nouveau profil client directement depuis la caisse."
+          }
         />
       </Card>
 
@@ -37,7 +51,7 @@ export function CustomerWorkspace({ initialCustomers = [] }: { initialCustomers?
         <p className="text-[var(--color-text-muted)] mb-6">
           Historique des dernières transactions.
         </p>
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center text-gray-500">
+        <div className="border border-dashed border-[var(--color-border)] rounded-[var(--radius-card,16px)] p-8 text-center text-[var(--color-text-muted)] text-sm">
           Aucune transaction récente
         </div>
       </Card>
