@@ -24,14 +24,15 @@ export function CustomerDetailView({
 
   // Calcul du palier suivant pour la jauge
   const nextTierInfo = (() => {
-    switch (customer.tier) {
-      case "Bronze":
+    const tierUpper = (customer.tier || "BRONZE").toUpperCase();
+    switch (tierUpper) {
+      case "BRONZE":
         return {
           nextTier: "Silver",
           remaining: Math.max(0, 500 - customer.historical_points),
           percent: Math.min(100, Math.round((customer.historical_points / 500) * 100)),
         };
-      case "Silver":
+      case "SILVER":
         return {
           nextTier: "Gold",
           remaining: Math.max(0, 2000 - customer.historical_points),
@@ -40,7 +41,7 @@ export function CustomerDetailView({
             Math.round(((customer.historical_points - 500) / (2000 - 500)) * 100),
           ),
         };
-      case "Gold":
+      case "GOLD":
         return {
           nextTier: "VIP",
           remaining: Math.max(0, 5000 - customer.historical_points),
@@ -50,6 +51,7 @@ export function CustomerDetailView({
           ),
         };
       case "VIP":
+      default:
         return {
           nextTier: "Niveau Max",
           remaining: 0,
@@ -57,6 +59,9 @@ export function CustomerDetailView({
         };
     }
   })();
+
+  const purchases = customer.purchases || [];
+  const movements = customer.movements || [];
 
   return (
     <div className="w-full space-y-6">
@@ -179,7 +184,7 @@ export function CustomerDetailView({
                 : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
             }`}
           >
-            Historique des achats ({customer.purchases.length})
+            Historique des achats ({purchases.length})
           </button>
           <button
             onClick={() => setActiveTab("movements")}
@@ -190,14 +195,14 @@ export function CustomerDetailView({
                 : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
             }`}
           >
-            Mouvements de points ({customer.movements.length})
+            Mouvements de points ({movements.length})
           </button>
         </div>
 
         {/* Tab Content: Purchases */}
         {activeTab === "purchases" && (
           <div className="p-6">
-            {customer.purchases.length === 0 ? (
+            {purchases.length === 0 ? (
               <p className="text-xs text-[var(--color-text-muted)] italic text-center py-8">
                 Aucun achat enregistré pour ce client.
               </p>
@@ -212,8 +217,8 @@ export function CustomerDetailView({
                       <th className="pb-3">Caissier</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--color-border)]">
-                    {customer.purchases.map((p) => {
+                  <tbody className="divide-y border-[var(--color-border)]">
+                    {purchases.map((p) => {
                       const dateFormatted = new Date(p.transaction_date).toLocaleDateString(
                         "fr-FR",
                         {
@@ -255,7 +260,7 @@ export function CustomerDetailView({
         {/* Tab Content: Movements */}
         {activeTab === "movements" && (
           <div className="p-6">
-            {customer.movements.length === 0 ? (
+            {movements.length === 0 ? (
               <p className="text-xs text-[var(--color-text-muted)] italic text-center py-8">
                 Aucun mouvement de points historisé.
               </p>
@@ -272,7 +277,7 @@ export function CustomerDetailView({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--color-border)]">
-                    {customer.movements.map((m) => {
+                    {movements.map((m) => {
                       const dateFormatted = new Date(m.created_at).toLocaleDateString("fr-FR", {
                         day: "2-digit",
                         month: "2-digit",

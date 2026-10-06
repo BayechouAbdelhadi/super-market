@@ -67,11 +67,11 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
-    // Protect Cashier routes
-    if ((isCashierRoute || isLoyaltyRoute) && role === 'ADMIN') {
-      console.log(`[Middleware] Admin accessing Cashier route -> Redirecting back to /admin`)
+    // Protect Cashier/Loyalty routes — only CASHIER and ADMIN can access
+    if ((isCashierRoute || isLoyaltyRoute) && role !== 'CASHIER' && role !== 'ADMIN') {
+      console.warn(`[Middleware] User (${role}) attempted to access Cashier route ${request.nextUrl.pathname} -> Redirecting to /login`)
       const url = request.nextUrl.clone()
-      url.pathname = '/admin'
+      url.pathname = '/login'
       return NextResponse.redirect(url)
     }
   }

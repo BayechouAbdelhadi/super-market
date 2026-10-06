@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { logout } from "@/app/login/actions";
@@ -15,10 +16,13 @@ interface SidebarProps {
 export function Sidebar({ role, email }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname();
 
   const isAdmin = role === "ADMIN";
 
   // Navigation Links
+  // L'admin a accès à toutes les sections y compris l'espace caisse.
+  // Le caissier a UNIQUEMENT accès à l'espace caisse.
   const navLinks = isAdmin ? [
     {
       name: "Tableau de bord",
@@ -26,6 +30,15 @@ export function Sidebar({ role, email }: SidebarProps) {
       icon: (
         <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+      )
+    },
+    {
+      name: "Espace Caisse",
+      href: "/cashier",
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
         </svg>
       )
     },
@@ -74,7 +87,7 @@ export function Sidebar({ role, email }: SidebarProps) {
           </button>
           <h1 className="text-lg font-black text-[var(--color-text)] tracking-tight">SuperMarket</h1>
         </div>
-        <Badge variant={isAdmin ? "gold" : "silver"} size="sm">
+        <Badge variant={isAdmin ? "brand" : "neutral"} size="sm">
           {isAdmin ? "Admin" : "Caisse"}
         </Badge>
       </div>
@@ -142,17 +155,24 @@ export function Sidebar({ role, email }: SidebarProps) {
 
         {/* Navigation Links */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navLinks.map((link, idx) => (
-            <Link 
-              key={idx}
-              href={link.href} 
-              className={`flex items-center gap-3 px-3 py-2 rounded-[var(--radius-button,10px)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-sm font-medium transition-colors group ${isCollapsed ? 'justify-center' : ''}`}
-              title={isCollapsed ? link.name : ""}
-            >
-              {link.icon}
-              {!isCollapsed && <span className="whitespace-nowrap">{link.name}</span>}
-            </Link>
-          ))}
+          {navLinks.map((link, idx) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link 
+                key={idx}
+                href={link.href} 
+                className={`flex items-center gap-3 px-3 py-2 rounded-[var(--radius-button,10px)] text-sm font-medium transition-colors group ${
+                  isActive
+                    ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-semibold shadow-2xs"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+                } ${isCollapsed ? 'justify-center' : ''}`}
+                title={isCollapsed ? link.name : ""}
+              >
+                {link.icon}
+                {!isCollapsed && <span className="whitespace-nowrap">{link.name}</span>}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Secondary Links / Shortcuts */}
@@ -185,7 +205,7 @@ export function Sidebar({ role, email }: SidebarProps) {
                     {email}
                   </span>
                   <div>
-                    <Badge variant={isAdmin ? "gold" : "silver"} size="sm">
+                    <Badge variant={isAdmin ? "brand" : "neutral"} size="sm">
                       {isAdmin ? "Administrateur" : "Caisse"}
                     </Badge>
                   </div>

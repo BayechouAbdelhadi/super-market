@@ -1,11 +1,20 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { searchCustomers, normalizePhone } from "@/lib/loyalty/service";
-import { loyaltyStore } from "@/lib/loyalty/store";
+import { describe, it, expect } from "vitest";
+import { normalizePhone, matchCustomerQuery } from "@/lib/loyalty/domain";
 
 describe("Workflow de recherche client à champ unique (§ 19)", () => {
-  beforeEach(() => {
-    loyaltyStore.reset();
-  });
+  const sampleCustomer = {
+    first_name: "Ahmed",
+    last_name: "Bayechou",
+    email: "ahmed@gmail.com",
+    phone_number: "06 12 34 56 78",
+  };
+
+  const sampleCustomer2 = {
+    first_name: "Ahmed",
+    last_name: "Benali",
+    email: "benali@gmail.com",
+    phone_number: "06 99 88 77 66",
+  };
 
   it("normalise correctement les numéros de téléphone", () => {
     expect(normalizePhone("06 12 34 56 78")).toBe("0612345678");
@@ -15,76 +24,45 @@ describe("Workflow de recherche client à champ unique (§ 19)", () => {
     expect(normalizePhone("  06 12 34 56 78  ")).toBe("0612345678");
   });
 
-  it("retrouve les clients dont le prénom ou nom contient 'Ahmed' (plusieurs résultats)", () => {
-    const results = searchCustomers("Ahmed");
-    expect(results.length).toBeGreaterThanOrEqual(2);
-    const names = results.map((c) => c.full_name);
-    expect(names).toContain("Ahmed Bayechou");
-    expect(names).toContain("Ahmed Benali");
+  it("retrouve les clients dont le prénom contient 'Ahmed'", () => {
+    expect(matchCustomerQuery(sampleCustomer, "Ahmed")).toBe(true);
+    expect(matchCustomerQuery(sampleCustomer2, "Ahmed")).toBe(true);
   });
 
   it("retrouve le client avec 'Bayechou'", () => {
-    const results = searchCustomers("Bayechou");
-    expect(results.length).toBe(1);
-    expect(results[0].full_name).toBe("Ahmed Bayechou");
+    expect(matchCustomerQuery(sampleCustomer, "Bayechou")).toBe(true);
+    expect(matchCustomerQuery(sampleCustomer2, "Bayechou")).toBe(false);
   });
 
   it("retrouve le client par 'Prénom Nom' : 'Ahmed Bayechou'", () => {
-    const results = searchCustomers("Ahmed Bayechou");
-    expect(results.length).toBe(1);
-    expect(results[0].id).toBe("cust-1");
-    expect(results[0].full_name).toBe("Ahmed Bayechou");
+    expect(matchCustomerQuery(sampleCustomer, "Ahmed Bayechou")).toBe(true);
   });
 
   it("retrouve le client par 'Nom Prénom' : 'Bayechou Ahmed'", () => {
-    const results = searchCustomers("Bayechou Ahmed");
-    expect(results.length).toBe(1);
-    expect(results[0].id).toBe("cust-1");
-    expect(results[0].full_name).toBe("Ahmed Bayechou");
+    expect(matchCustomerQuery(sampleCustomer, "Bayechou Ahmed")).toBe(true);
   });
 
   it("retrouve le client par email 'ahmed@gmail.com'", () => {
-    const results = searchCustomers("ahmed@gmail.com");
-    expect(results.length).toBe(1);
-    expect(results[0].email).toBe("ahmed@gmail.com");
+    expect(matchCustomerQuery(sampleCustomer, "ahmed@gmail.com")).toBe(true);
   });
 
   it("retrouve le client par email en majuscules 'AHMED@GMAIL.COM' (insensible à la casse)", () => {
-    const results = searchCustomers("AHMED@GMAIL.COM");
-    expect(results.length).toBe(1);
-    expect(results[0].email).toBe("ahmed@gmail.com");
+    expect(matchCustomerQuery(sampleCustomer, "AHMED@GMAIL.COM")).toBe(true);
   });
 
   it("retrouve le client par téléphone compact '0612345678'", () => {
-    const results = searchCustomers("0612345678");
-    expect(results.length).toBe(1);
-    expect(results[0].phone_normalized).toBe("0612345678");
+    expect(matchCustomerQuery(sampleCustomer, "0612345678")).toBe(true);
   });
 
   it("retrouve le client par téléphone avec espaces '06 12 34 56 78'", () => {
-    const results = searchCustomers("06 12 34 56 78");
-    expect(results.length).toBe(1);
-    expect(results[0].phone_normalized).toBe("0612345678");
+    expect(matchCustomerQuery(sampleCustomer, "06 12 34 56 78")).toBe(true);
   });
 
   it("retrouve le client par téléphone avec points '06.12.34.56.78'", () => {
-    const results = searchCustomers("06.12.34.56.78");
-    expect(results.length).toBe(1);
-    expect(results[0].phone_normalized).toBe("0612345678");
+    expect(matchCustomerQuery(sampleCustomer, "06.12.34.56.78")).toBe(true);
   });
 
   it("retrouve le client avec tolérance des espaces inutiles '  Ahmed  '", () => {
-    const results = searchCustomers("  Ahmed  ");
-    expect(results.length).toBeGreaterThanOrEqual(2);
-    expect(results.map((c) => c.first_name)).toContain("Ahmed");
-  });
-
-  it("renvoie les informations enrichies de fidélité (statut, points disponibles et historiques)", () => {
-    const results = searchCustomers("Bayechou");
-    expect(results.length).toBe(1);
-    const client = results[0];
-    expect(client.tier).toBe("Gold");
-    expect(client.historical_points).toBe(2450);
-    expect(client.available_points).toBe(750);
+    expect(matchCustomerQuery(sampleCustomer, "  Ahmed  ")).toBe(true);
   });
 });

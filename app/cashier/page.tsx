@@ -1,10 +1,16 @@
 import { ProtectedDashboard } from '@/components/ui/ProtectedDashboard'
-import { CustomersList } from '@/components/loyalty/CustomersList'
+import { CashierDashboard } from '@/components/loyalty/CashierDashboard'
+import { Metadata } from 'next'
 
-export default function CashierDashboard() {
+export const metadata: Metadata = {
+  title: "SuperMarket Fidélité — Espace Caisse",
+  description: "Système de fidélité et caisse : recherche clients, calcul et déduction de points",
+}
+
+export default function CashierPage() {
   return (
     <ProtectedDashboard requiredRole="CASHIER">
-      <CustomersList />
+      <CashierDashboard standalone={false} />
     </ProtectedDashboard>
   )
 }

@@ -4,7 +4,10 @@ import { CustomersList } from '@/components/loyalty/CustomersList'
 export default function AdminCustomersPage() {
   return (
     <ProtectedDashboard requiredRole="ADMIN">
-      <CustomersList />
+      <CustomersList 
+        title="Gestion des Clients"
+        subtitle="Consultez, modifiez et gérez l'ensemble des profils clients de votre magasin."
+      />
     </ProtectedDashboard>
   )
 }

@@ -5,7 +5,17 @@ import { Card } from '@/components/ui/Card'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { UserManager } from '@/components/shared/UserManager'
 
-export function CustomerWorkspace({ initialCustomers = [] }: { initialCustomers?: any[] }) {
+interface CustomerWorkspaceProps {
+  initialCustomers?: any[]
+  title?: string
+  subtitle?: string
+}
+
+export function CustomerWorkspace({
+  initialCustomers = [],
+  title = "Espace Client",
+  subtitle = "Recherchez un client pour lui attribuer ou déduire des points, ou créez un nouveau profil."
+}: CustomerWorkspaceProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
   const filteredCustomers = useMemo(() => {
@@ -21,8 +31,8 @@ export function CustomerWorkspace({ initialCustomers = [] }: { initialCustomers?
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">Espace Client</h2>
-        <p className="text-[var(--color-text-muted)]">Recherchez un client pour lui attribuer ou déduire des points, ou créez un nouveau profil.</p>
+        <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">{title}</h2>
+        <p className="text-[var(--color-text-muted)]">{subtitle}</p>
       </div>
 
       <div className="w-full">

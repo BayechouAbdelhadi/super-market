@@ -24,7 +24,7 @@ export async function ProtectedDashboard({
   }
 
   if (requiredRole === 'CASHIER' && role !== 'CASHIER' && role !== 'ADMIN') {
-    redirect('/customer')
+    redirect('/login')
   }
 
   return (

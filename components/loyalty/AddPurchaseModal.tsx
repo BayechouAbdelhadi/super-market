@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { CustomerDetail } from "@/lib/loyalty/types";
-import { calculatePoints } from "@/lib/loyalty/service";
+import { calculatePoints } from "@/lib/loyalty/domain";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 

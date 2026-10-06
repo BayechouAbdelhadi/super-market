@@ -31,10 +31,30 @@ export async function createUser(formData: FormData) {
   });
 
   if (!validatedFields.success) {
-    return { error: validatedFields.error.errors[0].message };
+    return { error: validatedFields.error.issues[0]?.message || "Données invalides." };
   }
 
   const { first_name, last_name, email, phone_number, password, role } = validatedFields.data;
+
+  // Verify caller's role for strict RBAC
+  const { createClient: createSSRClient } = await import('@/lib/supabase/server');
+  const supabaseServer = await createSSRClient();
+  const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
+
+  if (!currentUser) {
+    return { error: "Non autorisé. Veuillez vous connecter." };
+  }
+
+  const callerRole = currentUser?.user_metadata?.role || 'CUSTOMER';
+
+  // Le caissier ne peut créer QUE des clients. L'admin peut créer n'importe quel rôle.
+  if (callerRole === 'CASHIER' && role !== 'CUSTOMER') {
+    return { error: "Accès refusé. Un caissier ne peut créer que des profils clients." };
+  }
+
+  if (callerRole !== 'ADMIN' && callerRole !== 'CASHIER') {
+    return { error: "Accès refusé." };
+  }
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -62,6 +82,16 @@ export async function createUser(formData: FormData) {
   return { success: true, role };
 }
 
+export async function createCashier(formData: FormData) {
+  formData.set('role', 'CASHIER');
+  const password = formData.get('password') as string;
+  const result = await createUser(formData);
+  if (result.error) {
+    return { error: result.error };
+  }
+  return { success: true, password };
+}
+
 export async function editUser(formData: FormData) {
   const validatedFields = EditUserSchema.safeParse({
     user_id: formData.get('user_id'),
@@ -71,14 +101,36 @@ export async function editUser(formData: FormData) {
   });
 
   if (!validatedFields.success) {
-    return { error: validatedFields.error.errors[0].message };
+    return { error: validatedFields.error.issues[0]?.message || "Données invalides." };
   }
 
   const { user_id, first_name, last_name, phone_number } = validatedFields.data;
 
-  // To update profile metadata as admin, we need the cookies so the RLS knows we are admin!
+  // To update profile metadata, we need the session to enforce RLS and check caller role
   const { createClient: createSSRClient } = await import('@/lib/supabase/server');
   const supabaseServer = await createSSRClient();
+  const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
+
+  if (!currentUser) {
+    return { error: "Non autorisé. Veuillez vous connecter." };
+  }
+
+  const callerRole = currentUser?.user_metadata?.role || 'CUSTOMER';
+
+  // Le caissier ne peut modifier QUE des clients.
+  if (callerRole === 'CASHIER') {
+    const { data: targetProfile } = await supabaseServer
+      .from('profiles')
+      .select('role')
+      .eq('id', user_id)
+      .single();
+
+    if (targetProfile && targetProfile.role !== 'CUSTOMER') {
+      return { error: "Accès refusé. Un caissier ne peut modifier que des profils clients." };
+    }
+  } else if (callerRole !== 'ADMIN') {
+    return { error: "Accès refusé." };
+  }
 
   const { error } = await supabaseServer
     .from('profiles')

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { recordPurchase } from "@/lib/loyalty/service";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(
   req: NextRequest,
@@ -10,8 +10,9 @@ export async function POST(
     const { id } = await context.params;
     const body = await req.json();
     
-    const { data: cashiers } = await supabase.from("profiles").select("id").eq("role", "CASHIER").limit(1);
-    const cashierId = cashiers?.[0]?.id || null;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const cashierId = user?.id || null;
 
     const amount = Number(body.amount);
     const result = await recordPurchase(id, amount, cashierId);

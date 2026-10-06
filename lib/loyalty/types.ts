@@ -35,8 +35,27 @@ export interface Transaction {
   created_at: string;
 }
 
+export interface PurchaseRecord {
+  id: string;
+  amount: number;
+  points_earned: number;
+  transaction_date: string;
+  created_by: string;
+}
+
+export interface MovementRecord {
+  id: string;
+  type: "EARN" | "REDEEM" | string;
+  amount: number;
+  reason?: string;
+  created_at: string;
+  created_by: string;
+}
+
 export interface CustomerDetail extends CustomerSummary {
   created_at: string;
   updated_at: string;
   transactions: Transaction[];
+  purchases: PurchaseRecord[];
+  movements: MovementRecord[];
 }
