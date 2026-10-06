@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { redeemPoints } from "@/lib/loyalty/service";
-import { loyaltyStore } from "@/lib/loyalty/store";
+import { supabase } from "@/lib/supabase/client";
 
 export async function POST(
   req: NextRequest,
@@ -9,12 +9,14 @@ export async function POST(
   try {
     const { id } = await context.params;
     const body = await req.json();
-    const cashier = loyaltyStore.getCashier();
+    
+    const { data: cashiers } = await supabase.from("profiles").select("id").eq("role", "CASHIER").limit(1);
+    const cashierId = cashiers?.[0]?.id || null;
 
     const points = Number(body.points);
     const reason = typeof body.reason === "string" ? body.reason : undefined;
 
-    const result = redeemPoints(id, points, cashier.id, reason);
+    const result = await redeemPoints(id, points, cashierId);
 
     if (!result.success) {
       return NextResponse.json(

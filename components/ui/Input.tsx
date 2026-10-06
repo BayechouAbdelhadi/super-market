@@ -32,7 +32,7 @@ export function Input({
         <input
           id={inputId}
           disabled={disabled}
-          className={`w-full min-h-[44px] px-3.5 py-2.5 text-sm sm:text-base rounded-[var(--radius-input,12px)] border transition-all duration-150 bg-[var(--color-surface)] text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent disabled:opacity-50 disabled:bg-zinc-100 dark:disabled:bg-zinc-900 ${
+          className={`w-full min-h-[40px] px-3 py-2 text-sm rounded-[var(--radius-input,10px)] border transition-all duration-150 bg-[var(--color-surface)] text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent disabled:opacity-50 disabled:bg-zinc-100 dark:disabled:bg-zinc-900 ${
             error
               ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]"
               : "border-[var(--color-border)] hover:border-[var(--color-border-hover)]"

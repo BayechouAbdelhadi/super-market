@@ -97,7 +97,7 @@ export function CashierDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text)] flex flex-col font-sans">
+    <div className="h-full w-full overflow-hidden bg-[var(--color-background)] text-[var(--color-text)] flex flex-col font-sans">
       <CashierHeader cashier={cashier} />
 
       {/* Toast Alert */}
@@ -111,7 +111,8 @@ export function CashierDashboard() {
       )}
 
       {/* Main Container */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <main className="flex-1 min-h-0 overflow-y-auto">
+        <div className="max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         {/* If a customer is selected, show Customer Detail View (§ 9 & § 16) */}
         {selectedCustomerId && selectedCustomerDetail ? (
           <CustomerDetailView
@@ -199,6 +200,7 @@ export function CashierDashboard() {
             </div>
           </div>
         )}
+        </div>
       </main>
 
       {/* Modal 1: Nouveau Client */}
@@ -240,7 +242,8 @@ export function CashierDashboard() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-[var(--color-border)] py-4 text-center text-xs text-[var(--color-text-muted)]">
+      <footer className="shrink-0 border-t border-[var(--color-border)] py-4 text-center text-xs text-[var(--color-text-muted)]">
+
         SuperMarket • Système de fidélité caissier (Jalon 1 MVP) • 1 € dépensé = 1 point
       </footer>
     </div>

@@ -53,12 +53,12 @@ export function Modal({
       aria-modal="true"
     >
       <div
-        className={`bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-dialog,20px)] w-full ${maxWidthClasses} shadow-xl overflow-hidden animate-in zoom-in-95 duration-150`}
+        className={`bg-[var(--color-surface)] flex flex-col border border-[var(--color-border)] rounded-[var(--radius-dialog,20px)] w-full ${maxWidthClasses} shadow-xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-150`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         {(title || icon) && (
-          <div className="px-6 py-5 border-b border-[var(--color-border)] flex items-center justify-between gap-4">
+          <div className="px-6 py-5 border-b border-[var(--color-border)] flex-shrink-0 flex items-center justify-between gap-4">
             <div className="space-y-0.5">
               <h2 className="text-lg font-bold text-[var(--color-text)] flex items-center gap-2">
                 {icon && <span className="text-xl">{icon}</span>}
@@ -83,7 +83,9 @@ export function Modal({
         )}
 
         {/* Content */}
-        <div>{children}</div>
+        <div className="overflow-y-auto overflow-x-hidden flex-1 p-1">
+          {children}
+        </div>
       </div>
     </div>
   );

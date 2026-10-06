@@ -8,6 +8,32 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
+# Implementation Guide
+
+## 1. Architectural Pattern (Hexagonal Architecture)
+- **Strict Layering**: The application must strictly follow Hexagonal Architecture (Ports and Adapters).
+- **Core Domain**: Business logic must reside in the core domain layer, completely agnostic of Next.js, HTTP requests, or Supabase.
+- **Ports (Interfaces)**: Define strict TypeScript interfaces for all external dependencies (e.g., Repositories, external APIs).
+- **Adapters (Infrastructure)**: Supabase is an infrastructure detail. All Supabase calls must be encapsulated within repository adapters that implement the defined domain ports.
+
+## 2. Backend & Data Access (Next.js Layer)
+- **Next.js as BFF**: Next.js API Routes or Server Actions act as the strict middle layer (Backend for Frontend).
+- **No Frontend Supabase Calls**: The frontend client code MUST NOT import or call the Supabase client directly. All data fetching must be routed through the Next.js backend layer.
+- **Security & Authorization**: The Next.js backend layer is strictly responsible for enforcing authentication, role-based access control (RBAC), and business logic *before* calling the database.
+- **Data Validation**: All incoming requests to the backend must be strictly validated against schemas (e.g., using Zod) before reaching the domain layer.
+
+## 3. Frontend & Component Design
+- **Component-Driven Flow**: Build the UI using strict component-driven principles. Isolate complex business logic from presentation.
+- **Reusable Primitives**: UI primitives (Buttons, Inputs, Cards) must be highly reusable, visually consistent, and properly documented.
+- **Server Components First**: Maximize the use of React Server Components (RSC) for data-fetching and SEO. Only use `"use client"` when client-side interactivity, state, or React hooks are strictly required.
+- **State Management**: Keep global client-side state minimal. Rely on server-state management for API requests.
+
+## 4. Code Quality & Standards
+- **Strict TypeScript**: Avoid `any`. Define precise types for domain models, API payloads, and component props.
+- **Standardized Error Handling**: The domain layer should return structured errors (or Use Case responses), and the Next.js layer should translate these into appropriate HTTP status codes and user-friendly messages.
+- **Testability**: Domain logic and adapters must be entirely decoupled, ensuring they are independently testable using unit tests (e.g., Vitest).
+
+
 # UI / UX DESIGN SYSTEM — LOYALTY APP
 
 ## Core visual direction

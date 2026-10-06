@@ -21,11 +21,10 @@ export const metadata: Metadata = {
     "SuperMarket : Vos courses du quotidien, produits frais tous les jours et service caisse de proximité.",
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/logo.jpeg" },
     ],
     apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/logo.jpeg" },
     ],
   },
 };
@@ -36,8 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="fr" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="h-full overflow-hidden">{children}</body>
     </html>
   );
 }

@@ -23,8 +23,8 @@ export default function Home() {
       <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-center p-1 shadow-2xs">
-              <Image src="/logo-icon.svg" alt="SuperMarket Logo" width={32} height={32} priority className="h-full w-full object-contain" />
+            <div className="h-10 w-10 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-center p-1 shadow-2xs overflow-hidden">
+              <Image src="/logo.jpeg" alt="SuperMarket Logo" width={32} height={32} priority className="h-full w-full object-cover rounded-[calc(var(--radius-button,12px)-4px)]" />
             </div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-base tracking-tight text-[var(--color-text)]">

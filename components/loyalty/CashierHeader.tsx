@@ -33,8 +33,8 @@ export function CashierHeader({ cashier }: CashierHeaderProps) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Brand */}
         <Link href="/loyalty" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-          <div className="h-10 w-10 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-center p-1 shadow-2xs">
-            <Image src="/logo-icon.svg" alt="SuperMarket" width={32} height={32} priority className="h-full w-full object-contain" />
+          <div className="h-10 w-10 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-center p-1 shadow-2xs overflow-hidden">
+            <Image src="/logo.jpeg" alt="SuperMarket" width={32} height={32} priority className="h-full w-full object-cover rounded-[calc(var(--radius-button,12px)-4px)]" />
           </div>
           <div>
             <div className="flex items-center gap-2">

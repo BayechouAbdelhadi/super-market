@@ -1,10 +1,6 @@
-import { Customer, CustomerDetail, CustomerSummary, LoyaltyTier, PointMovement, Purchase } from "./types";
-import { loyaltyStore } from "./store";
+import { CustomerDetail, CustomerSummary, LoyaltyTier, Transaction } from "./types";
+import { supabase } from "@/lib/supabase/client";
 
-/**
- * Normalise un numéro de téléphone en extrayant uniquement les chiffres
- * et en gérant le préfixe international français (+33 / 33 -> 0).
- */
 export function normalizePhone(phone: string): string {
   let digits = phone.replace(/\D/g, "");
   if (digits.startsWith("33") && digits.length === 11) {
@@ -13,144 +9,100 @@ export function normalizePhone(phone: string): string {
   return digits;
 }
 
-/**
- * Règle de fidélité : 1 € dépensé = 1 point (arrondi inférieur).
- * Montant avec centimes conservé dans l'achat, points entiers.
- */
 export function calculatePoints(amount: number): number {
   if (amount <= 0 || isNaN(amount)) return 0;
   return Math.floor(amount);
 }
 
-/**
- * Calcule le statut en fonction des points historiques (cumul total gagné).
- * - Bronze : 0 – 499
- * - Silver : 500 – 1 999
- * - Gold   : 2 000 – 4 999
- * - VIP    : 5 000+
- */
 export function calculateTier(historicalPoints: number): LoyaltyTier {
   if (historicalPoints >= 5000) return "VIP";
-  if (historicalPoints >= 2000) return "Gold";
-  if (historicalPoints >= 500) return "Silver";
-  return "Bronze";
+  if (historicalPoints >= 2000) return "GOLD";
+  if (historicalPoints >= 500) return "SILVER";
+  return "BRONZE";
 }
 
-/**
- * Calcule les soldes de points et le statut d'un client.
- */
-export function computeCustomerBalances(customerId: string): {
-  historical_points: number;
-  available_points: number;
-  tier: LoyaltyTier;
-} {
-  const movements = loyaltyStore.getMovementsByCustomer(customerId);
+export async function searchCustomers(query: string): Promise<CustomerSummary[]> {
+  const trimmed = query.trim().toLowerCase();
+  
+  let dbQuery = supabase
+    .from("profiles")
+    .select(`
+      id, first_name, last_name, email, phone_number,
+      customers ( loyalty_points, status )
+    `)
+    .eq("role", "CUSTOMER");
 
-  let historicalPoints = 0;
-  let redeemedPoints = 0;
-  let adjustments = 0;
-
-  for (const m of movements) {
-    if (m.type === "EARN") {
-      historicalPoints += m.amount;
-    } else if (m.type === "REDEEM") {
-      redeemedPoints += m.amount;
-    } else if (m.type === "ADJUSTMENT") {
-      adjustments += m.amount;
-    }
+  if (trimmed) {
+    dbQuery = dbQuery.or(`first_name.ilike.%${trimmed}%,last_name.ilike.%${trimmed}%,email.ilike.%${trimmed}%,phone_number.ilike.%${trimmed}%`);
   }
 
-  const availablePoints = Math.max(0, historicalPoints - redeemedPoints + adjustments);
+  const { data, error } = await dbQuery.limit(50);
+  
+  if (error || !data) return [];
+
+  // We need to calculate historical points. 
+  // In a real app, you'd calculate this in SQL or a materialized view.
+  // For this implementation, we fetch the available_points from customers table
+  // and we'd need to fetch transactions to get historical points.
+  // To keep it simple per search, we will just set historical to available for the summary,
+  // or fetch aggregations via RPC. Here we estimate for now.
+  return data.map((p: any) => {
+    const available_points = p.customers?.[0]?.loyalty_points || 0;
+    return {
+      id: p.id,
+      first_name: p.first_name || "",
+      last_name: p.last_name || "",
+      full_name: `${p.first_name} ${p.last_name}`.trim(),
+      email: p.email || "",
+      phone: p.phone_number || "",
+      phone_normalized: p.phone_number || "",
+      tier: (p.customers?.[0]?.status as LoyaltyTier) || "BRONZE",
+      historical_points: available_points, // Approximation for summary list
+      available_points,
+    };
+  });
+}
+
+export async function getCustomerDetail(customerId: string): Promise<CustomerDetail | null> {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select(`
+      id, first_name, last_name, email, phone_number, created_at,
+      customers ( loyalty_points, status, updated_at )
+    `)
+    .eq("id", customerId)
+    .single();
+
+  if (!profile) return null;
+
+  const { data: transactions } = await supabase
+    .from("transactions")
+    .select("*")
+    .eq("customer_id", customerId)
+    .order("created_at", { ascending: false });
+
+  let historicalPoints = 0;
+  transactions?.forEach(t => {
+    historicalPoints += t.points_earned;
+  });
+
+  const available_points = profile.customers?.[0]?.loyalty_points || 0;
   const tier = calculateTier(historicalPoints);
 
   return {
-    historical_points: historicalPoints,
-    available_points: availablePoints,
+    id: profile.id,
+    first_name: profile.first_name || "",
+    last_name: profile.last_name || "",
+    full_name: `${profile.first_name} ${profile.last_name}`.trim(),
+    email: profile.email || "",
+    phone: profile.phone_number || "",
+    phone_normalized: profile.phone_number || "",
     tier,
-  };
-}
-
-/**
- * Retourne le résumé enrichi d'un client.
- */
-export function getCustomerSummary(customer: Customer): CustomerSummary {
-  const balances = computeCustomerBalances(customer.id);
-  return {
-    id: customer.id,
-    first_name: customer.first_name,
-    last_name: customer.last_name,
-    full_name: `${customer.first_name} ${customer.last_name}`,
-    email: customer.email,
-    phone: customer.phone,
-    phone_normalized: customer.phone_normalized,
-    tier: balances.tier,
-    historical_points: balances.historical_points,
-    available_points: balances.available_points,
-  };
-}
-
-/**
- * Recherche flexible à champ unique sur :
- * - Prénom
- * - Nom
- * - Nom + Prénom (ex: "Bayechou Ahmed")
- * - Prénom + Nom (ex: "Ahmed Bayechou")
- * - Téléphone (normalisé)
- * - Email
- * Insensible à la casse et tolérant aux espaces inutiles.
- */
-export function searchCustomers(query: string): CustomerSummary[] {
-  const trimmed = query.trim().toLowerCase();
-  const allCustomers = loyaltyStore.getCustomers();
-
-  if (!trimmed) {
-    return allCustomers.map(getCustomerSummary);
-  }
-
-  const phoneQuery = normalizePhone(trimmed);
-
-  const matched = allCustomers.filter((c) => {
-    const fn = c.first_name.toLowerCase();
-    const ln = c.last_name.toLowerCase();
-    const email = c.email.toLowerCase();
-    const fullName1 = `${fn} ${ln}`;
-    const fullName2 = `${ln} ${fn}`;
-
-    // Correspondance prénom ou nom
-    if (fn.includes(trimmed) || ln.includes(trimmed)) return true;
-
-    // Correspondance nom complet dans les deux ordres
-    if (fullName1.includes(trimmed) || fullName2.includes(trimmed)) return true;
-
-    // Correspondance email
-    if (email.includes(trimmed)) return true;
-
-    // Correspondance téléphone normalisé
-    if (phoneQuery && c.phone_normalized.includes(phoneQuery)) return true;
-
-    return false;
-  });
-
-  return matched.map(getCustomerSummary);
-}
-
-/**
- * Récupère le détail complet d'un client (fiche, achats, mouvements).
- */
-export function getCustomerDetail(customerId: string): CustomerDetail | null {
-  const customer = loyaltyStore.findCustomerById(customerId);
-  if (!customer) return null;
-
-  const summary = getCustomerSummary(customer);
-  const purchases = loyaltyStore.getPurchasesByCustomer(customerId);
-  const movements = loyaltyStore.getMovementsByCustomer(customerId);
-
-  return {
-    ...summary,
-    created_at: customer.created_at,
-    updated_at: customer.updated_at,
-    purchases,
-    movements,
+    historical_points: historicalPoints,
+    available_points,
+    created_at: profile.created_at,
+    updated_at: profile.customers?.[0]?.updated_at || profile.created_at,
+    transactions: transactions || [],
   };
 }
 
@@ -163,216 +115,114 @@ export interface CreateCustomerInput {
 
 export type CreateCustomerResult =
   | { success: true; customer: CustomerDetail }
-  | {
-      success: false;
-      isDuplicate: true;
-      field: "phone" | "email";
-      message: string;
-      existingCustomer: CustomerSummary;
+  | { success: false; error: string; };
+
+export async function createCustomer(data: CreateCustomerInput): Promise<CreateCustomerResult> {
+  const phoneNormalized = normalizePhone(data.phone);
+
+  // Use signUp to create the auth user, which triggers profile creation
+  const password = Math.random().toString(36).slice(-8) + "A1!";
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email: data.email,
+    password,
+    options: {
+      data: {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        role: 'CUSTOMER'
+      }
     }
-  | {
-      success: false;
-      isDuplicate: false;
-      error: string;
-    };
+  });
 
-/**
- * Création d'un client avec vérification anti-doublon (email et téléphone).
- */
-export function createCustomer(data: CreateCustomerInput, cashierId: string): CreateCustomerResult {
-  const firstName = data.first_name?.trim();
-  const lastName = data.last_name?.trim();
-  const email = data.email?.trim().toLowerCase();
-  const phone = data.phone?.trim();
-
-  if (!firstName || !lastName || !email || !phone) {
-    return {
-      success: false,
-      isDuplicate: false,
-      error: "Tous les champs sont obligatoires : prénom, nom, email et téléphone.",
-    };
+  if (authError || !authData.user) {
+    return { success: false, error: authError?.message || "Erreur de création." };
   }
 
-  const phoneNormalized = normalizePhone(phone);
-  if (!phoneNormalized || phoneNormalized.length < 8) {
-    return {
-      success: false,
-      isDuplicate: false,
-      error: "Numéro de téléphone invalide.",
-    };
-  }
+  // Update profile with phone number
+  await supabase
+    .from("profiles")
+    .update({ phone_number: phoneNormalized })
+    .eq("id", authData.user.id);
 
-  // Vérification doublon téléphone
-  const existingByPhone = loyaltyStore.findCustomerByPhoneNormalized(phoneNormalized);
-  if (existingByPhone) {
-    return {
-      success: false,
-      isDuplicate: true,
-      field: "phone",
-      message: `Un client utilisant ce numéro de téléphone existe déjà.`,
-      existingCustomer: getCustomerSummary(existingByPhone),
-    };
-  }
-
-  // Vérification doublon email
-  const existingByEmail = loyaltyStore.findCustomerByEmail(email);
-  if (existingByEmail) {
-    return {
-      success: false,
-      isDuplicate: true,
-      field: "email",
-      message: `Un client utilisant cette adresse email existe déjà.`,
-      existingCustomer: getCustomerSummary(existingByEmail),
-    };
-  }
-
-  const now = new Date().toISOString();
-  const newCustomer: Customer = {
-    id: `cust-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-    first_name: firstName,
-    last_name: lastName,
-    email,
-    phone,
-    phone_normalized: phoneNormalized,
-    created_at: now,
-    updated_at: now,
-    created_by: cashierId,
-  };
-
-  loyaltyStore.addCustomer(newCustomer);
-
-  const detail = getCustomerDetail(newCustomer.id)!;
-  return {
-    success: true,
-    customer: detail,
-  };
+  const detail = await getCustomerDetail(authData.user.id);
+  return { success: true, customer: detail! };
 }
 
 export type RecordPurchaseResult =
-  | {
-      success: true;
-      purchase: Purchase;
-      movement: PointMovement;
-      customer: CustomerDetail;
-    }
-  | {
-      success: false;
-      error: string;
-    };
+  | { success: true; transaction: Transaction; customer: CustomerDetail }
+  | { success: false; error: string; };
 
-/**
- * Enregistre un achat pour un client, attribue automatiquement les points (1 € = 1 pt)
- * et historise le mouvement.
- */
-export function recordPurchase(customerId: string, amount: number, cashierId: string): RecordPurchaseResult {
-  const customer = loyaltyStore.findCustomerById(customerId);
-  if (!customer) {
-    return { success: false, error: "Client introuvable." };
-  }
-
-  if (typeof amount !== "number" || amount <= 0 || isNaN(amount)) {
-    return { success: false, error: "Le montant de l'achat doit être un nombre positif supérieur à zéro." };
-  }
-
+export async function recordPurchase(customerId: string, amount: number, cashierId: string): Promise<RecordPurchaseResult> {
   const pointsEarned = calculatePoints(amount);
-  const now = new Date().toISOString();
+  
+  const { data: tx, error } = await supabase
+    .from("transactions")
+    .insert({
+      customer_id: customerId,
+      cashier_id: cashierId,
+      amount_total: amount,
+      points_earned: pointsEarned,
+      points_redeemed: 0
+    })
+    .select()
+    .single();
 
-  const purchase: Purchase = {
-    id: `purch-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-    customer_id: customerId,
-    amount: Number(amount.toFixed(2)),
-    points_earned: pointsEarned,
-    transaction_date: now,
-    created_at: now,
-    created_by: cashierId,
-  };
+  if (error || !tx) {
+    return { success: false, error: "Impossible d'enregistrer la transaction." };
+  }
 
-  loyaltyStore.addPurchase(purchase);
+  // Update customer points
+  const detailBefore = await getCustomerDetail(customerId);
+  const newPoints = (detailBefore?.available_points || 0) + pointsEarned;
+  
+  await supabase
+    .from("customers")
+    .update({ loyalty_points: newPoints })
+    .eq("id", customerId);
 
-  const movement: PointMovement = {
-    id: `mov-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-    customer_id: customerId,
-    type: "EARN",
-    amount: pointsEarned,
-    purchase_id: purchase.id,
-    reason: `Achat magasin (${purchase.amount.toFixed(2)} €)`,
-    created_at: now,
-    created_by: cashierId,
-  };
-
-  loyaltyStore.addMovement(movement);
-
-  const updatedDetail = getCustomerDetail(customerId)!;
-
-  return {
-    success: true,
-    purchase,
-    movement,
-    customer: updatedDetail,
-  };
+  const updatedDetail = await getCustomerDetail(customerId);
+  return { success: true, transaction: tx, customer: updatedDetail! };
 }
 
 export type RedeemPointsResult =
-  | {
-      success: true;
-      movement: PointMovement;
-      customer: CustomerDetail;
-    }
-  | {
-      success: false;
-      error: string;
-      availablePoints?: number;
-    };
+  | { success: true; transaction: Transaction; customer: CustomerDetail }
+  | { success: false; error: string; availablePoints?: number };
 
-/**
- * Déduit des points pour un client si le solde disponible est suffisant.
- * Le statut reste intact car il est basé sur les points historiques.
- */
-export function redeemPoints(
-  customerId: string,
-  pointsToRedeem: number,
-  cashierId: string,
-  reason?: string,
-): RedeemPointsResult {
-  const customer = loyaltyStore.findCustomerById(customerId);
-  if (!customer) {
-    return { success: false, error: "Client introuvable." };
-  }
+export async function redeemPoints(customerId: string, pointsToRedeem: number, cashierId: string): Promise<RedeemPointsResult> {
+  const detailBefore = await getCustomerDetail(customerId);
+  if (!detailBefore) return { success: false, error: "Client introuvable" };
 
-  if (!Number.isInteger(pointsToRedeem) || pointsToRedeem <= 0) {
-    return { success: false, error: "Le nombre de points à déduire doit être un entier strictement positif." };
-  }
-
-  const balances = computeCustomerBalances(customerId);
-
-  if (pointsToRedeem > balances.available_points) {
-    return {
-      success: false,
-      error: `Opération refusée : solde disponible insuffisant (${balances.available_points} disponibles, ${pointsToRedeem} demandés).`,
-      availablePoints: balances.available_points,
+  if (pointsToRedeem > detailBefore.available_points) {
+    return { 
+      success: false, 
+      error: "Solde insuffisant", 
+      availablePoints: detailBefore.available_points 
     };
   }
 
-  const now = new Date().toISOString();
+  const { data: tx, error } = await supabase
+    .from("transactions")
+    .insert({
+      customer_id: customerId,
+      cashier_id: cashierId,
+      amount_total: 0,
+      points_earned: 0,
+      points_redeemed: pointsToRedeem
+    })
+    .select()
+    .single();
 
-  const movement: PointMovement = {
-    id: `mov-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-    customer_id: customerId,
-    type: "REDEEM",
-    amount: pointsToRedeem,
-    purchase_id: null,
-    reason: reason || "Déduction points fidélité en caisse",
-    created_at: now,
-    created_by: cashierId,
-  };
+  if (error || !tx) {
+    return { success: false, error: "Impossible d'enregistrer la transaction." };
+  }
 
-  loyaltyStore.addMovement(movement);
+  // Update customer points
+  const newPoints = detailBefore.available_points - pointsToRedeem;
+  await supabase
+    .from("customers")
+    .update({ loyalty_points: newPoints })
+    .eq("id", customerId);
 
-  const updatedDetail = getCustomerDetail(customerId)!;
-
-  return {
-    success: true,
-    movement,
-    customer: updatedDetail,
-  };
+  const updatedDetail = await getCustomerDetail(customerId);
+  return { success: true, transaction: tx, customer: updatedDetail! };
 }
