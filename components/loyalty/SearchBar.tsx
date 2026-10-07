@@ -9,15 +9,8 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ query, onChange, onOpenNewCustomer }: SearchBarProps) {
-  const quickQueries = [
-    { label: "Ahmed", query: "Ahmed" },
-    { label: "Bayechou", query: "Bayechou" },
-    { label: "06 12 34 56 78", query: "06 12 34 56 78" },
-    { label: "Benali", query: "Benali" },
-  ];
-
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full">
       {/* Central action bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="flex-1">
@@ -40,21 +33,6 @@ export function SearchBar({ query, onChange, onOpenNewCustomer }: SearchBarProps
           </svg>
           <span>Nouveau client</span>
         </Button>
-      </div>
-
-      {/* Quick shortcuts */}
-      <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
-        <span className="font-medium">Raccourcis caisse :</span>
-        {quickQueries.map((item) => (
-          <button
-            key={item.label}
-            onClick={() => onChange(item.query)}
-            type="button"
-            className="px-2.5 py-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text)] font-mono text-[11px] transition-colors cursor-pointer"
-          >
-            {item.label}
-          </button>
-        ))}
       </div>
     </div>
   );
