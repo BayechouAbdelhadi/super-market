@@ -6,17 +6,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetClose,
-  SheetFooter,
-} from "@/components/ui/sheet";
 import { logout } from "@/app/login/actions";
-import { Menu, ChevronLeft, ExternalLink, LogOut, X } from "lucide-react";
+import { ChevronLeft, ExternalLink, LogOut } from "lucide-react";
 
 interface SidebarProps {
   role: "ADMIN" | "CASHIER" | "CUSTOMER";
@@ -25,7 +16,6 @@ interface SidebarProps {
 
 export function Sidebar({ role, email }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [isLoggingOut, startLogoutTransition] = useTransition();
   const pathname = usePathname();
 
@@ -37,10 +27,7 @@ export function Sidebar({ role, email }: SidebarProps) {
 
   const isAdmin = role === "ADMIN";
 
-  // Auto-close mobile drawer when navigating
-  useEffect(() => {
-    setSheetOpen(false);
-  }, [pathname]);
+
 
   // Navigation Links
   const navLinks = isAdmin
@@ -218,81 +205,27 @@ export function Sidebar({ role, email }: SidebarProps) {
   return (
     <>
       {/* 1. Mobile Top Bar */}
-      <div className="relative md:hidden flex items-center justify-between bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 h-16 shrink-0 z-40">
-        <div className="flex items-center gap-3">
-          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-            <SheetTrigger
-              render={
-                <Button variant="ghost" size="icon" aria-label="Ouvrir le menu" />
-              }
-            >
-              <Menu className="w-6 h-6" />
-            </SheetTrigger>
-
-            <SheetContent
-              side="left"
-              showCloseButton={false}
-              className="w-72 max-w-[85vw] p-0 flex flex-col"
-            >
-              {/* Drawer Header */}
-              <SheetHeader className="h-16 flex-row items-center justify-between px-4 border-b border-[var(--color-border)] shrink-0">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="h-9 w-9 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-xs">
-                    <Image
-                      src="/logo.jpeg"
-                      alt="SuperMarket Logo"
-                      width={36}
-                      height={36}
-                      priority
-                      className="h-full w-full object-cover rounded-[calc(var(--radius-button,12px)-4px)]"
-                    />
-                  </div>
-                  <SheetTitle className="text-lg font-black text-[var(--color-text)] tracking-tight whitespace-nowrap">
-                    SuperMarket
-                  </SheetTitle>
-                </div>
-                <SheetClose
-                  render={
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-11 w-11 min-h-[44px] min-w-[44px] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                      aria-label="Fermer le menu"
-                    />
-                  }
-                >
-                  <X className="w-5 h-5" />
-                </SheetClose>
-              </SheetHeader>
-
-              {/* Nav Content */}
-              <NavContent onLinkClick={() => setSheetOpen(false)} />
-
-              {/* Footer */}
-              <UserFooter />
-            </SheetContent>
-          </Sheet>
-
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-xs">
-              <Image
-                src="/logo.jpeg"
-                alt="SuperMarket Logo"
-                width={32}
-                height={32}
-                priority
-                className="h-full w-full object-cover rounded-[calc(var(--radius-button,12px)-4px)]"
-              />
-            </div>
-            <span className="text-base font-black text-[var(--color-text)] tracking-tight">
-              SuperMarket
-            </span>
+      <header className="relative md:hidden flex items-center justify-between bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 h-14 shrink-0 z-40">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-xs">
+            <Image
+              src="/logo.jpeg"
+              alt="SuperMarket Logo"
+              width={32}
+              height={32}
+              priority
+              className="h-full w-full object-cover rounded-[calc(var(--radius-button,12px)-4px)]"
+            />
           </div>
+          <span className="text-base font-black text-[var(--color-text)] tracking-tight">
+            SuperMarket
+          </span>
         </div>
+
         <Badge variant={isAdmin ? "brand" : "neutral"} size="sm">
           {isAdmin ? "Admin" : "Caisse"}
         </Badge>
-      </div>
+      </header>
 
       {/* 2. Desktop Static Sidebar */}
       <aside

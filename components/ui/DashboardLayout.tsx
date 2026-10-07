@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { Sidebar } from '@/components/ui/Sidebar'
+import { MobileBottomNav } from '@/components/ui/MobileBottomNav'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -18,6 +19,9 @@ export function DashboardLayout({ children, role, email }: DashboardLayoutProps)
           {children}
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation Bar (thumb-friendly for phones) */}
+      <MobileBottomNav role={role} email={email} />
     </div>
   )
 }
