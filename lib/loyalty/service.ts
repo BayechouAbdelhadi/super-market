@@ -10,7 +10,7 @@ async function getSupabase() {
   }
 }
 
-export {
+import {
   normalizePhone,
   calculatePoints,
   calculateTier,
@@ -18,6 +18,15 @@ export {
   applyPurchasePoints,
   applyRedeemPoints,
 } from "./domain";
+
+export {
+  normalizePhone,
+  calculatePoints,
+  calculateTier,
+  canRedeemPoints,
+  applyPurchasePoints,
+  applyRedeemPoints,
+};
 
 
 export async function searchCustomers(query: string): Promise<CustomerSummary[]> {

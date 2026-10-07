@@ -1,6 +1,6 @@
 import React from "react";
 import { CustomerSummary } from "@/lib/loyalty/types";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import { StatusBadge } from "./StatusBadge";
 
 interface CustomerCardProps {

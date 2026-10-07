@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Modal } from '@/components/ui/Modal'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Modal } from '@/components/ui/modal'
 import { PaginatedList } from '@/components/ui/PaginatedList'
+import { StatusBadge } from '@/components/loyalty/StatusBadge'
 import { createUser, editUser } from '@/app/admin/actions'
 
 interface UserManagerProps {
@@ -12,9 +13,10 @@ interface UserManagerProps {
   roleToManage: 'CASHIER' | 'CUSTOMER';
   title: string;
   description: string;
+  onViewDetail?: (user: any) => void;
 }
 
-export function UserManager({ initialUsers, roleToManage, title, description }: UserManagerProps) {
+export function UserManager({ initialUsers, roleToManage, title, description, onViewDetail }: UserManagerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<any>(null)
   const [error, setError] = useState('')
@@ -82,25 +84,59 @@ export function UserManager({ initialUsers, roleToManage, title, description }: 
         keyExtractor={(u) => u.id}
         defaultPageSize={8}
         pageSizeOptions={[8, 20, 50]}
-        renderItem={(u) => (
-          <div className="flex justify-between items-center p-3 border border-[var(--color-border)] rounded-[var(--radius-card,16px)] bg-[var(--color-surface)]">
-            <div>
-              <p className="text-sm font-semibold text-[var(--color-text)]">{u.first_name} {u.last_name}</p>
-              <div className="flex gap-4 text-xs text-[var(--color-text-muted)] mt-0.5">
-                <span>{u.email}</span>
-                {u.phone_number && <span>📞 {u.phone_number}</span>}
+        renderItem={(u) => {
+          const tier = u.status || 'BRONZE';
+          const points = u.loyalty_points ?? 0;
+          return (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-[var(--color-border)] rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] gap-4 hover:border-[var(--color-primary)]/40 transition-colors">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <p className="text-sm font-bold text-[var(--color-text)]">
+                    {u.first_name} {u.last_name}
+                  </p>
+                  {roleToManage === 'CUSTOMER' && (
+                    <StatusBadge status={tier} size="sm" />
+                  )}
+                  <span className="text-[10px] px-2 py-0.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-full font-semibold">
+                    Actif
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--color-text-muted)]">
+                  <span className="flex items-center gap-1">✉️ {u.email}</span>
+                  {u.phone_number && (
+                    <span className="flex items-center gap-1 font-mono">📞 {u.phone_number}</span>
+                  )}
+                  {roleToManage === 'CUSTOMER' && (
+                    <span className="flex items-center gap-1 font-semibold text-[var(--color-primary)]">
+                      ⭐ {points.toLocaleString('fr-FR')} point{points > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {roleToManage === 'CUSTOMER' && onViewDetail && (
+                  <Button
+                    variant="primary"
+                    onClick={() => onViewDetail(u)}
+                    className="px-3.5 py-1.5 text-xs min-h-[38px] h-auto flex items-center gap-1.5"
+                  >
+                    <span>🏆</span>
+                    <span>Détails &amp; Fidélité</span>
+                  </Button>
+                )}
+                <Button
+                  variant="secondary"
+                  onClick={() => openEdit(u)}
+                  className="px-3 py-1.5 text-xs min-h-[38px] h-auto"
+                >
+                  Modifier
+                </Button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="text-[10px] px-2 py-0.5 bg-green-50 text-green-700 border border-green-200 rounded-md hidden sm:block">
-                Actif
-              </div>
-              <Button variant="secondary" onClick={() => openEdit(u)} className="px-3 py-1.5 text-xs min-h-0 h-auto">
-                Modifier
-              </Button>
-            </div>
-          </div>
-        )}
+          );
+        }}
         emptyState={
           <div className="border border-dashed border-[var(--color-border)] rounded-[var(--radius-card,16px)] p-10 text-center text-sm text-[var(--color-text-muted)]">
             Aucun utilisateur pour le moment.

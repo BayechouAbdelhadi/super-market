@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import { User } from "@/lib/loyalty/types";
 import { logout } from "@/app/login/actions";
 
@@ -28,6 +28,14 @@ export function CashierHeader({ cashier }: CashierHeaderProps) {
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  const [isLoggingOut, startLogoutTransition] = useTransition();
+
+  const handleLogout = () => {
+    startLogoutTransition(async () => {
+      await logout();
+    });
+  };
 
   const isAdmin = cashier?.role === "ADMIN";
   const fullName = cashier
@@ -98,16 +106,26 @@ export function CashierHeader({ cashier }: CashierHeaderProps) {
           )}
 
           {/* Logout Action */}
-          <form action={logout}>
+          <form
+            action={logout}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleLogout();
+            }}
+          >
             <button
               type="submit"
               title="Déconnexion"
-              className="p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-rose-50 hover:text-[var(--color-danger)] hover:border-rose-200 text-[var(--color-text-muted)] transition-colors cursor-pointer text-xs flex items-center gap-1.5"
+              disabled={isLoggingOut}
+              onClick={handleLogout}
+              className="p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-rose-50 hover:text-[var(--color-danger)] hover:border-rose-200 text-[var(--color-text-muted)] transition-colors cursor-pointer text-xs flex items-center gap-1.5 disabled:opacity-50"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              <span className="hidden lg:inline font-medium">Déconnexion</span>
+              <span className="hidden lg:inline font-medium">
+                {isLoggingOut ? "Déconnexion..." : "Déconnexion"}
+              </span>
             </button>
           </form>
         </div>

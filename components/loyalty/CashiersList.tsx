@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { Card } from '@/components/ui/Card'
+import { Card } from '@/components/ui/card'
 import { UserManager } from '@/components/shared/UserManager'
 
 export async function CashiersList() {

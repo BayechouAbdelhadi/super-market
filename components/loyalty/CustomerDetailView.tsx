@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { CustomerDetail } from "@/lib/loyalty/types";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/ui/StatCard";
 import { StatusBadge } from "./StatusBadge";
 

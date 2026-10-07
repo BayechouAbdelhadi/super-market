@@ -1,6 +1,6 @@
 import React from "react";
 import { SearchInput } from "@/components/ui/SearchInput";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface SearchBarProps {
   query: string;
@@ -24,7 +24,7 @@ export function SearchBar({ query, onChange, onOpenNewCustomer }: SearchBarProps
           <SearchInput
             value={query}
             onChange={onChange}
-            placeholder="🔎  Nom, prénom, téléphone ou email..."
+            placeholder="Nom, prénom, téléphone ou email..."
             autoFocus
           />
         </div>

@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { CustomerDetail } from "@/lib/loyalty/types";
 import { calculatePoints } from "@/lib/loyalty/domain";
-import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
 
 interface AddPurchaseModalProps {
   isOpen: boolean;

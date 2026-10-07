@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { DashboardLayout } from '@/components/ui/DashboardLayout'
 import { StatCard } from '@/components/ui/StatCard'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 export default async function AdminDashboard() {
   const supabase = await createClient()

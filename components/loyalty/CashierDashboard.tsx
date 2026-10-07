@@ -9,8 +9,8 @@ import { CustomerDetailView } from "./CustomerDetailView";
 import { NewCustomerModal } from "./NewCustomerModal";
 import { AddPurchaseModal } from "./AddPurchaseModal";
 import { RedeemPointsModal } from "./RedeemPointsModal";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export interface CashierDashboardProps {
   standalone?: boolean;
@@ -57,13 +57,20 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
     loadCashier();
   }, []);
 
-  // Search effect with debounce
+  // Search effect: ONLY fetch and show results when a search term is entered
   useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed) {
+      setCustomers([]);
+      setLoading(false);
+      return;
+    }
+
     let isCancelled = false;
+    setLoading(true);
     const timer = setTimeout(async () => {
-      setLoading(true);
       try {
-        const res = await fetch(`/api/loyalty/customers?q=${encodeURIComponent(searchQuery)}`);
+        const res = await fetch(`/api/loyalty/customers?q=${encodeURIComponent(trimmed)}`);
         const data = await res.json();
         if (!isCancelled && data.customers) {
           startTransition(() => {
@@ -137,10 +144,10 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
           <Card padded="lg" className="space-y-5">
             <div className="space-y-1">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
-                Espace Caisse &amp; Points de Fidélité
+                Caisse &amp; Points de Fidélité
               </h1>
               <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-                Recherchez un client au comptoir par nom, téléphone ou email pour consulter ses points, enregistrer un achat (1 € = 1 pt) ou utiliser des points fidélité.
+                Recherchez un client au comptoir par nom, téléphone ou email pour consulter ses points, enregistrer un achat (1 € = 1 pt) ou utiliser ses points fidélité.
               </p>
             </div>
 
@@ -153,49 +160,68 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
 
           {/* Results Section */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs px-1 text-[var(--color-text-muted)]">
-              <span>
-                {loading
-                  ? "Recherche en cours..."
-                  : `${customers.length} client(s) trouvé(s)`}
-              </span>
-              {searchQuery && (
-                <span className="font-mono opacity-80">filtre : &quot;{searchQuery}&quot;</span>
-              )}
-            </div>
-
-            {customers.length > 0 ? (
-              <div className="grid grid-cols-1 gap-3">
-                {customers.map((c) => (
-                  <CustomerCard
-                    key={c.id}
-                    customer={c}
-                    onSelect={(cust) => loadCustomerDetail(cust.id)}
-                  />
-                ))}
-              </div>
-            ) : !loading ? (
-              <div className="border border-dashed border-[var(--color-border)] rounded-[var(--radius-card,16px)] p-12 text-center bg-[var(--color-surface)]/60 space-y-4">
-                <div className="inline-flex p-3 rounded-full bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] text-2xl">
-                  🔍
+            {searchQuery.trim() === "" ? (
+              <div className="border border-dashed border-[var(--color-border)] rounded-[var(--radius-card,16px)] p-12 text-center bg-[var(--color-surface)] space-y-3">
+                <div className="inline-flex p-4 rounded-full bg-[var(--color-surface-hover)] text-3xl">
+                  🔎
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-[var(--color-text)]">
-                    Aucun client ne correspond à cette recherche
+                <div className="space-y-1 max-w-md mx-auto">
+                  <h3 className="text-base font-bold text-[var(--color-text)]">
+                    Recherche client en caisse
                   </h3>
-                  <p className="text-xs text-[var(--color-text-muted)] max-w-sm mx-auto">
-                    Vérifiez l&apos;orthographe ou créez immédiatement un nouveau profil pour ce client directement depuis la caisse.
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
+                    Saisissez un nom, prénom, numéro de téléphone ou adresse email dans le champ ci-dessus pour afficher le client et effectuer une opération de fidélité.
                   </p>
                 </div>
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={() => setIsNewCustomerOpen(true)}
-                >
-                  <span>+ Créer ce client maintenant</span>
-                </Button>
               </div>
-            ) : null}
+            ) : (
+              <>
+                <div className="flex items-center justify-between text-xs px-1 text-[var(--color-text-muted)]">
+                  <span>
+                    {loading
+                      ? "Recherche en cours..."
+                      : `${customers.length} résultat(s) pour « ${searchQuery} »`}
+                  </span>
+                </div>
+
+                {loading ? (
+                  <div className="py-12 text-center text-xs text-[var(--color-text-muted)]">
+                    Recherche en cours dans la base de données...
+                  </div>
+                ) : customers.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-3">
+                    {customers.map((c) => (
+                      <CustomerCard
+                        key={c.id}
+                        customer={c}
+                        onSelect={(cust) => loadCustomerDetail(cust.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border border-dashed border-[var(--color-border)] rounded-[var(--radius-card,16px)] p-12 text-center bg-[var(--color-surface)]/60 space-y-4">
+                    <div className="inline-flex p-3 rounded-full bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] text-2xl">
+                      ❌
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-bold text-[var(--color-text)]">
+                        Aucun client trouvé pour « {searchQuery} »
+                      </h3>
+                      <p className="text-xs text-[var(--color-text-muted)] max-w-sm mx-auto">
+                        Vérifiez l&apos;orthographe ou créez immédiatement un nouveau profil pour ce client directement depuis la caisse.
+                      </p>
+                    </div>
+                    <Button
+                      variant="primary"
+                      size="md"
+                      onClick={() => setIsNewCustomerOpen(true)}
+                    >
+                      <span>+ Créer ce client maintenant</span>
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -223,38 +249,35 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
         onClose={() => setIsAddPurchaseOpen(false)}
         onPurchaseRecorded={(updatedCust) => {
           setSelectedCustomerDetail(updatedCust);
-          showToast(`Achat enregistré ! Points crédités.`);
+          showToast("Achat enregistré et points crédités avec succès !");
         }}
       />
 
-      {/* Modal 3: Utiliser des points (Déduction des points) */}
+      {/* Modal 3: Utiliser des points fidélité (Déduction et contrôle solde) */}
       <RedeemPointsModal
         isOpen={isRedeemOpen}
         customer={selectedCustomerDetail}
         onClose={() => setIsRedeemOpen(false)}
         onPointsRedeemed={(updatedCust) => {
           setSelectedCustomerDetail(updatedCust);
-          showToast(`Points déduits avec succès !`);
+          showToast("Points fidélité utilisés avec succès !");
         }}
       />
     </div>
   );
 
-  if (standalone) {
-    return (
-      <div className="h-full w-full overflow-hidden bg-[var(--color-background)] text-[var(--color-text)] flex flex-col font-sans">
-        <CashierHeader cashier={cashier} />
-        <main className="flex-1 min-h-0 overflow-y-auto">
-          <div className="max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-            {content}
-          </div>
-        </main>
-        <footer className="shrink-0 border-t border-[var(--color-border)] py-4 text-center text-xs text-[var(--color-text-muted)]">
-          SuperMarket • Système de fidélité caissier (Jalon 1 MVP) • 1 € dépensé = 1 point
-        </footer>
-      </div>
-    );
+  if (!standalone) {
+    return content;
   }
 
-  return content;
+  return (
+    <div className="flex flex-col h-full bg-[var(--color-background)]">
+      <CashierHeader
+        cashier={cashier}
+      />
+      <main className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
+        {content}
+      </main>
+    </div>
+  );
 }

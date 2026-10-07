@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import { CustomerDetail, CustomerSummary } from "@/lib/loyalty/types";
-import { Modal } from "@/components/ui/Modal";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/modal";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface NewCustomerModalProps {
   isOpen: boolean;
