@@ -20,6 +20,12 @@ export async function login(formData: FormData) {
   }
 
   const role = authData.user?.user_metadata?.role || 'CUSTOMER'
+
+  if (role !== 'ADMIN' && role !== 'CASHIER') {
+    await supabase.auth.signOut()
+    redirect('/login?message=Accès réservé au personnel du magasin')
+  }
+
   const redirectPath = role === 'ADMIN' ? '/admin' : '/cashier'
 
   revalidatePath(redirectPath, 'layout')

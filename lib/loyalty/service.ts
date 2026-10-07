@@ -1,4 +1,5 @@
 import { CustomerDetail, CustomerSummary, LoyaltyTier, Transaction } from "./types";
+import { createIsolatedClient } from "@/lib/supabase/isolated";
 
 async function getSupabase() {
   try {
@@ -211,9 +212,10 @@ export async function createCustomer(data: CreateCustomerInput): Promise<CreateC
     };
   }
 
-  // 3. Création du compte utilisateur dans Supabase auth
+  // 3. Création du compte utilisateur dans Supabase auth SANS modifier les cookies du caissier
+  const isolatedClient = createIsolatedClient();
   const password = Math.random().toString(36).slice(-8) + "A1!";
-  const { data: authData, error: authError } = await sb.auth.signUp({
+  const { data: authData, error: authError } = await isolatedClient.auth.signUp({
     email: emailNormalized,
     password,
     options: {

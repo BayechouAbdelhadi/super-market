@@ -161,17 +161,29 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
           {/* Results Section */}
           <div className="space-y-3">
             {searchQuery.trim() === "" ? (
-              <div className="border border-dashed border-[var(--color-border)] rounded-[var(--radius-card,16px)] p-12 text-center bg-[var(--color-surface)] space-y-3">
-                <div className="inline-flex p-4 rounded-full bg-[var(--color-surface-hover)] text-3xl">
+              <div className="border border-[var(--color-border)] rounded-[var(--radius-card,16px)] p-8 sm:p-12 text-center bg-gradient-to-b from-[var(--color-surface)] to-[var(--color-surface-hover)] space-y-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                <div className="inline-flex p-4 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-3xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                   🔎
                 </div>
-                <div className="space-y-1 max-w-md mx-auto">
-                  <h3 className="text-base font-bold text-[var(--color-text)]">
-                    Recherche client en caisse
+                <div className="space-y-1.5 max-w-md mx-auto">
+                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight">
+                    Recherche client au comptoir
                   </h3>
-                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-                    Saisissez un nom, prénom, numéro de téléphone ou adresse email dans le champ ci-dessus pour afficher le client et effectuer une opération de fidélité.
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                    Saisissez un nom, prénom, numéro de téléphone ou adresse email pour retrouver instantanément un compte client ou en créer un nouveau.
                   </p>
+                </div>
+
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-2 max-w-lg mx-auto text-xs">
+                  <span className="px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium">
+                    ⚡ Recherche instantanée
+                  </span>
+                  <span className="px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium">
+                    🎟️ 1 € dépensé = 1 point
+                  </span>
+                  <span className="px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium">
+                    👑 Paliers Bronze à VIP
+                  </span>
                 </div>
               </div>
             ) : (

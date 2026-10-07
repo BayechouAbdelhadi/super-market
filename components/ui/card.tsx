@@ -26,9 +26,9 @@ function Card({
     <div
       data-slot="card"
       className={cn(
-        "flex flex-col bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card,16px)] shadow-xs text-sm text-[var(--color-text)] transition-all duration-150",
+        "flex flex-col bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card,16px)] shadow-[0_1px_3px_0_rgba(0,0,0,0.04),0_4px_14px_0_rgba(0,0,0,0.03)] text-sm text-[var(--color-text)] transition-all duration-200",
         interactive &&
-          "hover:border-[var(--color-border-hover)] hover:shadow-sm cursor-pointer active:scale-[0.998]",
+          "hover:border-[var(--color-border-hover)] hover:shadow-[0_6px_16px_-2px_rgba(0,0,0,0.08),0_16px_32px_-4px_rgba(0,0,0,0.06)] hover:-translate-y-[1px] cursor-pointer active:scale-[0.995] active:translate-y-0",
         paddingClasses,
         className
       )}

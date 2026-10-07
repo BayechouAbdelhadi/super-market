@@ -24,47 +24,47 @@ export function StatCard({
 }: StatCardProps) {
   const accentClasses = {
     brand:
-      "bg-[var(--color-primary)]/5 border-[var(--color-primary)]/20 text-[var(--color-text)]",
+      "bg-gradient-to-br from-[var(--color-primary)]/[0.05] via-[var(--color-surface)] to-[var(--color-surface)] border-[var(--color-primary)]/25 shadow-[0_2px_8px_rgba(255,56,92,0.06)]",
     default:
-      "bg-[var(--color-surface)] border-[var(--color-border)]",
+      "bg-[var(--color-surface)] border-[var(--color-border)] shadow-[0_1px_3px_rgba(0,0,0,0.04)]",
     neutral:
       "bg-[var(--color-surface-hover)] border-[var(--color-border)]",
   }[accent];
 
   const trendColor = {
-    up: "text-green-600 bg-green-50 border-green-100",
-    down: "text-red-600 bg-red-50 border-red-100",
-    neutral: "text-gray-600 bg-gray-50 border-gray-100",
+    up: "text-emerald-700 bg-emerald-500/10 border-emerald-500/20 dark:text-emerald-300",
+    down: "text-rose-700 bg-rose-500/10 border-rose-500/20 dark:text-rose-300",
+    neutral: "text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] border-[var(--color-border)]",
   }[trendDirection];
 
   return (
-    <Card className={`space-y-3 p-5 ${accentClasses}`}>
-      <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+    <Card className={`space-y-3 p-5 sm:p-6 ${accentClasses}`}>
+      <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
         <span>{label}</span>
-        {icon && <span className="text-base">{icon}</span>}
+        {icon && <span className="text-lg shrink-0">{icon}</span>}
       </div>
 
       <div className="flex items-end justify-between gap-4">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl sm:text-3xl font-bold text-[var(--color-text)] tracking-tight">
+          <span className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
             {typeof value === "number" ? value.toLocaleString("fr-FR") : value}
           </span>
           {unit && (
-            <span className="text-sm font-semibold text-[var(--color-text-muted)]">
+            <span className="text-sm font-bold text-[var(--color-primary)]">
               {unit}
             </span>
           )}
         </div>
         
         {trend && (
-          <div className={`px-2 py-0.5 rounded-md border text-xs font-medium flex items-center gap-1 ${trendColor}`}>
+          <div className={`px-2.5 py-0.5 rounded-full border text-xs font-semibold flex items-center gap-1 shrink-0 ${trendColor}`}>
             {trendDirection === "up" && (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
             )}
             {trendDirection === "down" && (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" /></svg>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" /></svg>
             )}
-            {trend}
+            <span>{trend}</span>
           </div>
         )}
       </div>

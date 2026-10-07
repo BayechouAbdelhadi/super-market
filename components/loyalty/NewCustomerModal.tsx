@@ -10,7 +10,9 @@ interface NewCustomerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCustomerCreated: (customer: CustomerDetail) => void;
-  onOpenExisting: (existingCustomer: CustomerSummary) => void;
+  onOpenExisting?: (existingCustomer: CustomerSummary) => void;
+  title?: string;
+  description?: string;
 }
 
 export function NewCustomerModal({
@@ -18,6 +20,8 @@ export function NewCustomerModal({
   onClose,
   onCustomerCreated,
   onOpenExisting,
+  title,
+  description,
 }: NewCustomerModalProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -96,11 +100,11 @@ export function NewCustomerModal({
     <Modal
       isOpen={isOpen}
       onClose={handleReset}
-      title="Nouveau client fidélité"
+      title={title || "Nouveau client fidélité"}
       icon="👤"
-      description="Créez un compte fidélité en caisse en quelques secondes."
+      description={description || "Créez un profil client fidélité en quelques secondes."}
     >
-      {/* Duplicate Warning Banner (§ 8) */}
+      {/* Duplicate Warning Banner */}
       {duplicateInfo && (
         <div className="p-5 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/60 space-y-3">
           <div className="flex items-start gap-3">
@@ -116,16 +120,18 @@ export function NewCustomerModal({
             </div>
           </div>
 
-          <Button
-            variant="primary"
-            fullWidth
-            onClick={() => {
-              onOpenExisting(duplicateInfo.existingCustomer);
-              handleReset();
-            }}
-          >
-            Ouvrir la fiche de ce client
-          </Button>
+          {onOpenExisting && (
+            <Button
+              variant="primary"
+              fullWidth
+              onClick={() => {
+                onOpenExisting(duplicateInfo.existingCustomer);
+                handleReset();
+              }}
+            >
+              Ouvrir la fiche de ce client
+            </Button>
+          )}
         </div>
       )}
 

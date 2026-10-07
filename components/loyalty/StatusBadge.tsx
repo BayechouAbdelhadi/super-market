@@ -17,41 +17,41 @@ export function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
 
   const config = {
     bronze: {
-      label: "BRONZE",
+      label: "Bronze",
       icon: "🥉",
       classes:
-        "bg-amber-50 text-[var(--color-tier-bronze)] border-amber-200/80 dark:bg-amber-950/30 dark:border-amber-900/50",
+        "bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-600/20 shadow-[0_1px_2px_rgba(217,119,6,0.06)]",
     },
     silver: {
-      label: "SILVER",
+      label: "Silver",
       icon: "🥈",
       classes:
-        "bg-slate-100 text-[var(--color-tier-silver)] border-slate-300 dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-700",
+        "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-400/25 shadow-[0_1px_2px_rgba(100,116,139,0.06)]",
     },
     gold: {
-      label: "GOLD",
+      label: "Gold",
       icon: "🥇",
       classes:
-        "bg-amber-100/70 text-amber-900 border-amber-300 dark:bg-yellow-950/40 dark:text-yellow-300 dark:border-yellow-800",
+        "bg-amber-500/15 text-amber-900 dark:text-amber-200 border-amber-500/35 shadow-[0_1px_3px_rgba(245,158,11,0.12)] font-bold",
     },
     vip: {
-      label: "VIP",
+      label: "VIP Privilège",
       icon: "👑",
       classes:
-        "bg-purple-50 text-[var(--color-tier-vip)] border-purple-200 dark:bg-purple-950/40 dark:border-purple-800",
+        "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-zinc-950 dark:border-zinc-200 shadow-[0_2px_6px_rgba(0,0,0,0.15)] font-bold",
     },
   }[normalized] || {
     label: status.toUpperCase(),
     icon: "⭐",
-    classes: "bg-zinc-100 text-[var(--color-text)] border-[var(--color-border)]",
+    classes: "bg-[var(--color-surface-hover)] text-[var(--color-text)] border-[var(--color-border)]",
   };
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border tracking-wider uppercase font-sans select-none ${config.classes} ${sizeClasses}`}
+      className={`inline-flex items-center rounded-full border tracking-wide font-sans select-none transition-all ${config.classes} ${sizeClasses}`}
     >
-      <span className="text-[1.1em]">{config.icon}</span>
-      <span>{config.label}</span>
+      <span className="text-[1.1em] shrink-0 leading-none">{config.icon}</span>
+      <span className="leading-none">{config.label}</span>
     </span>
   );
 }

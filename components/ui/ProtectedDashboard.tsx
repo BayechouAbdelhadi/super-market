@@ -13,7 +13,7 @@ export async function ProtectedDashboard({
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) {
-    redirect('/auth')
+    redirect('/login')
   }
 
   const role = user.user_metadata?.role || 'CUSTOMER'

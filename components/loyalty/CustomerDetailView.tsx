@@ -63,6 +63,24 @@ export function CustomerDetailView({
   const purchases = customer.purchases || [];
   const movements = customer.movements || [];
 
+  const initials = customer.full_name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase())
+    .join("") || "CL";
+
+  const tierGradients: Record<string, string> = {
+    bronze: "from-amber-600/20 to-amber-700/10 text-amber-900 border-amber-300",
+    silver: "from-slate-400/20 to-slate-500/10 text-slate-800 border-slate-300",
+    gold: "from-amber-400/30 to-yellow-500/15 text-amber-950 border-amber-400",
+    vip: "from-zinc-900 to-zinc-800 text-white border-zinc-900",
+  };
+
+  const avatarStyle =
+    tierGradients[(customer.tier || "").toLowerCase()] ||
+    "from-[var(--color-surface-hover)] to-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)]";
+
   return (
     <div className="w-full space-y-6">
       {/* Back button */}
@@ -71,7 +89,7 @@ export function CustomerDetailView({
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="-ml-2"
+          className="-ml-2 hover:bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -83,22 +101,30 @@ export function CustomerDetailView({
       {/* Main Customer Summary Card (§ 8 & § 17) */}
       <Card padded="lg" className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
-                {customer.full_name}
-              </h1>
-              <StatusBadge status={customer.tier} size="lg" />
+          <div className="flex items-center gap-4">
+            <div
+              className={`h-16 w-16 rounded-full bg-gradient-to-br ${avatarStyle} border-2 flex items-center justify-center font-extrabold text-xl tracking-tight shrink-0 shadow-[0_4px_12px_rgba(0,0,0,0.06)]`}
+            >
+              {initials}
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--color-text-muted)] font-mono">
-              <span className="inline-flex items-center gap-1.5">
-                <span>📱</span> {customer.phone}
-              </span>
-              <span className="opacity-40">•</span>
-              <span className="inline-flex items-center gap-1.5 font-sans">
-                <span>✉️</span> {customer.email}
-              </span>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
+                  {customer.full_name}
+                </h1>
+                <StatusBadge status={customer.tier} size="lg" />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-[var(--color-text-muted)] font-mono">
+                <span className="inline-flex items-center gap-1.5">
+                  <span>📱</span> {customer.phone}
+                </span>
+                <span className="opacity-30">•</span>
+                <span className="inline-flex items-center gap-1.5 font-sans">
+                  <span>✉️</span> {customer.email}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -152,19 +178,24 @@ export function CustomerDetailView({
 
         {/* Tier progress (§ 13 & § 17) */}
         {customer.tier !== "VIP" && (
-          <div className="p-4 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-2 text-xs">
-            <div className="flex justify-between font-medium">
-              <span className="text-[var(--color-text-muted)]">
-                Progression vers le statut <strong className="text-[var(--color-text)]">{nextTierInfo.nextTier}</strong>
-              </span>
-              <span className="font-semibold text-[var(--color-text)]">
-                Plus que {nextTierInfo.remaining.toLocaleString("fr-FR")} pts
+          <div className="p-4 sm:p-5 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-3 text-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 font-medium">
+              <div className="flex items-center gap-2">
+                <span className="text-[var(--color-text-muted)]">
+                  Progression vers le palier :
+                </span>
+                <span className="font-bold text-[var(--color-text)] bg-[var(--color-surface)] px-2.5 py-0.5 rounded-full border border-[var(--color-border)] shadow-xs">
+                  {nextTierInfo.nextTier}
+                </span>
+              </div>
+              <span className="font-semibold text-[var(--color-primary)]">
+                Plus que {nextTierInfo.remaining.toLocaleString("fr-FR")} points nécessaires ({nextTierInfo.percent}%)
               </span>
             </div>
-            <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[var(--color-border)] h-2.5 rounded-full overflow-hidden p-0.5">
               <div
-                className="bg-[var(--color-primary)] h-full rounded-full transition-all duration-500"
-                style={{ width: `${nextTierInfo.percent}%` }}
+                className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)] h-full rounded-full transition-all duration-700 shadow-xs"
+                style={{ width: `${Math.max(5, nextTierInfo.percent)}%` }}
               />
             </div>
           </div>

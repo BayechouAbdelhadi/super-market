@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { supabase } from '@/lib/supabase/client'
+import { createIsolatedClient } from '@/lib/supabase/isolated'
 import { z } from 'zod'
 
 const CreateUserSchema = z.object({
@@ -56,7 +57,8 @@ export async function createUser(formData: FormData) {
     return { error: "Accès refusé." };
   }
 
-  const { data, error } = await supabase.auth.signUp({
+  const isolatedClient = createIsolatedClient();
+  const { data, error } = await isolatedClient.auth.signUp({
     email,
     password,
     options: {

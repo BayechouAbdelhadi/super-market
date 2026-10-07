@@ -38,10 +38,11 @@ export async function updateSession(request: NextRequest) {
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
   const isCashierRoute = request.nextUrl.pathname.startsWith('/cashier')
   const isLoyaltyRoute = request.nextUrl.pathname.startsWith('/loyalty')
+  const isCustomersRoute = request.nextUrl.pathname.startsWith('/customers')
 
-  const isProtectedRoute = isAdminRoute || isCashierRoute || isLoyaltyRoute
+  const isStaffRoute = isAdminRoute || isCashierRoute || isLoyaltyRoute || isCustomersRoute
 
-  if (!user && isProtectedRoute) {
+  if (!user && isStaffRoute) {
     console.log(`[Middleware] Blocked unauthenticated access to ${request.nextUrl.pathname} -> Redirecting to /login`)
     const url = request.nextUrl.clone()
     url.pathname = '/login'
@@ -51,25 +52,34 @@ export async function updateSession(request: NextRequest) {
   if (user) {
     const role = user.user_metadata?.role || 'CUSTOMER'
     
-    // Redirect authenticated users away from login
+    // Redirect authenticated staff users away from login
     if (isAuthRoute) {
-      const url = request.nextUrl.clone()
-      url.pathname = role === 'ADMIN' ? '/admin' : '/cashier'
-      console.log(`[Middleware] Authenticated user (${role}) trying to access login -> Redirecting to ${url.pathname}`)
-      return NextResponse.redirect(url)
+      if (role === 'ADMIN') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/admin'
+        console.log(`[Middleware] Authenticated ADMIN trying to access login -> Redirecting to /admin`)
+        return NextResponse.redirect(url)
+      }
+      if (role === 'CASHIER') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/cashier'
+        console.log(`[Middleware] Authenticated CASHIER trying to access login -> Redirecting to /cashier`)
+        return NextResponse.redirect(url)
+      }
+      // CUSTOMER role is allowed to stay on /login so they can log in as staff
     }
 
-    // Protect Admin routes
+    // Protect Admin routes — only ADMIN can access
     if (isAdminRoute && role !== 'ADMIN') {
-      console.warn(`[Middleware] User (${role}) attempted to access ADMIN route ${request.nextUrl.pathname} -> Redirecting to /cashier`)
       const url = request.nextUrl.clone()
-      url.pathname = '/cashier'
+      url.pathname = role === 'CASHIER' ? '/cashier' : '/login'
+      console.warn(`[Middleware] User (${role}) attempted to access ADMIN route ${request.nextUrl.pathname} -> Redirecting to ${url.pathname}`)
       return NextResponse.redirect(url)
     }
 
-    // Protect Cashier/Loyalty routes — only CASHIER and ADMIN can access
-    if ((isCashierRoute || isLoyaltyRoute) && role !== 'CASHIER' && role !== 'ADMIN') {
-      console.warn(`[Middleware] User (${role}) attempted to access Cashier route ${request.nextUrl.pathname} -> Redirecting to /login`)
+    // Protect Cashier/Staff routes — only CASHIER and ADMIN can access
+    if (isStaffRoute && role !== 'CASHIER' && role !== 'ADMIN') {
+      console.warn(`[Middleware] User (${role}) attempted to access staff route ${request.nextUrl.pathname} -> Redirecting to /login`)
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)

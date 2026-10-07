@@ -8,6 +8,7 @@ import { UserManager } from '@/components/shared/UserManager'
 import { CustomerDetailView } from '@/components/loyalty/CustomerDetailView'
 import { AddPurchaseModal } from '@/components/loyalty/AddPurchaseModal'
 import { RedeemPointsModal } from '@/components/loyalty/RedeemPointsModal'
+import { NewCustomerModal } from '@/components/loyalty/NewCustomerModal'
 import { CustomerDetail } from '@/lib/loyalty/types'
 
 interface CustomerWorkspaceProps {
@@ -22,9 +23,11 @@ export function CustomerWorkspace({
   subtitle = "Consultez, modifiez et gérez l'ensemble des profils clients de votre magasin."
 }: CustomerWorkspaceProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [createdCustomers, setCreatedCustomers] = useState<any[]>([])
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
   const [selectedCustomerDetail, setSelectedCustomerDetail] = useState<CustomerDetail | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [isNewCustomerOpen, setIsNewCustomerOpen] = useState(false)
 
   // Modals for loyalty actions from detail view
   const [isAddPurchaseOpen, setIsAddPurchaseOpen] = useState(false)
@@ -36,6 +39,28 @@ export function CustomerWorkspace({
     setTimeout(() => {
       setToastMessage((curr) => (curr === msg ? null : curr))
     }, 4000)
+  }
+
+  function handleCustomerCreated(newCustomer: CustomerDetail) {
+    setIsNewCustomerOpen(false)
+    showToast(`Client ${newCustomer.full_name} créé avec succès !`)
+
+    const newListItem = {
+      id: newCustomer.id,
+      first_name: newCustomer.first_name,
+      last_name: newCustomer.last_name,
+      email: newCustomer.email,
+      phone_number: newCustomer.phone,
+      role: 'CUSTOMER',
+      created_at: newCustomer.created_at,
+      loyalty_points: newCustomer.available_points,
+      status: newCustomer.tier,
+    }
+    setCreatedCustomers((prev) => [newListItem, ...prev.filter((c) => c.id !== newCustomer.id)])
+
+    // Open detail immediately
+    setSelectedCustomerId(newCustomer.id)
+    setSelectedCustomerDetail(newCustomer)
   }
 
   async function handleViewDetail(user: any) {
@@ -54,15 +79,20 @@ export function CustomerWorkspace({
     }
   }
 
+  const allCustomers = useMemo(() => {
+    const createdIds = new Set(createdCustomers.map((c) => c.id))
+    return [...createdCustomers, ...initialCustomers.filter((c) => !createdIds.has(c.id))]
+  }, [createdCustomers, initialCustomers])
+
   const filteredCustomers = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
-    if (!q) return initialCustomers
-    return initialCustomers.filter((c) =>
+    if (!q) return allCustomers
+    return allCustomers.filter((c) =>
       [c.first_name, c.last_name, c.email, c.phone_number]
         .filter(Boolean)
         .some((field: string) => field.toLowerCase().includes(q))
     )
-  }, [initialCustomers, searchQuery])
+  }, [allCustomers, searchQuery])
 
   return (
     <div className="space-y-6">
@@ -132,9 +162,19 @@ export function CustomerWorkspace({
       ) : (
         /* Standard Customer Management List View */
         <div className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold text-[var(--color-text)] mb-1">{title}</h2>
-            <p className="text-sm text-[var(--color-text-muted)]">{subtitle}</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[var(--color-text)] mb-1">{title}</h2>
+              <p className="text-sm text-[var(--color-text-muted)]">{subtitle}</p>
+            </div>
+            <Button
+              variant="primary"
+              onClick={() => setIsNewCustomerOpen(true)}
+              className="gap-2 shrink-0 font-semibold shadow-sm"
+            >
+              <span>+</span>
+              <span>Nouveau client</span>
+            </Button>
           </div>
 
           <div className="w-full">
@@ -156,10 +196,22 @@ export function CustomerWorkspace({
                   : "Gérez les profils clients, consultez leur solde de fidélité ou créez un nouveau profil."
               }
               onViewDetail={handleViewDetail}
+              onAddCustomer={() => setIsNewCustomerOpen(true)}
             />
           </Card>
         </div>
       )}
+
+      {/* Unified Customer Creation Modal (Same as Caisse) */}
+      <NewCustomerModal
+        isOpen={isNewCustomerOpen}
+        onClose={() => setIsNewCustomerOpen(false)}
+        onCustomerCreated={handleCustomerCreated}
+        onOpenExisting={(existingCustomer) => {
+          setIsNewCustomerOpen(false)
+          handleViewDetail(existingCustomer)
+        }}
+      />
     </div>
   )
 }
