@@ -26,3 +26,4 @@ coverage
 .idea
 *.tsbuildinfo
 create-vps-key.sh
+nginx
