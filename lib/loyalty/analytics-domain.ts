@@ -200,7 +200,7 @@ export function buildLiveOperations(
         "Caisse"
       : "Caisse";
 
-    const isRedeem = (t.points_redeemed || 0) > 0 && (Number(t.amount_total) || 0) === 0;
+    const isRedeem = (t.points_redeemed || 0) > 0;
     const tier = (custData?.status as any) || "BRONZE";
 
     const txDate = new Date(t.created_at);

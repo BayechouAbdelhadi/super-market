@@ -15,9 +15,12 @@ export async function POST(
     const cashierId = user?.id || null;
 
     const points = Number(body.points);
+    const amount = body.amount !== undefined && body.amount !== null
+      ? Math.max(0, Number(body.amount) || 0)
+      : 0;
     const reason = typeof body.reason === "string" ? body.reason : undefined;
 
-    const result = await redeemPoints(id, points, cashierId);
+    const result = await redeemPoints(id, points, cashierId, amount, reason);
 
     if (!result.success) {
       return NextResponse.json(

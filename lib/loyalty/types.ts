@@ -39,6 +39,7 @@ export interface PurchaseRecord {
   id: string;
   amount: number;
   points_earned: number;
+  points_redeemed?: number;
   transaction_date: string;
   created_by: string;
 }

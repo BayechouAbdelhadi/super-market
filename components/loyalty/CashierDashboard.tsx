@@ -272,7 +272,7 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
         onClose={() => setIsRedeemOpen(false)}
         onPointsRedeemed={(updatedCust) => {
           setSelectedCustomerDetail(updatedCust);
-          showToast("Points fidélité utilisés avec succès !");
+          showToast("Achat enregistré et points déduits avec succès !");
         }}
       />
     </div>

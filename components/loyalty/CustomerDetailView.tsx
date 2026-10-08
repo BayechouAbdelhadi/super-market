@@ -244,7 +244,7 @@ export function CustomerDetailView({
                     <tr className="border-b border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold uppercase tracking-wider">
                       <th className="pb-3">Date</th>
                       <th className="pb-3">Montant du ticket</th>
-                      <th className="pb-3">Points gagnés</th>
+                      <th className="pb-3">Points</th>
                       <th className="pb-3">Caissier</th>
                     </tr>
                   </thead>
@@ -260,6 +260,9 @@ export function CustomerDetailView({
                           minute: "2-digit",
                         },
                       );
+                      const isEarn = p.points_earned > 0;
+                      const isRedeem = (p.points_redeemed || 0) > 0;
+
                       return (
                         <tr key={p.id} className="hover:bg-[var(--color-surface-hover)] transition-colors">
                           <td className="py-3 font-mono text-[var(--color-text-muted)]">
@@ -273,9 +276,19 @@ export function CustomerDetailView({
                             €
                           </td>
                           <td className="py-3">
-                            <span className="inline-flex items-center gap-1 font-semibold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2.5 py-0.5 rounded-full text-xs">
-                              +{p.points_earned} points
-                            </span>
+                            {isEarn ? (
+                              <span className="inline-flex items-center gap-1 font-semibold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2.5 py-0.5 rounded-full text-xs">
+                                +{p.points_earned} points
+                              </span>
+                            ) : isRedeem ? (
+                              <span className="inline-flex items-center gap-1 font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 px-2.5 py-0.5 rounded-full text-xs">
+                                -{p.points_redeemed} points
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 font-medium text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] px-2.5 py-0.5 rounded-full text-xs">
+                                0 point
+                              </span>
+                            )}
                           </td>
                           <td className="py-3 text-[var(--color-text-muted)]">{p.created_by}</td>
                         </tr>

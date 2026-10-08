@@ -5,6 +5,7 @@ import {
   canRedeemPoints,
   applyPurchasePoints,
   applyRedeemPoints,
+  calculateRedemptionPointsEarned,
 } from "@/lib/loyalty/domain";
 
 describe("Règles métier de fidélité (§ 20)", () => {
@@ -89,6 +90,18 @@ describe("Règles métier de fidélité (§ 20)", () => {
       expect(result.historical_points).toBe(2450);
       // Statut reste toujours GOLD !
       expect(result.tier).toBe("GOLD");
+    });
+
+    it("ne crédite JAMAIS de points lors d'une utilisation (consommation du solde), même avec montant d'achat > 0", () => {
+      // Règle métier : le client consomme, il ne gagne aucun point lors d'une remise
+      expect(calculateRedemptionPointsEarned(0)).toBe(0);
+      expect(calculateRedemptionPointsEarned(15.5)).toBe(0);
+      expect(calculateRedemptionPointsEarned(120.0)).toBe(0);
+
+      const result = applyRedeemPoints(200, 1000, 50);
+      expect(result.points_earned).toBe(0);
+      expect(result.available_points).toBe(150);
+      expect(result.historical_points).toBe(1000);
     });
   });
 

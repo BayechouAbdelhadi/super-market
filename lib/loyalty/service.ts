@@ -18,6 +18,7 @@ import {
   canRedeemPoints,
   applyPurchasePoints,
   applyRedeemPoints,
+  calculateRedemptionPointsEarned,
 } from "./domain";
 
 export {
@@ -27,6 +28,7 @@ export {
   canRedeemPoints,
   applyPurchasePoints,
   applyRedeemPoints,
+  calculateRedemptionPointsEarned,
 };
 
 
@@ -127,21 +129,26 @@ export async function getCustomerDetail(customerId: string): Promise<CustomerDet
     updated_at: cust?.updated_at || profile.created_at,
     transactions: transactions || [],
     purchases: (transactions || [])
-      .filter((t: any) => Number(t.amount_total) > 0)
       .map((t: any) => ({
         id: t.id,
-        amount: Number(t.amount_total),
-        points_earned: t.points_earned,
+        amount: Number(t.amount_total) || 0,
+        points_earned: Number(t.points_earned) || 0,
+        points_redeemed: Number(t.points_redeemed) || 0,
         transaction_date: t.created_at,
         created_by: t.cashier_id ? `Caissier (${t.cashier_id.slice(0, 6)})` : "Caisse #1",
       })),
     movements: (transactions || []).map((t: any) => {
-      const isEarn = t.points_earned > 0;
+      const isEarn = (t.points_earned || 0) > 0;
+      const isRedeem = (t.points_redeemed || 0) > 0;
+      const amountTotal = Number(t.amount_total) || 0;
+      const defaultRedeemReason = amountTotal > 0
+        ? `Remise fidélité (Achat de ${amountTotal.toFixed(2)} €)`
+        : "Remise fidélité en caisse";
       return {
         id: t.id,
         type: isEarn ? "EARN" : "REDEEM",
         amount: isEarn ? t.points_earned : t.points_redeemed,
-        reason: isEarn ? `Achat de ${Number(t.amount_total).toFixed(2)} €` : "Remise fidélité en caisse",
+        reason: isEarn ? `Achat de ${amountTotal.toFixed(2)} €` : defaultRedeemReason,
         created_at: t.created_at,
         created_by: t.cashier_id ? `Caissier (${t.cashier_id.slice(0, 6)})` : "Caisse #1",
       };
@@ -334,7 +341,13 @@ export type RedeemPointsResult =
     }
   | { success: false; error: string; availablePoints?: number };
 
-export async function redeemPoints(customerId: string, pointsToRedeem: number, cashierId: string | null): Promise<RedeemPointsResult> {
+export async function redeemPoints(
+  customerId: string,
+  pointsToRedeem: number,
+  cashierId: string | null,
+  amount: number = 0,
+  reason?: string
+): Promise<RedeemPointsResult> {
   const sb = await getSupabase();
   const detailBefore = await getCustomerDetail(customerId);
   if (!detailBefore) return { success: false, error: "Client introuvable." };
@@ -353,13 +366,18 @@ export async function redeemPoints(customerId: string, pointsToRedeem: number, c
     activeCashierId = user?.id || null;
   }
 
+  const purchaseAmount = Math.max(0, isNaN(amount) ? 0 : Number(amount));
+
+  // Invariant: Points earned is strictly 0 when redeeming points even if purchaseAmount > 0
+  const pointsEarned = calculateRedemptionPointsEarned(purchaseAmount);
+
   const { data: tx, error } = await sb
     .from("transactions")
     .insert({
       customer_id: customerId,
       cashier_id: activeCashierId,
-      amount_total: 0,
-      points_earned: 0,
+      amount_total: purchaseAmount,
+      points_earned: pointsEarned,
       points_redeemed: pointsToRedeem
     })
     .select()
@@ -381,6 +399,12 @@ export async function redeemPoints(customerId: string, pointsToRedeem: number, c
     });
 
   const updatedDetail = await getCustomerDetail(customerId);
+  const movementReason = reason && reason.trim()
+    ? reason.trim()
+    : purchaseAmount > 0
+      ? `Remise fidélité (Achat de ${purchaseAmount.toFixed(2)} €)`
+      : "Remise fidélité en caisse";
+
   return { 
     success: true, 
     transaction: tx, 
@@ -389,7 +413,7 @@ export async function redeemPoints(customerId: string, pointsToRedeem: number, c
       type: "REDEEM",
       points: -pointsToRedeem,
       balance_after: newAvailablePoints,
-      reason: "Remise fidélité en caisse",
+      reason: movementReason,
       created_at: tx.created_at
     },
     customer: updatedDetail! 

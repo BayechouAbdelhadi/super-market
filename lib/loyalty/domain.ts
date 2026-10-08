@@ -60,8 +60,18 @@ export function applyPurchasePoints(
 }
 
 /**
+ * Calculates points earned during a redemption transaction.
+ * Pure business rule: When redeeming points, the customer is consuming rewards,
+ * so points earned is ALWAYS strictly 0, regardless of the purchase amount (even if > 0).
+ */
+export function calculateRedemptionPointsEarned(_purchaseAmount: number): number {
+  return 0;
+}
+
+/**
  * Pure calculation for redeeming points
- * Note: Historical points and tier NEVER decrease when points are spent!
+ * Note: Historical points and tier NEVER change when points are spent!
+ * Points earned is strictly 0 because the customer is consuming rewards.
  */
 export function applyRedeemPoints(
   availablePoints: number,
@@ -75,6 +85,7 @@ export function applyRedeemPoints(
     available_points: availablePoints - pointsToRedeem,
     historical_points: historicalPoints,
     tier: calculateTier(historicalPoints),
+    points_earned: 0,
   };
 }
 
