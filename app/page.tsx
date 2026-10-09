@@ -181,6 +181,47 @@ export default function Home() {
 
       {/* Main Scrollable Viewport Container (§ 25.1) */}
       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+        {/* Full-width 100% Super Market Calais Storefront Banner on Top of the Site */}
+        <section className="w-full relative shrink-0 aspect-[16/7] sm:aspect-[21/8] md:aspect-[24/8] max-h-[460px] min-h-[220px] bg-neutral-900 border-b border-[var(--color-border)] overflow-hidden group">
+          <Image
+            src="/super-market-calais-enhanced.jpg"
+            alt="Super Market Calais — Magasin & Devanture au 205 Avenue Antoine de Saint-Exupéry"
+            fill
+            priority
+            className="object-cover object-center group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10 flex flex-col justify-end p-4 sm:p-8 md:p-10 text-white">
+            <div className="max-w-6xl mx-auto w-full space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-xs font-bold text-white w-fit shadow-sm">
+                <Store className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                <span>Super Market Calais • 205 Avenue Antoine de Saint-Exupéry</span>
+              </div>
+              <h2 className="text-xl sm:text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-md">
+                Votre magasin de proximité &amp; primeur frais à Calais
+              </h2>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-neutral-200 font-medium pt-1">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>Ouvert 7j/7</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>Surface +300 m²</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>Primeur &amp; Dépôt de pain</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>Relais Pickup La Poste</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-10 sm:py-16 max-w-6xl mx-auto w-full space-y-16">
         {/* 1. Hero Section */}
         <section className="space-y-6 max-w-3xl mx-auto text-center pt-2">
@@ -248,6 +289,7 @@ export default function Home() {
             </Link>
           </div>
         </section>
+
 
         {/* 2. Calais Store Identity & Location Highlight Cards */}
         <section className="w-full space-y-6">
