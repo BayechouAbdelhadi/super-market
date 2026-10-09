@@ -13,6 +13,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 
 export interface CashierDashboardProps {
@@ -22,6 +23,7 @@ export interface CashierDashboardProps {
 export function CashierDashboard({ standalone = false }: CashierDashboardProps) {
   const [cashier, setCashier] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, LOYALTY_CONFIG.search.debounceMs);
   const [customers, setCustomers] = useState<CustomerSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
@@ -72,38 +74,49 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
     loadCashier();
   }, []);
 
-  // Search effect: ONLY fetch and show results when a search term is entered
+  // Search effect: executes ONLY when debouncedSearchQuery changes with AbortController
   useEffect(() => {
-    const trimmed = searchQuery.trim();
+    const trimmed = debouncedSearchQuery.trim();
     if (!trimmed) {
       setCustomers([]);
       setLoading(false);
       return;
     }
 
-    let isCancelled = false;
+    const abortController = new AbortController();
     setLoading(true);
-    const timer = setTimeout(async () => {
+
+    async function fetchCustomers() {
       try {
-        const res = await fetch(`/api/loyalty/customers?q=${encodeURIComponent(trimmed)}`);
-        const data = await res.json();
-        if (!isCancelled && data.customers) {
-          startTransition(() => {
-            setCustomers(data.customers);
-          });
+        const res = await fetch(
+          `/api/loyalty/customers?q=${encodeURIComponent(trimmed)}`,
+          { signal: abortController.signal }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.customers) {
+            startTransition(() => {
+              setCustomers(data.customers);
+            });
+          }
         }
-      } catch (err) {
-        console.error("Erreur recherche clients :", err);
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          console.error("Erreur recherche clients :", err);
+        }
       } finally {
-        if (!isCancelled) setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
-    }, 150);
+    }
+
+    fetchCustomers();
 
     return () => {
-      isCancelled = true;
-      clearTimeout(timer);
+      abortController.abort();
     };
-  }, [searchQuery]);
+  }, [debouncedSearchQuery]);
 
   // Load customer detail
   async function loadCustomerDetail(customerId: string) {
@@ -169,7 +182,7 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
             <SearchBar
               query={searchQuery}
               onChange={setSearchQuery}
-              loading={loading}
+              loading={loading || (searchQuery.trim() !== "" && searchQuery !== debouncedSearchQuery)}
               onOpenNewCustomer={() => setIsNewCustomerOpen(true)}
             />
           </Card>
@@ -206,13 +219,13 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
               <>
                 <div className="flex items-center justify-between text-xs px-1 text-[var(--color-text-muted)]">
                   <span>
-                    {loading
+                    {loading || searchQuery !== debouncedSearchQuery
                       ? "Recherche en cours..."
-                      : `${customers.length} résultat(s) pour « ${searchQuery} »`}
+                      : `${customers.length} résultat(s) pour « ${debouncedSearchQuery || searchQuery} »`}
                   </span>
                 </div>
 
-                {loading ? (
+                {loading || searchQuery !== debouncedSearchQuery ? (
                   <div className="grid grid-cols-1 gap-3">
                     {[1, 2, 3].map((i) => (
                       <div

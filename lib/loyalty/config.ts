@@ -48,4 +48,8 @@ export const LOYALTY_CONFIG = {
     cashierName: "Caisse #1",
     redeemReason: "Remise fidélité en caisse",
   },
+  search: {
+    debounceMs: 300,
+    minQueryLength: 1,
+  },
 } as const;

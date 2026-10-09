@@ -4,12 +4,21 @@ import { Button } from "@/components/ui/button";
 
 interface SearchBarProps {
   query: string;
-  onChange: (query: string) => void;
+  onChange?: (query: string) => void;
+  onDebouncedChange?: (query: string) => void;
+  debounceMs?: number;
   onOpenNewCustomer: () => void;
   loading?: boolean;
 }
 
-export function SearchBar({ query, onChange, onOpenNewCustomer, loading = false }: SearchBarProps) {
+export function SearchBar({
+  query,
+  onChange,
+  onDebouncedChange,
+  debounceMs,
+  onOpenNewCustomer,
+  loading = false,
+}: SearchBarProps) {
   return (
     <div className="w-full">
       {/* Central action bar */}
@@ -18,6 +27,8 @@ export function SearchBar({ query, onChange, onOpenNewCustomer, loading = false 
           <SearchInput
             value={query}
             onChange={onChange}
+            onDebouncedChange={onDebouncedChange}
+            debounceMs={debounceMs}
             loading={loading}
             placeholder="Nom, prénom, téléphone ou email..."
             autoFocus
