@@ -179,6 +179,7 @@ export function LiveOperationsFeed({ operations }: LiveOperationsFeedProps) {
               onPageChange={setPage}
               onPageSizeChange={setPageSize}
               pageSizeOptions={[5, 10, 25]}
+              alwaysShow={true}
             />
           </div>
         )}

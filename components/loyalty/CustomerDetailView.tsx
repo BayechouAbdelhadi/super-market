@@ -330,6 +330,7 @@ export function CustomerDetailView({
                   onPageChange={setPurchasesPage}
                   onPageSizeChange={setPurchasesPageSize}
                   pageSizeOptions={[5, 10, 20, 50]}
+                  alwaysShow={true}
                 />
               </>
             )}
@@ -413,6 +414,7 @@ export function CustomerDetailView({
                   onPageChange={setMovementsPage}
                   onPageSizeChange={setMovementsPageSize}
                   pageSizeOptions={[5, 10, 20, 50]}
+                  alwaysShow={true}
                 />
               </>
             )}

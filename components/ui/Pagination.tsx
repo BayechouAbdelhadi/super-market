@@ -59,7 +59,7 @@ export function Pagination({
   onPageSizeChange,
   pageSizeOptions = [10, 25, 50, 100],
   showTotal = true,
-  alwaysShow = false,
+  alwaysShow = true,
 }: PaginationProps) {
   if (!alwaysShow && totalPages <= 1 && totalItems <= Math.min(...pageSizeOptions)) return null;
 
@@ -111,52 +111,58 @@ export function Pagination({
       </div>
 
       {/* Right — page controls */}
-      {totalPages > 1 && (
-        <div className="flex items-center gap-1">
-          {/* Previous */}
-          <button
-            onClick={() => onPageChange(page - 1)}
-            disabled={page <= 1}
-            className={page <= 1 ? btnDisabled : btnDefault}
-            aria-label="Page précédente"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+      <div className="flex items-center gap-1">
+        {totalPages > 1 ? (
+          <>
+            {/* Previous */}
+            <button
+              onClick={() => onPageChange(page - 1)}
+              disabled={page <= 1}
+              className={page <= 1 ? btnDisabled : btnDefault}
+              aria-label="Page précédente"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
 
-          {/* Page numbers */}
-          {pages.map((p, i) =>
-            p === "…" ? (
-              <span key={`ellipsis-${i}`} className="px-1 text-[var(--color-text-muted)] text-sm select-none">
-                …
-              </span>
-            ) : (
-              <button
-                key={p}
-                onClick={() => onPageChange(p as number)}
-                className={p === page ? btnActive : btnDefault}
-                aria-label={`Page ${p}`}
-                aria-current={p === page ? "page" : undefined}
-              >
-                {p}
-              </button>
-            )
-          )}
+            {/* Page numbers */}
+            {pages.map((p, i) =>
+              p === "…" ? (
+                <span key={`ellipsis-${i}`} className="px-1 text-[var(--color-text-muted)] text-sm select-none">
+                  …
+                </span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => onPageChange(p as number)}
+                  className={p === page ? btnActive : btnDefault}
+                  aria-label={`Page ${p}`}
+                  aria-current={p === page ? "page" : undefined}
+                >
+                  {p}
+                </button>
+              )
+            )}
 
-          {/* Next */}
-          <button
-            onClick={() => onPageChange(page + 1)}
-            disabled={page >= totalPages}
-            className={page >= totalPages ? btnDisabled : btnDefault}
-            aria-label="Page suivante"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-      )}
+            {/* Next */}
+            <button
+              onClick={() => onPageChange(page + 1)}
+              disabled={page >= totalPages}
+              className={page >= totalPages ? btnDisabled : btnDefault}
+              aria-label="Page suivante"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        ) : alwaysShow && totalItems > 0 ? (
+          <span className="text-xs px-2.5 py-1 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium">
+            Page 1 / 1
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }

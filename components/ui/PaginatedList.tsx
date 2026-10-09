@@ -21,6 +21,8 @@ export interface PaginatedListProps<T> {
   showPageSizePicker?: boolean;
   /** Class applied to the list container */
   listClassName?: string;
+  /** Always show pagination even on single page. Default true. */
+  alwaysShow?: boolean;
 }
 
 /**
@@ -43,6 +45,7 @@ export function PaginatedList<T>({
   pageSizeOptions = [10, 25, 50],
   showPageSizePicker = true,
   listClassName = "space-y-3",
+  alwaysShow = true,
 }: PaginatedListProps<T>) {
   const {
     paginatedItems,
@@ -53,6 +56,15 @@ export function PaginatedList<T>({
     setPage,
     setPageSize,
   } = usePagination(items, { defaultPageSize });
+
+  // Reset to page 1 when items array reference or query result changes
+  const prevItemsRef = React.useRef(items);
+  React.useEffect(() => {
+    if (prevItemsRef.current !== items) {
+      prevItemsRef.current = items;
+      setPage(1);
+    }
+  }, [items, setPage]);
 
   if (items.length === 0) {
     return (
@@ -84,6 +96,7 @@ export function PaginatedList<T>({
         onPageChange={setPage}
         onPageSizeChange={showPageSizePicker ? setPageSize : undefined}
         pageSizeOptions={pageSizeOptions}
+        alwaysShow={alwaysShow}
       />
     </div>
   );

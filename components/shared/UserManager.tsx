@@ -8,6 +8,7 @@ import { PaginatedList } from '@/components/ui/PaginatedList'
 import { StatusBadge } from '@/components/loyalty/StatusBadge'
 import { NewCustomerModal } from '@/components/loyalty/NewCustomerModal'
 import { createUser, editUser } from '@/app/admin/actions'
+import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
 
 interface UserManagerProps {
   initialUsers: any[];
@@ -16,9 +17,22 @@ interface UserManagerProps {
   description: string;
   onViewDetail?: (user: any) => void;
   onAddCustomer?: () => void;
+  defaultPageSize?: number;
+  pageSizeOptions?: number[];
+  alwaysShowPagination?: boolean;
 }
 
-export function UserManager({ initialUsers, roleToManage, title: _title, description, onViewDetail, onAddCustomer }: UserManagerProps) {
+export function UserManager({
+  initialUsers,
+  roleToManage,
+  title: _title,
+  description,
+  onViewDetail,
+  onAddCustomer,
+  defaultPageSize = LOYALTY_CONFIG.pagination.tablePageSize,
+  pageSizeOptions = [5, 10, 20, 50],
+  alwaysShowPagination = true,
+}: UserManagerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<any>(null)
@@ -93,8 +107,9 @@ export function UserManager({ initialUsers, roleToManage, title: _title, descrip
       <PaginatedList
         items={initialUsers}
         keyExtractor={(u) => u.id}
-        defaultPageSize={8}
-        pageSizeOptions={[8, 20, 50]}
+        defaultPageSize={defaultPageSize}
+        pageSizeOptions={pageSizeOptions}
+        alwaysShow={alwaysShowPagination}
         renderItem={(u) => {
           const tier = u.status || 'BRONZE';
           const points = u.loyalty_points ?? 0;

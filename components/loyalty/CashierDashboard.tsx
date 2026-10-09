@@ -235,6 +235,7 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
                       onPageChange={setCustomerPage}
                       onPageSizeChange={setCustomerPageSize}
                       pageSizeOptions={[5, 10, 20]}
+                      alwaysShow={true}
                     />
                   </div>
                 ) : (

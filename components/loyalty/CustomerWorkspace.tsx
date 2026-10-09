@@ -10,19 +10,25 @@ import { AddPurchaseModal } from '@/components/loyalty/AddPurchaseModal'
 import { RedeemPointsModal } from '@/components/loyalty/RedeemPointsModal'
 import { NewCustomerModal } from '@/components/loyalty/NewCustomerModal'
 import { CustomerDetail } from '@/lib/loyalty/types'
+import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
 
 interface CustomerWorkspaceProps {
   initialCustomers?: any[]
   title?: string
   subtitle?: string
+  initialPage?: number
+  initialLimit?: number
+  initialQuery?: string
 }
 
 export function CustomerWorkspace({
   initialCustomers = [],
   title = "Gestion des Clients",
-  subtitle = "Consultez, modifiez et gérez l'ensemble des profils clients de votre magasin."
+  subtitle = "Consultez, modifiez et gérez l'ensemble des profils clients de votre magasin.",
+  initialLimit,
+  initialQuery = "",
 }: CustomerWorkspaceProps) {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [createdCustomers, setCreatedCustomers] = useState<any[]>([])
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
   const [selectedCustomerDetail, setSelectedCustomerDetail] = useState<CustomerDetail | null>(null)
@@ -193,10 +199,13 @@ export function CustomerWorkspace({
               description={
                 searchQuery
                   ? `${filteredCustomers.length} résultat(s) pour « ${searchQuery} »`
-                  : "Gérez les profils clients, consultez leur solde de fidélité ou créez un nouveau profil."
+                  : `${filteredCustomers.length} profil(s) client(s) au total dans votre établissement.`
               }
               onViewDetail={handleViewDetail}
               onAddCustomer={() => setIsNewCustomerOpen(true)}
+              defaultPageSize={initialLimit || LOYALTY_CONFIG.pagination.tablePageSize}
+              pageSizeOptions={[5, 10, 20, 50]}
+              alwaysShowPagination={true}
             />
           </Card>
         </div>

@@ -5,9 +5,18 @@ import { ProfileWithCustomerRow } from '@/lib/loyalty/types'
 interface CustomersListProps {
   title?: string
   subtitle?: string
+  initialPage?: number
+  initialLimit?: number
+  initialQuery?: string
 }
 
-export async function CustomersList({ title, subtitle }: CustomersListProps = {}) {
+export async function CustomersList({
+  title,
+  subtitle,
+  initialPage,
+  initialLimit,
+  initialQuery,
+}: CustomersListProps = {}) {
   const supabase = await createClient()
   const { data: profiles } = await supabase
     .from('profiles')
@@ -28,5 +37,14 @@ export async function CustomersList({ title, subtitle }: CustomersListProps = {}
     };
   });
 
-  return <CustomerWorkspace initialCustomers={customers} title={title} subtitle={subtitle} />
+  return (
+    <CustomerWorkspace
+      initialCustomers={customers}
+      title={title}
+      subtitle={subtitle}
+      initialPage={initialPage}
+      initialLimit={initialLimit}
+      initialQuery={initialQuery}
+    />
+  )
 }
