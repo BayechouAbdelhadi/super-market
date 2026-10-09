@@ -34,7 +34,7 @@ export async function updateSession(request: NextRequest) {
     console.error(`[Middleware] Supabase Auth Error on ${request.nextUrl.pathname}:`, userError.message)
   }
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login')
+  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup')
   const isAccountRoute = request.nextUrl.pathname === '/account' || request.nextUrl.pathname.startsWith('/account/')
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
   const isCashierRoute = request.nextUrl.pathname.startsWith('/cashier')
@@ -63,41 +63,50 @@ export async function updateSession(request: NextRequest) {
   if (user) {
     const role = user.user_metadata?.role || 'CUSTOMER'
     
-    // Redirect authenticated users from login / account to their appropriate dashboard
-    if (isAuthRoute || isAccountRoute) {
+    // Redirect authenticated users from login / signup to their appropriate dashboard
+    if (isAuthRoute) {
       if (role === 'ADMIN') {
         const url = request.nextUrl.clone()
         url.pathname = '/admin'
-        console.log(`[Middleware] Authenticated ADMIN -> Redirecting to /admin`)
         return NextResponse.redirect(url)
       }
       if (role === 'CASHIER') {
         const url = request.nextUrl.clone()
         url.pathname = '/cashier'
-        console.log(`[Middleware] Authenticated CASHIER -> Redirecting to /cashier`)
         return NextResponse.redirect(url)
       }
-      if (isAccountRoute) {
+      if (role === 'CUSTOMER') {
         const url = request.nextUrl.clone()
-        url.pathname = '/login'
+        url.pathname = '/account'
         return NextResponse.redirect(url)
       }
-      // CUSTOMER role is allowed to stay on /login so they can log in
+    }
+
+    if (isAccountRoute) {
+      if (role === 'ADMIN') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/admin'
+        return NextResponse.redirect(url)
+      }
+      if (role === 'CASHIER') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/cashier'
+        return NextResponse.redirect(url)
+      }
+      // CUSTOMER is allowed to access /account
     }
 
     // Protect Admin routes — only ADMIN can access
     if (isAdminRoute && role !== 'ADMIN') {
       const url = request.nextUrl.clone()
-      url.pathname = role === 'CASHIER' ? '/cashier' : '/login'
-      console.warn(`[Middleware] User (${role}) attempted to access ADMIN route ${request.nextUrl.pathname} -> Redirecting to ${url.pathname}`)
+      url.pathname = role === 'CASHIER' ? '/cashier' : '/account'
       return NextResponse.redirect(url)
     }
 
     // Protect Cashier/Staff routes — only CASHIER and ADMIN can access
     if (isStaffRoute && role !== 'CASHIER' && role !== 'ADMIN') {
-      console.warn(`[Middleware] User (${role}) attempted to access staff route ${request.nextUrl.pathname} -> Redirecting to /login`)
       const url = request.nextUrl.clone()
-      url.pathname = '/login'
+      url.pathname = '/account'
       return NextResponse.redirect(url)
     }
   }
