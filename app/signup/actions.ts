@@ -24,7 +24,7 @@ export async function signup(formData: FormData) {
 
   const parseResult = SignUpSchema.safeParse(rawData)
   if (!parseResult.success) {
-    const errorMsg = parseResult.error.errors[0]?.message || "Données invalides."
+    const errorMsg = parseResult.error.issues?.[0]?.message || "Données invalides."
     redirect(`/signup?message=${encodeURIComponent(errorMsg)}`)
   }
 
