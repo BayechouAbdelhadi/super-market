@@ -115,19 +115,19 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4">
           {/* Logo & Brand */}
           <div className="flex items-center gap-3.5">
-            <div className="h-11 w-11 rounded-[var(--radius-button,12px)] bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center p-1 shadow-[0_2px_8px_rgba(0,0,0,0.06)] overflow-hidden shrink-0">
+            <div className="h-14 w-14 sm:h-15 sm:w-15 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center p-0.5 shadow-md overflow-hidden shrink-0">
               <Image
-                src="/logo.jpeg"
+                src="/logo-hq.png"
                 alt="SuperMarket Calais Logo"
-                width={40}
-                height={40}
+                width={60}
+                height={60}
                 priority
-                className="h-full w-full object-cover rounded-[calc(var(--radius-button,12px)-4px)]"
+                className="h-full w-full object-contain"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg tracking-tight text-[var(--color-text)]">
+                <span className="font-black text-xl tracking-tight text-[var(--color-text)]">
                   Super Market
                 </span>
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
@@ -685,8 +685,8 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-[var(--color-border)]">
             <div className="flex items-center gap-3.5">
-              <div className="h-9 w-9 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-center p-1 overflow-hidden shrink-0">
-                <Image src="/logo.jpeg" alt="Logo SuperMarket" width={32} height={32} className="h-full w-full object-cover rounded-lg" />
+              <div className="h-12 w-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center p-0.5 shadow-xs overflow-hidden shrink-0">
+                <Image src="/logo-hq.png" alt="Logo SuperMarket" width={48} height={48} className="h-full w-full object-contain" />
               </div>
               <div>
                 <span className="font-extrabold text-sm text-[var(--color-text)]">

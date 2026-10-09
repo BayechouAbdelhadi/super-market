@@ -239,14 +239,14 @@ export function Sidebar({ role, email }: SidebarProps) {
       {/* 1. Mobile Top Bar */}
       <header className="relative md:hidden flex items-center justify-between bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 h-14 shrink-0 z-40">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-xs">
+          <div className="h-9 w-9 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-xs">
             <Image
-              src="/logo.jpeg"
+              src="/logo-hq.png"
               alt="SuperMarket Logo"
-              width={32}
-              height={32}
+              width={36}
+              height={36}
               priority
-              className="h-full w-full object-cover rounded-[calc(var(--radius-button,12px)-4px)]"
+              className="h-full w-full object-contain"
             />
           </div>
           <span className="text-base font-black text-[var(--color-text)] tracking-tight">
@@ -285,14 +285,14 @@ export function Sidebar({ role, email }: SidebarProps) {
           className={`h-16 flex items-center ${isCollapsed ? "justify-center" : "justify-between px-4"} border-b border-[var(--color-border)] shrink-0`}
         >
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="h-9 w-9 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-xs">
+            <div className="h-10 w-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-xs">
               <Image
-                src="/logo.jpeg"
+                src="/logo-hq.png"
                 alt="SuperMarket Logo"
-                width={36}
-                height={36}
+                width={40}
+                height={40}
                 priority
-                className="h-full w-full object-cover rounded-[calc(var(--radius-button,12px)-4px)]"
+                className="h-full w-full object-contain"
               />
             </div>
             {!isCollapsed && (

@@ -18,14 +18,14 @@ export default async function LoginPage({
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center justify-center mb-1 group">
-            <div className="h-14 w-14 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] p-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.06)] group-hover:scale-105 transition-transform overflow-hidden">
+            <div className="h-20 w-20 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] p-1 shadow-[0_6px_24px_rgba(0,0,0,0.08)] group-hover:scale-105 transition-transform overflow-hidden flex items-center justify-center">
               <Image
-                src="/logo.jpeg"
+                src="/logo-hq.png"
                 alt="SuperMarket Logo"
-                width={48}
-                height={48}
+                width={80}
+                height={80}
                 priority
-                className="h-full w-full object-cover rounded-xl"
+                className="h-full w-full object-contain"
               />
             </div>
           </Link>
