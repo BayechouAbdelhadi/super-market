@@ -21,12 +21,14 @@ export async function login(formData: FormData) {
 
   const role = authData.user?.user_metadata?.role || 'CUSTOMER'
 
-  if (role !== 'ADMIN' && role !== 'CASHIER') {
-    await supabase.auth.signOut()
-    redirect('/login?message=Identifiants invalides ou compte non autorisé')
+  let redirectPath: string
+  if (role === 'ADMIN') {
+    redirectPath = '/admin'
+  } else if (role === 'CASHIER') {
+    redirectPath = '/cashier'
+  } else {
+    redirectPath = '/account'
   }
-
-  const redirectPath = role === 'ADMIN' ? '/admin' : '/cashier'
 
   revalidatePath(redirectPath, 'layout')
   redirect(redirectPath)

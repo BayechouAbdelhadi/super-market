@@ -1,17 +1,17 @@
-import { login } from './actions'
+import { signup } from './actions'
 import Image from 'next/image'
 import Link from 'next/link'
-import { LoginSubmitButton } from '@/components/auth/LoginSubmitButton'
+import { SignUpSubmitButton } from '@/components/auth/SignUpSubmitButton'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 
-export default async function LoginPage({
+export default async function SignUpPage({
   searchParams,
 }: {
-  searchParams: Promise<{ message?: string; success?: string }>
+  searchParams: Promise<{ message?: string }>
 }) {
   const params = await searchParams
-  
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-background)] p-4 sm:p-6 font-sans">
       <div className="w-full max-w-md space-y-6">
@@ -31,25 +31,57 @@ export default async function LoginPage({
           </Link>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
-            Votre compte
+            Créer votre compte
           </h1>
           <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-            Connectez-vous pour accéder à votre espace
+            Rejoignez le programme fidélité Super Market Calais et cumulez des points
           </p>
         </div>
-        
-        {/* Login Form Card */}
+
+        {/* Signup Form Card */}
         <Card className="p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-[var(--color-border)]">
-          <form action={login} className="space-y-5">
+          <form action={signup} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                id="first_name"
+                name="first_name"
+                type="text"
+                label="Prénom"
+                placeholder="Jean"
+                required
+                className="h-11"
+              />
+              <Input
+                id="last_name"
+                name="last_name"
+                type="text"
+                label="Nom"
+                placeholder="Dupont"
+                required
+                className="h-11"
+              />
+            </div>
+
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              label="Numéro de téléphone"
+              placeholder="06 12 34 56 78"
+              required
+              className="h-11"
+            />
+
             <Input
               id="email"
               name="email"
               type="email"
               label="Adresse email"
-              placeholder="admin@supermarket.local"
+              placeholder="jean.dupont@example.com"
               required
               className="h-11"
             />
+
             <Input
               id="password"
               name="password"
@@ -59,29 +91,23 @@ export default async function LoginPage({
               required
               className="h-11"
             />
-            
-            {params?.success && (
-              <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 text-center bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-[var(--radius-button,12px)]">
-                {params.success}
-              </div>
-            )}
 
             {params?.message && (
               <div className="text-xs font-semibold text-rose-700 dark:text-rose-300 text-center bg-rose-500/10 border border-rose-500/20 p-3 rounded-[var(--radius-button,12px)]">
                 {params.message}
               </div>
             )}
-            
-            <LoginSubmitButton />
+
+            <SignUpSubmitButton />
 
             <div className="pt-2 text-center border-t border-[var(--color-border)]">
               <p className="text-xs text-[var(--color-text-muted)]">
-                Pas encore de compte client ?{" "}
+                Déjà un compte ?{" "}
                 <Link
-                  href="/signup"
+                  href="/login"
                   className="font-bold text-[var(--color-primary)] hover:underline ml-1"
                 >
-                  Créer un compte
+                  Se connecter
                 </Link>
               </p>
             </div>
