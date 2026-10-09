@@ -14,7 +14,7 @@ export function LoginSubmitButton() {
       loading={pending}
       className="w-full font-bold shadow-[0_4px_14px_rgba(255,56,92,0.3)]"
     >
-      {pending ? "Connexion en cours..." : "Se connecter au terminal"}
+      {pending ? "Connexion en cours..." : "Se connecter"}
     </Button>
   )
 }

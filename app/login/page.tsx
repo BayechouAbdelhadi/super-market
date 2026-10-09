@@ -31,10 +31,10 @@ export default async function LoginPage({
           </Link>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
-            Espace SuperMarket
+            Votre compte
           </h1>
           <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-            Accédez à la gestion de caisse et au programme fidélité
+            Connectez-vous pour accéder à votre espace
           </p>
         </div>
         

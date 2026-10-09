@@ -35,6 +35,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login')
+  const isAccountRoute = request.nextUrl.pathname === '/account' || request.nextUrl.pathname.startsWith('/account/')
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
   const isCashierRoute = request.nextUrl.pathname.startsWith('/cashier')
   const isLoyaltyRoute = request.nextUrl.pathname.startsWith('/loyalty')
@@ -52,7 +53,7 @@ export async function updateSession(request: NextRequest) {
 
   const isStaffRoute = isAdminRoute || isCashierRoute || isLoyaltyRoute || isCustomersRoute
 
-  if (!user && isStaffRoute) {
+  if (!user && (isStaffRoute || isAccountRoute)) {
     console.log(`[Middleware] Blocked unauthenticated access to ${request.nextUrl.pathname} -> Redirecting to /login`)
     const url = request.nextUrl.clone()
     url.pathname = '/login'
@@ -62,21 +63,26 @@ export async function updateSession(request: NextRequest) {
   if (user) {
     const role = user.user_metadata?.role || 'CUSTOMER'
     
-    // Redirect authenticated staff users away from login
-    if (isAuthRoute) {
+    // Redirect authenticated users from login / account to their appropriate dashboard
+    if (isAuthRoute || isAccountRoute) {
       if (role === 'ADMIN') {
         const url = request.nextUrl.clone()
         url.pathname = '/admin'
-        console.log(`[Middleware] Authenticated ADMIN trying to access login -> Redirecting to /admin`)
+        console.log(`[Middleware] Authenticated ADMIN -> Redirecting to /admin`)
         return NextResponse.redirect(url)
       }
       if (role === 'CASHIER') {
         const url = request.nextUrl.clone()
         url.pathname = '/cashier'
-        console.log(`[Middleware] Authenticated CASHIER trying to access login -> Redirecting to /cashier`)
+        console.log(`[Middleware] Authenticated CASHIER -> Redirecting to /cashier`)
         return NextResponse.redirect(url)
       }
-      // CUSTOMER role is allowed to stay on /login so they can log in as staff
+      if (isAccountRoute) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        return NextResponse.redirect(url)
+      }
+      // CUSTOMER role is allowed to stay on /login so they can log in
     }
 
     // Protect Admin routes — only ADMIN can access

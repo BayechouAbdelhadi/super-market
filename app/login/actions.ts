@@ -23,7 +23,7 @@ export async function login(formData: FormData) {
 
   if (role !== 'ADMIN' && role !== 'CASHIER') {
     await supabase.auth.signOut()
-    redirect('/login?message=Accès réservé au personnel du magasin')
+    redirect('/login?message=Identifiants invalides ou compte non autorisé')
   }
 
   const redirectPath = role === 'ADMIN' ? '/admin' : '/cashier'
