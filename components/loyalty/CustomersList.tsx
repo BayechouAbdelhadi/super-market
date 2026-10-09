@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { CustomerWorkspace } from '@/components/loyalty/CustomerWorkspace'
+import { ProfileWithCustomerRow } from '@/lib/loyalty/types'
 
 interface CustomersListProps {
   title?: string
@@ -16,8 +17,9 @@ export async function CustomersList({ title, subtitle }: CustomersListProps = {}
     `)
     .eq('role', 'CUSTOMER')
     .order('created_at', { ascending: false })
+    .limit(100)
 
-  const customers = (profiles || []).map((p: any) => {
+  const customers = (profiles || []).map((p: ProfileWithCustomerRow) => {
     const cust = Array.isArray(p.customers) ? p.customers[0] : p.customers;
     return {
       ...p,

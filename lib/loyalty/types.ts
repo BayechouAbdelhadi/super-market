@@ -47,10 +47,30 @@ export interface PurchaseRecord {
 export interface MovementRecord {
   id: string;
   type: "EARN" | "REDEEM" | string;
-  amount: number;
+  amount?: number;
+  points?: number;
+  balance_after?: number;
   reason?: string;
   created_at: string;
-  created_by: string;
+  created_by?: string;
+}
+
+export interface CreateCustomerInput {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+}
+
+export interface ProfileWithCustomerRow {
+  id: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  phone_number?: string | null;
+  created_at?: string;
+  role?: UserRole | null;
+  customers?: { loyalty_points: number; status: string; updated_at?: string } | Array<{ loyalty_points: number; status: string; updated_at?: string }> | null;
 }
 
 export interface CustomerDetail extends CustomerSummary {

@@ -33,6 +33,26 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **Standardized Error Handling**: The domain layer should return structured errors (or Use Case responses), and the Next.js layer should translate these into appropriate HTTP status codes and user-friendly messages.
 - **Testability**: Domain logic and adapters must be entirely decoupled, ensuring they are independently testable using unit tests (e.g., Vitest).
 
+## 5. Security & Access Control (Strict RBAC & Validation)
+- **Mandatory Route & Action Authentication**: Every API Route (`/api/*`) and Server Action that accesses or mutates data MUST verify the session using `supabase.auth.getUser()`. Unauthenticated requests MUST return `401 Unauthorized`.
+- **Strict Role-Based Authorization (RBAC)**: Check caller's role (`ADMIN`, `CASHIER`, `CUSTOMER`). Admin routes (e.g. analytics, user management) strictly require `ADMIN`. Loyalty operations strictly require `CASHIER` or `ADMIN`.
+- **Schema Validation with Zod**: Every API route and Server Action handling request bodies MUST validate payloads with Zod schemas before passing them to the service/domain layer. Reject invalid payloads with `400 Bad Request`.
+- **Cryptographic Security**: Never use pseudo-random generators (e.g., `Math.random()`) for credentials, tokens, or temporary passwords. Use Node.js `crypto.randomBytes` or secure auth invitation flows.
+
+## 6. Memory Management, Scalability & Query Performance
+- **Zero Unbounded Queries**: Never query the database without limits or date boundaries (e.g. `sb.from('transactions').select('*')` without filter or limit is strictly FORBIDDEN).
+- **Database-Side Aggregations**: Always offload metric calculations (revenue, transaction counts, sums) to the database using SQL filters (`created_at >= startOfDay`), Supabase exact counts (`{ count: 'exact', head: true }`), or RPC functions. NEVER load all records into Node.js heap memory to iterate in JavaScript loops.
+- **Pagination by Default**: All list endpoints and views (transactions, customer histories, operations) must support pagination (`limit`, `offset` / cursor).
+
+## 7. Centralized Configuration Architecture
+- **Zero Magic Numbers / Hardcoded Constants**: Business constants (points-per-euro ratios, tier thresholds, quick-action amount and point presets, default cashier names) must be declared in a central configuration module (`lib/loyalty/config.ts`).
+- **Configurable Presets**: UI modals and domain logic must import and consume configuration tokens rather than embedding raw literal values in JSX or business functions.
+
+## 8. Anti-Patterns & Code Deduplication
+- **Clean Environment Separation**: Never dynamically import server clients inside catch blocks or import browser singletons (`@/lib/supabase/client`) in Server Actions or backend services.
+- **Single Source of Truth for Components**: Avoid duplicate screens or parallel management components (e.g. do not maintain both `CashierManager` and `UserManager`). Reusable shared components must serve both admin and cashier roles cleanly.
+- **No Dead Code**: Remove unused, deprecated, or superseded components and imports promptly.
+
 
 # UI / UX DESIGN SYSTEM — LOYALTY APP
 

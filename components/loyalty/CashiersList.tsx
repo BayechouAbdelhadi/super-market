@@ -9,6 +9,7 @@ export async function CashiersList() {
     .select('*')
     .eq('role', 'CASHIER')
     .order('created_at', { ascending: false })
+    .limit(100)
 
   return (
     <div className="space-y-8">

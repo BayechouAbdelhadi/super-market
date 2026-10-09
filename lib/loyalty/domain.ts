@@ -1,4 +1,5 @@
 import { LoyaltyTier } from "./types";
+import { LOYALTY_CONFIG } from "./config";
 
 /**
  * Normalizes phone numbers to standard French 10-digit format (0X...)
@@ -12,24 +13,20 @@ export function normalizePhone(phone: string): string {
 }
 
 /**
- * 1 € = 1 loyalty point (rounded down)
+ * Calculates points earned from purchase amount using configured ratio (rounded down)
  */
 export function calculatePoints(amount: number): number {
   if (amount <= 0 || isNaN(amount)) return 0;
-  return Math.floor(amount);
+  return Math.floor(amount * LOYALTY_CONFIG.conversion.euroToPointsRatio);
 }
 
 /**
- * Calculates customer loyalty tier based on cumulative historical points
- * BRONZE: 0 - 499 pts
- * SILVER: 500 - 1999 pts
- * GOLD: 2000 - 4999 pts
- * VIP: 5000+ pts
+ * Calculates customer loyalty tier based on cumulative historical points from LOYALTY_CONFIG
  */
 export function calculateTier(historicalPoints: number): LoyaltyTier {
-  if (historicalPoints >= 5000) return "VIP";
-  if (historicalPoints >= 2000) return "GOLD";
-  if (historicalPoints >= 500) return "SILVER";
+  if (historicalPoints >= LOYALTY_CONFIG.tiers.VIP.minHistoricalPoints) return "VIP";
+  if (historicalPoints >= LOYALTY_CONFIG.tiers.GOLD.minHistoricalPoints) return "GOLD";
+  if (historicalPoints >= LOYALTY_CONFIG.tiers.SILVER.minHistoricalPoints) return "SILVER";
   return "BRONZE";
 }
 

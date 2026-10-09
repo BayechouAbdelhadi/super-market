@@ -172,7 +172,7 @@ export function UserManager({ initialUsers, roleToManage, title: _title, descrip
           <div className="p-6">
             {successMsg ? (
               <div className="space-y-6">
-                <div className="p-4 bg-green-50 border border-green-200 text-green-800 rounded-[var(--radius-button,12px)] text-sm font-medium">
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 rounded-[var(--radius-button,12px)] text-sm font-medium">
                   {successMsg}
                 </div>
                 <Button onClick={close} className="w-full">Fermer</Button>
@@ -207,7 +207,11 @@ export function UserManager({ initialUsers, roleToManage, title: _title, descrip
                   <Input id="password" name="password" type="password" label="Mot de passe" required />
                 )}
                 
-                {error && <p className="text-sm text-red-600 p-2 bg-red-50 rounded-md">{error}</p>}
+                {error && (
+                  <p className="text-xs text-rose-700 dark:text-rose-300 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-[var(--radius-button,12px)]">
+                    {error}
+                  </p>
+                )}
                 
                 <div className="pt-4 flex justify-end gap-3">
                   <Button type="button" variant="secondary" onClick={close}>Annuler</Button>

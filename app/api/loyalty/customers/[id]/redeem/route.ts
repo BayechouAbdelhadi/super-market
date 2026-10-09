@@ -1,24 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { redeemPoints } from "@/lib/loyalty/service";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/loyalty/api-auth";
+import { RedeemPointsSchema } from "@/lib/loyalty/validation";
 
 export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   try {
+    const auth = await requireAuth(["CASHIER", "ADMIN"]);
+    if (!auth.authorized) {
+      return auth.response;
+    }
+
     const { id } = await context.params;
     const body = await req.json();
-    
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    const cashierId = user?.id || null;
 
-    const points = Number(body.points);
-    const amount = body.amount !== undefined && body.amount !== null
-      ? Math.max(0, Number(body.amount) || 0)
-      : 0;
-    const reason = typeof body.reason === "string" ? body.reason : undefined;
+    const validation = RedeemPointsSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: "VALIDATION_ERROR",
+          message: validation.error.issues[0]?.message || "Données d'utilisation de points invalides.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const { points, amount, reason } = validation.data;
+    const cashierId = auth.user.id;
 
     const result = await redeemPoints(id, points, cashierId, amount, reason);
 

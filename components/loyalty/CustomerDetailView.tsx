@@ -6,6 +6,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/ui/StatCard";
 import { StatusBadge } from "./StatusBadge";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
+import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 
 interface CustomerDetailViewProps {
   customer: CustomerDetail;
@@ -62,6 +65,26 @@ export function CustomerDetailView({
 
   const purchases = customer.purchases || [];
   const movements = customer.movements || [];
+
+  const {
+    paginatedItems: paginatedPurchases,
+    page: purchasesPage,
+    pageSize: purchasesPageSize,
+    totalPages: purchasesTotalPages,
+    totalItems: purchasesTotalItems,
+    setPage: setPurchasesPage,
+    setPageSize: setPurchasesPageSize,
+  } = usePagination(purchases, { defaultPageSize: LOYALTY_CONFIG.pagination.tablePageSize });
+
+  const {
+    paginatedItems: paginatedMovements,
+    page: movementsPage,
+    pageSize: movementsPageSize,
+    totalPages: movementsTotalPages,
+    totalItems: movementsTotalItems,
+    setPage: setMovementsPage,
+    setPageSize: setMovementsPageSize,
+  } = usePagination(movements, { defaultPageSize: LOYALTY_CONFIG.pagination.tablePageSize });
 
   const initials = customer.full_name
     .split(" ")
@@ -232,142 +255,166 @@ export function CustomerDetailView({
 
         {/* Tab Content: Purchases */}
         {activeTab === "purchases" && (
-          <div className="p-6">
+          <div className="p-6 space-y-4">
             {purchases.length === 0 ? (
               <p className="text-xs text-[var(--color-text-muted)] italic text-center py-8">
                 Aucun achat enregistré pour ce client.
               </p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold uppercase tracking-wider">
-                      <th className="pb-3">Date</th>
-                      <th className="pb-3">Montant du ticket</th>
-                      <th className="pb-3">Points</th>
-                      <th className="pb-3">Caissier</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y border-[var(--color-border)]">
-                    {purchases.map((p) => {
-                      const dateFormatted = new Date(p.transaction_date).toLocaleDateString(
-                        "fr-FR",
-                        {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        },
-                      );
-                      const isEarn = p.points_earned > 0;
-                      const isRedeem = (p.points_redeemed || 0) > 0;
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold uppercase tracking-wider">
+                        <th className="pb-3">Date</th>
+                        <th className="pb-3">Montant du ticket</th>
+                        <th className="pb-3">Points</th>
+                        <th className="pb-3">Caissier</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y border-[var(--color-border)]">
+                      {paginatedPurchases.map((p) => {
+                        const dateFormatted = new Date(p.transaction_date).toLocaleDateString(
+                          "fr-FR",
+                          {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        );
+                        const isEarn = p.points_earned > 0;
+                        const isRedeem = (p.points_redeemed || 0) > 0;
 
-                      return (
-                        <tr key={p.id} className="hover:bg-[var(--color-surface-hover)] transition-colors">
-                          <td className="py-3 font-mono text-[var(--color-text-muted)]">
-                            {dateFormatted}
-                          </td>
-                          <td className="py-3 font-bold text-[var(--color-text)]">
-                            {p.amount.toLocaleString("fr-FR", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}{" "}
-                            €
-                          </td>
-                          <td className="py-3">
-                            {isEarn ? (
-                              <span className="inline-flex items-center gap-1 font-semibold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2.5 py-0.5 rounded-full text-xs">
-                                +{p.points_earned} points
-                              </span>
-                            ) : isRedeem ? (
-                              <span className="inline-flex items-center gap-1 font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 px-2.5 py-0.5 rounded-full text-xs">
-                                -{p.points_redeemed} points
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 font-medium text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] px-2.5 py-0.5 rounded-full text-xs">
-                                0 point
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-3 text-[var(--color-text-muted)]">{p.created_by}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                        return (
+                          <tr key={p.id} className="hover:bg-[var(--color-surface-hover)] transition-colors">
+                            <td className="py-3 font-mono text-[var(--color-text-muted)]">
+                              {dateFormatted}
+                            </td>
+                            <td className="py-3 font-bold text-[var(--color-text)]">
+                              {p.amount.toLocaleString("fr-FR", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}{" "}
+                              €
+                            </td>
+                            <td className="py-3">
+                              {isEarn ? (
+                                <span className="inline-flex items-center gap-1 font-semibold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2.5 py-0.5 rounded-full text-xs">
+                                  +{p.points_earned} points
+                                </span>
+                              ) : isRedeem ? (
+                                <span className="inline-flex items-center gap-1 font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 px-2.5 py-0.5 rounded-full text-xs">
+                                  -{p.points_redeemed} points
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 font-medium text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] px-2.5 py-0.5 rounded-full text-xs">
+                                  0 point
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 text-[var(--color-text-muted)]">{p.created_by}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <Pagination
+                  page={purchasesPage}
+                  totalPages={purchasesTotalPages}
+                  totalItems={purchasesTotalItems}
+                  pageSize={purchasesPageSize}
+                  onPageChange={setPurchasesPage}
+                  onPageSizeChange={setPurchasesPageSize}
+                  pageSizeOptions={[5, 10, 20, 50]}
+                />
+              </>
             )}
           </div>
         )}
 
         {/* Tab Content: Movements */}
         {activeTab === "movements" && (
-          <div className="p-6">
+          <div className="p-6 space-y-4">
             {movements.length === 0 ? (
               <p className="text-xs text-[var(--color-text-muted)] italic text-center py-8">
                 Aucun mouvement de points historisé.
               </p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold uppercase tracking-wider">
-                      <th className="pb-3">Date</th>
-                      <th className="pb-3">Type</th>
-                      <th className="pb-3">Points</th>
-                      <th className="pb-3">Motif</th>
-                      <th className="pb-3">Caissier</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--color-border)]">
-                    {movements.map((m) => {
-                      const dateFormatted = new Date(m.created_at).toLocaleDateString("fr-FR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      });
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold uppercase tracking-wider">
+                        <th className="pb-3">Date</th>
+                        <th className="pb-3">Type</th>
+                        <th className="pb-3">Points</th>
+                        <th className="pb-3">Motif</th>
+                        <th className="pb-3">Caissier</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--color-border)]">
+                      {paginatedMovements.map((m) => {
+                        const dateFormatted = new Date(m.created_at).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
 
-                      const isEarn = m.type === "EARN";
-                      const isRedeem = m.type === "REDEEM";
+                        const isEarn = m.type === "EARN";
+                        const isRedeem = m.type === "REDEEM";
 
-                      return (
-                        <tr key={m.id} className="hover:bg-[var(--color-surface-hover)] transition-colors">
-                          <td className="py-3 font-mono text-[var(--color-text-muted)]">
-                            {dateFormatted}
-                          </td>
-                          <td className="py-3">
-                            <span
-                              className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                                isEarn
-                                  ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                  : isRedeem
-                                    ? "bg-rose-50 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
-                                    : "bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                        return (
+                          <tr key={m.id} className="hover:bg-[var(--color-surface-hover)] transition-colors">
+                            <td className="py-3 font-mono text-[var(--color-text-muted)]">
+                              {dateFormatted}
+                            </td>
+                            <td className="py-3">
+                              <span
+                                className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                                  isEarn
+                                    ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                    : isRedeem
+                                      ? "bg-rose-50 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
+                                      : "bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                                }`}
+                              >
+                                {m.type}
+                              </span>
+                            </td>
+                            <td
+                              className={`py-3 font-bold ${
+                                isEarn ? "text-[var(--color-primary)]" : "text-[var(--color-danger)]"
                               }`}
                             >
-                              {m.type}
-                            </span>
-                          </td>
-                          <td
-                            className={`py-3 font-bold ${
-                              isEarn ? "text-[var(--color-primary)]" : "text-[var(--color-danger)]"
-                            }`}
-                          >
-                            {isEarn ? `+${m.amount}` : `-${m.amount}`}
-                          </td>
-                          <td className="py-3 text-[var(--color-text)]">
-                            {m.reason || "—"}
-                          </td>
-                          <td className="py-3 text-[var(--color-text-muted)]">{m.created_by}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                              {isEarn ? `+${m.amount}` : `-${m.amount}`}
+                            </td>
+                            <td className="py-3 text-[var(--color-text)]">
+                              {m.reason || "—"}
+                            </td>
+                            <td className="py-3 text-[var(--color-text-muted)]">{m.created_by}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <Pagination
+                  page={movementsPage}
+                  totalPages={movementsTotalPages}
+                  totalItems={movementsTotalItems}
+                  pageSize={movementsPageSize}
+                  onPageChange={setMovementsPage}
+                  onPageSizeChange={setMovementsPageSize}
+                  pageSizeOptions={[5, 10, 20, 50]}
+                />
+              </>
             )}
           </div>
         )}

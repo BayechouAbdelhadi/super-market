@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { calculatePaginationMeta } from "@/lib/loyalty/pagination";
 
 export interface UsePaginationOptions {
   /** Default page size. Default 10. */
@@ -40,15 +41,19 @@ export function usePagination<T>(
   const [page, setPageRaw] = useState(1);
   const [pageSize, setPageSizeRaw] = useState(defaultPageSize);
 
-  const totalItems = items.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const meta = useMemo(
+    () => calculatePaginationMeta(items.length, page, pageSize),
+    [items.length, page, pageSize]
+  );
 
-  // Clamp page when items/pageSize changes (e.g. after a filter)
-  const clampedPage = Math.min(page, totalPages);
+  // Sync state if totalPages shrinks below current page
+  if (page > meta.totalPages && meta.totalPages > 0) {
+    setPageRaw(meta.totalPages);
+  }
 
   const setPage = useCallback(
-    (p: number) => setPageRaw(Math.max(1, Math.min(p, totalPages))),
-    [totalPages]
+    (p: number) => setPageRaw(Math.max(1, Math.min(p, meta.totalPages))),
+    [meta.totalPages]
   );
 
   const setPageSize = useCallback((size: number) => {
@@ -57,16 +62,15 @@ export function usePagination<T>(
   }, []);
 
   const paginatedItems = useMemo(() => {
-    const start = (clampedPage - 1) * pageSize;
-    return items.slice(start, start + pageSize);
-  }, [items, clampedPage, pageSize]);
+    return items.slice(meta.startIndex, meta.endIndex);
+  }, [items, meta.startIndex, meta.endIndex]);
 
   return {
     paginatedItems,
-    page: clampedPage,
-    pageSize,
-    totalPages,
-    totalItems,
+    page: meta.page,
+    pageSize: meta.pageSize,
+    totalPages: meta.totalPages,
+    totalItems: meta.totalItems,
     setPage,
     setPageSize,
   };

@@ -39,6 +39,16 @@ export async function updateSession(request: NextRequest) {
   const isCashierRoute = request.nextUrl.pathname.startsWith('/cashier')
   const isLoyaltyRoute = request.nextUrl.pathname.startsWith('/loyalty')
   const isCustomersRoute = request.nextUrl.pathname.startsWith('/customers')
+  const isApiAdminRoute = request.nextUrl.pathname.startsWith('/api/admin')
+  const isApiLoyaltyRoute = request.nextUrl.pathname.startsWith('/api/loyalty')
+
+  // Defense-in-depth: Block unauthenticated API calls immediately
+  if (!user && (isApiAdminRoute || isApiLoyaltyRoute)) {
+    return NextResponse.json(
+      { error: "UNAUTHORIZED", message: "Authentification requise." },
+      { status: 401 }
+    )
+  }
 
   const isStaffRoute = isAdminRoute || isCashierRoute || isLoyaltyRoute || isCustomersRoute
 

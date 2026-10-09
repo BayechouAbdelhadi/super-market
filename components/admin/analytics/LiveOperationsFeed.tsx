@@ -14,6 +14,9 @@ import {
   Store,
   Clock,
 } from "lucide-react";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
+import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 
 interface LiveOperationsFeedProps {
   operations: LiveOperationRecord[];
@@ -21,6 +24,18 @@ interface LiveOperationsFeedProps {
 
 export function LiveOperationsFeed({ operations }: LiveOperationsFeedProps) {
   const hasOperations = operations && operations.length > 0;
+
+  const {
+    paginatedItems: paginatedOperations,
+    page,
+    pageSize,
+    totalPages,
+    totalItems,
+    setPage,
+    setPageSize,
+  } = usePagination(operations || [], {
+    defaultPageSize: LOYALTY_CONFIG.pagination.tablePageSize,
+  });
 
   return (
     <Card className="p-5 sm:p-6 rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm flex flex-col justify-between">
@@ -38,7 +53,7 @@ export function LiveOperationsFeed({ operations }: LiveOperationsFeedProps) {
           </div>
 
           <span className="text-xs text-[var(--color-text-muted)] font-medium">
-            {hasOperations ? `${operations.length} dernières opérations` : "En attente"}
+            {hasOperations ? `${operations.length} opération${operations.length > 1 ? "s" : ""} au total` : "En attente"}
           </span>
         </div>
 
@@ -64,95 +79,107 @@ export function LiveOperationsFeed({ operations }: LiveOperationsFeedProps) {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-            {operations.map((op) => {
-              const isPurchase = op.type === "PURCHASE";
-              const isEarn = op.pointsEarned > 0;
+          <div className="space-y-4">
+            <div className="space-y-3">
+              {paginatedOperations.map((op) => {
+                const isPurchase = op.type === "PURCHASE";
+                const isEarn = op.pointsEarned > 0;
 
-              return (
-                <div
-                  key={op.id}
-                  className="p-3.5 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-between gap-3 hover:border-[var(--color-border-hover)] transition-all"
-                >
-                  {/* Left: Icon + Customer + Cashier */}
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 border ${
-                        isPurchase
-                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                          : "bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/20"
-                      }`}
-                    >
-                      {isPurchase ? (
-                        <ShoppingCart className="w-4 h-4" />
-                      ) : (
-                        <Gift className="w-4 h-4" />
-                      )}
+                return (
+                  <div
+                    key={op.id}
+                    className="p-3.5 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-between gap-3 hover:border-[var(--color-border-hover)] transition-all"
+                  >
+                    {/* Left: Icon + Customer + Cashier */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 border ${
+                          isPurchase
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                            : "bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/20"
+                        }`}
+                      >
+                        {isPurchase ? (
+                          <ShoppingCart className="w-4 h-4" />
+                        ) : (
+                          <Gift className="w-4 h-4" />
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-xs sm:text-sm text-[var(--color-text)] truncate">
+                            {op.customerName}
+                          </span>
+                          <span
+                            className={`text-[10px] px-2 py-0.2 rounded-full font-bold uppercase border ${
+                              op.customerTier === "VIP"
+                                ? "bg-[var(--color-primary)]/15 text-[var(--color-primary)] border-[var(--color-primary)]/30"
+                                : op.customerTier === "GOLD"
+                                ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30"
+                                : "bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)]"
+                            }`}
+                          >
+                            {op.customerTier}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-[var(--color-text-muted)] flex items-center gap-2 mt-0.5">
+                          <span>{op.cashierName}</span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {op.formattedTime}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-xs sm:text-sm text-[var(--color-text)] truncate">
-                          {op.customerName}
-                        </span>
-                        <span
-                          className={`text-[10px] px-2 py-0.2 rounded-full font-bold uppercase border ${
-                            op.customerTier === "VIP"
-                              ? "bg-[var(--color-primary)]/15 text-[var(--color-primary)] border-[var(--color-primary)]/30"
-                              : op.customerTier === "GOLD"
-                              ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30"
-                              : "bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)]"
-                          }`}
-                        >
-                          {op.customerTier}
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-[var(--color-text-muted)] flex items-center gap-2 mt-0.5">
-                        <span>{op.cashierName}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {op.formattedTime}
-                        </span>
+                    {/* Right: Amount and Points */}
+                    <div className="text-right shrink-0">
+                      {op.amount > 0 ? (
+                        <div className="font-extrabold text-xs sm:text-sm text-[var(--color-text)]">
+                          {formatCurrency(op.amount)} €
+                        </div>
+                      ) : (
+                        <div className="font-bold text-xs text-[var(--color-primary)]">
+                          Remise fidélité
+                        </div>
+                      )}
+
+                      <div
+                        className={`text-[11px] font-bold inline-flex items-center gap-0.5 mt-0.5 ${
+                          isEarn
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-[var(--color-primary)]"
+                        }`}
+                      >
+                        {isEarn ? (
+                          <>
+                            <ArrowUpRight className="w-3 h-3" />
+                            +{op.pointsEarned} pts
+                          </>
+                        ) : (
+                          <>
+                            <ArrowDownLeft className="w-3 h-3" />
+                            -{op.pointsRedeemed} pts
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
+                );
+              })}
+            </div>
 
-                  {/* Right: Amount and Points */}
-                  <div className="text-right shrink-0">
-                    {op.amount > 0 ? (
-                      <div className="font-extrabold text-xs sm:text-sm text-[var(--color-text)]">
-                        {formatCurrency(op.amount)} €
-                      </div>
-                    ) : (
-                      <div className="font-bold text-xs text-[var(--color-primary)]">
-                        Remise fidélité
-                      </div>
-                    )}
-
-                    <div
-                      className={`text-[11px] font-bold inline-flex items-center gap-0.5 mt-0.5 ${
-                        isEarn
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-[var(--color-primary)]"
-                      }`}
-                    >
-                      {isEarn ? (
-                        <>
-                          <ArrowUpRight className="w-3 h-3" />
-                          +{op.pointsEarned} pts
-                        </>
-                      ) : (
-                        <>
-                          <ArrowDownLeft className="w-3 h-3" />
-                          -{op.pointsRedeemed} pts
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[5, 10, 25]}
+            />
           </div>
         )}
       </div>

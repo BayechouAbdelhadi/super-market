@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { CustomerDetail } from "@/lib/loyalty/types";
 import { calculatePoints } from "@/lib/loyalty/domain";
+import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 
@@ -112,7 +113,7 @@ export function AddPurchaseModal({
         {/* Quick preset chips */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="text-[var(--color-text-muted)] font-medium">Montants fréquents :</span>
-          {[12.5, 45.8, 75.5, 120.0].map((preset) => (
+          {LOYALTY_CONFIG.presets.purchaseAmounts.map((preset) => (
             <button
               key={preset}
               type="button"

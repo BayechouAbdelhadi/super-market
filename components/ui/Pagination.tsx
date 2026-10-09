@@ -19,6 +19,8 @@ export interface PaginationProps {
   pageSizeOptions?: number[];
   /** Show total items count. Default true. */
   showTotal?: boolean;
+  /** Always show pagination even on single page. Default false. */
+  alwaysShow?: boolean;
 }
 
 /** Maximum page buttons rendered before collapsing to ellipsis */
@@ -57,8 +59,9 @@ export function Pagination({
   onPageSizeChange,
   pageSizeOptions = [10, 25, 50, 100],
   showTotal = true,
+  alwaysShow = false,
 }: PaginationProps) {
-  if (totalPages <= 1 && totalItems <= Math.min(...pageSizeOptions)) return null;
+  if (!alwaysShow && totalPages <= 1 && totalItems <= Math.min(...pageSizeOptions)) return null;
 
   const from = Math.min((page - 1) * pageSize + 1, totalItems);
   const to = Math.min(page * pageSize, totalItems);

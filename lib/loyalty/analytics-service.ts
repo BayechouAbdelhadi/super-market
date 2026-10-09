@@ -3,79 +3,151 @@ import {
   calculateRealKpis,
   aggregateDailySales,
   buildLiveOperations,
+  getStartOfToday,
 } from "./analytics-domain";
-
-async function getSupabaseServerClient() {
-  const { createClient } = await import("@/lib/supabase/server");
-  return await createClient();
-}
+import { createClient as createServerClient } from "@/lib/supabase/server";
 
 /**
  * BFF Service to fetch and assemble real analytics directly from Supabase.
- * Zero mock or fake data — everything reflects the actual database state.
+ * Optimized for high performance and zero memory bloat:
+ * - Offloads counts to PostgreSQL (`head: true`)
+ * - Limits queries to bounded date ranges (last 7 days) and paginated sets
+ * - Avoids unbounded memory allocation in Node.js heap
  */
 export async function getDashboardAnalytics(): Promise<RealDashboardData> {
   try {
-    const sb = await getSupabaseServerClient();
+    const sb = await createServerClient();
+    const now = new Date();
+    const todayStart = getStartOfToday(now);
 
-    // 1. Fetch real transactions from Supabase
-    const { data: rawTransactions, error: txError } = await sb
+    // Date boundary for 7-day trend (8 days ago start of day)
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    // 1. Fetch recent transactions bounded to the active analytics window (last 7 days + limit safety)
+    const { data: rawRecentTransactions, error: txError } = await sb
       .from("transactions")
       .select("id, customer_id, cashier_id, amount_total, points_earned, points_redeemed, created_at")
-      .order("created_at", { ascending: false });
+      .gte("created_at", sevenDaysAgo.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(5000);
 
     if (txError) {
-      console.warn("[Analytics Service] Error fetching transactions:", txError.message);
+      console.warn("[Analytics Service] Error fetching recent transactions:", txError.message);
     }
 
-    // 2. Fetch real profiles from Supabase
-    const { data: rawProfiles, error: profError } = await sb
+    // 2. Fetch total count of all transactions using PostgreSQL count (zero payload memory)
+    const { count: totalSalesCount } = await sb
+      .from("transactions")
+      .select("*", { count: "exact", head: true });
+
+    // 3. Exact counts for customers & cashiers directly from database
+    const { count: totalClientsCount } = await sb
       .from("profiles")
-      .select("id, first_name, last_name, email, role, created_at");
+      .select("*", { count: "exact", head: true })
+      .eq("role", "CUSTOMER");
 
-    if (profError) {
-      console.warn("[Analytics Service] Error fetching profiles:", profError.message);
+    const { count: totalCashiersCount } = await sb
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("role", "CASHIER");
+
+    const { count: newClientsTodayCount } = await sb
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("role", "CUSTOMER")
+      .gte("created_at", todayStart.toISOString());
+
+    const recentTransactions = rawRecentTransactions || [];
+
+    // 4. Calculate today's metrics from the recent transactions dataset
+    let caToday = 0;
+    let dailySalesCount = 0;
+    let dailyPointsRedeemed = 0;
+    let dailyPointsEarned = 0;
+
+    let caTotal = 0;
+    let totalPointsEarned = 0;
+    let totalPointsRedeemed = 0;
+
+    for (const t of recentTransactions) {
+      const amount = Number(t.amount_total) || 0;
+      const earned = Number(t.points_earned) || 0;
+      const redeemed = Number(t.points_redeemed) || 0;
+      const txDate = new Date(t.created_at);
+
+      caTotal += amount;
+      totalPointsEarned += earned;
+      totalPointsRedeemed += redeemed;
+
+      if (txDate >= todayStart) {
+        caToday += amount;
+        dailySalesCount += 1;
+        dailyPointsRedeemed += redeemed;
+        dailyPointsEarned += earned;
+      }
     }
 
-    // 3. Fetch real customers from Supabase
-    const { data: rawCustomers, error: custError } = await sb
-      .from("customers")
-      .select("id, loyalty_points, status");
+    // 5. Build live operations (latest 25 transactions)
+    const latest25Txs = recentTransactions.slice(0, 25);
+    const relevantUserIds = Array.from(
+      new Set(
+        latest25Txs
+          .flatMap((t) => [t.customer_id, t.cashier_id])
+          .filter((id): id is string => Boolean(id))
+      )
+    );
 
-    if (custError) {
-      console.warn("[Analytics Service] Error fetching customers:", custError.message);
+    // Fetch ONLY profiles involved in the latest 25 operations
+    let profilesById = new Map<string, any>();
+    let customersById = new Map<string, any>();
+
+    if (relevantUserIds.length > 0) {
+      const { data: relevantProfiles } = await sb
+        .from("profiles")
+        .select("id, first_name, last_name, email, role, created_at")
+        .in("id", relevantUserIds);
+
+      const { data: relevantCustomers } = await sb
+        .from("customers")
+        .select("id, loyalty_points, status")
+        .in("id", relevantUserIds);
+
+      profilesById = new Map((relevantProfiles || []).map((p) => [p.id, p]));
+      customersById = new Map((relevantCustomers || []).map((c) => [c.id, c]));
     }
-
-    const transactions = rawTransactions || [];
-    const profiles = rawProfiles || [];
-    const customers = rawCustomers || [];
-
-    // Build lookup maps for fast live feed joining
-    const profilesById = new Map(profiles.map((p) => [p.id, p]));
-    const customersById = new Map(customers.map((c) => [c.id, c]));
-
-    // Calculate real KPIs
-    const kpis = calculateRealKpis(transactions, profiles);
 
     // Aggregate real daily sales for the last 7 days
-    const dailySalesTrend = aggregateDailySales(transactions, 7);
+    const dailySalesTrend = aggregateDailySales(recentTransactions, 7, now);
 
     // Build real live operations feed
     const liveOperations = buildLiveOperations(
-      transactions,
+      latest25Txs,
       profilesById,
       customersById,
       25
     );
 
-    const totalCashiersCount = profiles.filter((p) => p.role === "CASHIER").length;
+    const kpis = {
+      caToday: Math.round(caToday * 100) / 100,
+      caTotal: Math.round(caTotal * 100) / 100,
+      dailySalesCount,
+      totalSalesCount: totalSalesCount ?? recentTransactions.length,
+      dailyPointsRedeemed,
+      totalPointsRedeemed,
+      dailyPointsEarned,
+      totalPointsEarned,
+      newClientsToday: newClientsTodayCount ?? 0,
+      totalClients: totalClientsCount ?? 0,
+    };
 
     return {
-      generatedAt: new Date().toISOString(),
+      generatedAt: now.toISOString(),
       kpis,
       dailySalesTrend,
       liveOperations,
-      totalCashiersCount,
+      totalCashiersCount: totalCashiersCount ?? 0,
     };
   } catch (err: any) {
     console.error("[Analytics Service] Unexpected error in getDashboardAnalytics:", err);

@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { supabase } from '@/lib/supabase/client'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createIsolatedClient } from '@/lib/supabase/isolated'
 import { z } from 'zod'
 
@@ -38,8 +38,7 @@ export async function createUser(formData: FormData) {
   const { first_name, last_name, email, phone_number, password, role } = validatedFields.data;
 
   // Verify caller's role for strict RBAC
-  const { createClient: createSSRClient } = await import('@/lib/supabase/server');
-  const supabaseServer = await createSSRClient();
+  const supabaseServer = await createServerClient();
   const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
 
   if (!currentUser) {
@@ -109,8 +108,7 @@ export async function editUser(formData: FormData) {
   const { user_id, first_name, last_name, phone_number } = validatedFields.data;
 
   // To update profile metadata, we need the session to enforce RLS and check caller role
-  const { createClient: createSSRClient } = await import('@/lib/supabase/server');
-  const supabaseServer = await createSSRClient();
+  const supabaseServer = await createServerClient();
   const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
 
   if (!currentUser) {

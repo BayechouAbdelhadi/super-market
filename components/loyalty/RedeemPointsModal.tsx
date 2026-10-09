@@ -5,6 +5,7 @@ import { CustomerDetail } from "@/lib/loyalty/types";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 
 interface RedeemPointsModalProps {
   isOpen: boolean;
@@ -161,7 +162,7 @@ export function RedeemPointsModal({
           {/* Preset amount chips */}
           <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
             <span className="text-[var(--color-text-muted)] text-[11px] font-medium mr-1">Raccourcis montant :</span>
-            {[0, 15, 30, 50, 100].map((preset) => (
+            {LOYALTY_CONFIG.presets.redeemAmounts.map((preset) => (
               <button
                 key={preset}
                 type="button"
@@ -209,7 +210,7 @@ export function RedeemPointsModal({
           {/* Quick point chips */}
           <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
             <span className="text-[var(--color-text-muted)] text-[11px] font-medium mr-1">Raccourcis points :</span>
-            {[50, 100, 250, 500].map((preset) => (
+            {LOYALTY_CONFIG.presets.redeemPoints.map((preset) => (
               <button
                 key={preset}
                 type="button"

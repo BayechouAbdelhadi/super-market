@@ -11,6 +11,9 @@ import { AddPurchaseModal } from "./AddPurchaseModal";
 import { RedeemPointsModal } from "./RedeemPointsModal";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
+import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 
 export interface CashierDashboardProps {
   standalone?: boolean;
@@ -25,6 +28,18 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
   const [selectedCustomerDetail, setSelectedCustomerDetail] = useState<CustomerDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [, startTransition] = useTransition();
+
+  const {
+    paginatedItems: paginatedCustomers,
+    page: customerPage,
+    pageSize: customerPageSize,
+    totalPages: customerTotalPages,
+    totalItems: customerTotalItems,
+    setPage: setCustomerPage,
+    setPageSize: setCustomerPageSize,
+  } = usePagination(customers, {
+    defaultPageSize: LOYALTY_CONFIG.pagination.tablePageSize,
+  });
 
   // Modals state
   const [isNewCustomerOpen, setIsNewCustomerOpen] = useState(false);
@@ -201,14 +216,26 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
                     Recherche en cours dans la base de données...
                   </div>
                 ) : customers.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-3">
-                    {customers.map((c) => (
-                      <CustomerCard
-                        key={c.id}
-                        customer={c}
-                        onSelect={(cust) => loadCustomerDetail(cust.id)}
-                      />
-                    ))}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-3">
+                      {paginatedCustomers.map((c) => (
+                        <CustomerCard
+                          key={c.id}
+                          customer={c}
+                          onSelect={(cust) => loadCustomerDetail(cust.id)}
+                        />
+                      ))}
+                    </div>
+
+                    <Pagination
+                      page={customerPage}
+                      totalPages={customerTotalPages}
+                      totalItems={customerTotalItems}
+                      pageSize={customerPageSize}
+                      onPageChange={setCustomerPage}
+                      onPageSizeChange={setCustomerPageSize}
+                      pageSizeOptions={[5, 10, 20]}
+                    />
                   </div>
                 ) : (
                   <div className="border border-dashed border-[var(--color-border)] rounded-[var(--radius-card,16px)] p-12 text-center bg-[var(--color-surface)]/60 space-y-4">

@@ -1,37 +1,34 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { supabase as supabaseClient } from "@/lib/supabase/client";
+import { requireAuth } from "@/lib/loyalty/api-auth";
 
 export async function GET() {
+  const auth = await requireAuth(["CASHIER", "ADMIN"]);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", auth.user.id)
+      .single();
 
-    if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (profile && (profile.role === "CASHIER" || profile.role === "ADMIN")) {
-        return NextResponse.json({ cashier: profile });
-      }
+    if (error || !profile) {
+      return NextResponse.json(
+        { error: "NOT_FOUND", message: "Profil caissier introuvable." },
+        { status: 404 }
+      );
     }
-  } catch (err) {
+
+    return NextResponse.json({ cashier: profile });
+  } catch (err: any) {
     console.error("Error retrieving authenticated user for cashier/me:", err);
+    return NextResponse.json(
+      { error: "INTERNAL_ERROR", message: "Erreur lors de la récupération du profil." },
+      { status: 500 }
+    );
   }
-
-  // Fallback if not authenticated via session cookies
-  const { data: profiles } = await supabaseClient
-    .from("profiles")
-    .select("*")
-    .in("role", ["CASHIER", "ADMIN"])
-    .limit(1);
-
-  if (!profiles || profiles.length === 0) {
-    return NextResponse.json({ cashier: null }, { status: 404 });
-  }
-
-  return NextResponse.json({ cashier: profiles[0] });
 }
