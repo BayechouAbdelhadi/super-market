@@ -227,11 +227,11 @@ export function MobileBottomNav({ role, email }: MobileBottomNavProps) {
                   type="submit"
                   variant="secondary"
                   size="lg"
-                  disabled={isLoggingOut}
+                  loading={isLoggingOut}
                   onClick={handleLogout}
                   className="w-full justify-center gap-2 font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:border-rose-200 border border-[var(--color-border)] min-h-[48px] cursor-pointer disabled:opacity-50"
                 >
-                  <LogOut className="w-5 h-5 shrink-0" />
+                  {!isLoggingOut && <LogOut className="w-5 h-5 shrink-0" />}
                   <span>{isLoggingOut ? "Déconnexion..." : "Déconnexion"}</span>
                 </Button>
               </form>

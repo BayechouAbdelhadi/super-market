@@ -161,13 +161,15 @@ export function AddPurchaseModal({
             variant="secondary"
             type="button"
             onClick={handleClose}
+            disabled={loading}
           >
             Annuler
           </Button>
           <Button
             variant="primary"
             type="submit"
-            disabled={loading || pointsEarned <= 0}
+            loading={loading}
+            disabled={pointsEarned <= 0}
           >
             {loading ? "Enregistrement..." : `Confirmer l'achat (+${pointsEarned} pts)`}
           </Button>

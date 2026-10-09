@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/login/actions";
-import { ChevronLeft, ExternalLink, LogOut } from "lucide-react";
+import { ChevronLeft, ExternalLink, LogOut, Loader2 } from "lucide-react";
 
 interface SidebarProps {
   role: "ADMIN" | "CASHIER" | "CUSTOMER";
@@ -168,11 +168,11 @@ export function Sidebar({ role, email }: SidebarProps) {
                 type="submit"
                 variant="secondary"
                 size="sm"
-                disabled={isLoggingOut}
+                loading={isLoggingOut}
                 onClick={handleLogout}
                 className="w-full justify-center gap-2 cursor-pointer font-medium hover:text-[var(--color-danger)] hover:bg-rose-50 hover:border-rose-200 transition-colors disabled:opacity-50"
               >
-                <LogOut className="w-4 h-4 shrink-0" />
+                {!isLoggingOut && <LogOut className="w-4 h-4 shrink-0" />}
                 <span>{isLoggingOut ? "Déconnexion..." : "Déconnexion"}</span>
               </Button>
             </form>
@@ -191,10 +191,14 @@ export function Sidebar({ role, email }: SidebarProps) {
               title="Déconnexion"
               disabled={isLoggingOut}
               onClick={handleLogout}
-              className="p-2 rounded-lg bg-[var(--color-surface-hover)] text-[var(--color-danger)] hover:bg-rose-50 transition-colors cursor-pointer disabled:opacity-50"
+              className="p-2 rounded-lg bg-[var(--color-surface-hover)] text-[var(--color-danger)] hover:bg-rose-50 transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center"
               aria-label="Déconnexion"
             >
-              <LogOut className="w-5 h-5" />
+              {isLoggingOut ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <LogOut className="w-5 h-5" />
+              )}
             </button>
           </form>
         )}

@@ -292,13 +292,15 @@ export function RedeemPointsModal({
             variant="secondary"
             type="button"
             onClick={handleClose}
+            disabled={loading}
           >
             Annuler
           </Button>
           <Button
             variant="primary"
             type="submit"
-            disabled={loading || !isValidPoints || isExceedingBalance || !isValidAmount}
+            loading={loading}
+            disabled={!isValidPoints || isExceedingBalance || !isValidAmount}
           >
             {loading
               ? "Enregistrement..."

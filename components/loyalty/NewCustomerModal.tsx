@@ -187,13 +187,14 @@ export function NewCustomerModal({
             variant="secondary"
             type="button"
             onClick={handleReset}
+            disabled={loading}
           >
             Annuler
           </Button>
           <Button
             variant="primary"
             type="submit"
-            disabled={loading}
+            loading={loading}
           >
             {loading ? "Création en cours..." : "Créer le client"}
           </Button>

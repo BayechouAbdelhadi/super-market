@@ -229,8 +229,8 @@ export function UserManager({
                 )}
                 
                 <div className="pt-4 flex justify-end gap-3">
-                  <Button type="button" variant="secondary" onClick={close}>Annuler</Button>
-                  <Button type="submit" disabled={loading}>{loading ? 'Enregistrement...' : (editingUser ? 'Mettre à jour' : 'Créer')}</Button>
+                  <Button type="button" variant="secondary" onClick={close} disabled={loading}>Annuler</Button>
+                  <Button type="submit" loading={loading}>{loading ? 'Enregistrement...' : (editingUser ? 'Mettre à jour' : 'Créer')}</Button>
                 </div>
               </form>
             )}

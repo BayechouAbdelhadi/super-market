@@ -1,7 +1,7 @@
 import { login } from './actions'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { LoginSubmitButton } from '@/components/auth/LoginSubmitButton'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 
@@ -40,7 +40,7 @@ export default async function LoginPage({
         
         {/* Login Form Card */}
         <Card className="p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-[var(--color-border)]">
-          <form className="space-y-5">
+          <form action={login} className="space-y-5">
             <Input
               id="email"
               name="email"
@@ -66,15 +66,7 @@ export default async function LoginPage({
               </div>
             )}
             
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              formAction={login}
-              className="w-full font-bold shadow-[0_4px_14px_rgba(255,56,92,0.3)]"
-            >
-              Se connecter au terminal
-            </Button>
+            <LoginSubmitButton />
           </form>
         </Card>
 

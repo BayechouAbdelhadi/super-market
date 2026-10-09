@@ -2,6 +2,7 @@ import * as React from "react"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
+import { Loader2 } from "lucide-react"
 
 const buttonVariants = cva(
   "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--radius-button,12px)] border border-transparent bg-clip-padding text-sm font-semibold tracking-tight whitespace-nowrap transition-all duration-200 outline-none select-none focus-visible:border-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/20 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -42,6 +43,7 @@ export interface ButtonProps
   extends React.ComponentProps<typeof ButtonPrimitive>,
     VariantProps<typeof buttonVariants> {
   fullWidth?: boolean
+  loading?: boolean
 }
 
 function Button({
@@ -49,6 +51,9 @@ function Button({
   variant = "default",
   size = "default",
   fullWidth = false,
+  loading = false,
+  disabled,
+  children,
   type,
   ...props
 }: ButtonProps) {
@@ -57,13 +62,19 @@ function Button({
     <ButtonPrimitive
       data-slot="button"
       type={resolvedType}
+      disabled={disabled || loading}
+      aria-busy={loading ? "true" : undefined}
       className={cn(
         buttonVariants({ variant, size }),
         fullWidth && "w-full",
+        loading && "opacity-80 cursor-wait",
         className
       )}
       {...props}
-    />
+    >
+      {loading && <Loader2 className="size-4 animate-spin shrink-0" />}
+      {children}
+    </ButtonPrimitive>
   )
 }
 

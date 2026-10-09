@@ -5,6 +5,7 @@ import Image from "next/image";
 import React, { useEffect, useState, useTransition } from "react";
 import { User } from "@/lib/loyalty/types";
 import { logout } from "@/app/login/actions";
+import { Loader2 } from "lucide-react";
 
 interface CashierHeaderProps {
   cashier: User | null;
@@ -40,10 +41,10 @@ export function CashierHeader({ cashier }: CashierHeaderProps) {
   const isAdmin = cashier?.role === "ADMIN";
   const fullName = cashier
     ? `${cashier.first_name || ""} ${cashier.last_name || ""}`.trim() || cashier.email
-    : "Opérateur en cours...";
+    : "";
   const initials = cashier
     ? `${cashier.first_name?.[0] || ""}${cashier.last_name?.[0] || ""}`.toUpperCase() || (isAdmin ? "AD" : "CA")
-    : "OP";
+    : "";
 
   return (
     <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/90 backdrop-blur-md shrink-0 z-40">
@@ -83,21 +84,33 @@ export function CashierHeader({ cashier }: CashierHeaderProps) {
 
         {/* Cashier Info, Clock & Logout */}
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex flex-col text-right">
-            <span className="text-xs font-semibold text-[var(--color-text)]">
-              {fullName}
-            </span>
-            <span className="text-[11px] text-[var(--color-text-muted)]">
-              {isAdmin ? "Mode Administrateur" : "Poste Caisse #1"} • {cashier?.role || "CASHIER"}
-            </span>
-          </div>
+          {cashier ? (
+            <>
+              <div className="hidden sm:flex flex-col text-right">
+                <span className="text-xs font-semibold text-[var(--color-text)]">
+                  {fullName}
+                </span>
+                <span className="text-[11px] text-[var(--color-text-muted)]">
+                  {isAdmin ? "Mode Administrateur" : "Poste Caisse #1"} • {cashier.role}
+                </span>
+              </div>
 
-          <div 
-            className="h-8 w-8 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center font-bold text-xs border border-[var(--color-primary)]/20 shadow-2xs"
-            title={fullName}
-          >
-            {initials}
-          </div>
+              <div 
+                className="h-8 w-8 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center font-bold text-xs border border-[var(--color-primary)]/20 shadow-2xs"
+                title={fullName}
+              >
+                {initials}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 animate-pulse">
+              <div className="hidden sm:flex flex-col items-end gap-1">
+                <div className="h-3 w-24 bg-[var(--color-border)] rounded-full" />
+                <div className="h-2.5 w-16 bg-[var(--color-border)]/70 rounded-full" />
+              </div>
+              <div className="h-8 w-8 rounded-full bg-[var(--color-border)]/80" />
+            </div>
+          )}
 
           {time && (
             <div className="hidden md:block pl-3 border-l border-[var(--color-border)] text-xs font-mono text-[var(--color-text-muted)]">
@@ -120,9 +133,13 @@ export function CashierHeader({ cashier }: CashierHeaderProps) {
               onClick={handleLogout}
               className="p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-rose-50 hover:text-[var(--color-danger)] hover:border-rose-200 text-[var(--color-text-muted)] transition-colors cursor-pointer text-xs flex items-center gap-1.5 disabled:opacity-50"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
+              {isLoggingOut ? (
+                <Loader2 className="w-4 h-4 animate-spin text-[var(--color-danger)]" />
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              )}
               <span className="hidden lg:inline font-medium">
                 {isLoggingOut ? "Déconnexion..." : "Déconnexion"}
               </span>

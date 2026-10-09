@@ -1,16 +1,20 @@
 "use client";
 
 import React from "react";
+import { Loader2 } from "lucide-react";
+
 export interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
   value: string;
   onChange: (value: string) => void;
   onClear?: () => void;
+  loading?: boolean;
 }
 
 export function SearchInput({
   value,
   onChange,
   onClear,
+  loading = false,
   placeholder = "Rechercher...",
   className = "",
   ...props
@@ -43,7 +47,11 @@ export function SearchInput({
         {...props}
       />
 
-      {value ? (
+      {loading ? (
+        <div className="absolute inset-y-0 right-0 pr-5 flex items-center pointer-events-none">
+          <Loader2 className="w-5 h-5 animate-spin text-[var(--color-primary)]" />
+        </div>
+      ) : value ? (
         <button
           type="button"
           onClick={() => {

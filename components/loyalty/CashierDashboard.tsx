@@ -169,6 +169,7 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
             <SearchBar
               query={searchQuery}
               onChange={setSearchQuery}
+              loading={loading}
               onOpenNewCustomer={() => setIsNewCustomerOpen(true)}
             />
           </Card>
@@ -212,8 +213,25 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
                 </div>
 
                 {loading ? (
-                  <div className="py-12 text-center text-xs text-[var(--color-text-muted)]">
-                    Recherche en cours dans la base de données...
+                  <div className="grid grid-cols-1 gap-3">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3.5">
+                          <div className="h-11 w-11 rounded-full bg-[var(--color-border)]/60 shrink-0" />
+                          <div className="space-y-2">
+                            <div className="h-4 w-36 bg-[var(--color-border)]/80 rounded-md" />
+                            <div className="h-3 w-52 bg-[var(--color-border)]/50 rounded-md" />
+                          </div>
+                        </div>
+                        <div className="hidden sm:flex items-center gap-3">
+                          <div className="h-6 w-20 bg-[var(--color-border)]/60 rounded-full" />
+                          <div className="h-10 w-28 bg-[var(--color-border)]/70 rounded-[var(--radius-button,12px)]" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : customers.length > 0 ? (
                   <div className="space-y-4">

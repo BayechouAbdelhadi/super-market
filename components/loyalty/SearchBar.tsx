@@ -6,9 +6,10 @@ interface SearchBarProps {
   query: string;
   onChange: (query: string) => void;
   onOpenNewCustomer: () => void;
+  loading?: boolean;
 }
 
-export function SearchBar({ query, onChange, onOpenNewCustomer }: SearchBarProps) {
+export function SearchBar({ query, onChange, onOpenNewCustomer, loading = false }: SearchBarProps) {
   return (
     <div className="w-full">
       {/* Central action bar */}
@@ -17,6 +18,7 @@ export function SearchBar({ query, onChange, onOpenNewCustomer }: SearchBarProps
           <SearchInput
             value={query}
             onChange={onChange}
+            loading={loading}
             placeholder="Nom, prénom, téléphone ou email..."
             autoFocus
           />
