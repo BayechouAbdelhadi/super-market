@@ -24,20 +24,16 @@ export default function AdminLoading() {
         ))}
       </div>
 
-      {/* Main Content Area Skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 p-6 rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] border border-[var(--color-border)] space-y-4">
-          <div className="h-5 w-48 bg-[var(--color-surface-hover)] rounded-md" />
-          <div className="h-64 bg-[var(--color-surface-hover)]/40 rounded-xl" />
-        </div>
-        <div className="p-6 rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] border border-[var(--color-border)] space-y-4">
-          <div className="h-5 w-40 bg-[var(--color-surface-hover)] rounded-md" />
-          <div className="space-y-3">
-            {[1, 2, 3, 4].map((j) => (
-              <div key={j} className="h-12 bg-[var(--color-surface-hover)]/50 rounded-lg" />
-            ))}
+      {/* Main Content Area Skeleton: Full Width Chart */}
+      <div className="p-6 rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] border border-[var(--color-border)] space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <div className="h-5 w-56 bg-[var(--color-surface-hover)] rounded-md" />
+            <div className="h-3 w-80 bg-[var(--color-surface-hover)]/70 rounded-md" />
           </div>
+          <div className="h-8 w-36 bg-[var(--color-surface-hover)] rounded-lg" />
         </div>
+        <div className="h-72 bg-[var(--color-surface-hover)]/40 rounded-xl" />
       </div>
     </div>
   )

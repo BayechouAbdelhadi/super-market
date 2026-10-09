@@ -5,9 +5,8 @@ import Link from "next/link";
 import { RealDashboardData } from "@/lib/loyalty/analytics-types";
 import { DashboardKpis } from "./DashboardKpis";
 import { DailySalesChart } from "./DailySalesChart";
-import { LiveOperationsFeed } from "./LiveOperationsFeed";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Store, Users, ShoppingBag } from "lucide-react";
+import { RefreshCw, Store, Users, ShoppingBag, Activity } from "lucide-react";
 
 interface AnalyticsDashboardProps {
   initialData: RealDashboardData;
@@ -42,11 +41,11 @@ export function AnalyticsDashboard({ initialData }: AnalyticsDashboardProps) {
             </h1>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Base Supabase • En direct</span>
+              <span>Base Supabase • Synchronisée</span>
             </div>
           </div>
           <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
-            Indicateurs d&apos;activité, ventes du jour et flux des passages en caisse en temps réel.
+            Indicateurs d&apos;activité commerciale, tendances de vente et synthèse des performances du magasin.
           </p>
         </div>
 
@@ -79,14 +78,9 @@ export function AnalyticsDashboard({ initialData }: AnalyticsDashboardProps) {
       {/* 1. Simplified KPIs Grid */}
       <DashboardKpis kpis={data.kpis} />
 
-      {/* 2. Charts & Live Feed Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7">
-          <DailySalesChart data={data.dailySalesTrend} />
-        </div>
-        <div className="lg:col-span-5">
-          <LiveOperationsFeed operations={data.liveOperations} />
-        </div>
+      {/* 2. Full-Width Daily Sales Trend Chart */}
+      <div>
+        <DailySalesChart data={data.dailySalesTrend} />
       </div>
 
       {/* 3. Quick Links Footer */}
@@ -96,7 +90,14 @@ export function AnalyticsDashboard({ initialData }: AnalyticsDashboardProps) {
           <span>•</span>
           <span>Données 100% synchronisées avec Supabase</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
+          <Link
+            href="/admin/live"
+            className="hover:text-[var(--color-primary)] transition-colors flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400"
+          >
+            <Activity className="w-3.5 h-3.5" />
+            <span>Flux en direct</span>
+          </Link>
           <Link
             href="/customers"
             className="hover:text-[var(--color-text)] transition-colors flex items-center gap-1 font-medium"

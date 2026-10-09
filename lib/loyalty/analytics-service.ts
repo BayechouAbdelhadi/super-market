@@ -1,4 +1,4 @@
-import { RealDashboardData } from "./analytics-types";
+import { RealDashboardData, LiveFeedData } from "./analytics-types";
 import {
   calculateRealKpis,
   aggregateDailySales,
@@ -168,6 +168,98 @@ export async function getDashboardAnalytics(): Promise<RealDashboardData> {
       dailySalesTrend: aggregateDailySales([], 7),
       liveOperations: [],
       totalCashiersCount: 0,
+    };
+  }
+}
+
+/**
+ * BFF Service to fetch extended live operations feed for the dedicated live monitoring screen.
+ * Offloads sorting and user retrieval with bounded queries.
+ */
+export async function getLiveFeedData(limit = 100): Promise<LiveFeedData> {
+  try {
+    const sb = await createServerClient();
+    const now = new Date();
+    const todayStart = getStartOfToday(now);
+
+    const { data: rawTxs, error: txError } = await sb
+      .from("transactions")
+      .select("id, customer_id, cashier_id, amount_total, points_earned, points_redeemed, created_at")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (txError) {
+      console.warn("[Analytics Service] Error fetching live feed transactions:", txError.message);
+    }
+
+    const txs = rawTxs || [];
+
+    let caToday = 0;
+    let operationsToday = 0;
+    let pointsEarnedToday = 0;
+    let pointsRedeemedToday = 0;
+
+    for (const t of txs) {
+      const txDate = new Date(t.created_at);
+      if (txDate >= todayStart) {
+        caToday += Number(t.amount_total) || 0;
+        operationsToday += 1;
+        pointsEarnedToday += Number(t.points_earned) || 0;
+        pointsRedeemedToday += Number(t.points_redeemed) || 0;
+      }
+    }
+
+    const relevantUserIds = Array.from(
+      new Set(
+        txs
+          .flatMap((t) => [t.customer_id, t.cashier_id])
+          .filter((id): id is string => Boolean(id))
+      )
+    );
+
+    let profilesById = new Map<string, any>();
+    let customersById = new Map<string, any>();
+
+    if (relevantUserIds.length > 0) {
+      const { data: relevantProfiles } = await sb
+        .from("profiles")
+        .select("id, first_name, last_name, email, role, created_at")
+        .in("id", relevantUserIds);
+
+      const { data: relevantCustomers } = await sb
+        .from("customers")
+        .select("id, loyalty_points, status")
+        .in("id", relevantUserIds);
+
+      profilesById = new Map((relevantProfiles || []).map((p) => [p.id, p]));
+      customersById = new Map((relevantCustomers || []).map((c) => [c.id, c]));
+    }
+
+    const operations = buildLiveOperations(txs, profilesById, customersById, limit);
+
+    return {
+      generatedAt: now.toISOString(),
+      operations,
+      stats: {
+        caToday: Math.round(caToday * 100) / 100,
+        operationsToday,
+        pointsEarnedToday,
+        pointsRedeemedToday,
+        totalLoaded: operations.length,
+      },
+    };
+  } catch (err: any) {
+    console.error("[Analytics Service] Unexpected error in getLiveFeedData:", err);
+    return {
+      generatedAt: new Date().toISOString(),
+      operations: [],
+      stats: {
+        caToday: 0,
+        operationsToday: 0,
+        pointsEarnedToday: 0,
+        pointsRedeemedToday: 0,
+        totalLoaded: 0,
+      },
     };
   }
 }

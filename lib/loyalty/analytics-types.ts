@@ -41,3 +41,15 @@ export interface RealDashboardData {
   liveOperations: LiveOperationRecord[];
   totalCashiersCount: number;
 }
+
+export interface LiveFeedData {
+  generatedAt: string;
+  operations: LiveOperationRecord[];
+  stats: {
+    caToday: number;
+    operationsToday: number;
+    pointsEarnedToday: number;
+    pointsRedeemedToday: number;
+    totalLoaded: number;
+  };
+}

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/login/actions";
-import { ChevronLeft, ExternalLink, LogOut, Loader2 } from "lucide-react";
+import { ChevronLeft, ExternalLink, LogOut, Loader2, Activity } from "lucide-react";
 
 interface SidebarProps {
   role: "ADMIN" | "CASHIER" | "CUSTOMER";
@@ -68,6 +68,12 @@ export function Sidebar({ role, email }: SidebarProps) {
             </svg>
           ),
         },
+        {
+          name: "Flux en direct",
+          href: "/admin/live",
+          isLive: true,
+          icon: <Activity className="w-5 h-5 shrink-0" />,
+        },
       ]
     : [
         {
@@ -97,20 +103,42 @@ export function Sidebar({ role, email }: SidebarProps) {
           const isActive =
             pathname === link.href ||
             (link.href === "/customers" && pathname === "/admin/customers");
+          const isLive = Boolean((link as any).isLive);
           return (
             <Link
               key={idx}
               href={link.href}
               onClick={onLinkClick}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-button,10px)] text-sm font-medium transition-colors group ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-button,10px)] text-sm font-medium transition-colors group relative ${
                 isActive
                   ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-semibold shadow-2xs"
                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
               } ${isCollapsed ? "justify-center" : ""}`}
               title={isCollapsed ? link.name : ""}
             >
-              {link.icon}
-              {!isCollapsed && <span className="whitespace-nowrap">{link.name}</span>}
+              <div className="relative shrink-0 flex items-center justify-center">
+                {link.icon}
+                {isLive && isCollapsed && (
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                )}
+              </div>
+              {!isCollapsed && (
+                <>
+                  <span className="whitespace-nowrap flex-1">{link.name}</span>
+                  {isLive && (
+                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase shadow-2xs">
+                      <span className="flex h-1.5 w-1.5 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                      </span>
+                      <span>Live</span>
+                    </span>
+                  )}
+                </>
+              )}
             </Link>
           );
         })}
