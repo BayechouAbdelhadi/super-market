@@ -1,11 +1,9 @@
-import { resetPassword } from './actions'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { OtpSubmitButton } from '@/components/auth/OtpSubmitButton'
+import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm'
 import { verifySignedToken, PendingResetPayload } from '@/lib/email/otp-security'
-import { ArrowLeft, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 
 export default async function ResetPasswordPage({
   searchParams,
@@ -24,8 +22,8 @@ export default async function ResetPasswordPage({
   const targetEmail = pendingData?.email || params?.email?.trim() || ''
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-background)] p-4 sm:p-6 font-sans">
-      <div className="w-full max-w-md space-y-6">
+    <div className="h-full w-full overflow-y-auto flex flex-col items-center bg-[var(--color-background)] p-4 sm:p-6 font-sans">
+      <div className="w-full max-w-md my-auto space-y-5 py-4 sm:py-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center justify-center mb-1 group">
@@ -67,49 +65,11 @@ export default async function ResetPasswordPage({
             </div>
           )}
 
-          <form action={resetPassword} className="space-y-4">
-            <input type="hidden" name="email" value={targetEmail} />
-            <input type="hidden" name="token" value={token} />
-
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              label="Nouveau mot de passe"
-              placeholder="••••••••"
-              required
-              autoFocus
-              className="h-11"
-            />
-
-            <Input
-              id="confirm_password"
-              name="confirm_password"
-              type="password"
-              label="Confirmer le nouveau mot de passe"
-              placeholder="••••••••"
-              required
-              className="h-11"
-            />
-
-            {params?.message && (
-              <div className="text-xs font-semibold text-rose-700 dark:text-rose-300 text-center bg-rose-500/10 border border-rose-500/20 p-3 rounded-[var(--radius-button,12px)]">
-                {params.message}
-              </div>
-            )}
-
-            <OtpSubmitButton label="Enregistrer mon nouveau mot de passe" />
-
-            <div className="pt-2 text-center border-t border-[var(--color-border)]">
-              <Link
-                href="/login"
-                className="text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors inline-flex items-center gap-1.5"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Retour à la connexion</span>
-              </Link>
-            </div>
-          </form>
+          <ResetPasswordForm
+            email={targetEmail}
+            token={token}
+            errorMessage={params?.message}
+          />
         </Card>
       </div>
     </div>

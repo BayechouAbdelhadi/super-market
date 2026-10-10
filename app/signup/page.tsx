@@ -32,8 +32,8 @@ export default async function SignUpPage({
     : undefined
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-background)] p-4 sm:p-6 font-sans">
-      <div className="w-full max-w-md space-y-6">
+    <div className="h-full w-full overflow-y-auto flex flex-col items-center bg-[var(--color-background)] p-4 sm:p-6 font-sans">
+      <div className="w-full max-w-md my-auto space-y-5 py-4 sm:py-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center justify-center mb-1 group">

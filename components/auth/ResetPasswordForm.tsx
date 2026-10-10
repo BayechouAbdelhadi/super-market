@@ -1,83 +1,54 @@
 'use client'
 
-import { useActionState, useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff, Lock, ArrowLeft, ShieldCheck } from 'lucide-react'
-import { confirmAccount } from '@/app/confirm-account/actions'
-import type { ConfirmAccountResult } from '@/app/confirm-account/actions'
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { resetPassword } from '@/app/reset-password/actions'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { toast } from '@/components/ui/sonner'
 import { PasswordCriteriaChecklist } from '@/components/auth/PasswordCriteriaChecklist'
 
-interface ConfirmAccountFormProps {
+interface ResetPasswordFormProps {
   email: string
   token: string
-  role: 'CUSTOMER' | 'CASHIER' | 'ADMIN'
+  errorMessage?: string
 }
 
-export function ConfirmAccountForm({ email, token, role }: ConfirmAccountFormProps) {
-  const [state, formAction, isPending] = useActionState<ConfirmAccountResult, FormData>(
-    confirmAccount,
-    { error: null }
-  )
-
+export function ResetPasswordForm({
+  email,
+  token,
+  errorMessage,
+}: ResetPasswordFormProps) {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
-  const errorMessage = state?.error
-
-  useEffect(() => {
-    if (errorMessage) {
-      toast.error(errorMessage)
-    }
-  }, [errorMessage])
-
-  const roleLabel = role === 'CASHIER' ? 'Caissier' : 'Client Fidélité'
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   return (
-    <form action={formAction} className="space-y-3.5">
+    <form
+      action={(formData) => {
+        setIsSubmitting(true)
+        resetPassword(formData)
+      }}
+      className="space-y-4"
+    >
+      <input type="hidden" name="email" value={email} />
       <input type="hidden" name="token" value={token} />
 
-      {/* Verified Account Notice */}
-      <div className="text-xs font-medium text-emerald-800 dark:text-emerald-200 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-[var(--radius-button,12px)] flex items-center gap-2">
-        <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-        <span>
-          Compte <strong>{roleLabel}</strong> vérifié
-        </span>
-      </div>
-
-      {/* Pre-filled and Read-Only Email Field */}
-      <div>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          label="Adresse email associée"
-          value={email}
-          readOnly
-          tabIndex={-1}
-          className="h-10 bg-[var(--color-surface-hover,#f7f7f7)] cursor-not-allowed font-medium text-[var(--color-text)] opacity-90 select-none"
-          helperText="Rattachée à votre compte (non modifiable)"
-          rightElement={<Lock className="w-4 h-4 text-[var(--color-text-muted)]" />}
-        />
-      </div>
-
-      {/* New Password Field */}
+      {/* New Password */}
       <Input
         id="password"
         name="password"
         type={showPassword ? 'text' : 'password'}
-        label="Définir votre mot de passe"
+        label="Nouveau mot de passe"
         placeholder="••••••••"
         required
         autoFocus
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         autoComplete="new-password"
-        className="h-10"
+        className="h-11"
         rightElement={
           <button
             type="button"
@@ -93,12 +64,12 @@ export function ConfirmAccountForm({ email, token, role }: ConfirmAccountFormPro
 
       <PasswordCriteriaChecklist password={password} />
 
-      {/* Confirm Password Field */}
+      {/* Confirm Password */}
       <Input
         id="confirm_password"
         name="confirm_password"
         type={showConfirmPassword ? 'text' : 'password'}
-        label="Confirmer votre mot de passe"
+        label="Confirmer le nouveau mot de passe"
         placeholder="••••••••"
         required
         value={confirmPassword}
@@ -128,10 +99,10 @@ export function ConfirmAccountForm({ email, token, role }: ConfirmAccountFormPro
         type="submit"
         variant="primary"
         size="lg"
-        loading={isPending}
+        loading={isSubmitting}
         className="w-full font-bold shadow-[0_4px_14px_rgba(255,56,92,0.3)] mt-2"
       >
-        {isPending ? 'Activation en cours...' : 'Confirmer et activer mon compte'}
+        {isSubmitting ? 'Enregistrement...' : 'Enregistrer mon nouveau mot de passe'}
       </Button>
 
       <div className="pt-2 text-center border-t border-[var(--color-border)]">

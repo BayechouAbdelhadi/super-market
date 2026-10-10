@@ -11,6 +11,7 @@ import {
   AccountActivationPayload,
 } from '@/lib/email/otp-security'
 import { normalizePhone } from '@/lib/loyalty/domain'
+import { PasswordSchema } from '@/lib/auth/password-rules'
 import { z } from 'zod'
 
 const CreateUserSchema = z.object({
@@ -18,7 +19,7 @@ const CreateUserSchema = z.object({
   last_name: z.string().trim().min(2, "Le nom doit contenir au moins 2 caractères."),
   email: z.string().trim().email("L'adresse email est invalide."),
   phone_number: z.string().trim().min(8, "Le numéro de téléphone doit contenir au moins 8 caractères."),
-  password: z.string().optional().or(z.literal('')),
+  password: z.union([PasswordSchema, z.literal(''), z.undefined()]),
   role: z.enum(['CUSTOMER', 'CASHIER', 'ADMIN']).default('CUSTOMER')
 });
 
@@ -87,9 +88,14 @@ export async function createUser(formData: FormData) {
   }
 
   // Generate secure initial password if not provided
-  const securePassword = (password && password.length >= 6)
-    ? password
-    : crypto.randomBytes(16).toString("hex") + "A1!";
+  let securePassword = crypto.randomBytes(16).toString("hex") + "A1!";
+  if (password && password.trim()) {
+    const pwdCheck = PasswordSchema.safeParse(password.trim());
+    if (!pwdCheck.success) {
+      return { error: pwdCheck.error.issues[0]?.message || "Le mot de passe ne respecte pas les critères de sécurité." };
+    }
+    securePassword = password.trim();
+  }
 
   // Create user with email_confirm: true via Supabase Admin API
   const { data: authData, error: authError } = await adminClient.auth.admin.createUser({

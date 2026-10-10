@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { signup } from '@/app/signup/actions'
 import type { SignUpActionResult } from '@/app/signup/actions'
+import { PasswordCriteriaChecklist } from '@/components/auth/PasswordCriteriaChecklist'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/sonner'
@@ -101,7 +102,6 @@ export function SignUpForm({ initialMessage, initialData }: SignUpFormProps) {
         type={showPassword ? 'text' : 'password'}
         label="Mot de passe"
         placeholder="••••••••"
-        helperText="Au moins 6 caractères"
         required
         value={password}
         onChange={(e) => setPassword(e.target.value)}
@@ -119,6 +119,8 @@ export function SignUpForm({ initialMessage, initialData }: SignUpFormProps) {
           </button>
         }
       />
+
+      <PasswordCriteriaChecklist password={password} />
 
       {errorMessage && (
         <div className="text-xs font-semibold text-rose-700 dark:text-rose-300 text-center bg-rose-500/10 border border-rose-500/20 p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">

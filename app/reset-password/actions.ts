@@ -9,12 +9,13 @@ import {
   PENDING_RESET_COOKIE,
   PendingResetPayload,
 } from '@/lib/email/otp-security'
+import { PasswordSchema } from '@/lib/auth/password-rules'
 import { z } from 'zod'
 
 const ResetPasswordSchema = z
   .object({
-    password: z.string().min(6, "Le mot de passe doit comporter au moins 6 caractères."),
-    confirm_password: z.string().min(6, "Veuillez confirmer votre mot de passe."),
+    password: PasswordSchema,
+    confirm_password: z.string().min(1, "Veuillez confirmer votre mot de passe."),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "Les mots de passe ne correspondent pas.",

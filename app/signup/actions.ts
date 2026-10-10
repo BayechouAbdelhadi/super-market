@@ -13,6 +13,7 @@ import {
   verifySignedToken,
   PENDING_SIGNUP_COOKIE,
 } from '@/lib/email/otp-security'
+import { PasswordSchema } from '@/lib/auth/password-rules'
 import { z } from 'zod'
 
 export type SignUpActionResult = {
@@ -25,7 +26,7 @@ const SignUpSchema = z.object({
   last_name: z.string().trim().min(2, "Le nom est obligatoire (au moins 2 caractères)."),
   email: z.string().trim().email("L'adresse email est obligatoire et doit être valide."),
   phone: z.string().trim().min(8, "Le numéro de téléphone est obligatoire (au moins 8 chiffres)."),
-  password: z.string().min(6, "Le mot de passe est obligatoire (au moins 6 caractères)."),
+  password: PasswordSchema,
 })
 
 interface PendingSignUpPayload {
