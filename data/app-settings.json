@@ -1,7 +1,7 @@
 {
   "loyalty": {
     "pointValueInEuro": 0.05,
-    "euroToPointsRatio": 3,
+    "euroToPointsRatio": 1,
     "minPointsToRedeem": 50,
     "maxDiscountPerTransactionEuro": 50,
     "tierSilverMinPoints": 500,
@@ -32,11 +32,11 @@
     "email": "contact@supermarket-calais.fr"
   },
   "notifications": {
-    "senderEmail": "notifications@supermarket-calais.fr",
+    "senderEmail": "abdelbayechou@gmail.com",
     "senderName": "Super Market Calais",
     "sendWelcomeEmail": true,
     "sendCashierInviteEmail": true
   },
-  "updatedAt": "2026-10-10T22:46:29.705Z",
+  "updatedAt": "2026-10-10T22:56:56.761Z",
   "updatedBy": "admin@supermarket.com"
 }

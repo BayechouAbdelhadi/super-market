@@ -127,6 +127,15 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       return;
     }
 
+    if (
+      !settings.notifications.senderEmail ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.notifications.senderEmail.trim())
+    ) {
+      setErrorMsg("Veuillez saisir une adresse email d'expédition valide pour les notifications.");
+      setSaving(false);
+      return;
+    }
+
     // Parse comma separated arrays
     const parsedAmounts = quickAmountsStr
       .split(',')
@@ -760,6 +769,68 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
               </div>
 
               <div className="space-y-4 pt-2">
+                {/* Expéditeur des notifications */}
+                <div className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">📬</span>
+                    <h3 className="text-sm font-bold text-[var(--color-text)]">
+                      Expéditeur des notifications (Sender Email)
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--color-text)] mb-1">
+                        Adresse email d&apos;expédition *
+                      </label>
+                      <input
+                        type="email"
+                        value={settings.notifications.senderEmail || ""}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setSettings({
+                            ...settings,
+                            notifications: {
+                              ...settings.notifications,
+                              senderEmail: e.target.value,
+                            },
+                          })
+                        }
+                        placeholder="notifications@supermarket-calais.fr"
+                        className="w-full h-11 text-sm font-medium font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        required
+                      />
+                      <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
+                        Adresse utilisée comme expéditeur (« From ») pour tous les e-mails envoyés aux clients et caissiers via Brevo.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--color-text)] mb-1">
+                        Nom d&apos;affichage de l&apos;expéditeur
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.notifications.senderName || ""}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setSettings({
+                            ...settings,
+                            notifications: {
+                              ...settings.notifications,
+                              senderName: e.target.value,
+                            },
+                          })
+                        }
+                        placeholder="Super Market Calais"
+                        className="w-full h-11 text-sm font-medium rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                      />
+                      <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
+                        Nom affiché dans la boîte de messagerie du destinataire.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Toggles d'envoi automatique */}
                 <label className="flex items-start gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-hover,#f9fafb)] cursor-pointer hover:border-[var(--color-primary)]/40 transition-colors">
                   <input
                     type="checkbox"

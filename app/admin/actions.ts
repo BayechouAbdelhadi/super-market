@@ -172,6 +172,12 @@ export async function createUser(formData: FormData) {
         activationLink,
         role,
         expiresInDays: 7,
+        sender: settings.notifications.senderEmail
+          ? {
+              email: settings.notifications.senderEmail,
+              name: settings.notifications.senderName || settings.store.storeName,
+            }
+          : undefined,
       }).catch((err) => {
         console.error("[createUser] Brevo activation email failed:", err);
       });

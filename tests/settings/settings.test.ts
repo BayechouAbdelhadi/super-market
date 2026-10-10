@@ -28,6 +28,8 @@ describe('Application Settings & Configuration', () => {
       expect(DEFAULT_APP_SETTINGS.pos.quickRedeemPoints.length).toBeGreaterThan(0);
       expect(DEFAULT_APP_SETTINGS.store.storeName).toBe('Super Market Calais');
       expect(DEFAULT_APP_SETTINGS.notifications.sendWelcomeEmail).toBe(true);
+      expect(DEFAULT_APP_SETTINGS.notifications.senderEmail).toContain('@');
+      expect(DEFAULT_APP_SETTINGS.notifications.senderName).toBe('Super Market Calais');
     });
   });
 
@@ -35,6 +37,18 @@ describe('Application Settings & Configuration', () => {
     it('validates a correct configuration object', () => {
       const parseResult = AppSettingsSchema.safeParse(DEFAULT_APP_SETTINGS);
       expect(parseResult.success).toBe(true);
+    });
+
+    it('rejects invalid notification sender email', () => {
+      const invalid = {
+        ...DEFAULT_APP_SETTINGS,
+        notifications: {
+          ...DEFAULT_APP_SETTINGS.notifications,
+          senderEmail: 'invalid-email-address',
+        },
+      };
+      const result = AppSettingsSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
     });
 
     it('rejects point value <= 0', () => {
