@@ -42,6 +42,10 @@ export interface StoreSettings {
 }
 
 export interface NotificationSettings {
+  /** Email address from which notifications are sent (Expéditeur des emails) */
+  senderEmail: string;
+  /** Display name of the sender (e.g. Super Market Calais) */
+  senderName: string;
   /** Whether to automatically send an activation email when a customer is registered */
   sendWelcomeEmail: boolean;
   /** Whether to automatically send a collaboration invitation email when a cashier is created */
@@ -81,6 +85,8 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     email: "contact@supermarket-calais.fr",
   },
   notifications: {
+    senderEmail: process.env.BREVO_SENDER_EMAIL || "notifications@supermarket-calais.fr",
+    senderName: process.env.BREVO_SENDER_NAME || "Super Market Calais",
     sendWelcomeEmail: true,
     sendCashierInviteEmail: true,
   },

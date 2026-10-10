@@ -68,6 +68,16 @@ export const AppSettingsSchema = z.object({
     email: z.string().trim().email("L'adresse email du magasin est invalide."),
   }),
   notifications: z.object({
+    senderEmail: z
+      .string()
+      .trim()
+      .email("L'adresse email d'envoi des notifications est invalide.")
+      .default("notifications@supermarket-calais.fr"),
+    senderName: z
+      .string()
+      .trim()
+      .max(100, "Le nom de l'expéditeur ne doit pas dépasser 100 caractères.")
+      .default("Super Market Calais"),
     sendWelcomeEmail: z.boolean(),
     sendCashierInviteEmail: z.boolean(),
   }),
