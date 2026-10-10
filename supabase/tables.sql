@@ -7,10 +7,12 @@ CREATE TABLE profiles (
     role user_role NOT NULL DEFAULT 'CUSTOMER',
     first_name TEXT,
     last_name TEXT,
-    email TEXT UNIQUE,
-    phone_number TEXT UNIQUE,
+    email TEXT,
+    phone_number TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    CONSTRAINT profiles_email_key UNIQUE (email),
+    CONSTRAINT profiles_phone_number_key UNIQUE (phone_number)
 );
 
 -- Customers table (for loyalty and rewards data)

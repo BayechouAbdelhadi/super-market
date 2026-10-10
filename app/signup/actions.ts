@@ -78,10 +78,10 @@ export async function signup(
   const firstNameClean = first_name.trim()
   const lastNameClean = last_name.trim()
 
-  const supabase = await createClient()
+  const adminClient = createAdminClient()
 
-  // Verify that account does not already exist
-  const { data: existingUser } = await supabase
+  // Verify that account does not already exist (use adminClient to bypass RLS on public signup)
+  const { data: existingUser } = await adminClient
     .from('profiles')
     .select('id, email, phone_number')
     .or(`email.eq.${emailNormalized},phone_number.eq.${phoneNormalized}`)
@@ -92,7 +92,7 @@ export async function signup(
     return {
       error: isEmailConflict
         ? "Un compte existe déjà avec cette adresse email."
-        : "Un compte existe déjà avec ce numéro de téléphone.",
+        : "Ce numéro de téléphone est déjà associé à un compte existant.",
     }
   }
 
@@ -203,7 +203,7 @@ export async function confirmSignUpOtp(formData: FormData) {
   const userId = authData.user.id;
 
   // Create profile with hardcoded role CUSTOMER
-  await adminClient.from('profiles').upsert({
+  const { error: profileError } = await adminClient.from('profiles').upsert({
     id: userId,
     first_name: pendingData.first_name,
     last_name: pendingData.last_name,
@@ -211,6 +211,13 @@ export async function confirmSignUpOtp(formData: FormData) {
     phone_number: pendingData.phone,
     role: STRICT_ROLE, // IMMUTABLE: ONLY role CUSTOMER
   });
+
+  if (profileError) {
+    console.error("[SignUp Confirm] Profile upsert error:", profileError.message);
+    // Rollback: delete auth user to avoid orphan accounts
+    await adminClient.auth.admin.deleteUser(userId).catch(() => null);
+    redirect(`/signup?message=${encodeURIComponent("Ce numéro de téléphone ou cette adresse email est déjà utilisé.")}`);
+  }
 
   // Create initial loyalty customer record (Bronze tier, 0 points)
   await adminClient.from('customers').upsert({
