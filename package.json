@@ -8,7 +8,7 @@
         "start": "next start",
         "lint": "eslint",
         "test": "vitest run",
-        "create-vps-key": "bash ./create-vps-key.sh super-market"
+        "create-vps-key": "bash ./create-vps-key.sh super-market"    
     },
     "dependencies": {
         "@base-ui/react": "^1.8.0",
@@ -32,6 +32,7 @@
         "eslint": "^9",
         "eslint-config-next": "16.3.8",
         "tailwindcss": "^4",
+        "tsx": "^4.23.15",
         "typescript": "^5",
         "vitest": "^5.0.3"
     }

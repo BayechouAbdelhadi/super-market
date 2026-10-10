@@ -23,7 +23,6 @@ const ResetPasswordSchema = z
 
 export async function resetPassword(formData: FormData) {
   const token = (formData.get('token') as string || '').trim()
-  const emailParam = (formData.get('email') as string || '').trim().toLowerCase()
   const password = formData.get('password') as string
   const confirmPassword = formData.get('confirm_password') as string
 
@@ -35,116 +34,92 @@ export async function resetPassword(formData: FormData) {
   if (!parseResult.success) {
     const errorMsg = parseResult.error.issues?.[0]?.message || "Données invalides."
     redirect(
-      `/reset-password?email=${encodeURIComponent(emailParam)}&token=${encodeURIComponent(token)}&message=${encodeURIComponent(errorMsg)}`
+      `/reset-password?token=${encodeURIComponent(token)}&message=${encodeURIComponent(errorMsg)}`
     )
   }
 
-  // 1. If an active authenticated session exists in cookies (e.g. from native Supabase recovery link)
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (user) {
-    const { error: updateError } = await supabase.auth.updateUser({
-      password: parseResult.data.password,
-    })
-
-    if (!updateError) {
-      const cookieStore = await cookies()
-      cookieStore.delete(PENDING_RESET_COOKIE)
-      redirect(
-        `/login?success=${encodeURIComponent(
-          "Votre mot de passe a été modifié avec succès ! Vous pouvez maintenant vous connecter."
-        )}`
-      )
-    }
-
-    console.error("[ResetPassword] updateUser error with active session:", updateError.message)
-    redirect(
-      `/reset-password?email=${encodeURIComponent(emailParam)}&token=${encodeURIComponent(token)}&message=${encodeURIComponent(
-        `Erreur: ${updateError.message}`
-      )}`
-    )
-  }
-
-  // 2. Validate signed reset token from the URL query
+  // 1. Verify the cryptographically signed reset token
+  // CRITICAL SECURITY: Never trust browser session cookies! The target email
+  // MUST come strictly from the signed, HMAC-verified reset token.
   const cookieStore = await cookies()
   const rawToken = token || cookieStore.get(PENDING_RESET_COOKIE)?.value
   const pendingData = rawToken ? verifySignedToken<PendingResetPayload>(rawToken) : null
 
-  if (pendingData) {
-    if (Date.now() > pendingData.expiresAt) {
-      cookieStore.delete(PENDING_RESET_COOKIE)
-      redirect(
-        `/forgot-password?message=${encodeURIComponent(
-          "Ce lien de réinitialisation a expiré. Veuillez refaire une nouvelle demande."
-        )}`
-      )
-    }
-
-    // Update password securely via Server-Only Supabase Admin Client
-    try {
-      const adminClient = createAdminClient()
-
-      let targetUserId: string | null = null
-      const { data: profile } = await adminClient
-        .from('profiles')
-        .select('id')
-        .eq('email', pendingData.email)
-        .single()
-
-      if (profile?.id) {
-        targetUserId = profile.id
-      } else {
-        const { data: usersData } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 100 })
-        const userFound = usersData?.users?.find(
-          (u) => u.email?.toLowerCase() === pendingData.email.toLowerCase()
-        )
-        targetUserId = userFound?.id || null
-      }
-
-      if (!targetUserId) {
-        console.error("[ResetPassword] User not found for email:", pendingData.email)
-        redirect(
-          `/reset-password?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent(
-            "Aucun compte associé à cette adresse email n'a été trouvé."
-          )}`
-        )
-      }
-
-      const { error: adminError } = await adminClient.auth.admin.updateUserById(targetUserId, {
-        password: parseResult.data.password,
-      })
-
-      if (adminError) {
-        console.error("[ResetPassword] admin.updateUserById error:", adminError.message)
-        redirect(
-          `/reset-password?email=${encodeURIComponent(pendingData.email)}&token=${encodeURIComponent(token)}&message=${encodeURIComponent(
-            `Erreur: ${adminError.message}`
-          )}`
-        )
-      }
-
-      // Password successfully updated!
-      cookieStore.delete(PENDING_RESET_COOKIE)
-      redirect(
-        `/login?success=${encodeURIComponent(
-          "Votre mot de passe a été modifié avec succès ! Vous pouvez maintenant vous connecter."
-        )}`
-      )
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('NEXT_REDIRECT')) {
-        throw err
-      }
-      console.error("[ResetPassword] Unexpected error during admin update:", err)
-    }
+  if (!pendingData) {
+    redirect(
+      `/reset-password?message=${encodeURIComponent(
+        "Lien de réinitialisation invalide ou manquant. Veuillez refaire une demande."
+      )}`
+    )
   }
 
-  // 3. Fallback error if token was missing or invalid
+  if (Date.now() > pendingData.expiresAt) {
+    cookieStore.delete(PENDING_RESET_COOKIE)
+    redirect(
+      `/forgot-password?message=${encodeURIComponent(
+        "Ce lien de réinitialisation a expiré. Veuillez refaire une nouvelle demande."
+      )}`
+    )
+  }
+
+  const targetEmail = pendingData.email.toLowerCase().trim()
+
+  // 2. Identify the target user strictly by the signed token email
+  const adminClient = createAdminClient()
+  let targetUserId: string | null = null
+
+  const { data: profile } = await adminClient
+    .from('profiles')
+    .select('id')
+    .eq('email', targetEmail)
+    .single()
+
+  if (profile?.id) {
+    targetUserId = profile.id
+  } else {
+    // Fallback search in auth users list
+    const { data: usersData } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 100 })
+    const matched = usersData?.users?.find(
+      (u) => u.email?.toLowerCase().trim() === targetEmail
+    )
+    targetUserId = matched?.id || null
+  }
+
+  if (!targetUserId) {
+    console.error("[ResetPassword] No account found for signed email:", targetEmail)
+    redirect(
+      `/reset-password?message=${encodeURIComponent(
+        `Aucun compte associé à l'adresse email ${targetEmail} n'a été trouvé.`
+      )}`
+    )
+  }
+
+  // 3. Update the target user's password using the Admin Client
+  // This explicitly targets ONLY the user from the signed token, NEVER the browser's active session!
+  const { error: adminError } = await adminClient.auth.admin.updateUserById(targetUserId, {
+    password: parseResult.data.password,
+  })
+
+  if (adminError) {
+    console.error("[ResetPassword] admin.updateUserById error:", adminError.message)
+    redirect(
+      `/reset-password?token=${encodeURIComponent(token)}&message=${encodeURIComponent(
+        `Erreur lors de la mise à jour: ${adminError.message}`
+      )}`
+    )
+  }
+
+  // 4. CRITICAL SECURITY: Immediately purge and sign out any active session in the browser!
+  // If an admin or cashier was currently logged in on this browser window,
+  // this completely wipes their session so no privilege escalation or cross-account leakage can occur.
+  const supabase = await createClient()
+  await supabase.auth.signOut().catch(() => null)
+  cookieStore.delete(PENDING_RESET_COOKIE)
+
+  // 5. Redirect cleanly to login
   redirect(
-    `/reset-password?email=${encodeURIComponent(emailParam)}&token=${encodeURIComponent(token)}&message=${encodeURIComponent(
-      "Session de réinitialisation expirée ou invalide. Veuillez refaire une demande."
+    `/login?success=${encodeURIComponent(
+      `Le mot de passe pour le compte ${targetEmail} a été modifié avec succès ! Veuillez vous connecter avec vos nouveaux identifiants.`
     )}`
   )
 }

@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { normalizePhone } from '@/lib/loyalty/domain'
 import { emailService } from '@/lib/email'
 import { generateSecureOtp, hashOtp, createSignedToken, verifySignedToken } from '@/lib/email/otp-security'
@@ -149,18 +150,18 @@ export async function confirmSignUpOtp(formData: FormData) {
   // Under NO circumstances can 'ADMIN' or 'CASHIER' ever be created here.
   const STRICT_ROLE = 'CUSTOMER' as const;
 
-  const supabase = await createClient();
+  const adminClient = createAdminClient();
 
-  const { data: authData, error: authError } = await supabase.auth.signUp({
+  // Create confirmed user in Supabase (Brevo OTP has already been verified)
+  const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
     email: pendingData.email,
     password: pendingData.password,
-    options: {
-      data: {
-        first_name: pendingData.first_name,
-        last_name: pendingData.last_name,
-        phone_number: pendingData.phone,
-        role: STRICT_ROLE, // IMMUTABLE: ONLY role CUSTOMER
-      },
+    email_confirm: true, // Marked as verified immediately
+    user_metadata: {
+      first_name: pendingData.first_name,
+      last_name: pendingData.last_name,
+      phone_number: pendingData.phone,
+      role: STRICT_ROLE,
     },
   });
 
@@ -172,7 +173,7 @@ export async function confirmSignUpOtp(formData: FormData) {
   const userId = authData.user.id;
 
   // Create profile with hardcoded role CUSTOMER
-  await supabase.from('profiles').upsert({
+  await adminClient.from('profiles').upsert({
     id: userId,
     first_name: pendingData.first_name,
     last_name: pendingData.last_name,
@@ -182,7 +183,7 @@ export async function confirmSignUpOtp(formData: FormData) {
   });
 
   // Create initial loyalty customer record (Bronze tier, 0 points)
-  await supabase.from('customers').upsert({
+  await adminClient.from('customers').upsert({
     id: userId,
     loyalty_points: 0,
     status: 'BRONZE',
@@ -191,7 +192,14 @@ export async function confirmSignUpOtp(formData: FormData) {
   // Clear cookie
   cookieStore.delete(PENDING_SIGNUP_COOKIE);
 
-  if (authData.session) {
+  // Automatically authenticate user with active session cookies
+  const supabase = await createClient();
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: pendingData.email,
+    password: pendingData.password,
+  });
+
+  if (!signInError) {
     redirect('/account');
   }
 

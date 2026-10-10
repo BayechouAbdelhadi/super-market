@@ -9,7 +9,8 @@ CREATE TABLE profiles (
     last_name TEXT,
     email TEXT UNIQUE,
     phone_number TEXT UNIQUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- Customers table (for loyalty and rewards data)
@@ -30,23 +31,3 @@ CREATE TABLE transactions (
     points_redeemed INTEGER DEFAULT 0 NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
-
--- Handle automatic profile creation on user signup (Trigger)
-CREATE OR REPLACE FUNCTION public.handle_new_user() 
-RETURNS trigger AS $$
-BEGIN
-  INSERT INTO public.profiles (id, first_name, last_name, email, role)
-  VALUES (new.id, new.raw_user_meta_data->>'first_name', new.raw_user_meta_data->>'last_name', new.email, COALESCE((new.raw_user_meta_data->>'role')::user_role, 'CUSTOMER'::user_role));
-  
-  -- If role is CUSTOMER, create a customer record as well
-  IF COALESCE((new.raw_user_meta_data->>'role')::user_role, 'CUSTOMER'::user_role) = 'CUSTOMER' THEN
-    INSERT INTO public.customers (id) VALUES (new.id);
-  END IF;
-
-  RETURN new;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
