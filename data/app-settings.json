@@ -1,0 +1,40 @@
+{
+  "loyalty": {
+    "pointValueInEuro": 0.01,
+    "euroToPointsRatio": 1.5,
+    "minPointsToRedeem": 100,
+    "maxDiscountPerTransactionEuro": 50,
+    "tierSilverMinPoints": 500,
+    "tierGoldMinPoints": 2000,
+    "tierVipMinPoints": 5000
+  },
+  "pos": {
+    "defaultCashierStation": "Caisse #1",
+    "quickPurchaseAmounts": [
+      12.5,
+      45.8,
+      75.5,
+      120
+    ],
+    "quickRedeemPoints": [
+      50,
+      100,
+      250,
+      500
+    ],
+    "defaultRedeemReason": "Remise fidélité en caisse"
+  },
+  "store": {
+    "storeName": "Super Market Calais",
+    "tagline": "Votre supermarché de proximité à Calais",
+    "address": "123 Boulevard Lafayette, 62100 Calais",
+    "phone": "03 21 00 00 00",
+    "email": "contact@supermarket-calais.fr"
+  },
+  "notifications": {
+    "sendWelcomeEmail": true,
+    "sendCashierInviteEmail": true
+  },
+  "updatedAt": "2026-10-10T21:37:45.282Z",
+  "updatedBy": "admin@supermarket.com"
+}

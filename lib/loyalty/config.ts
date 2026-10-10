@@ -7,6 +7,8 @@ export const LOYALTY_CONFIG = {
   conversion: {
     // 1 Euro spent = 1 Loyalty Point (rounded down)
     euroToPointsRatio: 1,
+    // 1 Loyalty Point = 0.05 Euro discount (e.g. 100 points = 5 €)
+    pointValueInEuro: 0.05,
   },
   tiers: {
     BRONZE: {

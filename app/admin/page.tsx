@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Receipt,
   Sparkles,
+  Sliders,
 } from "lucide-react";
 import { Metadata } from "next";
 
@@ -293,7 +294,45 @@ export default async function AdminHubPage() {
               </Card>
             </Link>
 
-            {/* App 6: Stocks & Inventaire (Future App Card) */}
+            {/* App 6: Configuration & Paramètres du Magasin */}
+            <Link
+              href="/admin/settings"
+              className="group block focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-2xl"
+            >
+              <Card
+                padded="lg"
+                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-amber-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
+              >
+                <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Sliders className="w-6 h-6" />
+                    </div>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                      Admin Only
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-amber-600 transition-colors">
+                      Configuration de l&apos;App
+                    </h3>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
+                      Valeur monétaire des points (0.05 €), seuils de remises, paramètres de caisse et identité commerciale.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-amber-600 group-hover:translate-x-1 transition-transform">
+                  <span>Configurer l&apos;application</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </Card>
+            </Link>
+
+            {/* App 7: Stocks & Inventaire (Future App Card) */}
             <Card
               padded="lg"
               className="h-full border-[var(--color-border)] bg-[var(--color-surface)] opacity-85 flex flex-col justify-between"

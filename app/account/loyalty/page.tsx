@@ -20,6 +20,8 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 
+import { getAppSettings } from '@/lib/settings/service'
+
 export default async function CustomerLoyaltyAppPage() {
   const supabase = await createClient()
   const {
@@ -34,8 +36,8 @@ export default async function CustomerLoyaltyAppPage() {
   if (role === 'ADMIN') redirect('/admin')
   if (role === 'CASHIER') redirect('/cashier')
 
-  // Fetch profile, customer loyalty status, and recent transactions
-  const [{ data: profile }, { data: customer }, { data: transactions }] =
+  // Fetch profile, customer loyalty status, recent transactions, and app settings
+  const [{ data: profile }, { data: customer }, { data: transactions }, settings] =
     await Promise.all([
       supabase
         .from('profiles')
@@ -53,6 +55,7 @@ export default async function CustomerLoyaltyAppPage() {
         .eq('customer_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10),
+      getAppSettings(),
     ])
 
   const firstName = profile?.first_name || user.user_metadata?.first_name || ''
@@ -63,8 +66,9 @@ export default async function CustomerLoyaltyAppPage() {
   const points = customer?.loyalty_points ?? 0
   const tier = (customer?.status as 'BRONZE' | 'SILVER' | 'GOLD' | 'VIP') || 'BRONZE'
 
-  // Conversion: 100 points = 5 € (0.05 € per point)
-  const euroDiscount = (points * 0.05).toFixed(2)
+  // Dynamic conversion based on admin configured point value
+  const pointValueInEuro = settings.loyalty.pointValueInEuro
+  const euroDiscount = (points * pointValueInEuro).toFixed(2)
 
   // Calculate next tier progress
   const tiersList = [
@@ -234,6 +238,7 @@ export default async function CustomerLoyaltyAppPage() {
               tier={tier}
               userId={user.id}
               createdAt={user.created_at}
+              pointValueInEuro={pointValueInEuro}
             />
 
             {/* Quick Tip Card */}

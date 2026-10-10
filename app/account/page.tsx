@@ -21,6 +21,8 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 
+import { getAppSettings } from '@/lib/settings/service'
+
 export default async function AccountHubPage() {
   const supabase = await createClient()
   const {
@@ -35,8 +37,8 @@ export default async function AccountHubPage() {
   if (role === 'ADMIN') redirect('/admin')
   if (role === 'CASHIER') redirect('/cashier')
 
-  // Fetch customer profile and loyalty info
-  const [{ data: profile }, { data: customer }] = await Promise.all([
+  // Fetch customer profile, loyalty info, and app settings
+  const [{ data: profile }, { data: customer }, settings] = await Promise.all([
     supabase
       .from('profiles')
       .select('first_name, last_name, email, phone_number')
@@ -47,6 +49,7 @@ export default async function AccountHubPage() {
       .select('loyalty_points, status')
       .eq('id', user.id)
       .single(),
+    getAppSettings(),
   ])
 
   const firstName = profile?.first_name || user.user_metadata?.first_name || ''
@@ -56,7 +59,8 @@ export default async function AccountHubPage() {
   const phone = profile?.phone_number || user.user_metadata?.phone_number || ''
   const points = customer?.loyalty_points ?? 0
   const tier = (customer?.status as 'BRONZE' | 'SILVER' | 'GOLD' | 'VIP') || 'BRONZE'
-  const euroDiscount = (points * 0.05).toFixed(2)
+  const pointValueInEuro = settings.loyalty.pointValueInEuro
+  const euroDiscount = (points * pointValueInEuro).toFixed(2)
 
   const apps = getAllApps()
 

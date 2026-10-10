@@ -13,6 +13,7 @@ interface RedeemPointsModalProps {
   customer: CustomerDetail | null;
   onClose: () => void;
   onPointsRedeemed: (updatedCustomer: CustomerDetail) => void;
+  pointValueInEuro?: number;
 }
 
 export function RedeemPointsModal({
@@ -20,6 +21,7 @@ export function RedeemPointsModal({
   customer,
   onClose,
   onPointsRedeemed,
+  pointValueInEuro = LOYALTY_CONFIG.conversion.pointValueInEuro,
 }: RedeemPointsModalProps) {
   // Both required inputs: purchase amount (€) and points to redeem
   const [amountStr, setAmountStr] = useState("");
@@ -261,6 +263,13 @@ export function RedeemPointsModal({
             <span className="text-[var(--color-text-muted)] font-medium">Points fidélité utilisés :</span>
             <strong className="text-rose-600 dark:text-rose-400 font-mono text-sm">
               {isValidPoints ? `-${pointsToRedeem} pts` : "—"}
+            </strong>
+          </div>
+
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[var(--color-text-muted)] font-medium">Remise fidélité accordée :</span>
+            <strong className="text-emerald-600 dark:text-emerald-400 font-mono text-sm">
+              {isValidPoints ? `-${(pointsToRedeem * pointValueInEuro).toFixed(2)} €` : "—"}
             </strong>
           </div>
 

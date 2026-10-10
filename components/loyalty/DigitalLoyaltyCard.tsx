@@ -13,6 +13,7 @@ interface DigitalLoyaltyCardProps {
   tier: LoyaltyTier
   userId?: string
   createdAt?: string
+  pointValueInEuro?: number
 }
 
 export function DigitalLoyaltyCard({
@@ -23,6 +24,7 @@ export function DigitalLoyaltyCard({
   tier = 'BRONZE',
   userId = '',
   createdAt,
+  pointValueInEuro = 0.05,
 }: DigitalLoyaltyCardProps) {
   // Real Member reference from actual Supabase ID (first 8 hex characters, no invented numbers)
   const memberNumber = userId
@@ -35,8 +37,8 @@ export function DigitalLoyaltyCard({
     ? `${String(joinDate.getMonth() + 1).padStart(2, '0')}/${joinDate.getFullYear()}`
     : '2026'
 
-  // Euro discount value (real formula: 100 points = 5 €)
-  const euroDiscount = (points * 0.05).toFixed(2)
+  // Euro discount value (calculated dynamically from configured point value in euro)
+  const euroDiscount = (points * pointValueInEuro).toFixed(2)
 
   // Authentic light luxury colors that match the tier with crisp, darker text
   const tierThemes = {

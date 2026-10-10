@@ -25,6 +25,7 @@ import {
   LogOut,
   X,
   Activity,
+  Sliders,
 } from "lucide-react";
 
 interface MobileBottomNavProps {
@@ -226,6 +227,16 @@ export function MobileBottomNav({ role, email }: MobileBottomNavProps) {
                     </span>
                     <span>Live</span>
                   </span>
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  href="/admin/settings"
+                  onClick={() => setSheetOpen(false)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors min-h-[44px]"
+                >
+                  <Sliders className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  <span>Configuration de l&apos;App</span>
                 </Link>
               )}
               <Link
