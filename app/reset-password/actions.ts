@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import {
   verifySignedToken,
   PENDING_RESET_COOKIE,
@@ -38,9 +39,8 @@ export async function resetPassword(formData: FormData) {
     )
   }
 
+  // 1. If an active authenticated session exists in cookies (e.g. from native Supabase recovery link)
   const supabase = await createClient()
-
-  // 1. If an active authenticated session exists in cookies (e.g. from Supabase link or exchange)
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -83,63 +83,68 @@ export async function resetPassword(formData: FormData) {
       )
     }
 
-    // A. Try updating via Supabase Admin API if SUPABASE_SERVICE_ROLE_KEY is configured
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (serviceRoleKey) {
-      try {
-        const { createClient: createSupabaseJsClient } = await import('@supabase/supabase-js')
-        const adminClient = createSupabaseJsClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          serviceRoleKey,
-          { auth: { persistSession: false, autoRefreshToken: false } }
+    // Update password securely via Server-Only Supabase Admin Client
+    try {
+      const adminClient = createAdminClient()
+
+      let targetUserId: string | null = null
+      const { data: profile } = await adminClient
+        .from('profiles')
+        .select('id')
+        .eq('email', pendingData.email)
+        .single()
+
+      if (profile?.id) {
+        targetUserId = profile.id
+      } else {
+        const { data: usersData } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 100 })
+        const userFound = usersData?.users?.find(
+          (u) => u.email?.toLowerCase() === pendingData.email.toLowerCase()
         )
-
-        const { data: profile } = await adminClient
-          .from('profiles')
-          .select('id')
-          .eq('email', pendingData.email)
-          .single()
-
-        if (profile?.id) {
-          const { error: adminError } = await adminClient.auth.admin.updateUserById(profile.id, {
-            password: parseResult.data.password,
-          })
-
-          if (!adminError) {
-            cookieStore.delete(PENDING_RESET_COOKIE)
-            redirect(
-              `/login?success=${encodeURIComponent(
-                "Votre mot de passe a été modifié avec succès ! Vous pouvez maintenant vous connecter."
-              )}`
-            )
-          }
-        }
-      } catch (e) {
-        console.error("[ResetPassword] Service role update exception:", e)
+        targetUserId = userFound?.id || null
       }
-    }
 
-    // B. Try direct database RPC if available in Postgres
-    const { data: rpcData, error: rpcError } = await supabase.rpc('reset_customer_password', {
-      user_email: pendingData.email,
-      new_password: parseResult.data.password,
-    })
+      if (!targetUserId) {
+        console.error("[ResetPassword] User not found for email:", pendingData.email)
+        redirect(
+          `/reset-password?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent(
+            "Aucun compte associé à cette adresse email n'a été trouvé."
+          )}`
+        )
+      }
 
-    if (!rpcError && (rpcData as any)?.success) {
+      const { error: adminError } = await adminClient.auth.admin.updateUserById(targetUserId, {
+        password: parseResult.data.password,
+      })
+
+      if (adminError) {
+        console.error("[ResetPassword] admin.updateUserById error:", adminError.message)
+        redirect(
+          `/reset-password?email=${encodeURIComponent(pendingData.email)}&token=${encodeURIComponent(token)}&message=${encodeURIComponent(
+            `Erreur: ${adminError.message}`
+          )}`
+        )
+      }
+
+      // Password successfully updated!
       cookieStore.delete(PENDING_RESET_COOKIE)
       redirect(
         `/login?success=${encodeURIComponent(
           "Votre mot de passe a été modifié avec succès ! Vous pouvez maintenant vous connecter."
         )}`
       )
+    } catch (err) {
+      if (err instanceof Error && err.message.includes('NEXT_REDIRECT')) {
+        throw err
+      }
+      console.error("[ResetPassword] Unexpected error during admin update:", err)
     }
   }
 
-  // 3. If neither session nor service role / RPC succeeded
-  console.error("[ResetPassword] Password update could not be completed for:", emailParam)
+  // 3. Fallback error if token was missing or invalid
   redirect(
     `/reset-password?email=${encodeURIComponent(emailParam)}&token=${encodeURIComponent(token)}&message=${encodeURIComponent(
-      "Impossible de mettre à jour le mot de passe. Veuillez refaire une demande ou contacter le support."
+      "Session de réinitialisation expirée ou invalide. Veuillez refaire une demande."
     )}`
   )
 }
