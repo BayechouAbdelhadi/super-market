@@ -77,6 +77,10 @@ function getIsOpenNow(): { isOpen: boolean; statusText: string } {
 
 export default function Home() {
   const [openStatus, setOpenStatus] = useState({ isOpen: true, statusText: "Ouvert 7j/7 à Calais" });
+  const [appSettings, setAppSettings] = useState<{ euroRatio: number; storeName: string }>({
+    euroRatio: 1,
+    storeName: "Super Market",
+  });
   const currentDayIndex = new Date().getDay();
 
   useEffect(() => {
@@ -85,6 +89,26 @@ export default function Home() {
       setOpenStatus(getIsOpenNow());
     }, 60000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const res = await fetch("/api/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.settings) {
+            setAppSettings({
+              euroRatio: data.settings.loyalty?.euroToPointsRatio ?? 1,
+              storeName: data.settings.store?.storeName ?? "Super Market",
+            });
+          }
+        }
+      } catch {
+        // Keep default
+      }
+    }
+    loadSettings();
   }, []);
 
   return (
@@ -245,7 +269,7 @@ export default function Home() {
           </h1>
 
           <p className="text-base sm:text-lg text-[var(--color-text-muted)] leading-relaxed max-w-2xl mx-auto font-normal">
-            Alimentation générale de proximité, fruits et légumes frais réapprovisionnés quotidiennement, point relais colis Pickup La Poste et programme fidélité au comptoir (1 € = 1 point).
+            Alimentation générale de proximité, fruits et légumes frais réapprovisionnés quotidiennement, point relais colis Pickup La Poste et programme fidélité au comptoir (1 € = {appSettings.euroRatio} point{appSettings.euroRatio > 1 ? "s" : ""}).
           </p>
 
           {/* Quick action buttons */}
@@ -440,7 +464,7 @@ export default function Home() {
                     <div>
                       <strong className="block text-[var(--color-text)]">Fidélité au comptoir</strong>
                       <span className="text-[11px] text-[var(--color-text-muted)]">
-                        1 € = 1 pt dès le 1er achat, pas de carte plastique requise.
+                        1 € = {appSettings.euroRatio} pt{appSettings.euroRatio > 1 ? "s" : ""} dès le 1er achat, pas de carte plastique requise.
                       </span>
                     </div>
                   </div>
@@ -635,7 +659,7 @@ export default function Home() {
 
               <div className="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-2">
                 <div className="text-2xl font-black text-[var(--color-primary)]">2. Cumulez</div>
-                <h4 className="text-sm font-bold text-[var(--color-text)]">1 € = 1 point fidélité</h4>
+                <h4 className="text-sm font-bold text-[var(--color-text)]">1 € = {appSettings.euroRatio} point{appSettings.euroRatio > 1 ? "s" : ""} fidélité</h4>
                 <p className="text-xs text-[var(--color-text-muted)]">
                   Vos points s&apos;accumulent automatiquement et débloquent des statuts Bronze, Silver, Gold et VIP.
                 </p>

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { CustomerWorkspace } from '@/components/loyalty/CustomerWorkspace'
 import { ProfileWithCustomerRow } from '@/lib/loyalty/types'
+import { getAppSettings } from '@/lib/settings/service'
 
 interface CustomersListProps {
   title?: string
@@ -18,15 +19,18 @@ export async function CustomersList({
   initialQuery,
 }: CustomersListProps = {}) {
   const supabase = await createClient()
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select(`
-      id, first_name, last_name, email, phone_number, created_at, role,
-      customers ( loyalty_points, status )
-    `)
-    .eq('role', 'CUSTOMER')
-    .order('created_at', { ascending: false })
-    .limit(100)
+  const [{ data: profiles }, settings] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select(`
+        id, first_name, last_name, email, phone_number, created_at, role,
+        customers ( loyalty_points, status )
+      `)
+      .eq('role', 'CUSTOMER')
+      .order('created_at', { ascending: false })
+      .limit(100),
+    getAppSettings(),
+  ])
 
   const customers = (profiles || []).map((p: ProfileWithCustomerRow) => {
     const cust = Array.isArray(p.customers) ? p.customers[0] : p.customers;
@@ -45,6 +49,7 @@ export async function CustomersList({
       initialPage={initialPage}
       initialLimit={initialLimit}
       initialQuery={initialQuery}
+      settings={settings}
     />
   )
 }

@@ -1,8 +1,8 @@
 {
   "loyalty": {
-    "pointValueInEuro": 0.01,
-    "euroToPointsRatio": 1.5,
-    "minPointsToRedeem": 100,
+    "pointValueInEuro": 0.05,
+    "euroToPointsRatio": 1,
+    "minPointsToRedeem": 50,
     "maxDiscountPerTransactionEuro": 50,
     "tierSilverMinPoints": 500,
     "tierGoldMinPoints": 2000,
@@ -35,6 +35,6 @@
     "sendWelcomeEmail": true,
     "sendCashierInviteEmail": true
   },
-  "updatedAt": "2026-10-10T21:37:45.282Z",
-  "updatedBy": "admin@supermarket.com"
+  "updatedAt": "2026-10-10T22:32:34.928Z",
+  "updatedBy": "admin@example.com"
 }

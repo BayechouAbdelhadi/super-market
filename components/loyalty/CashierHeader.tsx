@@ -9,9 +9,10 @@ import { Loader2 } from "lucide-react";
 
 interface CashierHeaderProps {
   cashier: User | null;
+  euroToPointsRatio?: number;
 }
 
-export function CashierHeader({ cashier }: CashierHeaderProps) {
+export function CashierHeader({ cashier, euroToPointsRatio = 1 }: CashierHeaderProps) {
   const [time, setTime] = useState("");
 
   useEffect(() => {
@@ -65,7 +66,7 @@ export function CashierHeader({ cashier }: CashierHeaderProps) {
                 </span>
               </div>
               <p className="text-[11px] text-[var(--color-text-muted)] hidden sm:block">
-                Système d&apos;attribution &amp; déduction de points • 1 € = 1 pt
+                Système d&apos;attribution &amp; déduction de points • 1 € = {euroToPointsRatio} pt{euroToPointsRatio > 1 ? "s" : ""}
               </p>
             </div>
           </Link>

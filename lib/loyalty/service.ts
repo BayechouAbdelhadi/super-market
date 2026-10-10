@@ -11,11 +11,14 @@ import { SupabaseCustomerRepository } from "./adapters/supabase-customer-reposit
 import { SupabaseTransactionRepository } from "./adapters/supabase-transaction-repository";
 import { LOYALTY_CONFIG } from "./config";
 
+import { getAppSettings } from "@/lib/settings/service";
+
 import {
   normalizePhone,
   calculatePoints,
   calculateTier,
   canRedeemPoints,
+  validateRedemption,
   applyPurchasePoints,
   applyRedeemPoints,
   calculateRedemptionPointsEarned,
@@ -26,6 +29,7 @@ export {
   calculatePoints,
   calculateTier,
   canRedeemPoints,
+  validateRedemption,
   applyPurchasePoints,
   applyRedeemPoints,
   calculateRedemptionPointsEarned,
@@ -136,7 +140,8 @@ export async function recordPurchase(
     return { success: false, error: "Client introuvable." };
   }
 
-  const pointsEarned = calculatePoints(amount);
+  const settings = await getAppSettings();
+  const pointsEarned = calculatePoints(amount, settings.loyalty.euroToPointsRatio);
 
   try {
     const tx = await txRepo.create({
@@ -147,10 +152,17 @@ export async function recordPurchase(
       pointsRedeemed: 0,
     });
 
+    const tierThresholds = {
+      silver: settings.loyalty.tierSilverMinPoints,
+      gold: settings.loyalty.tierGoldMinPoints,
+      vip: settings.loyalty.tierVipMinPoints,
+    };
+
     const updated = applyPurchasePoints(
       detailBefore.available_points,
       detailBefore.historical_points,
-      pointsEarned
+      pointsEarned,
+      tierThresholds
     );
 
     await customerRepo.updateLoyaltyPoints(customerId, updated.available_points, updated.tier);
@@ -165,7 +177,7 @@ export async function recordPurchase(
         type: "EARN",
         points: pointsEarned,
         balance_after: updated.available_points,
-        reason: `Achat de ${amount.toFixed(2)} €`,
+        reason: `Achat de ${amount.toFixed(2)} € (+${pointsEarned} pts)`,
         created_at: tx.created_at,
       },
       customer: updatedDetail!,
@@ -202,10 +214,18 @@ export async function redeemPoints(
     return { success: false, error: "Client introuvable." };
   }
 
-  if (!canRedeemPoints(detailBefore.available_points, pointsToRedeem)) {
+  const settings = await getAppSettings();
+
+  const validation = validateRedemption(pointsToRedeem, detailBefore.available_points, {
+    minPointsToRedeem: settings.loyalty.minPointsToRedeem,
+    maxDiscountPerTransactionEuro: settings.loyalty.maxDiscountPerTransactionEuro,
+    pointValueInEuro: settings.loyalty.pointValueInEuro,
+  });
+
+  if (!validation.valid) {
     return {
       success: false,
-      error: `Solde insuffisant : ${detailBefore.available_points} point(s) disponible(s).`,
+      error: validation.error || "Opération de déduction invalide.",
       availablePoints: detailBefore.available_points,
     };
   }
@@ -222,21 +242,29 @@ export async function redeemPoints(
       pointsRedeemed: pointsToRedeem,
     });
 
+    const tierThresholds = {
+      silver: settings.loyalty.tierSilverMinPoints,
+      gold: settings.loyalty.tierGoldMinPoints,
+      vip: settings.loyalty.tierVipMinPoints,
+    };
+
     const updated = applyRedeemPoints(
       detailBefore.available_points,
       detailBefore.historical_points,
-      pointsToRedeem
+      pointsToRedeem,
+      tierThresholds
     );
 
     await customerRepo.updateLoyaltyPoints(customerId, updated.available_points);
     const updatedDetail = await customerRepo.getById(customerId);
 
+    const discountEuro = (pointsToRedeem * settings.loyalty.pointValueInEuro).toFixed(2);
     const movementReason =
       reason && reason.trim()
-        ? reason.trim()
+        ? `${reason.trim()} (-${discountEuro} €)`
         : purchaseAmount > 0
-          ? `Remise fidélité (Achat de ${purchaseAmount.toFixed(2)} €)`
-          : LOYALTY_CONFIG.defaults.redeemReason;
+          ? `Remise fidélité -${discountEuro} € (Achat de ${purchaseAmount.toFixed(2)} €)`
+          : `${settings.pos.defaultRedeemReason} (-${discountEuro} €)`;
 
     return {
       success: true,

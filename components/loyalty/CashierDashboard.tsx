@@ -15,13 +15,51 @@ import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
+import { AppSettings } from "@/lib/settings/types";
 import { toast } from "@/components/ui/sonner";
 
 export interface CashierDashboardProps {
   standalone?: boolean;
+  settings?: AppSettings;
 }
 
-export function CashierDashboard({ standalone = false }: CashierDashboardProps) {
+export function CashierDashboard({ standalone = false, settings: propSettings }: CashierDashboardProps) {
+  const [currentSettings, setCurrentSettings] = useState<AppSettings | undefined>(propSettings);
+
+  // Sync state if propSettings changes
+  useEffect(() => {
+    if (propSettings) {
+      setCurrentSettings(propSettings);
+    }
+  }, [propSettings]);
+
+  // Fetch live settings on mount to guarantee fresh rules
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const res = await fetch("/api/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.settings) {
+            setCurrentSettings(data.settings);
+          }
+        }
+      } catch (err) {
+        console.error("Erreur chargement paramètres :", err);
+      }
+    }
+    loadSettings();
+  }, []);
+
+  const euroRatio = currentSettings?.loyalty?.euroToPointsRatio ?? LOYALTY_CONFIG.conversion.euroToPointsRatio;
+  const pointValueInEuro = currentSettings?.loyalty?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
+  const tierThresholds = currentSettings?.loyalty
+    ? {
+        silver: currentSettings.loyalty.tierSilverMinPoints,
+        gold: currentSettings.loyalty.tierGoldMinPoints,
+        vip: currentSettings.loyalty.tierVipMinPoints,
+      }
+    : undefined;
   const [cashier, setCashier] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, LOYALTY_CONFIG.search.debounceMs);
@@ -138,6 +176,9 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
           }}
           onOpenAddPurchase={() => setIsAddPurchaseOpen(true)}
           onOpenRedeemPoints={() => setIsRedeemOpen(true)}
+          pointValueInEuro={pointValueInEuro}
+          minPointsToRedeem={currentSettings?.loyalty?.minPointsToRedeem}
+          tierThresholds={tierThresholds}
         />
       ) : loadingDetail ? (
         <div className="py-24 text-center space-y-3">
@@ -156,7 +197,7 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
                 Caisse &amp; Points de Fidélité
               </h1>
               <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-                Recherchez un client au comptoir par nom, téléphone ou email pour consulter ses points, enregistrer un achat (1 € = 1 pt) ou utiliser ses points fidélité.
+                Recherchez un client au comptoir par nom, téléphone ou email pour consulter ses points, enregistrer un achat (1 € = {euroRatio} pt{euroRatio > 1 ? "s" : ""}) ou utiliser ses points fidélité.
               </p>
             </div>
 
@@ -189,7 +230,7 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
                     ⚡ Recherche instantanée
                   </span>
                   <span className="px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium">
-                    🎟️ 1 € dépensé = 1 point
+                    🎟️ 1 € dépensé = {euroRatio} point{euroRatio > 1 ? "s" : ""}
                   </span>
                   <span className="px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium">
                     👑 Paliers Bronze à VIP
@@ -299,6 +340,8 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
         isOpen={isAddPurchaseOpen}
         customer={selectedCustomerDetail}
         onClose={() => setIsAddPurchaseOpen(false)}
+        euroToPointsRatio={currentSettings?.loyalty?.euroToPointsRatio}
+        quickPurchaseAmounts={currentSettings?.pos?.quickPurchaseAmounts}
         onPurchaseRecorded={(updatedCust) => {
           setSelectedCustomerDetail(updatedCust);
           toast.success("Achat enregistré et points crédités avec succès !");
@@ -310,9 +353,20 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
         isOpen={isRedeemOpen}
         customer={selectedCustomerDetail}
         onClose={() => setIsRedeemOpen(false)}
+        pointValueInEuro={currentSettings?.loyalty?.pointValueInEuro}
+        euroToPointsRatio={currentSettings?.loyalty?.euroToPointsRatio}
+        quickPurchaseAmounts={currentSettings?.pos?.quickPurchaseAmounts}
+        quickRedeemPoints={currentSettings?.pos?.quickRedeemPoints}
+        minPointsToRedeem={currentSettings?.loyalty?.minPointsToRedeem}
+        maxDiscountPerTransactionEuro={currentSettings?.loyalty?.maxDiscountPerTransactionEuro}
+        defaultRedeemReason={currentSettings?.pos?.defaultRedeemReason}
         onPointsRedeemed={(updatedCust) => {
           setSelectedCustomerDetail(updatedCust);
           toast.success("Achat enregistré et points déduits avec succès !");
+        }}
+        onPurchaseRecorded={(updatedCust) => {
+          setSelectedCustomerDetail(updatedCust);
+          toast.success("Achat enregistré et points crédités avec succès !");
         }}
       />
     </div>
@@ -326,6 +380,7 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
     <div className="flex flex-col h-full bg-[var(--color-background)]">
       <CashierHeader
         cashier={cashier}
+        euroToPointsRatio={euroRatio}
       />
       <main className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
         {content}

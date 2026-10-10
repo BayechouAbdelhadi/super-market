@@ -8,19 +8,21 @@ const SETTINGS_FILE_DIR = path.join(process.cwd(), "data");
 const SETTINGS_FILE_PATH = path.join(SETTINGS_FILE_DIR, "app-settings.json");
 
 let memoryCache: AppSettings | null = null;
+let lastFileMtimeMs = 0;
 
 /**
  * Loads current application settings.
- * Priority: In-Memory Cache -> File System Store -> Supabase Table -> Defaults
+ * Priority: File System Store (mtime-checked) -> Supabase Table -> In-Memory Cache -> Defaults
  */
 export async function getAppSettings(): Promise<AppSettings> {
-  if (memoryCache) {
-    return memoryCache;
-  }
-
-  // 1. Try file system storage first
+  // 1. Try file system storage first with mtime invalidation
   try {
     if (fs.existsSync(SETTINGS_FILE_PATH)) {
+      const stat = fs.statSync(SETTINGS_FILE_PATH);
+      if (memoryCache && stat.mtimeMs === lastFileMtimeMs) {
+        return memoryCache;
+      }
+
       const raw = fs.readFileSync(SETTINGS_FILE_PATH, "utf-8");
       const parsed = JSON.parse(raw);
       const validated = AppSettingsSchema.safeParse(parsed);
@@ -35,11 +37,16 @@ export async function getAppSettings(): Promise<AppSettings> {
           updatedAt: parsed.updatedAt,
           updatedBy: parsed.updatedBy,
         };
+        lastFileMtimeMs = stat.mtimeMs;
         return memoryCache;
       }
     }
   } catch (err) {
     console.warn("[AppSettings] Failed to read from file storage, falling back:", err);
+  }
+
+  if (memoryCache) {
+    return memoryCache;
   }
 
   // 2. Try Supabase app_settings table if configured

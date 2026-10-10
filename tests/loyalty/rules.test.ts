@@ -117,4 +117,55 @@ describe("Règles métier de fidélité (§ 20)", () => {
       expect(updated.tier).toBe("SILVER"); // Passed from BRONZE to SILVER
     });
   });
+
+  describe("Application des règles dynamiques issues des configurations admin", () => {
+    it("applique un ratio euroToPointsRatio configuré par l'admin (ex: 2 pts ou 1.5 pt par euro)", () => {
+      expect(calculatePoints(50, 2)).toBe(100);
+      expect(calculatePoints(12.5, 0.5)).toBe(6);
+      expect(calculatePoints(30, 3)).toBe(90);
+      // Ratio fractionnaire (ex: 1.5 pt / €)
+      expect(calculatePoints(1, 1.5)).toBe(2);
+      expect(calculatePoints(2, 1.5)).toBe(3);
+      expect(calculatePoints(10, 1.5)).toBe(15);
+    });
+
+    it("applique des seuils de paliers personnalisés", () => {
+      const customTiers = { silver: 300, gold: 1000, vip: 2500 };
+      expect(calculateTier(250, customTiers)).toBe("BRONZE");
+      expect(calculateTier(300, customTiers)).toBe("SILVER");
+      expect(calculateTier(999, customTiers)).toBe("SILVER");
+      expect(calculateTier(1000, customTiers)).toBe("GOLD");
+      expect(calculateTier(2500, customTiers)).toBe("VIP");
+    });
+
+    it("valide la règle du minimum de points requis pour une remise (minPointsToRedeem)", () => {
+      const rules = {
+        minPointsToRedeem: 50,
+        maxDiscountPerTransactionEuro: 50.0,
+        pointValueInEuro: 0.05,
+      };
+
+      // Tente d'utiliser 40 points avec un minimum de 50
+      expect(() => {
+        applyRedeemPoints(100, 500, 40, undefined, rules);
+      }).toThrow("Seuil minimum non atteint : un minimum de 50 points est requis pour utiliser une remise.");
+    });
+
+    it("valide la règle du plafond de remise par ticket (maxDiscountPerTransactionEuro)", () => {
+      const rules = {
+        minPointsToRedeem: 50,
+        maxDiscountPerTransactionEuro: 20.0, // 20 € max = 400 points max à 0.05 €/pt
+        pointValueInEuro: 0.05,
+      };
+
+      // Tente d'utiliser 500 points (25 € de remise > plafond 20 €)
+      expect(() => {
+        applyRedeemPoints(1000, 2000, 500, undefined, rules);
+      }).toThrow("La remise maximale autorisée par passage en caisse est de 20.00 €");
+
+      // Utilise 400 points (20 € de remise <= 20 €) -> Autorisé
+      const ok = applyRedeemPoints(1000, 2000, 400, undefined, rules);
+      expect(ok.available_points).toBe(600);
+    });
+  });
 });

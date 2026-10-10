@@ -12,21 +12,46 @@ export function normalizePhone(phone: string): string {
   return digits;
 }
 
-/**
- * Calculates points earned from purchase amount using configured ratio (rounded down)
- */
-export function calculatePoints(amount: number): number {
-  if (amount <= 0 || isNaN(amount)) return 0;
-  return Math.floor(amount * LOYALTY_CONFIG.conversion.euroToPointsRatio);
+export interface TierThresholds {
+  silver?: number;
+  gold?: number;
+  vip?: number;
+}
+
+export interface RedemptionRulesConfig {
+  minPointsToRedeem?: number;
+  maxDiscountPerTransactionEuro?: number;
+  pointValueInEuro?: number;
 }
 
 /**
- * Calculates customer loyalty tier based on cumulative historical points from LOYALTY_CONFIG
+ * Calculates points earned from purchase amount using configured ratio (rounded down)
  */
-export function calculateTier(historicalPoints: number): LoyaltyTier {
-  if (historicalPoints >= LOYALTY_CONFIG.tiers.VIP.minHistoricalPoints) return "VIP";
-  if (historicalPoints >= LOYALTY_CONFIG.tiers.GOLD.minHistoricalPoints) return "GOLD";
-  if (historicalPoints >= LOYALTY_CONFIG.tiers.SILVER.minHistoricalPoints) return "SILVER";
+export function calculatePoints(
+  amount: number,
+  ratio: number = LOYALTY_CONFIG.conversion.euroToPointsRatio
+): number {
+  if (amount <= 0 || isNaN(amount)) return 0;
+  if (Number.isInteger(ratio)) {
+    return Math.floor(amount * ratio);
+  }
+  return Math.round(amount * ratio);
+}
+
+/**
+ * Calculates customer loyalty tier based on cumulative historical points and configured thresholds
+ */
+export function calculateTier(
+  historicalPoints: number,
+  tiers?: TierThresholds
+): LoyaltyTier {
+  const vipMin = tiers?.vip ?? LOYALTY_CONFIG.tiers.VIP.minHistoricalPoints;
+  const goldMin = tiers?.gold ?? LOYALTY_CONFIG.tiers.GOLD.minHistoricalPoints;
+  const silverMin = tiers?.silver ?? LOYALTY_CONFIG.tiers.SILVER.minHistoricalPoints;
+
+  if (historicalPoints >= vipMin) return "VIP";
+  if (historicalPoints >= goldMin) return "GOLD";
+  if (historicalPoints >= silverMin) return "SILVER";
   return "BRONZE";
 }
 
@@ -39,16 +64,59 @@ export function canRedeemPoints(availablePoints: number, pointsToRedeem: number)
 }
 
 /**
+ * Validates business rules for points redemption (minimum threshold, maximum euro discount, balance).
+ */
+export function validateRedemption(
+  pointsToRedeem: number,
+  availablePoints: number,
+  rules?: RedemptionRulesConfig
+): { valid: boolean; error?: string } {
+  if (pointsToRedeem <= 0 || isNaN(pointsToRedeem)) {
+    return { valid: false, error: "Veuillez saisir un nombre de points valide supérieur à 0." };
+  }
+  if (!canRedeemPoints(availablePoints, pointsToRedeem)) {
+    return {
+      valid: false,
+      error: "Opération refusée : solde disponible insuffisant.",
+    };
+  }
+
+  const minPoints = rules?.minPointsToRedeem ?? 0;
+  if (minPoints > 0 && pointsToRedeem < minPoints) {
+    return {
+      valid: false,
+      error: `Seuil minimum non atteint : un minimum de ${minPoints} points est requis pour utiliser une remise.`,
+    };
+  }
+
+  const maxDiscountEuro = rules?.maxDiscountPerTransactionEuro ?? 0;
+  const pointValue = rules?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
+  if (maxDiscountEuro > 0) {
+    const discountEuro = pointsToRedeem * pointValue;
+    if (discountEuro > maxDiscountEuro) {
+      const maxAllowedPoints = Math.floor(maxDiscountEuro / pointValue);
+      return {
+        valid: false,
+        error: `La remise maximale autorisée par passage en caisse est de ${maxDiscountEuro.toFixed(2)} € (soit un maximum de ${maxAllowedPoints} points).`,
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
+/**
  * Pure calculation for applying points from an earned purchase
  */
 export function applyPurchasePoints(
   availablePoints: number,
   historicalPoints: number,
   pointsEarned: number,
+  tiers?: TierThresholds
 ) {
   const newAvailable = availablePoints + pointsEarned;
   const newHistorical = historicalPoints + pointsEarned;
-  const newTier = calculateTier(newHistorical);
+  const newTier = calculateTier(newHistorical, tiers);
   return {
     available_points: newAvailable,
     historical_points: newHistorical,
@@ -74,14 +142,17 @@ export function applyRedeemPoints(
   availablePoints: number,
   historicalPoints: number,
   pointsToRedeem: number,
+  tiers?: TierThresholds,
+  rules?: RedemptionRulesConfig
 ) {
-  if (!canRedeemPoints(availablePoints, pointsToRedeem)) {
-    throw new Error("Opération refusée : solde disponible insuffisant.");
+  const validation = validateRedemption(pointsToRedeem, availablePoints, rules);
+  if (!validation.valid) {
+    throw new Error(validation.error || "Opération refusée : solde disponible insuffisant.");
   }
   return {
     available_points: availablePoints - pointsToRedeem,
     historical_points: historicalPoints,
-    tier: calculateTier(historicalPoints),
+    tier: calculateTier(historicalPoints, tiers),
     points_earned: 0,
   };
 }

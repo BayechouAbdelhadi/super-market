@@ -13,6 +13,8 @@ interface AddPurchaseModalProps {
   customer: CustomerDetail | null;
   onClose: () => void;
   onPurchaseRecorded: (updatedCustomer: CustomerDetail) => void;
+  euroToPointsRatio?: number;
+  quickPurchaseAmounts?: number[];
 }
 
 export function AddPurchaseModal({
@@ -20,6 +22,8 @@ export function AddPurchaseModal({
   customer,
   onClose,
   onPurchaseRecorded,
+  euroToPointsRatio = LOYALTY_CONFIG.conversion.euroToPointsRatio,
+  quickPurchaseAmounts,
 }: AddPurchaseModalProps) {
   const [amountStr, setAmountStr] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,8 +31,13 @@ export function AddPurchaseModal({
 
   if (!isOpen || !customer) return null;
 
+  const presets = quickPurchaseAmounts && quickPurchaseAmounts.length > 0
+    ? quickPurchaseAmounts
+    : [...LOYALTY_CONFIG.presets.purchaseAmounts];
+
   const parsedAmount = parseFloat(amountStr.replace(",", "."));
-  const pointsEarned = !isNaN(parsedAmount) && parsedAmount > 0 ? calculatePoints(parsedAmount) : 0;
+  const pointsEarned =
+    !isNaN(parsedAmount) && parsedAmount > 0 ? calculatePoints(parsedAmount, euroToPointsRatio) : 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -118,7 +127,7 @@ export function AddPurchaseModal({
         {/* Quick preset chips */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="text-[var(--color-text-muted)] font-medium">Montants fréquents :</span>
-          {LOYALTY_CONFIG.presets.purchaseAmounts.map((preset) => (
+          {presets.map((preset) => (
             <button
               key={preset}
               type="button"
@@ -134,7 +143,9 @@ export function AddPurchaseModal({
         <div className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-3">
           <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
             <span>Règle d&apos;attribution</span>
-            <span className="font-medium text-[var(--color-text)]">1 € dépensé = 1 point</span>
+            <span className="font-medium text-[var(--color-text)]">
+              1 € dépensé = {euroToPointsRatio} point{euroToPointsRatio > 1 ? "s" : ""}
+            </span>
           </div>
 
           <div className="pt-2 border-t border-[var(--color-border)] flex items-end justify-between">

@@ -15,9 +15,10 @@ import {
 
 interface DashboardKpisProps {
   kpis: DashboardKpisType;
+  euroToPointsRatio?: number;
 }
 
-export function DashboardKpis({ kpis }: DashboardKpisProps) {
+export function DashboardKpis({ kpis, euroToPointsRatio = 1 }: DashboardKpisProps) {
   const cards = [
     {
       id: "ca-today",
@@ -80,7 +81,7 @@ export function DashboardKpis({ kpis }: DashboardKpisProps) {
       subtext: `${formatNumber(kpis.totalPointsEarned)} pts distribués au total`,
       icon: <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />,
       accent: "border-[var(--color-border)]",
-      badge: "Barème 1 € = 1 pt",
+      badge: `Barème 1 € = ${euroToPointsRatio} pt${euroToPointsRatio > 1 ? "s" : ""}`,
       badgeColor: "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20",
     },
   ];

@@ -70,12 +70,12 @@ export default async function CustomerLoyaltyAppPage() {
   const pointValueInEuro = settings.loyalty.pointValueInEuro
   const euroDiscount = (points * pointValueInEuro).toFixed(2)
 
-  // Calculate next tier progress
+  // Calculate next tier progress with admin configured tier thresholds
   const tiersList = [
-    { name: 'BRONZE', min: LOYALTY_CONFIG.tiers.BRONZE.minHistoricalPoints },
-    { name: 'SILVER', min: LOYALTY_CONFIG.tiers.SILVER.minHistoricalPoints },
-    { name: 'GOLD', min: LOYALTY_CONFIG.tiers.GOLD.minHistoricalPoints },
-    { name: 'VIP', min: LOYALTY_CONFIG.tiers.VIP.minHistoricalPoints },
+    { name: 'BRONZE', min: 0 },
+    { name: 'SILVER', min: settings.loyalty.tierSilverMinPoints },
+    { name: 'GOLD', min: settings.loyalty.tierGoldMinPoints },
+    { name: 'VIP', min: settings.loyalty.tierVipMinPoints },
   ]
   const currentTierIndex = tiersList.findIndex((t) => t.name === tier)
   const nextTier =
@@ -186,8 +186,8 @@ export default async function CustomerLoyaltyAppPage() {
 
               <div className="px-4 py-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs text-[var(--color-text-muted)] space-y-1 sm:text-right">
                 <div className="font-bold text-[var(--color-text)]">Formule de calcul :</div>
-                <div>1 € d&apos;achat = 1 point fidélité</div>
-                <div>100 points = 5 € de remise en caisse</div>
+                <div>1 € d&apos;achat = {settings.loyalty.euroToPointsRatio} point{settings.loyalty.euroToPointsRatio > 1 ? 's' : ''} fidélité</div>
+                <div>100 points = {(100 * pointValueInEuro).toFixed(2)} € de remise en caisse</div>
               </div>
             </div>
 
@@ -222,7 +222,7 @@ export default async function CustomerLoyaltyAppPage() {
               <Store className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
               <div>
                 <span className="font-bold">Comment utiliser vos points ?</span> Lors de votre passage
-                en caisse au Super Market Calais, indiquez simplement votre nom ou votre numéro de
+                en caisse au {settings.store.storeName}, indiquez simplement votre nom ou votre numéro de
                 téléphone (<strong className="font-semibold">{phone || 'rattaché à votre compte'}</strong>). Le caissier déduira immédiatement vos remises sur votre ticket.
               </div>
             </div>
@@ -289,7 +289,7 @@ export default async function CustomerLoyaltyAppPage() {
                     <div>
                       <div className="font-semibold text-xs sm:text-sm text-[var(--color-text)]">
                         {isEarn && `Achat en magasin de ${(Number(tx.amount_total) || 0).toFixed(2)} €`}
-                        {isRedeem && !isEarn && `Remise fidélité utilisée en caisse`}
+                        {isRedeem && !isEarn && `Remise fidélité de -${((Number(tx.points_redeemed) || 0) * pointValueInEuro).toFixed(2)} € utilisée en caisse`}
                       </div>
                       <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
                         {txDate}
@@ -304,7 +304,7 @@ export default async function CustomerLoyaltyAppPage() {
                       )}
                       {isRedeem && (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-500/10 text-rose-700 dark:text-rose-300">
-                          -{tx.points_redeemed} pts
+                          -{tx.points_redeemed} pts (-{((Number(tx.points_redeemed) || 0) * pointValueInEuro).toFixed(2)} €)
                         </span>
                       )}
                     </div>

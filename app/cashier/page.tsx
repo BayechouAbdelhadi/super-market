@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ProtectedDashboard } from '@/components/ui/ProtectedDashboard'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { getAppSettings } from '@/lib/settings/service'
 import Link from 'next/link'
 import {
   Store,
@@ -21,9 +22,10 @@ export const metadata: Metadata = {
 
 export default async function CashierHubPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const [{ data: { user } }, settings] = await Promise.all([
+    supabase.auth.getUser(),
+    getAppSettings(),
+  ])
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -34,6 +36,8 @@ export default async function CashierHubPage() {
   const firstName = profile?.first_name || user?.user_metadata?.first_name || ''
   const lastName = profile?.last_name || user?.user_metadata?.last_name || ''
   const displayName = `${firstName} ${lastName}`.trim() || user?.email || 'Caissier'
+
+  const euroRatio = settings.loyalty.euroToPointsRatio
 
   return (
     <ProtectedDashboard requiredRole="CASHIER">
@@ -49,14 +53,14 @@ export default async function CashierHubPage() {
               Bonjour, {displayName} !
             </h1>
             <p className="text-xs sm:text-sm text-[var(--color-text-muted)] max-w-xl leading-relaxed">
-              Bienvenue sur votre portail caisse Super Market Calais. Sélectionnez un outil ci-dessous pour démarrer vos opérations au comptoir.
+              Bienvenue sur votre portail caisse {settings.store.storeName}. Sélectionnez un outil ci-dessous pour démarrer vos opérations au comptoir.
             </p>
           </div>
 
           <div className="px-5 py-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs space-y-1.5 shadow-xs shrink-0">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-bold text-[var(--color-text)]">Magasin Calais — Caisse #1</span>
+              <span className="font-bold text-[var(--color-text)]">{settings.store.storeName} — {settings.pos.defaultCashierStation}</span>
             </div>
             <p className="text-[11px] text-[var(--color-text-muted)]">
               Connecté en tant que caissier habilité
@@ -102,7 +106,7 @@ export default async function CashierHubPage() {
                       Caisse &amp; Points Fidélité
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
-                      Rechercher des clients au comptoir, enregistrer les achats (1 € = 1 pt) et appliquer les remises fidélité immédiates.
+                      Rechercher des clients au comptoir, enregistrer les achats (1 € = {euroRatio} pt{euroRatio > 1 ? "s" : ""}) et appliquer les remises fidélité immédiates.
                     </p>
                   </div>
                 </div>

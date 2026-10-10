@@ -1,4 +1,5 @@
 import { CashierDashboard } from "@/components/loyalty/CashierDashboard";
+import { getAppSettings } from "@/lib/settings/service";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -6,6 +7,7 @@ export const metadata: Metadata = {
   description: "Système de fidélité pour caissier (Jalon 1 MVP)",
 };
 
-export default function LoyaltyPage() {
-  return <CashierDashboard />;
+export default async function LoyaltyPage() {
+  const settings = await getAppSettings();
+  return <CashierDashboard settings={settings} />;
 }

@@ -9,12 +9,20 @@ import { StatusBadge } from "./StatusBadge";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
+import { toast } from "@/components/ui/sonner";
 
 interface CustomerDetailViewProps {
   customer: CustomerDetail;
   onBack: () => void;
   onOpenAddPurchase: () => void;
   onOpenRedeemPoints: () => void;
+  pointValueInEuro?: number;
+  minPointsToRedeem?: number;
+  tierThresholds?: {
+    silver: number;
+    gold: number;
+    vip: number;
+  };
 }
 
 export function CustomerDetailView({
@@ -22,35 +30,45 @@ export function CustomerDetailView({
   onBack,
   onOpenAddPurchase,
   onOpenRedeemPoints,
+  pointValueInEuro = LOYALTY_CONFIG.conversion.pointValueInEuro,
+  minPointsToRedeem = 50,
+  tierThresholds = {
+    silver: LOYALTY_CONFIG.tiers.SILVER.minHistoricalPoints,
+    gold: LOYALTY_CONFIG.tiers.GOLD.minHistoricalPoints,
+    vip: LOYALTY_CONFIG.tiers.VIP.minHistoricalPoints,
+  },
 }: CustomerDetailViewProps) {
   const [activeTab, setActiveTab] = useState<"purchases" | "movements">("purchases");
 
-  // Calcul du palier suivant pour la jauge
+  const euroDiscount = (customer.available_points * pointValueInEuro).toFixed(2);
+
+  // Calcul du palier suivant pour la jauge avec seuils configurables
   const nextTierInfo = (() => {
     const tierUpper = (customer.tier || "BRONZE").toUpperCase();
+    const { silver, gold, vip } = tierThresholds;
     switch (tierUpper) {
       case "BRONZE":
         return {
           nextTier: "Silver",
-          remaining: Math.max(0, 500 - customer.historical_points),
-          percent: Math.min(100, Math.round((customer.historical_points / 500) * 100)),
+          remaining: Math.max(0, silver - customer.historical_points),
+          percent: Math.min(100, Math.round((customer.historical_points / silver) * 100)),
         };
       case "SILVER":
         return {
           nextTier: "Gold",
-          remaining: Math.max(0, 2000 - customer.historical_points),
+          remaining: Math.max(0, gold - customer.historical_points),
           percent: Math.min(
             100,
-            Math.round(((customer.historical_points - 500) / (2000 - 500)) * 100),
+            Math.round(((customer.historical_points - silver) / (gold - silver)) * 100),
           ),
         };
       case "GOLD":
         return {
           nextTier: "VIP",
-          remaining: Math.max(0, 5000 - customer.historical_points),
+          remaining: Math.max(0, vip - customer.historical_points),
           percent: Math.min(
             100,
-            Math.round(((customer.historical_points - 2000) / (5000 - 2000)) * 100),
+            Math.round(((customer.historical_points - gold) / (vip - gold)) * 100),
           ),
         };
       case "VIP":
@@ -167,8 +185,14 @@ export function CustomerDetailView({
             <Button
               variant="secondary"
               size="lg"
-              disabled={customer.available_points <= 0}
-              onClick={onOpenRedeemPoints}
+              onClick={() => {
+                if (minPointsToRedeem > 0 && customer.available_points < minPointsToRedeem) {
+                  toast.error(
+                    `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise.`
+                  );
+                }
+                onOpenRedeemPoints();
+              }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 12H4" />
@@ -184,7 +208,7 @@ export function CustomerDetailView({
             label="Points Disponibles"
             value={customer.available_points}
             unit="pts"
-            description="Solde immédiatement utilisable pour des remises en caisse."
+            description={`Solde immédiatement utilisable pour des remises en caisse (${euroDiscount} € de remise).`}
             icon="🎟️"
             accent="brand"
           />
@@ -306,7 +330,7 @@ export function CustomerDetailView({
                                 </span>
                               ) : isRedeem ? (
                                 <span className="inline-flex items-center gap-1 font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 px-2.5 py-0.5 rounded-full text-xs">
-                                  -{p.points_redeemed} points
+                                  -{p.points_redeemed} points (-{((p.points_redeemed || 0) * pointValueInEuro).toFixed(2)} €)
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 font-medium text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] px-2.5 py-0.5 rounded-full text-xs">
@@ -393,7 +417,9 @@ export function CustomerDetailView({
                                 isEarn ? "text-[var(--color-primary)]" : "text-[var(--color-danger)]"
                               }`}
                             >
-                              {isEarn ? `+${m.amount}` : `-${m.amount}`}
+                              {isEarn
+                                ? `+${m.amount ?? 0}`
+                                : `-${m.amount ?? 0} (-${(((m.amount || 0)) * pointValueInEuro).toFixed(2)} €)`}
                             </td>
                             <td className="py-3 text-[var(--color-text)]">
                               {m.reason || "—"}

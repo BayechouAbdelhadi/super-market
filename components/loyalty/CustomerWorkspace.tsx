@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { SearchInput } from '@/components/ui/SearchInput'
@@ -11,6 +11,7 @@ import { RedeemPointsModal } from '@/components/loyalty/RedeemPointsModal'
 import { NewCustomerModal } from '@/components/loyalty/NewCustomerModal'
 import { CustomerDetail } from '@/lib/loyalty/types'
 import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
+import { AppSettings } from '@/lib/settings/types'
 import { toast } from '@/components/ui/sonner'
 
 interface CustomerWorkspaceProps {
@@ -20,6 +21,7 @@ interface CustomerWorkspaceProps {
   initialPage?: number
   initialLimit?: number
   initialQuery?: string
+  settings?: AppSettings
 }
 
 export function CustomerWorkspace({
@@ -28,7 +30,41 @@ export function CustomerWorkspace({
   subtitle = "Consultez, modifiez et gérez l'ensemble des profils clients de votre magasin.",
   initialLimit,
   initialQuery = "",
+  settings: propSettings,
 }: CustomerWorkspaceProps) {
+  const [currentSettings, setCurrentSettings] = useState<AppSettings | undefined>(propSettings);
+
+  useEffect(() => {
+    if (propSettings) {
+      setCurrentSettings(propSettings);
+    }
+  }, [propSettings]);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const res = await fetch("/api/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.settings) {
+            setCurrentSettings(data.settings);
+          }
+        }
+      } catch (err) {
+        console.error("Erreur chargement paramètres :", err);
+      }
+    }
+    loadSettings();
+  }, []);
+
+  const pointValueInEuro = currentSettings?.loyalty?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
+  const tierThresholds = currentSettings?.loyalty
+    ? {
+        silver: currentSettings.loyalty.tierSilverMinPoints,
+        gold: currentSettings.loyalty.tierGoldMinPoints,
+        vip: currentSettings.loyalty.tierVipMinPoints,
+      }
+    : undefined;
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [createdCustomers, setCreatedCustomers] = useState<any[]>([])
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
@@ -117,6 +153,9 @@ export function CustomerWorkspace({
             }}
             onOpenAddPurchase={() => setIsAddPurchaseOpen(true)}
             onOpenRedeemPoints={() => setIsRedeemOpen(true)}
+            pointValueInEuro={pointValueInEuro}
+            minPointsToRedeem={currentSettings?.loyalty?.minPointsToRedeem}
+            tierThresholds={tierThresholds}
           />
 
           {/* Action Modal 1: Add Purchase */}
@@ -124,6 +163,8 @@ export function CustomerWorkspace({
             isOpen={isAddPurchaseOpen}
             customer={selectedCustomerDetail}
             onClose={() => setIsAddPurchaseOpen(false)}
+            euroToPointsRatio={currentSettings?.loyalty?.euroToPointsRatio}
+            quickPurchaseAmounts={currentSettings?.pos?.quickPurchaseAmounts}
             onPurchaseRecorded={(updatedCust) => {
               setSelectedCustomerDetail(updatedCust)
               toast.success("Achat enregistré et points crédités avec succès !")
@@ -135,9 +176,20 @@ export function CustomerWorkspace({
             isOpen={isRedeemOpen}
             customer={selectedCustomerDetail}
             onClose={() => setIsRedeemOpen(false)}
+            pointValueInEuro={currentSettings?.loyalty?.pointValueInEuro}
+            euroToPointsRatio={currentSettings?.loyalty?.euroToPointsRatio}
+            quickPurchaseAmounts={currentSettings?.pos?.quickPurchaseAmounts}
+            quickRedeemPoints={currentSettings?.pos?.quickRedeemPoints}
+            minPointsToRedeem={currentSettings?.loyalty?.minPointsToRedeem}
+            maxDiscountPerTransactionEuro={currentSettings?.loyalty?.maxDiscountPerTransactionEuro}
+            defaultRedeemReason={currentSettings?.pos?.defaultRedeemReason}
             onPointsRedeemed={(updatedCust) => {
               setSelectedCustomerDetail(updatedCust)
               toast.success("Achat enregistré et points déduits avec succès !")
+            }}
+            onPurchaseRecorded={(updatedCust) => {
+              setSelectedCustomerDetail(updatedCust)
+              toast.success("Achat enregistré et points crédités avec succès !")
             }}
           />
         </div>

@@ -12,6 +12,7 @@ import {
 } from '@/lib/email/otp-security'
 import { normalizePhone } from '@/lib/loyalty/domain'
 import { PasswordSchema } from '@/lib/auth/password-rules'
+import { getAppSettings } from '@/lib/settings/service'
 import { z } from 'zod'
 
 const CreateUserSchema = z.object({
@@ -158,15 +159,23 @@ export async function createUser(formData: FormData) {
     const origin = `${proto}://${host}`;
     const activationLink = `${origin}/confirm-account?token=${encodeURIComponent(token)}`;
 
-    emailService.sendAccountActivation({
-      email: emailNormalized,
-      name: `${firstNameClean} ${lastNameClean}`,
-      activationLink,
-      role,
-      expiresInDays: 7,
-    }).catch((err) => {
-      console.error("[createUser] Brevo activation email failed:", err);
-    });
+    const settings = await getAppSettings();
+    const shouldSendEmail =
+      role === 'CASHIER'
+        ? settings.notifications.sendCashierInviteEmail
+        : settings.notifications.sendWelcomeEmail;
+
+    if (shouldSendEmail) {
+      emailService.sendAccountActivation({
+        email: emailNormalized,
+        name: `${firstNameClean} ${lastNameClean}`,
+        activationLink,
+        role,
+        expiresInDays: 7,
+      }).catch((err) => {
+        console.error("[createUser] Brevo activation email failed:", err);
+      });
+    }
   } catch (emailErr) {
     console.error("[createUser] Error preparing activation email:", emailErr);
   }

@@ -10,9 +10,10 @@ import { RefreshCw, Store, Users, ShoppingBag, Activity } from "lucide-react";
 
 interface AnalyticsDashboardProps {
   initialData: RealDashboardData;
+  euroToPointsRatio?: number;
 }
 
-export function AnalyticsDashboard({ initialData }: AnalyticsDashboardProps) {
+export function AnalyticsDashboard({ initialData, euroToPointsRatio }: AnalyticsDashboardProps) {
   const [data, setData] = useState<RealDashboardData>(initialData);
   const [isPending, startTransition] = useTransition();
 
@@ -76,7 +77,7 @@ export function AnalyticsDashboard({ initialData }: AnalyticsDashboardProps) {
       </div>
 
       {/* 1. Simplified KPIs Grid */}
-      <DashboardKpis kpis={data.kpis} />
+      <DashboardKpis kpis={data.kpis} euroToPointsRatio={euroToPointsRatio} />
 
       {/* 2. Full-Width Daily Sales Trend Chart */}
       <div>

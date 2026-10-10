@@ -1,5 +1,6 @@
 import { ProtectedDashboard } from '@/components/ui/ProtectedDashboard'
 import { CashierDashboard } from '@/components/loyalty/CashierDashboard'
+import { getAppSettings } from '@/lib/settings/service'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -7,10 +8,11 @@ export const metadata: Metadata = {
   description: "Recherche client et gestion des points de fidélité au comptoir",
 }
 
-export default function CashierPosPage() {
+export default async function CashierPosPage() {
+  const settings = await getAppSettings()
   return (
     <ProtectedDashboard requiredRole="CASHIER">
-      <CashierDashboard standalone={false} />
+      <CashierDashboard standalone={false} settings={settings} />
     </ProtectedDashboard>
   )
 }
