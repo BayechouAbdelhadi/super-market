@@ -9,6 +9,7 @@ import { StatusBadge } from '@/components/loyalty/StatusBadge'
 import { NewCustomerModal } from '@/components/loyalty/NewCustomerModal'
 import { createUser, editUser } from '@/app/admin/actions'
 import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
+import { toast } from '@/components/ui/sonner'
 
 interface UserManagerProps {
   initialUsers: any[];
@@ -79,7 +80,9 @@ export function UserManager({
       const result = await editUser(formData)
       if (result.error) {
         setError(result.error)
+        toast.error(result.error)
       } else {
+        toast.success("Utilisateur mis à jour avec succès !")
         close()
       }
     } else {
@@ -87,9 +90,11 @@ export function UserManager({
       const result = await createUser(formData)
       if (result.error) {
         setError(result.error)
+        toast.error(result.error)
       } else {
         const roleName = result.role === 'CASHIER' ? 'Caissier' : 'Client';
-        setSuccessMsg(`${roleName} créé avec succès !`)
+        toast.success(`${roleName} créé avec succès !`)
+        close()
       }
     }
     setLoading(false)
@@ -219,7 +224,9 @@ export function UserManager({
                 />
                 
                 {!editingUser && (
-                  <Input id="password" name="password" type="password" label="Mot de passe" required />
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 rounded-[var(--radius-button,12px)] text-xs text-blue-800 dark:text-blue-200 leading-relaxed">
+                    ✉️ Un email de confirmation sera automatiquement envoyé pour inviter l&apos;utilisateur à définir son mot de passe et activer son accès.
+                  </div>
                 )}
                 
                 {error && (

@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
+import { toast } from "@/components/ui/sonner";
 
 interface RedeemPointsModalProps {
   isOpen: boolean;
@@ -78,7 +79,9 @@ export function RedeemPointsModal({
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMsg(data.message || "Erreur lors de la validation de la déduction.");
+        const errorText = data.message || "Erreur lors de la validation de la déduction.";
+        setErrorMsg(errorText);
+        toast.error(errorText);
         return;
       }
 
@@ -87,7 +90,9 @@ export function RedeemPointsModal({
       setPointsStr("");
       onClose();
     } catch {
-      setErrorMsg("Erreur réseau ou serveur inaccessible.");
+      const netError = "Erreur réseau ou serveur inaccessible.";
+      setErrorMsg(netError);
+      toast.error(netError);
     } finally {
       setLoading(false);
     }

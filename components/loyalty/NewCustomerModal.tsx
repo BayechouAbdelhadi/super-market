@@ -5,6 +5,7 @@ import { CustomerDetail, CustomerSummary } from "@/lib/loyalty/types";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
 
 interface NewCustomerModalProps {
   isOpen: boolean;
@@ -72,7 +73,9 @@ export function NewCustomerModal({
       }
 
       if (!res.ok) {
-        setErrorMsg(data.message || "Erreur lors de la création du client.");
+        const errorText = data.message || "Erreur lors de la création du client.";
+        setErrorMsg(errorText);
+        toast.error(errorText);
         return;
       }
 
@@ -80,7 +83,9 @@ export function NewCustomerModal({
       onCustomerCreated(data.customer);
       handleReset();
     } catch {
-      setErrorMsg("Erreur réseau ou serveur inaccessible.");
+      const netError = "Erreur réseau ou serveur inaccessible.";
+      setErrorMsg(netError);
+      toast.error(netError);
     } finally {
       setLoading(false);
     }

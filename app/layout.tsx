@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -32,7 +33,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={`${inter.variable} font-sans antialiased`}>
-      <body className="h-full overflow-hidden font-sans">{children}</body>
+      <body className="h-full overflow-hidden font-sans">
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }

@@ -15,6 +15,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
+import { toast } from "@/components/ui/sonner";
 
 export interface CashierDashboardProps {
   standalone?: boolean;
@@ -47,16 +48,6 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
   const [isNewCustomerOpen, setIsNewCustomerOpen] = useState(false);
   const [isAddPurchaseOpen, setIsAddPurchaseOpen] = useState(false);
   const [isRedeemOpen, setIsRedeemOpen] = useState(false);
-
-  // Toast feedback
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  function showToast(msg: string) {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage((curr) => (curr === msg ? null : curr));
-    }, 4000);
-  }
 
   // Load cashier info on mount
   useEffect(() => {
@@ -137,16 +128,6 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
 
   const content = (
     <div className="space-y-6">
-      {/* Toast Alert */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-200">
-          <div className="bg-[var(--color-primary)] text-[var(--color-primary-text)] font-semibold text-xs py-3 px-5 rounded-[var(--radius-button,12px)] shadow-lg flex items-center gap-2">
-            <span>✅</span>
-            <span>{toastMessage}</span>
-          </div>
-        </div>
-      )}
-
       {/* If a customer is selected, show Customer Detail View with points actions */}
       {selectedCustomerId && selectedCustomerDetail ? (
         <CustomerDetailView
@@ -303,7 +284,7 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
         onClose={() => setIsNewCustomerOpen(false)}
         onCustomerCreated={(newCust) => {
           setIsNewCustomerOpen(false);
-          showToast(`Client ${newCust.full_name} créé avec succès !`);
+          toast.success(`Client ${newCust.full_name} créé avec succès !`);
           setSelectedCustomerId(newCust.id);
           setSelectedCustomerDetail(newCust);
         }}
@@ -320,7 +301,7 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
         onClose={() => setIsAddPurchaseOpen(false)}
         onPurchaseRecorded={(updatedCust) => {
           setSelectedCustomerDetail(updatedCust);
-          showToast("Achat enregistré et points crédités avec succès !");
+          toast.success("Achat enregistré et points crédités avec succès !");
         }}
       />
 
@@ -331,7 +312,7 @@ export function CashierDashboard({ standalone = false }: CashierDashboardProps) 
         onClose={() => setIsRedeemOpen(false)}
         onPointsRedeemed={(updatedCust) => {
           setSelectedCustomerDetail(updatedCust);
-          showToast("Achat enregistré et points déduits avec succès !");
+          toast.success("Achat enregistré et points déduits avec succès !");
         }}
       />
     </div>

@@ -1,12 +1,13 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { login } from '@/app/login/actions'
 import type { AuthActionResult } from '@/app/login/actions'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { toast } from '@/components/ui/sonner'
 
 interface LoginFormProps {
   initialMessage?: string
@@ -24,6 +25,18 @@ export function LoginForm({ initialMessage, initialSuccess }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
 
   const errorMessage = state?.error
+
+  useEffect(() => {
+    if (state?.error) {
+      toast.error(state.error)
+    }
+  }, [state?.error])
+
+  useEffect(() => {
+    if (initialSuccess) {
+      toast.success(initialSuccess)
+    }
+  }, [initialSuccess])
 
   return (
     <form action={formAction} className="space-y-5">

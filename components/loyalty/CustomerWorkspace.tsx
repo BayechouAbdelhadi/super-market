@@ -11,6 +11,7 @@ import { RedeemPointsModal } from '@/components/loyalty/RedeemPointsModal'
 import { NewCustomerModal } from '@/components/loyalty/NewCustomerModal'
 import { CustomerDetail } from '@/lib/loyalty/types'
 import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
+import { toast } from '@/components/ui/sonner'
 
 interface CustomerWorkspaceProps {
   initialCustomers?: any[]
@@ -38,18 +39,10 @@ export function CustomerWorkspace({
   // Modals for loyalty actions from detail view
   const [isAddPurchaseOpen, setIsAddPurchaseOpen] = useState(false)
   const [isRedeemOpen, setIsRedeemOpen] = useState(false)
-  const [toastMessage, setToastMessage] = useState<string | null>(null)
-
-  function showToast(msg: string) {
-    setToastMessage(msg)
-    setTimeout(() => {
-      setToastMessage((curr) => (curr === msg ? null : curr))
-    }, 4000)
-  }
 
   function handleCustomerCreated(newCustomer: CustomerDetail) {
     setIsNewCustomerOpen(false)
-    showToast(`Client ${newCustomer.full_name} créé avec succès !`)
+    toast.success(`Client ${newCustomer.full_name} créé avec succès !`)
 
     const newListItem = {
       id: newCustomer.id,
@@ -102,16 +95,6 @@ export function CustomerWorkspace({
 
   return (
     <div className="space-y-6">
-      {/* Toast Feedback */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-200">
-          <div className="bg-[var(--color-primary)] text-[var(--color-primary-text)] font-semibold text-xs py-3 px-5 rounded-[var(--radius-button,12px)] shadow-lg flex items-center gap-2">
-            <span>✅</span>
-            <span>{toastMessage}</span>
-          </div>
-        </div>
-      )}
-
       {/* If a customer detail is opened, show full CustomerDetailView */}
       {selectedCustomerId && selectedCustomerDetail ? (
         <div className="space-y-4">
@@ -143,7 +126,7 @@ export function CustomerWorkspace({
             onClose={() => setIsAddPurchaseOpen(false)}
             onPurchaseRecorded={(updatedCust) => {
               setSelectedCustomerDetail(updatedCust)
-              showToast("Achat enregistré et points crédités avec succès !")
+              toast.success("Achat enregistré et points crédités avec succès !")
             }}
           />
 
@@ -154,7 +137,7 @@ export function CustomerWorkspace({
             onClose={() => setIsRedeemOpen(false)}
             onPointsRedeemed={(updatedCust) => {
               setSelectedCustomerDetail(updatedCust)
-              showToast("Achat enregistré et points déduits avec succès !")
+              toast.success("Achat enregistré et points déduits avec succès !")
             }}
           />
         </div>

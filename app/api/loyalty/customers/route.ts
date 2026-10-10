@@ -3,6 +3,11 @@ import { createCustomer, searchCustomers } from "@/lib/loyalty/service";
 import { requireAuth } from "@/lib/loyalty/api-auth";
 import { CreateCustomerSchema } from "@/lib/loyalty/validation";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
+import { emailService } from "@/lib/email";
+import {
+  createSignedToken,
+  AccountActivationPayload,
+} from "@/lib/email/otp-security";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuth(["CASHIER", "ADMIN"]);
@@ -91,6 +96,48 @@ export async function POST(req: NextRequest) {
         },
         { status: 400 },
       );
+    }
+
+    const customer = result.customer;
+
+    // Send account activation email to the customer
+    if (customer.email) {
+      try {
+        const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+        const token = createSignedToken<AccountActivationPayload>({
+          email: customer.email.toLowerCase().trim(),
+          role: "CUSTOMER",
+          type: "ACCOUNT_ACTIVATION",
+          expiresAt,
+        });
+
+        const host = req.headers.get("host") || "localhost:3000";
+        const proto =
+          req.headers.get("x-forwarded-proto") ||
+          (host.includes("localhost") ? "http" : "https");
+        const origin = `${proto}://${host}`;
+        const activationLink = `${origin}/confirm-account?token=${encodeURIComponent(token)}`;
+
+        emailService
+          .sendAccountActivation({
+            email: customer.email,
+            name: customer.full_name,
+            activationLink,
+            role: "CUSTOMER",
+            expiresInDays: 7,
+          })
+          .catch((err) => {
+            console.error(
+              "[POST /api/loyalty/customers] Failed to send activation email:",
+              err
+            );
+          });
+      } catch (emailErr) {
+        console.error(
+          "[POST /api/loyalty/customers] Error preparing activation email:",
+          emailErr
+        );
+      }
     }
 
     return NextResponse.json(

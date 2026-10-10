@@ -1,12 +1,13 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { signup } from '@/app/signup/actions'
 import type { SignUpActionResult } from '@/app/signup/actions'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { toast } from '@/components/ui/sonner'
 
 interface SignUpFormProps {
   initialMessage?: string
@@ -32,6 +33,12 @@ export function SignUpForm({ initialMessage, initialData }: SignUpFormProps) {
   const [showPassword, setShowPassword] = useState(false)
 
   const errorMessage = state?.error
+
+  useEffect(() => {
+    if (state?.error) {
+      toast.error(state.error)
+    }
+  }, [state?.error])
 
   return (
     <form action={formAction} className="space-y-4">

@@ -9,7 +9,7 @@ import {
   Transaction,
 } from "../types";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { createIsolatedClient } from "@/lib/supabase/isolated";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone, calculateTier } from "../domain";
 import { LOYALTY_CONFIG } from "../config";
 
@@ -174,37 +174,36 @@ export class SupabaseCustomerRepository implements ICustomerRepository {
   }
 
   async createAuthAndProfile(data: CreateCustomerInput): Promise<{ id: string; email: string }> {
-    const sb = await this.getClient();
     const phoneNormalized = normalizePhone(data.phone);
     const emailNormalized = data.email.toLowerCase().trim();
     const firstName = data.first_name.trim();
     const lastName = data.last_name.trim();
 
-    // Isolated auth client without touching active cashier session cookies
-    const isolatedClient = createIsolatedClient();
-    const securePassword = crypto.randomBytes(12).toString("hex") + "A1!";
+    const adminClient = createAdminClient();
+    const securePassword = crypto.randomBytes(16).toString("hex") + "A1!";
 
-    const { data: authData, error: authError } = await isolatedClient.auth.signUp({
+    // Create user in Supabase Auth (Brevo confirmation email will prompt them to set their password)
+    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
       email: emailNormalized,
       password: securePassword,
-      options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          phone_number: phoneNormalized,
-          role: "CUSTOMER",
-        },
+      email_confirm: true,
+      user_metadata: {
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNormalized,
+        role: "CUSTOMER",
       },
     });
 
     if (authError || !authData.user) {
+      console.error("[CustomerRepository] auth.admin.createUser error:", authError?.message);
       throw new Error(authError?.message || "Erreur de création du compte client.");
     }
 
     const userId = authData.user.id;
 
-    // Profile & loyalty records
-    await sb.from("profiles").upsert({
+    // Create profile
+    const { error: profileError } = await adminClient.from("profiles").upsert({
       id: userId,
       first_name: firstName,
       last_name: lastName,
@@ -213,7 +212,14 @@ export class SupabaseCustomerRepository implements ICustomerRepository {
       role: "CUSTOMER",
     });
 
-    await sb.from("customers").upsert({
+    if (profileError) {
+      console.error("[CustomerRepository] Profile upsert error:", profileError.message);
+      await adminClient.auth.admin.deleteUser(userId).catch(() => null);
+      throw new Error("Impossible de créer le profil client (email ou téléphone en double).");
+    }
+
+    // Create loyalty record
+    await adminClient.from("customers").upsert({
       id: userId,
       loyalty_points: 0,
       status: "BRONZE",

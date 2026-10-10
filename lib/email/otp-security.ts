@@ -14,6 +14,13 @@ export interface PendingResetPayload {
   expiresAt: number;
 }
 
+export interface AccountActivationPayload {
+  email: string;
+  role: 'CUSTOMER' | 'CASHIER' | 'ADMIN';
+  type: 'ACCOUNT_ACTIVATION';
+  expiresAt: number;
+}
+
 /**
  * Generates a cryptographically secure 6-digit OTP code (e.g. "492815")
  */

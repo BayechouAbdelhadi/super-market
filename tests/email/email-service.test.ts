@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   renderVerificationOtpEmail,
   renderPasswordResetEmail,
+  renderAccountActivationEmail,
   BrevoEmailAdapter,
 } from "@/lib/email";
 import {
@@ -56,6 +57,40 @@ describe("Email Templates", () => {
       expect(template.html).toContain("https://supermarketcalais.com/reset-password?token=abc");
       expect(template.html).toContain("Réinitialiser mon mot de passe");
       expect(template.text).toContain("https://supermarketcalais.com/reset-password?token=abc");
+    });
+  });
+
+  describe("renderAccountActivationEmail", () => {
+    it("renders customer confirmation email mentioning account created at cash register", () => {
+      const template = renderAccountActivationEmail({
+        email: "client@example.com",
+        name: "Alexandre Dumas",
+        activationLink: "https://supermarketcalais.com/confirm-account?token=xyz",
+        role: "CUSTOMER",
+      });
+
+      expect(template.subject).toContain("Activez votre compte fidélité");
+      expect(template.html).toContain("Bonjour Alexandre Dumas,");
+      expect(template.html).toContain("passage à la caisse");
+      expect(template.html).toContain("https://supermarketcalais.com/confirm-account?token=xyz");
+      expect(template.html).toContain("Confirmer et activer mon compte");
+      expect(template.text).toContain("passage à la caisse");
+    });
+
+    it("renders cashier invitation email mentioning collaboration", () => {
+      const template = renderAccountActivationEmail({
+        email: "caissier@example.com",
+        name: "Sophie Germain",
+        activationLink: "https://supermarketcalais.com/confirm-account?token=cashier_token",
+        role: "CASHIER",
+      });
+
+      expect(template.subject).toContain("Invitation à rejoindre l'équipe caisse");
+      expect(template.html).toContain("Bonjour Sophie Germain,");
+      expect(template.html).toContain("invité(e) en tant que caissier(e)");
+      expect(template.html).toContain("https://supermarketcalais.com/confirm-account?token=cashier_token");
+      expect(template.html).toContain("Activer mon compte caissier");
+      expect(template.text).toContain("caissier(e)");
     });
   });
 });

@@ -6,6 +6,7 @@ import { calculatePoints } from "@/lib/loyalty/domain";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
 
 interface AddPurchaseModalProps {
   isOpen: boolean;
@@ -49,7 +50,9 @@ export function AddPurchaseModal({
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMsg(data.message || "Erreur lors de l'enregistrement de l'achat.");
+        const errorText = data.message || "Erreur lors de l'enregistrement de l'achat.";
+        setErrorMsg(errorText);
+        toast.error(errorText);
         return;
       }
 
@@ -57,7 +60,9 @@ export function AddPurchaseModal({
       setAmountStr("");
       onClose();
     } catch {
-      setErrorMsg("Erreur réseau ou serveur inaccessible.");
+      const netError = "Erreur réseau ou serveur inaccessible.";
+      setErrorMsg(netError);
+      toast.error(netError);
     } finally {
       setLoading(false);
     }

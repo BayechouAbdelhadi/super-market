@@ -43,6 +43,14 @@ export interface PasswordResetEmailProps {
   expiresInMinutes?: number;
 }
 
+export interface AccountActivationEmailProps {
+  email: string;
+  name?: string;
+  activationLink: string;
+  role: 'CUSTOMER' | 'CASHIER' | 'ADMIN';
+  expiresInDays?: number;
+}
+
 export interface EmailTemplateResult {
   subject: string;
   html: string;

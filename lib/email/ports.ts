@@ -3,6 +3,7 @@ import {
   EmailResult,
   VerificationOtpEmailProps,
   PasswordResetEmailProps,
+  AccountActivationEmailProps,
 } from "./types";
 
 /**
@@ -25,4 +26,9 @@ export interface IEmailService {
    * Sends a password reset email with secure link and/or recovery OTP code
    */
   sendPasswordReset(props: PasswordResetEmailProps): Promise<EmailResult>;
+
+  /**
+   * Sends an account confirmation/activation email when created by Admin or Cashier
+   */
+  sendAccountActivation(props: AccountActivationEmailProps): Promise<EmailResult>;
 }
