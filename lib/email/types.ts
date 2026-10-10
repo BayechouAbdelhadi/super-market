@@ -33,6 +33,7 @@ export interface VerificationOtpEmailProps {
   name?: string;
   otp: string;
   expiresInMinutes?: number;
+  sender?: EmailSender;
 }
 
 export interface PasswordResetEmailProps {
@@ -41,6 +42,7 @@ export interface PasswordResetEmailProps {
   resetLink?: string;
   resetCode?: string;
   expiresInMinutes?: number;
+  sender?: EmailSender;
 }
 
 export interface AccountActivationEmailProps {
@@ -49,6 +51,7 @@ export interface AccountActivationEmailProps {
   activationLink: string;
   role: 'CUSTOMER' | 'CASHIER' | 'ADMIN';
   expiresInDays?: number;
+  sender?: EmailSender;
 }
 
 export interface EmailTemplateResult {
