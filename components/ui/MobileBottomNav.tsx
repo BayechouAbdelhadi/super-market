@@ -48,8 +48,13 @@ export function MobileBottomNav({ role, email }: MobileBottomNavProps) {
   const navItems = isAdmin
     ? [
         {
+          name: "Accueil",
+          href: "/admin",
+          icon: <LayoutDashboard className="w-5 h-5 shrink-0" />,
+        },
+        {
           name: "Caisse",
-          href: "/cashier",
+          href: "/cashier/pos",
           icon: <CreditCard className="w-5 h-5 shrink-0" />,
         },
         {
@@ -62,16 +67,16 @@ export function MobileBottomNav({ role, email }: MobileBottomNavProps) {
           href: "/admin/cashiers",
           icon: <UserCog className="w-5 h-5 shrink-0" />,
         },
-        {
-          name: "Tableau",
-          href: "/admin",
-          icon: <LayoutDashboard className="w-5 h-5 shrink-0" />,
-        },
       ]
     : [
         {
-          name: "Caisse",
+          name: "Accueil",
           href: "/cashier",
+          icon: <LayoutDashboard className="w-5 h-5 shrink-0" />,
+        },
+        {
+          name: "Caisse",
+          href: "/cashier/pos",
           icon: <CreditCard className="w-5 h-5 shrink-0" />,
         },
         {
