@@ -6,15 +6,26 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { normalizePhone } from '@/lib/loyalty/domain'
 import { emailService } from '@/lib/email'
-import { generateSecureOtp, hashOtp, createSignedToken, verifySignedToken } from '@/lib/email/otp-security'
+import {
+  generateSecureOtp,
+  hashOtp,
+  createSignedToken,
+  verifySignedToken,
+  PENDING_SIGNUP_COOKIE,
+} from '@/lib/email/otp-security'
 import { z } from 'zod'
 
+export type SignUpActionResult = {
+  success?: boolean
+  error?: string | null
+}
+
 const SignUpSchema = z.object({
-  first_name: z.string().trim().min(2, "Le prénom doit comporter au moins 2 caractères."),
-  last_name: z.string().trim().min(2, "Le nom doit comporter au moins 2 caractères."),
-  email: z.string().trim().email("Adresse email invalide."),
-  phone: z.string().trim().min(8, "Le numéro de téléphone doit comporter au moins 8 caractères."),
-  password: z.string().min(6, "Le mot de passe doit comporter au moins 6 caractères."),
+  first_name: z.string().trim().min(2, "Le prénom est obligatoire (au moins 2 caractères)."),
+  last_name: z.string().trim().min(2, "Le nom est obligatoire (au moins 2 caractères)."),
+  email: z.string().trim().email("L'adresse email est obligatoire et doit être valide."),
+  phone: z.string().trim().min(8, "Le numéro de téléphone est obligatoire (au moins 8 chiffres)."),
+  password: z.string().min(6, "Le mot de passe est obligatoire (au moins 6 caractères)."),
 })
 
 interface PendingSignUpPayload {
@@ -27,26 +38,38 @@ interface PendingSignUpPayload {
   expiresAt: number;
 }
 
-const PENDING_SIGNUP_COOKIE = 'sm_pending_signup';
-
 /**
  * Step 1: User submits signup details.
  * Validates inputs, generates a 6-digit confirmation OTP,
  * sends it via Brevo email service, and redirects to OTP verification.
  */
-export async function signup(formData: FormData) {
+export async function signup(
+  prevStateOrFormData: SignUpActionResult | FormData | null,
+  maybeFormData?: FormData
+): Promise<SignUpActionResult> {
+  const formData =
+    prevStateOrFormData instanceof FormData
+      ? prevStateOrFormData
+      : maybeFormData instanceof FormData
+      ? maybeFormData
+      : null
+
+  if (!formData) {
+    return { error: "Données de formulaire manquantes." }
+  }
+
   const rawData = {
-    first_name: formData.get('first_name') as string,
-    last_name: formData.get('last_name') as string,
-    email: formData.get('email') as string,
-    phone: formData.get('phone') as string,
-    password: formData.get('password') as string,
+    first_name: ((formData.get('first_name') as string) || '').trim(),
+    last_name: ((formData.get('last_name') as string) || '').trim(),
+    email: ((formData.get('email') as string) || '').trim(),
+    phone: ((formData.get('phone') as string) || '').trim(),
+    password: (formData.get('password') as string) || '',
   }
 
   const parseResult = SignUpSchema.safeParse(rawData)
   if (!parseResult.success) {
     const errorMsg = parseResult.error.issues?.[0]?.message || "Données invalides."
-    redirect(`/signup?message=${encodeURIComponent(errorMsg)}`)
+    return { error: errorMsg }
   }
 
   const { first_name, last_name, email, phone, password } = parseResult.data
@@ -60,12 +83,17 @@ export async function signup(formData: FormData) {
   // Verify that account does not already exist
   const { data: existingUser } = await supabase
     .from('profiles')
-    .select('id')
+    .select('id, email, phone_number')
     .or(`email.eq.${emailNormalized},phone_number.eq.${phoneNormalized}`)
     .limit(1)
 
   if (existingUser && existingUser.length > 0) {
-    redirect(`/signup?message=${encodeURIComponent("Un compte avec cet email ou numéro de téléphone existe déjà.")}`)
+    const isEmailConflict = existingUser[0].email?.toLowerCase() === emailNormalized
+    return {
+      error: isEmailConflict
+        ? "Un compte existe déjà avec cette adresse email."
+        : "Un compte existe déjà avec ce numéro de téléphone.",
+    }
   }
 
   // Generate 6-digit cryptographically secure OTP
@@ -83,7 +111,9 @@ export async function signup(formData: FormData) {
 
   if (!emailResult.success) {
     console.error("[SignUp] Failed to send Brevo verification email:", emailResult.error);
-    redirect(`/signup?message=${encodeURIComponent("Impossible d'envoyer l'email de confirmation. Veuillez réessayer.")}`)
+    return {
+      error: "Impossible d'envoyer l'email de confirmation. Veuillez vérifier votre adresse email et réessayer.",
+    }
   }
 
   // Store secure signed token in HTTP-only cookie

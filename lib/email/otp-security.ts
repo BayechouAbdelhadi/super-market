@@ -6,6 +6,7 @@ const DEFAULT_SECRET =
   "super-market-calais-secure-otp-salt";
 
 export const PENDING_RESET_COOKIE = "sm_pending_reset";
+export const PENDING_SIGNUP_COOKIE = "sm_pending_signup";
 
 export interface PendingResetPayload {
   email: string;

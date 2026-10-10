@@ -88,7 +88,7 @@ export default async function ForgotPasswordPage({
                 name="email"
                 type="email"
                 label="Votre adresse email"
-                placeholder="jean.dupont@example.com"
+                placeholder="email@gmail.com"
                 required
                 autoFocus
                 className="h-11"

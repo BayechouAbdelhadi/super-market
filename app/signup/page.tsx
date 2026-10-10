@@ -1,9 +1,16 @@
-import { signup } from './actions'
 import Image from 'next/image'
 import Link from 'next/link'
-import { SignUpSubmitButton } from '@/components/auth/SignUpSubmitButton'
-import { Input } from '@/components/ui/input'
+import { cookies } from 'next/headers'
 import { Card } from '@/components/ui/card'
+import { SignUpForm } from '@/components/auth/SignUpForm'
+import { verifySignedToken, PENDING_SIGNUP_COOKIE } from '@/lib/email/otp-security'
+
+interface PendingSignUpPayload {
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+}
 
 export default async function SignUpPage({
   searchParams,
@@ -11,6 +18,18 @@ export default async function SignUpPage({
   searchParams: Promise<{ message?: string }>
 }) {
   const params = await searchParams
+  const cookieStore = await cookies()
+  const pendingCookie = cookieStore.get(PENDING_SIGNUP_COOKIE)?.value
+  const pendingData = pendingCookie ? verifySignedToken<PendingSignUpPayload>(pendingCookie) : null
+
+  const initialData = pendingData
+    ? {
+        firstName: pendingData.first_name,
+        lastName: pendingData.last_name,
+        email: pendingData.email,
+        phone: pendingData.phone,
+      }
+    : undefined
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-background)] p-4 sm:p-6 font-sans">
@@ -40,78 +59,7 @@ export default async function SignUpPage({
 
         {/* Signup Form Card */}
         <Card className="p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-[var(--color-border)]">
-          <form action={signup} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                id="first_name"
-                name="first_name"
-                type="text"
-                label="Prénom"
-                placeholder="Jean"
-                required
-                className="h-11"
-              />
-              <Input
-                id="last_name"
-                name="last_name"
-                type="text"
-                label="Nom"
-                placeholder="Dupont"
-                required
-                className="h-11"
-              />
-            </div>
-
-            <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              label="Numéro de téléphone"
-              placeholder="06 12 34 56 78"
-              required
-              className="h-11"
-            />
-
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              label="Adresse email"
-              placeholder="jean.dupont@example.com"
-              required
-              className="h-11"
-            />
-
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              label="Mot de passe"
-              placeholder="••••••••"
-              required
-              className="h-11"
-            />
-
-            {params?.message && (
-              <div className="text-xs font-semibold text-rose-700 dark:text-rose-300 text-center bg-rose-500/10 border border-rose-500/20 p-3 rounded-[var(--radius-button,12px)]">
-                {params.message}
-              </div>
-            )}
-
-            <SignUpSubmitButton />
-
-            <div className="pt-2 text-center border-t border-[var(--color-border)]">
-              <p className="text-xs text-[var(--color-text-muted)]">
-                Déjà un compte ?{" "}
-                <Link
-                  href="/login"
-                  className="font-bold text-[var(--color-primary)] hover:underline ml-1"
-                >
-                  Se connecter
-                </Link>
-              </p>
-            </div>
-          </form>
+          <SignUpForm initialMessage={params?.message} initialData={initialData} />
         </Card>
 
         {/* Back Link */}
