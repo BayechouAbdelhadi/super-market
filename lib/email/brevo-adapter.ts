@@ -50,7 +50,24 @@ export class BrevoEmailAdapter implements IEmailService {
         };
       }
 
-      const sender = options.sender || this.defaultSender;
+      let sender = options.sender;
+      if (!sender) {
+        try {
+          const { getAppSettings } = await import("@/lib/settings/service");
+          const settings = await getAppSettings();
+          if (settings?.notifications?.senderEmail) {
+            sender = {
+              email: settings.notifications.senderEmail,
+              name: settings.notifications.senderName || settings.store.storeName || this.defaultSender.name,
+            };
+          }
+        } catch {
+          // fallback to defaultSender if service fails to load
+        }
+      }
+      if (!sender) {
+        sender = this.defaultSender;
+      }
 
       const payload = {
         sender: {
@@ -117,6 +134,7 @@ export class BrevoEmailAdapter implements IEmailService {
       subject,
       htmlContent: html,
       textContent: text,
+      sender: props.sender,
     });
   }
 
@@ -127,6 +145,7 @@ export class BrevoEmailAdapter implements IEmailService {
       subject,
       htmlContent: html,
       textContent: text,
+      sender: props.sender,
     });
   }
 
@@ -137,6 +156,7 @@ export class BrevoEmailAdapter implements IEmailService {
       subject,
       htmlContent: html,
       textContent: text,
+      sender: props.sender,
     });
   }
 }
