@@ -34,7 +34,16 @@ export async function updateSession(request: NextRequest) {
     console.error(`[Middleware] Supabase Auth Error on ${request.nextUrl.pathname}:`, userError.message)
   }
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup')
+  const isAuthRoute =
+    request.nextUrl.pathname.startsWith('/login') ||
+    request.nextUrl.pathname.startsWith('/signup') ||
+    request.nextUrl.pathname.startsWith('/forgot-password') ||
+    request.nextUrl.pathname.startsWith('/reset-password') ||
+    request.nextUrl.pathname.startsWith('/auth/callback')
+  const isPublicAuthEntry =
+    request.nextUrl.pathname.startsWith('/login') ||
+    request.nextUrl.pathname.startsWith('/signup') ||
+    request.nextUrl.pathname.startsWith('/forgot-password')
   const isAccountRoute = request.nextUrl.pathname === '/account' || request.nextUrl.pathname.startsWith('/account/')
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
   const isCashierRoute = request.nextUrl.pathname.startsWith('/cashier')
@@ -64,7 +73,8 @@ export async function updateSession(request: NextRequest) {
     const role = user.user_metadata?.role || 'CUSTOMER'
     
     // Redirect authenticated users from login / signup to their appropriate dashboard
-    if (isAuthRoute) {
+    // Keep users on /reset-password so they can set their new password
+    if (isPublicAuthEntry) {
       if (role === 'ADMIN') {
         const url = request.nextUrl.clone()
         url.pathname = '/admin'

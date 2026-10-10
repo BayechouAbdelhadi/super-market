@@ -59,6 +59,15 @@ export default async function LoginPage({
               required
               className="h-11"
             />
+
+            <div className="flex justify-end -mt-3">
+              <Link
+                href="/forgot-password"
+                className="text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+              >
+                Mot de passe oublié ?
+              </Link>
+            </div>
             
             {params?.success && (
               <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 text-center bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-[var(--radius-button,12px)]">
