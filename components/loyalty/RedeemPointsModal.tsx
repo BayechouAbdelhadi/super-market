@@ -3,10 +3,13 @@
 import React, { useState } from "react";
 import { CustomerDetail } from "@/lib/loyalty/types";
 import { Modal } from "@/components/ui/modal";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
-import { calculatePoints } from "@/lib/loyalty/domain";
+import {
+  calculatePoints,
+  calculateMaxPointsForAmount,
+  calculateMaxRedeemablePoints,
+} from "@/lib/loyalty/domain";
 import { toast } from "@/components/ui/sonner";
 
 interface RedeemPointsModalProps {
@@ -41,7 +44,6 @@ export function RedeemPointsModal({
   // Both required inputs: purchase amount (€) and points to redeem
   const [amountStr, setAmountStr] = useState("");
   const [pointsStr, setPointsStr] = useState("");
-  const [reason, setReason] = useState(defaultRedeemReason);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -55,18 +57,37 @@ export function RedeemPointsModal({
 
   if (!isOpen || !customer) return null;
 
-  const purchasePresets = quickPurchaseAmounts && quickPurchaseAmounts.length > 0
+  const rawPurchasePresets = quickPurchaseAmounts && quickPurchaseAmounts.length > 0
     ? quickPurchaseAmounts
     : [...LOYALTY_CONFIG.presets.redeemAmounts];
+  // Filter out any 0 € presets since a purchase amount > 0 is mandatory to apply points
+  const purchasePresets = rawPurchasePresets.filter((p) => p > 0);
 
   const pointsPresets = quickRedeemPoints && quickRedeemPoints.length > 0
     ? quickRedeemPoints
     : [...LOYALTY_CONFIG.presets.redeemPoints];
 
-  // Amount parsing & validation (allows 0 € or any positive amount)
+  // Amount parsing & validation (must be > 0 to redeem points: no money given back)
   const rawAmount = amountStr.trim().replace(",", ".");
   const parsedAmount = rawAmount === "" ? 0 : parseFloat(rawAmount);
   const isValidAmount = !isNaN(parsedAmount) && parsedAmount >= 0;
+  const isPurchaseAmountEntered = isValidAmount && parsedAmount > 0;
+
+  // Maximum points authorized based strictly on the purchase amount (amount - points * pointValue >= 0)
+  const maxPointsForAmount = isPurchaseAmountEntered
+    ? calculateMaxPointsForAmount(parsedAmount, pointValueInEuro)
+    : 0;
+
+  // Effective maximum points that can be redeemed (bounded by balance, amount, and store cap)
+  const maxAllowedPointsForTx = calculateMaxRedeemablePoints(
+    customer.available_points,
+    isPurchaseAmountEntered ? parsedAmount : 0,
+    {
+      minPointsToRedeem,
+      maxDiscountPerTransactionEuro,
+      pointValueInEuro,
+    }
+  );
 
   // Points parsing & validation
   const cannotRedeem =
@@ -75,9 +96,22 @@ export function RedeemPointsModal({
   const pointsToRedeem = parseInt(pointsStr.trim(), 10);
   const isValidPoints = !cannotRedeem && Number.isInteger(pointsToRedeem) && pointsToRedeem > 0;
   const isExceedingBalance = isValidPoints && pointsToRedeem > customer.available_points;
-  const remainingPoints = isValidPoints && !isExceedingBalance
-    ? customer.available_points - pointsToRedeem
-    : customer.available_points;
+  const isExceedingAmount =
+    isValidPoints && isPurchaseAmountEntered && pointsToRedeem > maxPointsForAmount;
+  const isAmountMissingForPoints = isValidPoints && !isPurchaseAmountEntered;
+
+  const discountEuro = isValidPoints
+    ? Math.round(pointsToRedeem * pointValueInEuro * 100) / 100
+    : 0;
+
+  const netPayable = isPurchaseAmountEntered
+    ? Math.max(0, Math.round((parsedAmount - discountEuro) * 100) / 100)
+    : 0;
+
+  const remainingPoints =
+    isValidPoints && !isExceedingBalance && !isExceedingAmount
+      ? customer.available_points - pointsToRedeem
+      : customer.available_points;
 
   const normalPointsEarned =
     !isNaN(parsedAmount) && parsedAmount > 0
@@ -141,8 +175,8 @@ export function RedeemPointsModal({
       return handleNormalPurchase(e);
     }
 
-    if (!isValidAmount) {
-      const msg = "Veuillez saisir un montant d'achat valide (supérieur ou égal à 0 €).";
+    if (!isValidAmount || !isPurchaseAmountEntered) {
+      const msg = "Veuillez saisir un montant d'achat valide (supérieur à 0 €) pour utiliser des points.";
       setErrorMsg(msg);
       toast.error(msg);
       return;
@@ -162,6 +196,13 @@ export function RedeemPointsModal({
       return;
     }
 
+    if (isExceedingAmount) {
+      const msg = `La remise (${discountEuro.toFixed(2)} €) ne peut pas dépasser le montant de l'achat (${parsedAmount.toFixed(2)} €). Aucun rendu de monnaie n'est autorisé. Maximum utilisable : ${maxPointsForAmount} points.`;
+      setErrorMsg(msg);
+      toast.error(msg);
+      return;
+    }
+
     if (minPointsToRedeem > 0 && pointsToRedeem < minPointsToRedeem) {
       const msg = `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise.`;
       setErrorMsg(msg);
@@ -170,8 +211,8 @@ export function RedeemPointsModal({
     }
 
     if (maxDiscountPerTransactionEuro > 0) {
-      const discountEuro = pointsToRedeem * pointValueInEuro;
-      if (discountEuro > maxDiscountPerTransactionEuro) {
+      const discountEuroCalc = pointsToRedeem * pointValueInEuro;
+      if (discountEuroCalc > maxDiscountPerTransactionEuro) {
         const maxPts = Math.floor(maxDiscountPerTransactionEuro / pointValueInEuro);
         const msg = `La remise maximale autorisée par passage en caisse est de ${maxDiscountPerTransactionEuro.toFixed(2)} € (soit maximum ${maxPts} points).`;
         setErrorMsg(msg);
@@ -188,7 +229,7 @@ export function RedeemPointsModal({
         body: JSON.stringify({
           amount: parsedAmount,
           points: pointsToRedeem,
-          reason: reason.trim() || undefined,
+          reason: defaultRedeemReason || "Remise fidélité en caisse",
         }),
       });
 
@@ -261,7 +302,7 @@ export function RedeemPointsModal({
               1. Montant de l&apos;achat (€) *
             </label>
             <span className="text-[11px] text-[var(--color-text-muted)]">
-              (0 € si article 100% offert/remisé)
+              (Plafond de points calculé sur ce montant)
             </span>
           </div>
 
@@ -305,8 +346,10 @@ export function RedeemPointsModal({
             >
               2. Nombre de points à utiliser *
             </label>
-            <span className="text-[11px] text-[var(--color-text-muted)]">
-              Max : {customer.available_points} pts
+            <span className="text-[11px] text-[var(--color-text-muted)] font-mono">
+              {isPurchaseAmountEntered
+                ? `Max pour cet achat : ${Math.min(customer.available_points, maxPointsForAmount)} pts`
+                : `Solde : ${customer.available_points} pts`}
             </span>
           </div>
 
@@ -315,13 +358,19 @@ export function RedeemPointsModal({
               id="redeem-points-input"
               type="number"
               min={minPointsToRedeem > 0 ? minPointsToRedeem : 1}
-              max={customer.available_points}
+              max={isPurchaseAmountEntered ? Math.min(customer.available_points, maxPointsForAmount) : customer.available_points}
               step={1}
               required
-              disabled={cannotRedeem}
+              disabled={cannotRedeem || !isPurchaseAmountEntered}
               value={cannotRedeem ? "" : pointsStr}
               onChange={(e) => setPointsStr(e.target.value)}
-              placeholder={cannotRedeem ? "Points indisponibles" : "0"}
+              placeholder={
+                cannotRedeem
+                  ? "Points indisponibles"
+                  : !isPurchaseAmountEntered
+                    ? "Saisir le montant d'abord"
+                    : "0"
+              }
               className="w-full h-13 text-xl sm:text-2xl font-bold rounded-[var(--radius-input,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] py-2.5 pl-4 pr-12 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:bg-[var(--color-surface-hover)] disabled:cursor-not-allowed transition-all"
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--color-text-muted)] select-none pointer-events-none">
@@ -340,42 +389,58 @@ export function RedeemPointsModal({
             </p>
           )}
 
+          {!cannotRedeem && !isPurchaseAmountEntered && (
+            <p className="text-xs text-[var(--color-text-muted)] font-medium flex items-center gap-1.5 pt-1">
+              <span>💡</span>
+              <span>Indiquez le montant de l&apos;achat pour débloquer l&apos;utilisation des points (aucun rendu de monnaie).</span>
+            </p>
+          )}
+
           {/* Quick point chips */}
           <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
             <span className="text-[var(--color-text-muted)] text-[11px] font-medium mr-1">Raccourcis points :</span>
-            {pointsPresets.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                disabled={cannotRedeem || preset > customer.available_points}
-                onClick={() => {
-                  if (minPointsToRedeem > 0 && preset < minPointsToRedeem) {
-                    toast.error(
-                      `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise.`
-                    );
-                  }
-                  setPointsStr(preset.toString());
-                }}
-                className="px-2.5 py-1 min-h-[30px] rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text)] font-mono text-[11px] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              >
-                -{preset} pts
-              </button>
-            ))}
-            {customer.available_points > 0 && (
+            {pointsPresets.map((preset) => {
+              const isDisabled =
+                cannotRedeem ||
+                !isPurchaseAmountEntered ||
+                preset > customer.available_points ||
+                preset > maxPointsForAmount;
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  disabled={isDisabled}
+                  onClick={() => {
+                    if (minPointsToRedeem > 0 && preset < minPointsToRedeem) {
+                      toast.error(
+                        `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise.`
+                      );
+                    }
+                    setPointsStr(preset.toString());
+                  }}
+                  className="px-2.5 py-1 min-h-[30px] rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text)] font-mono text-[11px] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                >
+                  -{preset} pts
+                </button>
+              );
+            })}
+            {customer.available_points > 0 && isPurchaseAmountEntered && maxAllowedPointsForTx > 0 && (
               <button
                 type="button"
                 disabled={cannotRedeem}
                 onClick={() => {
-                  if (minPointsToRedeem > 0 && customer.available_points < minPointsToRedeem) {
+                  if (minPointsToRedeem > 0 && maxAllowedPointsForTx < minPointsToRedeem) {
                     toast.error(
                       `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise.`
                     );
                   }
-                  setPointsStr(customer.available_points.toString());
+                  setPointsStr(maxAllowedPointsForTx.toString());
                 }}
                 className="px-2.5 py-1 min-h-[30px] rounded-full border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-semibold text-[11px] hover:bg-[var(--color-primary)]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
-                Tout le solde ({customer.available_points} pts)
+                {customer.available_points <= maxPointsForAmount
+                  ? `Tout le solde (${customer.available_points} pts)`
+                  : `Max possible (${maxAllowedPointsForTx} pts · -${(maxAllowedPointsForTx * pointValueInEuro).toFixed(2)} €)`}
               </button>
             )}
           </div>
@@ -391,93 +456,80 @@ export function RedeemPointsModal({
           </div>
         )}
 
-        {/* Live Transaction Preview Card */}
-        <div className="p-4 rounded-[var(--radius-card,16px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-2.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-[var(--color-text-muted)] font-medium">Montant de l&apos;achat :</span>
-            <strong className="text-[var(--color-text)] font-mono text-sm">
-              {isValidAmount && parsedAmount > 0 ? `${parsedAmount.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "0,00 €"}
-            </strong>
+        {/* Warning if exceeding purchase amount (no money given) */}
+        {isExceedingAmount && (
+          <div className="p-3 rounded-[var(--radius-button,12px)] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-200 font-medium flex items-start gap-2">
+            <span className="shrink-0 text-sm">⚠️</span>
+            <div>
+              <strong className="block font-semibold">Aucun rendu de monnaie autorisé</strong>
+              La remise calculée ({discountEuro.toFixed(2)} €) dépasse le montant du ticket ({parsedAmount.toFixed(2)} €).
+              Pour cet achat, le maximum utilisable est de <strong>{maxPointsForAmount} points</strong> (soit {(maxPointsForAmount * pointValueInEuro).toFixed(2)} € de remise max).
+            </div>
           </div>
+        )}
 
+        {/* Compact Live Transaction Summary Bar */}
+        <div className="p-3 sm:p-3.5 rounded-[var(--radius-card,16px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] grid grid-cols-3 gap-2 items-center text-center">
           {cannotRedeem ? (
             <>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--color-text-muted)] font-medium">Points fidélité utilisés :</span>
-                <span className="text-[var(--color-text-muted)] font-mono text-xs">
-                  0 pt (remise non applicable)
+              <div className="text-left sm:text-center">
+                <span className="text-[11px] font-medium text-[var(--color-text-muted)] block">Points gagnés</span>
+                <span className="text-xs sm:text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  +{normalPointsEarned} pts
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--color-text-muted)] font-medium">Remise fidélité accordée :</span>
-                <span className="text-[var(--color-text-muted)] font-mono text-xs">
-                  0,00 €
+              <div className="px-2 py-1.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">
+                  Total à encaisser
+                </span>
+                <span className="text-sm sm:text-base font-mono font-extrabold text-[var(--color-text)]">
+                  {isPurchaseAmountEntered ? `${parsedAmount.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "0,00 €"}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--color-text-muted)] font-medium">Points cumulés avec cet achat :</span>
-                <strong className="text-emerald-600 dark:text-emerald-400 font-mono text-sm font-bold">
-                  +{normalPointsEarned} pts (1 € = {euroToPointsRatio} pt{euroToPointsRatio > 1 ? "s" : ""})
-                </strong>
-              </div>
-
-              <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs">
-                <span className="text-[var(--color-text-muted)] font-medium">Nouveau solde estimé :</span>
-                <strong className="text-sm font-bold text-[var(--color-primary)]">
+              <div className="text-right sm:text-center">
+                <span className="text-[11px] font-medium text-[var(--color-text-muted)] block">Nouveau solde</span>
+                <span className="text-xs sm:text-sm font-mono font-bold text-[var(--color-text)]">
                   {(customer.available_points + normalPointsEarned).toLocaleString("fr-FR")} pts
-                </strong>
+                </span>
               </div>
-
-              <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium pt-1 border-t border-[var(--color-border)]/50">
-                ✨ En l&apos;absence d&apos;utilisation de remise, le client cumule +{normalPointsEarned} point{normalPointsEarned > 1 ? "s" : ""} sur son compte.
-              </p>
             </>
           ) : (
             <>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--color-text-muted)] font-medium">Points fidélité utilisés :</span>
-                <strong className="text-rose-600 dark:text-rose-400 font-mono text-sm">
-                  {isValidPoints ? `-${pointsToRedeem} pts` : "—"}
-                </strong>
+              <div className="text-left sm:text-center">
+                <span className="text-[11px] font-medium text-[var(--color-text-muted)] block">Remise</span>
+                <div className="flex flex-col sm:items-center">
+                  <span className={`text-xs sm:text-sm font-mono font-bold ${isValidPoints ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--color-text-muted)]"}`}>
+                    {isValidPoints ? `-${discountEuro.toFixed(2)} €` : "0,00 €"}
+                  </span>
+                  {isValidPoints && (
+                    <span className="text-[10px] text-[var(--color-text-muted)] font-mono">
+                      (-{pointsToRedeem} pts)
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--color-text-muted)] font-medium">Remise fidélité accordée :</span>
-                <strong className="text-emerald-600 dark:text-emerald-400 font-mono text-sm">
-                  {isValidPoints ? `-${(pointsToRedeem * pointValueInEuro).toFixed(2)} €` : "—"}
-                </strong>
-              </div>
-
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--color-text-muted)] font-medium">Points crédités :</span>
-                <span className="inline-flex items-center gap-1 font-semibold text-xs text-[var(--color-text-muted)] bg-[var(--color-surface)] px-2 py-0.5 rounded-full border border-[var(--color-border)]">
-                  0 pt (consommation)
+              <div className="px-2 py-1.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">
+                  Reste à payer
+                </span>
+                <span className={`text-sm sm:text-base font-mono font-black ${isExceedingAmount ? "text-rose-600 dark:text-rose-400 line-through" : "text-[var(--color-text)]"}`}>
+                  {isPurchaseAmountEntered ? `${netPayable.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "0,00 €"}
                 </span>
               </div>
 
-              <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs">
-                <span className="text-[var(--color-text-muted)] font-medium">Nouveau solde disponible :</span>
-                <strong className="text-sm font-bold text-[var(--color-text)]">
+              <div className="text-right sm:text-center">
+                <span className="text-[11px] font-medium text-[var(--color-text-muted)] block">Nouveau solde</span>
+                <span className="text-xs sm:text-sm font-mono font-bold text-[var(--color-text)]">
                   {remainingPoints.toLocaleString("fr-FR")} pts
-                </strong>
+                </span>
               </div>
-
-              <p className="text-[11px] text-[var(--color-text-muted)] italic pt-1 border-t border-[var(--color-border)]/50">
-                ℹ️ Règle fidélité : Aucun point n&apos;est crédité lors de l&apos;utilisation de points, même avec un montant d&apos;achat (le client consomme son avantage).
-              </p>
             </>
           )}
         </div>
 
-        {/* Reason input */}
-        <Input
-          label="Motif de l'opération"
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          placeholder="Remise fidélité en caisse"
-        />
 
         {/* Footer Actions */}
         <div className="pt-3 flex items-center justify-end gap-3 border-t border-[var(--color-border)]">
@@ -514,12 +566,19 @@ export function RedeemPointsModal({
               variant="primary"
               type="submit"
               loading={loading}
-              disabled={cannotRedeem || !isValidPoints || isExceedingBalance || !isValidAmount}
+              disabled={
+                cannotRedeem ||
+                !isValidPoints ||
+                isExceedingBalance ||
+                !isValidAmount ||
+                !isPurchaseAmountEntered ||
+                isExceedingAmount
+              }
             >
               {loading
                 ? "Enregistrement..."
-                : isValidPoints && isValidAmount
-                  ? `Valider (${parsedAmount.toFixed(2)} € · -${pointsToRedeem} pts)`
+                : isValidPoints && isPurchaseAmountEntered && !isExceedingAmount
+                  ? `Valider (${parsedAmount.toFixed(2)} € · -${pointsToRedeem} pts · Reste : ${netPayable.toFixed(2)} €)`
                   : "Saisir montant et points"}
             </Button>
           )}

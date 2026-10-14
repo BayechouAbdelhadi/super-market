@@ -215,12 +215,19 @@ export async function redeemPoints(
   }
 
   const settings = await getAppSettings();
+  const purchaseAmount = Math.max(0, isNaN(amount) ? 0 : Number(amount));
 
-  const validation = validateRedemption(pointsToRedeem, detailBefore.available_points, {
-    minPointsToRedeem: settings.loyalty.minPointsToRedeem,
-    maxDiscountPerTransactionEuro: settings.loyalty.maxDiscountPerTransactionEuro,
-    pointValueInEuro: settings.loyalty.pointValueInEuro,
-  });
+  const validation = validateRedemption(
+    pointsToRedeem,
+    detailBefore.available_points,
+    {
+      minPointsToRedeem: settings.loyalty.minPointsToRedeem,
+      maxDiscountPerTransactionEuro: settings.loyalty.maxDiscountPerTransactionEuro,
+      pointValueInEuro: settings.loyalty.pointValueInEuro,
+      purchaseAmount,
+    },
+    purchaseAmount
+  );
 
   if (!validation.valid) {
     return {
@@ -230,7 +237,6 @@ export async function redeemPoints(
     };
   }
 
-  const purchaseAmount = Math.max(0, isNaN(amount) ? 0 : Number(amount));
   const pointsEarned = calculateRedemptionPointsEarned(purchaseAmount);
 
   try {
@@ -252,7 +258,14 @@ export async function redeemPoints(
       detailBefore.available_points,
       detailBefore.historical_points,
       pointsToRedeem,
-      tierThresholds
+      tierThresholds,
+      {
+        minPointsToRedeem: settings.loyalty.minPointsToRedeem,
+        maxDiscountPerTransactionEuro: settings.loyalty.maxDiscountPerTransactionEuro,
+        pointValueInEuro: settings.loyalty.pointValueInEuro,
+        purchaseAmount,
+      },
+      purchaseAmount
     );
 
     await customerRepo.updateLoyaltyPoints(customerId, updated.available_points);

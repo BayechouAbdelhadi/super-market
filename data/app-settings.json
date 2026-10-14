@@ -32,11 +32,11 @@
     "email": "contact@supermarket-calais.fr"
   },
   "notifications": {
-    "senderEmail": "abdelbayechou@gmail.com",
+    "senderEmail": "notifications@supermarket-calais.fr",
     "senderName": "Super Market Calais",
     "sendWelcomeEmail": true,
     "sendCashierInviteEmail": true
   },
-  "updatedAt": "2026-10-10T22:56:56.761Z",
-  "updatedBy": "admin@supermarket.com"
+  "updatedAt": "2026-10-14T21:28:02.433Z",
+  "updatedBy": "admin@example.com"
 }

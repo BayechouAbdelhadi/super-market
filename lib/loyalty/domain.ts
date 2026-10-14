@@ -22,6 +22,7 @@ export interface RedemptionRulesConfig {
   minPointsToRedeem?: number;
   maxDiscountPerTransactionEuro?: number;
   pointValueInEuro?: number;
+  purchaseAmount?: number;
 }
 
 /**
@@ -56,6 +57,49 @@ export function calculateTier(
 }
 
 /**
+ * Calculates the maximum number of loyalty points that can be redeemed for a given purchase amount,
+ * enforcing the business rule that a discount cannot exceed the purchase amount (no money given back to customer).
+ * Formula: amount - (points * pointValue) >= 0 => points <= amount / pointValue.
+ */
+export function calculateMaxPointsForAmount(
+  amount: number,
+  pointValueInEuro: number = LOYALTY_CONFIG.conversion.pointValueInEuro
+): number {
+  if (amount <= 0 || isNaN(amount) || pointValueInEuro <= 0) {
+    return 0;
+  }
+  // Use epsilon to prevent floating-point truncation issues (e.g. 0.15 / 0.05 = 2.9999999999999996)
+  return Math.floor((amount + 1e-9) / pointValueInEuro);
+}
+
+/**
+ * Calculates the effective maximum number of points a customer can redeem for a given transaction,
+ * taking into account:
+ * 1. Customer's available points balance
+ * 2. Purchase amount (amount - points * pointValue >= 0, no money given)
+ * 3. Store ceiling per transaction (maxDiscountPerTransactionEuro)
+ */
+export function calculateMaxRedeemablePoints(
+  availablePoints: number,
+  purchaseAmount: number,
+  rules?: RedemptionRulesConfig
+): number {
+  if (availablePoints <= 0 || isNaN(availablePoints)) return 0;
+  const pointValue = rules?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
+
+  const maxFromAmount = calculateMaxPointsForAmount(purchaseAmount, pointValue);
+  let maxPoints = Math.min(availablePoints, maxFromAmount);
+
+  const maxDiscountEuro = rules?.maxDiscountPerTransactionEuro ?? 0;
+  if (maxDiscountEuro > 0) {
+    const maxFromCap = Math.floor((maxDiscountEuro + 1e-9) / pointValue);
+    maxPoints = Math.min(maxPoints, maxFromCap);
+  }
+
+  return Math.max(0, maxPoints);
+}
+
+/**
  * Validates if customer has enough available points to redeem
  */
 export function canRedeemPoints(availablePoints: number, pointsToRedeem: number): boolean {
@@ -64,12 +108,14 @@ export function canRedeemPoints(availablePoints: number, pointsToRedeem: number)
 }
 
 /**
- * Validates business rules for points redemption (minimum threshold, maximum euro discount, balance).
+ * Validates business rules for points redemption (minimum threshold, maximum euro discount, balance,
+ * and maximum discount constrained by purchase amount so that amount - points * pointValue >= 0).
  */
 export function validateRedemption(
   pointsToRedeem: number,
   availablePoints: number,
-  rules?: RedemptionRulesConfig
+  rules?: RedemptionRulesConfig,
+  purchaseAmount?: number
 ): { valid: boolean; error?: string } {
   if (pointsToRedeem <= 0 || isNaN(pointsToRedeem)) {
     return { valid: false, error: "Veuillez saisir un nombre de points valide supérieur à 0." };
@@ -81,6 +127,28 @@ export function validateRedemption(
     };
   }
 
+  const pointValue = rules?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
+
+  // Business Rule: No money given back. Points discount cannot exceed the purchase amount:
+  // amount - (points * pointValue) >= 0
+  const effectiveAmount = purchaseAmount !== undefined ? purchaseAmount : rules?.purchaseAmount;
+  if (effectiveAmount !== undefined) {
+    if (isNaN(effectiveAmount) || effectiveAmount < 0) {
+      return {
+        valid: false,
+        error: "Le montant de l'achat ne peut pas être négatif.",
+      };
+    }
+    const maxPointsForAmount = calculateMaxPointsForAmount(effectiveAmount, pointValue);
+    if (pointsToRedeem > maxPointsForAmount) {
+      const requestedDiscount = (pointsToRedeem * pointValue).toFixed(2);
+      return {
+        valid: false,
+        error: `La remise ne peut pas dépasser le montant de l'achat : pour un montant de ${effectiveAmount.toFixed(2)} €, le maximum de points utilisables est de ${maxPointsForAmount} (aucun rendu de monnaie autorisé, remise demandée : ${requestedDiscount} €).`,
+      };
+    }
+  }
+
   const minPoints = rules?.minPointsToRedeem ?? 0;
   if (minPoints > 0 && pointsToRedeem < minPoints) {
     return {
@@ -90,11 +158,10 @@ export function validateRedemption(
   }
 
   const maxDiscountEuro = rules?.maxDiscountPerTransactionEuro ?? 0;
-  const pointValue = rules?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
   if (maxDiscountEuro > 0) {
     const discountEuro = pointsToRedeem * pointValue;
     if (discountEuro > maxDiscountEuro) {
-      const maxAllowedPoints = Math.floor(maxDiscountEuro / pointValue);
+      const maxAllowedPoints = Math.floor((maxDiscountEuro + 1e-9) / pointValue);
       return {
         valid: false,
         error: `La remise maximale autorisée par passage en caisse est de ${maxDiscountEuro.toFixed(2)} € (soit un maximum de ${maxAllowedPoints} points).`,
@@ -143,9 +210,10 @@ export function applyRedeemPoints(
   historicalPoints: number,
   pointsToRedeem: number,
   tiers?: TierThresholds,
-  rules?: RedemptionRulesConfig
+  rules?: RedemptionRulesConfig,
+  purchaseAmount?: number
 ) {
-  const validation = validateRedemption(pointsToRedeem, availablePoints, rules);
+  const validation = validateRedemption(pointsToRedeem, availablePoints, rules, purchaseAmount);
   if (!validation.valid) {
     throw new Error(validation.error || "Opération refusée : solde disponible insuffisant.");
   }

@@ -6,6 +6,9 @@ import {
   applyPurchasePoints,
   applyRedeemPoints,
   calculateRedemptionPointsEarned,
+  calculateMaxPointsForAmount,
+  calculateMaxRedeemablePoints,
+  validateRedemption,
 } from "@/lib/loyalty/domain";
 
 describe("Règles métier de fidélité (§ 20)", () => {
@@ -166,6 +169,82 @@ describe("Règles métier de fidélité (§ 20)", () => {
       // Utilise 400 points (20 € de remise <= 20 €) -> Autorisé
       const ok = applyRedeemPoints(1000, 2000, 400, undefined, rules);
       expect(ok.available_points).toBe(600);
+    });
+  });
+
+  describe("Règle métier : Aucun rendu de monnaie (amount - points * pointValue >= 0)", () => {
+    it("calcule correctement le plafond de points utilisables en fonction du montant d'achat (calculateMaxPointsForAmount)", () => {
+      // 10.00 € à 0.05 €/pt -> 200 points max (10.00 - 200 * 0.05 = 0.00 €)
+      expect(calculateMaxPointsForAmount(10.0, 0.05)).toBe(200);
+
+      // 15.00 € à 0.05 €/pt -> 300 points max
+      expect(calculateMaxPointsForAmount(15.0, 0.05)).toBe(300);
+
+      // Montant non multiple exact : 12.49 € à 0.05 €/pt -> 249 points (12.45 € <= 12.49 €)
+      expect(calculateMaxPointsForAmount(12.49, 0.05)).toBe(249);
+      expect(12.49 - 249 * 0.05).toBeGreaterThanOrEqual(0);
+
+      // Précision flottante (0.15 € à 0.05 €/pt) -> exactement 3 points
+      expect(calculateMaxPointsForAmount(0.15, 0.05)).toBe(3);
+
+      // Montant 0 ou négatif -> 0 point utilisable
+      expect(calculateMaxPointsForAmount(0, 0.05)).toBe(0);
+      expect(calculateMaxPointsForAmount(-5, 0.05)).toBe(0);
+    });
+
+    it("calcule les points effectifs maximums en combinant le solde client, le montant et le plafond (calculateMaxRedeemablePoints)", () => {
+      // Client a 500 points, mais l'achat est de 10 € (max 200 pts autorisés) -> 200 points
+      expect(calculateMaxRedeemablePoints(500, 10.0, { pointValueInEuro: 0.05 })).toBe(200);
+
+      // Client a 150 points et l'achat est de 20 € (max 400 pts autorisés) -> 150 points (limité par son solde)
+      expect(calculateMaxRedeemablePoints(150, 20.0, { pointValueInEuro: 0.05 })).toBe(150);
+
+      // Client a 1000 points, achat de 50 € (max 1000 pts), mais plafond magasin de 20 € (max 400 pts) -> 400 points
+      expect(
+        calculateMaxRedeemablePoints(1000, 50.0, {
+          pointValueInEuro: 0.05,
+          maxDiscountPerTransactionEuro: 20.0,
+        })
+      ).toBe(400);
+
+      // Achat de 0 € -> 0 point utilisable (aucun rendu d'argent)
+      expect(calculateMaxRedeemablePoints(500, 0, { pointValueInEuro: 0.05 })).toBe(0);
+    });
+
+    it("valide une déduction où la remise est strictement inférieure ou égale au montant d'achat", () => {
+      // 10 € d'achat, déduction de 200 points (10.00 € de remise) -> valide
+      const validationExact = validateRedemption(200, 500, { pointValueInEuro: 0.05 }, 10.0);
+      expect(validationExact.valid).toBe(true);
+
+      // 15 € d'achat, déduction de 100 points (5.00 € de remise) -> valide
+      const validationPartial = validateRedemption(100, 500, { pointValueInEuro: 0.05 }, 15.0);
+      expect(validationPartial.valid).toBe(true);
+
+      const res = applyRedeemPoints(500, 1000, 200, undefined, { pointValueInEuro: 0.05 }, 10.0);
+      expect(res.available_points).toBe(300);
+    });
+
+    it("rejette une déduction où la remise dépasse le montant d'achat (pas de rendu d'argent)", () => {
+      // 10 € d'achat, tentative d'utiliser 250 points (12.50 € de remise > 10.00 €)
+      const validation = validateRedemption(250, 500, { pointValueInEuro: 0.05 }, 10.0);
+      expect(validation.valid).toBe(false);
+      expect(validation.error).toContain("La remise ne peut pas dépasser le montant de l'achat");
+      expect(validation.error).toContain("aucun rendu de monnaie autorisé");
+
+      // applyRedeemPoints doit lever une erreur
+      expect(() => {
+        applyRedeemPoints(500, 1000, 250, undefined, { pointValueInEuro: 0.05 }, 10.0);
+      }).toThrow("La remise ne peut pas dépasser le montant de l'achat");
+    });
+
+    it("rejette toute utilisation de points si le montant de l'achat est 0 €", () => {
+      const validation = validateRedemption(50, 500, { pointValueInEuro: 0.05 }, 0);
+      expect(validation.valid).toBe(false);
+      expect(validation.error).toContain("La remise ne peut pas dépasser le montant de l'achat");
+
+      expect(() => {
+        applyRedeemPoints(500, 1000, 50, undefined, { pointValueInEuro: 0.05 }, 0);
+      }).toThrow("La remise ne peut pas dépasser le montant de l'achat");
     });
   });
 });

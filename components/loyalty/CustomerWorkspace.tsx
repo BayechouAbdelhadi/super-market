@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { SearchInput } from '@/components/ui/SearchInput'
@@ -76,6 +77,50 @@ export function CustomerWorkspace({
   const [isAddPurchaseOpen, setIsAddPurchaseOpen] = useState(false)
   const [isRedeemOpen, setIsRedeemOpen] = useState(false)
 
+  // Auto-redirect countdown to caisse
+  const router = useRouter()
+  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null)
+  const redirectTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  const clearRedirectTimers = () => {
+    if (redirectTimerRef.current) {
+      clearTimeout(redirectTimerRef.current)
+      redirectTimerRef.current = null
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current)
+      countdownIntervalRef.current = null
+    }
+  }
+
+  const handleImmediateRedirect = () => {
+    clearRedirectTimers()
+    setRedirectCountdown(null)
+    setSelectedCustomerId(null)
+    setSelectedCustomerDetail(null)
+    router.push('/cashier/pos')
+  }
+
+  const triggerPostTransactionRedirect = (successMsg: string) => {
+    clearRedirectTimers()
+    // Immediately reset customer selection and navigate to caisse
+    setSelectedCustomerId(null)
+    setSelectedCustomerDetail(null)
+    setSearchQuery('')
+    setIsAddPurchaseOpen(false)
+    setIsRedeemOpen(false)
+
+    toast.success(successMsg, { duration: 5000 })
+    router.push('/cashier/pos')
+  }
+
+  useEffect(() => {
+    return () => {
+      clearRedirectTimers()
+    }
+  }, [])
+
   function handleCustomerCreated(newCustomer: CustomerDetail) {
     setIsNewCustomerOpen(false)
     toast.success(`Client ${newCustomer.full_name} créé avec succès !`)
@@ -137,6 +182,8 @@ export function CustomerWorkspace({
           <Button
             variant="secondary"
             onClick={() => {
+              clearRedirectTimers()
+              setRedirectCountdown(null)
               setSelectedCustomerId(null)
               setSelectedCustomerDetail(null)
             }}
@@ -145,9 +192,35 @@ export function CustomerWorkspace({
             <span>← Retour à la liste des clients</span>
           </Button>
 
+          {redirectCountdown !== null && (
+            <div className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 shadow-xs">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl select-none">🎉</span>
+                <div>
+                  <strong className="block text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                    Transaction confirmée avec succès !
+                  </strong>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                    Redirection vers l&apos;accueil caisse dans <span className="font-extrabold font-mono text-sm px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-900 dark:text-emerald-100">{redirectCountdown}s</span>...
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleImmediateRedirect}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0"
+              >
+                Aller à la caisse maintenant
+              </Button>
+            </div>
+          )}
+
           <CustomerDetailView
             customer={selectedCustomerDetail}
             onBack={() => {
+              clearRedirectTimers()
+              setRedirectCountdown(null)
               setSelectedCustomerId(null)
               setSelectedCustomerDetail(null)
             }}
@@ -166,8 +239,7 @@ export function CustomerWorkspace({
             euroToPointsRatio={currentSettings?.loyalty?.euroToPointsRatio}
             quickPurchaseAmounts={currentSettings?.pos?.quickPurchaseAmounts}
             onPurchaseRecorded={(updatedCust) => {
-              setSelectedCustomerDetail(updatedCust)
-              toast.success("Achat enregistré et points crédités avec succès !")
+              triggerPostTransactionRedirect(`Achat de ${updatedCust.full_name} enregistré (+ points crédités avec succès) !`)
             }}
           />
 
@@ -184,12 +256,10 @@ export function CustomerWorkspace({
             maxDiscountPerTransactionEuro={currentSettings?.loyalty?.maxDiscountPerTransactionEuro}
             defaultRedeemReason={currentSettings?.pos?.defaultRedeemReason}
             onPointsRedeemed={(updatedCust) => {
-              setSelectedCustomerDetail(updatedCust)
-              toast.success("Achat enregistré et points déduits avec succès !")
+              triggerPostTransactionRedirect(`Remise et points de ${updatedCust.full_name} déduits avec succès !`)
             }}
             onPurchaseRecorded={(updatedCust) => {
-              setSelectedCustomerDetail(updatedCust)
-              toast.success("Achat enregistré et points crédités avec succès !")
+              triggerPostTransactionRedirect(`Achat de ${updatedCust.full_name} enregistré (+ points crédités avec succès) !`)
             }}
           />
         </div>

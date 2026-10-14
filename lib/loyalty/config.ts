@@ -36,7 +36,7 @@ export const LOYALTY_CONFIG = {
     // Standard purchase amounts proposed to cashiers
     purchaseAmounts: [12.5, 45.8, 75.5, 120.0],
     // Standard purchase amounts in redemption flow
-    redeemAmounts: [0, 15, 30, 50, 100],
+    redeemAmounts: [15, 30, 50, 100],
     // Quick loyalty point reduction presets
     redeemPoints: [50, 100, 250, 500],
   },

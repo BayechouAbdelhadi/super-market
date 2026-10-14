@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useTransition } from "react";
+import React, { useEffect, useState, useTransition, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { CustomerDetail, CustomerSummary, User } from "@/lib/loyalty/types";
 import { CashierHeader } from "./CashierHeader";
 import { SearchBar } from "./SearchBar";
@@ -87,6 +88,90 @@ export function CashierDashboard({ standalone = false, settings: propSettings }:
   const [isAddPurchaseOpen, setIsAddPurchaseOpen] = useState(false);
   const [isRedeemOpen, setIsRedeemOpen] = useState(false);
 
+  // Post-transaction auto-redirect countdown
+  const router = useRouter();
+  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
+  const [completedTxAlert, setCompletedTxAlert] = useState<string | null>(null);
+  const redirectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const completedTxAlertTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clearRedirectTimers = () => {
+    if (redirectTimerRef.current) {
+      clearTimeout(redirectTimerRef.current);
+      redirectTimerRef.current = null;
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+  };
+
+  const handleImmediateRedirect = (finalMsg?: string) => {
+    clearRedirectTimers();
+    setRedirectCountdown(null);
+    // Explicitly guarantee that no customer is selected
+    setSelectedCustomerId(null);
+    setSelectedCustomerDetail(null);
+    setSearchQuery("");
+    setCustomers([]);
+    if (finalMsg) {
+      setCompletedTxAlert(finalMsg);
+      if (completedTxAlertTimerRef.current) clearTimeout(completedTxAlertTimerRef.current);
+      completedTxAlertTimerRef.current = setTimeout(() => {
+        setCompletedTxAlert(null);
+      }, 5000);
+    }
+    router.push("/cashier/pos");
+  };
+
+  const triggerPostTransactionRedirect = (successMsg: string) => {
+    clearRedirectTimers();
+    if (completedTxAlertTimerRef.current) clearTimeout(completedTxAlertTimerRef.current);
+
+    // 1. Immediately reset customer and search so the cashier sees the input right away
+    setSelectedCustomerId(null);
+    setSelectedCustomerDetail(null);
+    setSearchQuery("");
+    setCustomers([]);
+    setIsAddPurchaseOpen(false);
+    setIsRedeemOpen(false);
+
+    // 2. Alertify success (toast notification + 5-second banner on caisse view)
+    toast.success(successMsg, { duration: 5000 });
+    setCompletedTxAlert(successMsg);
+    setRedirectCountdown(5);
+
+    let remaining = 5;
+    countdownIntervalRef.current = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        if (countdownIntervalRef.current) {
+          clearInterval(countdownIntervalRef.current);
+          countdownIntervalRef.current = null;
+        }
+        setCompletedTxAlert(null);
+        setRedirectCountdown(null);
+      } else {
+        setRedirectCountdown(remaining);
+      }
+    }, 1000);
+
+    completedTxAlertTimerRef.current = setTimeout(() => {
+      setCompletedTxAlert(null);
+      setRedirectCountdown(null);
+    }, 5000);
+
+    router.push("/cashier/pos");
+  };
+
+  useEffect(() => {
+    return () => {
+      clearRedirectTimers();
+      if (completedTxAlertTimerRef.current) clearTimeout(completedTxAlertTimerRef.current);
+    };
+  }, []);
+
   // Load cashier info on mount
   useEffect(() => {
     async function loadCashier() {
@@ -168,18 +253,45 @@ export function CashierDashboard({ standalone = false, settings: propSettings }:
     <div className="space-y-6">
       {/* If a customer is selected, show Customer Detail View with points actions */}
       {selectedCustomerId && selectedCustomerDetail ? (
-        <CustomerDetailView
-          customer={selectedCustomerDetail}
-          onBack={() => {
-            setSelectedCustomerId(null);
-            setSelectedCustomerDetail(null);
-          }}
-          onOpenAddPurchase={() => setIsAddPurchaseOpen(true)}
-          onOpenRedeemPoints={() => setIsRedeemOpen(true)}
-          pointValueInEuro={pointValueInEuro}
-          minPointsToRedeem={currentSettings?.loyalty?.minPointsToRedeem}
-          tierThresholds={tierThresholds}
-        />
+        <div className="space-y-4">
+          {redirectCountdown !== null && (
+            <div className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 shadow-xs">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl select-none">🎉</span>
+                <div>
+                  <strong className="block text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                    Transaction confirmée avec succès !
+                  </strong>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                    Redirection vers l&apos;accueil caisse dans <span className="font-extrabold font-mono text-sm px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-900 dark:text-emerald-100">{redirectCountdown}s</span> pour le prochain client...
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handleImmediateRedirect()}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0"
+              >
+                Passer au client suivant
+              </Button>
+            </div>
+          )}
+          <CustomerDetailView
+            customer={selectedCustomerDetail}
+            onBack={() => {
+              clearRedirectTimers();
+              setRedirectCountdown(null);
+              setSelectedCustomerId(null);
+              setSelectedCustomerDetail(null);
+            }}
+            onOpenAddPurchase={() => setIsAddPurchaseOpen(true)}
+            onOpenRedeemPoints={() => setIsRedeemOpen(true)}
+            pointValueInEuro={pointValueInEuro}
+            minPointsToRedeem={currentSettings?.loyalty?.minPointsToRedeem}
+            tierThresholds={tierThresholds}
+          />
+        </div>
       ) : loadingDetail ? (
         <div className="py-24 text-center space-y-3">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-3 border-[var(--color-primary)] border-t-transparent" />
@@ -190,6 +302,30 @@ export function CashierDashboard({ standalone = false, settings: propSettings }:
       ) : (
         /* Search & Points Dashboard View */
         <div className="space-y-6">
+          {/* Confirmed Transaction Alert (Displayed when redirected with no customer selected) */}
+          {completedTxAlert && (
+            <div className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-100 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 shadow-xs">
+              <div className="flex items-center gap-3">
+                <span className="text-xl select-none">✅</span>
+                <div>
+                  <strong className="block text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                    {completedTxAlert}
+                  </strong>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                    Caisse prête pour le client suivant (aucun client sélectionné).
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCompletedTxAlert(null)}
+                className="text-emerald-700 hover:text-emerald-900 dark:text-emerald-300 hover:bg-emerald-500/20 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+              >
+                ✕ Fermer
+              </button>
+            </div>
+          )}
+
           {/* Search Bar Card */}
           <Card padded="lg" className="space-y-5">
             <div className="space-y-1">
@@ -343,8 +479,7 @@ export function CashierDashboard({ standalone = false, settings: propSettings }:
         euroToPointsRatio={currentSettings?.loyalty?.euroToPointsRatio}
         quickPurchaseAmounts={currentSettings?.pos?.quickPurchaseAmounts}
         onPurchaseRecorded={(updatedCust) => {
-          setSelectedCustomerDetail(updatedCust);
-          toast.success("Achat enregistré et points crédités avec succès !");
+          triggerPostTransactionRedirect(`Achat de ${updatedCust.full_name} enregistré (+ points crédités avec succès) !`);
         }}
       />
 
@@ -361,12 +496,10 @@ export function CashierDashboard({ standalone = false, settings: propSettings }:
         maxDiscountPerTransactionEuro={currentSettings?.loyalty?.maxDiscountPerTransactionEuro}
         defaultRedeemReason={currentSettings?.pos?.defaultRedeemReason}
         onPointsRedeemed={(updatedCust) => {
-          setSelectedCustomerDetail(updatedCust);
-          toast.success("Achat enregistré et points déduits avec succès !");
+          triggerPostTransactionRedirect(`Remise et points de ${updatedCust.full_name} déduits avec succès !`);
         }}
         onPurchaseRecorded={(updatedCust) => {
-          setSelectedCustomerDetail(updatedCust);
-          toast.success("Achat enregistré et points crédités avec succès !");
+          triggerPostTransactionRedirect(`Achat de ${updatedCust.full_name} enregistré (+ points crédités avec succès) !`);
         }}
       />
     </div>
