@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/login/actions";
-import { ChevronLeft, ExternalLink, LogOut, Loader2, Activity, Sliders } from "lucide-react";
+import { ChevronLeft, ExternalLink, LogOut, Loader2, Activity, Sliders, Sparkles } from "lucide-react";
 
 interface SidebarProps {
   role: "ADMIN" | "CASHIER" | "CUSTOMER";
@@ -83,6 +83,11 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
           href: "/admin/live",
           isLive: true,
           icon: <Activity className="w-5 h-5 shrink-0" />,
+        },
+        {
+          name: "Bons Plans & Emails",
+          href: "/admin/deals",
+          icon: <Sparkles className="w-5 h-5 shrink-0" />,
         },
         {
           name: "Paramètres",

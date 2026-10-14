@@ -26,6 +26,7 @@ import {
   X,
   Activity,
   Sliders,
+  Sparkles,
 } from "lucide-react";
 
 interface MobileBottomNavProps {
@@ -228,6 +229,16 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
                     </span>
                     <span>Live</span>
                   </span>
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  href="/admin/deals"
+                  onClick={() => setSheetOpen(false)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors min-h-[44px]"
+                >
+                  <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <span>Bons Plans &amp; Campagnes</span>
                 </Link>
               )}
               {isAdmin && (

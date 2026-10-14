@@ -296,7 +296,45 @@ export default async function AdminHubPage() {
               </Card>
             </Link>
 
-            {/* App 6: Configuration & Paramètres du Magasin */}
+            {/* App 6: Bons Plans & Campagnes E-mails */}
+            <Link
+              href="/admin/deals"
+              className="group block focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-2xl"
+            >
+              <Card
+                padded="lg"
+                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-indigo-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
+              >
+                <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-500" />
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Sparkles className="w-6 h-6" />
+                    </div>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+                      Marketing
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-indigo-600 transition-colors">
+                      Bons Plans &amp; Campagnes E-mails
+                    </h3>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
+                      Programmation de newsletters promotionnelles ciblées par palier fidélité (Bronze à VIP), envoi instantané ou limité par jour.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-indigo-600 group-hover:translate-x-1 transition-transform">
+                  <span>Créer une campagne</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </Card>
+            </Link>
+
+            {/* App 7: Configuration & Paramètres du Magasin */}
             <Link
               href="/admin/settings"
               className="group block focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-2xl"
