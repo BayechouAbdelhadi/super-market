@@ -268,7 +268,22 @@ export function RedeemPointsModal({
       onClose={handleClose}
       title="Achat avec utilisation de points"
       icon="🎟️"
-      description={`Client : ${customer.full_name} · Solde disponible : ${customer.available_points.toLocaleString("fr-FR")} pts`}
+      description={
+        <span className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+          <span className="font-semibold text-[var(--color-text)]">
+            {customer.full_name}
+          </span>
+          <span className="text-[var(--color-text-muted)] opacity-50">·</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-[var(--color-text)]">
+            Palier {customer.tier}
+          </span>
+          <span className="text-[var(--color-text-muted)] opacity-50">·</span>
+          <span className="inline-flex items-center gap-1 font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2.5 py-0.5 rounded-full border border-[var(--color-primary)]/20">
+            <span>Solde :</span>
+            <span className="font-mono text-xs font-black">{customer.available_points.toLocaleString("fr-FR")} pts</span>
+          </span>
+        </span>
+      }
     >
       <form onSubmit={handleSubmit} className="p-6 space-y-5">
         {errorMsg && (
@@ -276,21 +291,6 @@ export function RedeemPointsModal({
             {errorMsg}
           </div>
         )}
-
-        {/* Current Balance Card */}
-        <div className="p-4 rounded-[var(--radius-card,16px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-between">
-          <div>
-            <span className="text-xs text-[var(--color-text-muted)] font-medium block">
-              Solde fidélité disponible
-            </span>
-            <span className="text-xs text-[var(--color-text-muted)]">
-              Palier : <strong className="text-[var(--color-text)]">{customer.tier}</strong>
-            </span>
-          </div>
-          <span className="text-xl font-extrabold text-[var(--color-primary)]">
-            {customer.available_points.toLocaleString("fr-FR")} pts
-          </span>
-        </div>
 
         {/* 1. MONTANT DE L'ACHAT */}
         <div className="space-y-1.5">

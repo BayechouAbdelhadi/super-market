@@ -13,7 +13,7 @@ export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
-  description?: string;
+  description?: React.ReactNode;
   icon?: string;
   maxWidth?: "sm" | "md" | "lg";
   children: React.ReactNode;
