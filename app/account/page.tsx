@@ -82,7 +82,7 @@ export default async function AccountHubPage() {
             </div>
             <div>
               <span className="font-extrabold text-base sm:text-lg tracking-tight text-[var(--color-text)]">
-                Super Market Calais
+                {settings.store.storeName}
               </span>
               <p className="text-[11px] text-[var(--color-text-muted)]">Portail Client</p>
             </div>
@@ -122,7 +122,7 @@ export default async function AccountHubPage() {
               Bonjour, {firstName || fullName} !
             </h1>
             <p className="text-xs sm:text-sm text-[var(--color-text-muted)] max-w-xl leading-relaxed">
-              Bienvenue sur votre portail client Super Market Calais. Retrouvez ci-dessous l&apos;ensemble de vos applications, avantages et services connectés.
+              Bienvenue sur votre portail client {settings.store.storeName}. Retrouvez ci-dessous l&apos;ensemble de vos applications, avantages et services connectés.
             </p>
           </div>
 
@@ -304,8 +304,8 @@ export default async function AccountHubPage() {
                 <div className="flex items-start gap-2">
                   <MapPin className="w-3.5 h-3.5 text-[var(--color-primary)] shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold block">Super Market Calais</span>
-                    <span className="text-[var(--color-text-muted)]">205 Avenue Antoine de Saint-Exupéry, 62100 Calais</span>
+                    <span className="font-bold block">{settings.store.storeName}</span>
+                    <span className="text-[var(--color-text-muted)]">{settings.store.address}</span>
                   </div>
                 </div>
 

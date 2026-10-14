@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { DashboardLayout } from "@/components/ui/DashboardLayout";
 import { getDashboardAnalytics } from "@/lib/loyalty/analytics-service";
+import { getAppSettings } from "@/lib/settings/service";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import {
@@ -33,14 +34,15 @@ export default async function AdminHubPage() {
   const role = user?.user_metadata?.role || "ADMIN";
   const email = user?.email || "";
 
-  // Fetch profile and quick analytics overview
-  const [{ data: profile }, analytics] = await Promise.all([
+  // Fetch profile, quick analytics overview, and store settings
+  const [{ data: profile }, analytics, settings] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name")
       .eq("id", user?.id || "")
       .single(),
     getDashboardAnalytics().catch(() => null),
+    getAppSettings(),
   ]);
 
   const firstName = profile?.first_name || user?.user_metadata?.first_name || "";
@@ -52,7 +54,7 @@ export default async function AdminHubPage() {
   const totalCustomers = analytics?.kpis.totalClients ?? 0;
 
   return (
-    <DashboardLayout role={role} email={email}>
+    <DashboardLayout role={role} email={email} storeName={settings.store.storeName}>
       <div className="space-y-8">
         {/* Admin Welcome Banner */}
         <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -65,7 +67,7 @@ export default async function AdminHubPage() {
               Bonjour, {displayName} !
             </h1>
             <p className="text-xs sm:text-sm text-[var(--color-text-muted)] max-w-xl leading-relaxed">
-              Bienvenue sur le portail d&apos;administration Super Market Calais. Retrouvez ici tous vos modules de gestion, applications caisse et outils d&apos;analyse.
+              Bienvenue sur le portail d&apos;administration {settings.store.storeName}. Retrouvez ici tous vos modules de gestion, applications caisse et outils d&apos;analyse.
             </p>
           </div>
 

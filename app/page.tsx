@@ -77,9 +77,24 @@ function getIsOpenNow(): { isOpen: boolean; statusText: string } {
 
 export default function Home() {
   const [openStatus, setOpenStatus] = useState({ isOpen: true, statusText: "Ouvert 7j/7 à Calais" });
-  const [appSettings, setAppSettings] = useState<{ euroRatio: number; storeName: string }>({
+  const [appSettings, setAppSettings] = useState<{
+    euroRatio: number;
+    store: {
+      storeName: string;
+      tagline: string;
+      address: string;
+      phone: string;
+      email: string;
+    };
+  }>({
     euroRatio: 1,
-    storeName: "Super Market",
+    store: {
+      storeName: "Super Market Calais",
+      tagline: "Votre magasin de proximité & primeur frais à Calais",
+      address: "205 Avenue Antoine de Saint-Exupéry, 62100 Calais",
+      phone: "06 71 54 05 28",
+      email: "contact@supermarket-calais.fr",
+    },
   });
   const currentDayIndex = new Date().getDay();
 
@@ -100,7 +115,13 @@ export default function Home() {
           if (data.settings) {
             setAppSettings({
               euroRatio: data.settings.loyalty?.euroToPointsRatio ?? 1,
-              storeName: data.settings.store?.storeName ?? "Super Market",
+              store: {
+                storeName: data.settings.store?.storeName || "Super Market Calais",
+                tagline: data.settings.store?.tagline || "Votre magasin de proximité & primeur frais à Calais",
+                address: data.settings.store?.address || "205 Avenue Antoine de Saint-Exupéry, 62100 Calais",
+                phone: data.settings.store?.phone || "06 71 54 05 28",
+                email: data.settings.store?.email || "contact@supermarket-calais.fr",
+              },
             });
           }
         }
@@ -152,10 +173,7 @@ export default function Home() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-black text-xl tracking-tight text-[var(--color-text)]">
-                  Super Market
-                </span>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
-                  Calais
+                  {appSettings.store.storeName}
                 </span>
                 <span
                   className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
@@ -173,20 +191,22 @@ export default function Home() {
                 </span>
               </div>
               <p className="text-[11px] text-[var(--color-text-muted)] hidden sm:block">
-                205 Avenue Antoine de Saint-Exupéry • 62100 Calais
+                {appSettings.store.address}
               </p>
             </div>
           </div>
 
           {/* Quick Contact & Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <a
-              href={STORE_DETAILS.phoneRaw}
-              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-xs font-semibold text-[var(--color-text)] transition-colors"
-            >
-              <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>{STORE_DETAILS.phone}</span>
-            </a>
+            {appSettings.store.phone && (
+              <a
+                href={`tel:${appSettings.store.phone.replace(/\s+/g, "")}`}
+                className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-xs font-semibold text-[var(--color-text)] transition-colors"
+              >
+                <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>{appSettings.store.phone}</span>
+              </a>
+            )}
 
             <Link href="/login">
               <Button
@@ -219,10 +239,10 @@ export default function Home() {
             <div className="max-w-6xl mx-auto w-full space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-xs font-bold text-white w-fit shadow-sm">
                 <Store className="w-3.5 h-3.5 text-[var(--color-primary)]" />
-                <span>Super Market Calais • 205 Avenue Antoine de Saint-Exupéry</span>
+                <span>{appSettings.store.storeName} • {appSettings.store.address}</span>
               </div>
               <h2 className="text-xl sm:text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-md">
-                Votre magasin de proximité &amp; primeur frais à Calais
+                {appSettings.store.tagline}
               </h2>
               <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-neutral-200 font-medium pt-1">
                 <span className="flex items-center gap-1.5">
@@ -472,10 +492,10 @@ export default function Home() {
               </div>
 
               <div className="pt-2 border-t border-[var(--color-border)]">
-                <a href={STORE_DETAILS.phoneRaw} className="w-full">
+                <a href={appSettings.store.phone ? `tel:${appSettings.store.phone.replace(/\s+/g, "")}` : STORE_DETAILS.phoneRaw} className="w-full">
                   <Button variant="secondary" size="sm" fullWidth className="font-semibold gap-1.5">
                     <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Appeler le magasin</span>
+                    <span>Appeler le magasin {appSettings.store.phone ? `(${appSettings.store.phone})` : ""}</span>
                   </Button>
                 </a>
               </div>
@@ -493,10 +513,10 @@ export default function Home() {
                   <span>Plan d&apos;accès à Calais</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--color-text)] tracking-tight">
-                  Comment venir à Super Market Calais ?
+                  Comment venir à {appSettings.store.storeName} ?
                 </h3>
                 <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-                  Situé sur l&apos;Avenue Antoine de Saint-Exupéry, facilement accessible en voiture, transports en commun ou à pied.
+                  Situé au {appSettings.store.address}, facilement accessible en voiture, transports en commun ou à pied.
                 </p>
               </div>
 
@@ -714,10 +734,10 @@ export default function Home() {
               </div>
               <div>
                 <span className="font-extrabold text-sm text-[var(--color-text)]">
-                  Super Market Calais
+                  {appSettings.store.storeName}
                 </span>
                 <p className="text-[11px] text-[var(--color-text-muted)]">
-                  205 Avenue Antoine de Saint-Exupéry, 62100 Calais • SIRET : {STORE_DETAILS.siret}
+                  {appSettings.store.address} • {appSettings.store.email} • {appSettings.store.phone}
                 </p>
               </div>
             </div>
@@ -732,12 +752,14 @@ export default function Home() {
                 <span>Google Maps</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
-              <a
-                href={STORE_DETAILS.phoneRaw}
-                className="hover:text-[var(--color-primary)] transition-colors inline-flex items-center gap-1"
-              >
-                <span>{STORE_DETAILS.phone}</span>
-              </a>
+              {appSettings.store.phone && (
+                <a
+                  href={`tel:${appSettings.store.phone.replace(/\s+/g, "")}`}
+                  className="hover:text-[var(--color-primary)] transition-colors inline-flex items-center gap-1"
+                >
+                  <span>{appSettings.store.phone}</span>
+                </a>
+              )}
               <Link href="/login" className="hover:text-[var(--color-text)] transition-colors">
                 <span>Votre compte</span>
               </Link>
@@ -745,7 +767,7 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px]">
-            <p>© 2026 Super Market Calais. Tous droits réservés.</p>
+            <p>© {new Date().getFullYear()} {appSettings.store.storeName}. Tous droits réservés.</p>
             <div className="flex items-center gap-4">
               <span>Du lundi au dimanche 7j/7</span>
               <span className="opacity-40">•</span>

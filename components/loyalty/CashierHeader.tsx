@@ -10,9 +10,10 @@ import { Loader2 } from "lucide-react";
 interface CashierHeaderProps {
   cashier: User | null;
   euroToPointsRatio?: number;
+  storeName?: string;
 }
 
-export function CashierHeader({ cashier, euroToPointsRatio = 1 }: CashierHeaderProps) {
+export function CashierHeader({ cashier, euroToPointsRatio = 1, storeName }: CashierHeaderProps) {
   const [time, setTime] = useState("");
 
   useEffect(() => {
@@ -59,7 +60,7 @@ export function CashierHeader({ cashier, euroToPointsRatio = 1 }: CashierHeaderP
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-base tracking-tight text-[var(--color-text)]">
-                  SuperMarket
+                  {storeName || "SuperMarket"}
                 </span>
                 <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20">
                   Fidélité Caisse

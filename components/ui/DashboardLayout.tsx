@@ -1,17 +1,29 @@
 import { ReactNode } from 'react'
 import { Sidebar } from '@/components/ui/Sidebar'
 import { MobileBottomNav } from '@/components/ui/MobileBottomNav'
+import { getAppSettings } from '@/lib/settings/service'
 
 interface DashboardLayoutProps {
   children: ReactNode
   role: 'ADMIN' | 'CASHIER' | 'CUSTOMER'
   email: string
+  storeName?: string
 }
 
-export function DashboardLayout({ children, role, email }: DashboardLayoutProps) {
+export async function DashboardLayout({ children, role, email, storeName }: DashboardLayoutProps) {
+  let effectiveStoreName = storeName
+  if (!effectiveStoreName) {
+    try {
+      const settings = await getAppSettings()
+      effectiveStoreName = settings.store?.storeName || 'SuperMarket'
+    } catch {
+      effectiveStoreName = 'SuperMarket'
+    }
+  }
+
   return (
     <div className="h-full w-full overflow-hidden bg-[var(--color-background)] flex flex-col md:flex-row">
-      <Sidebar role={role} email={email} />
+      <Sidebar role={role} email={email} storeName={effectiveStoreName} />
 
       {/* Main Content Area — flex-1 + min-h-0 ensures it doesn't blow past the viewport */}
       <main className="flex-1 min-h-0 min-w-0 overflow-y-auto">
@@ -21,7 +33,7 @@ export function DashboardLayout({ children, role, email }: DashboardLayoutProps)
       </main>
 
       {/* Mobile Bottom Navigation Bar (thumb-friendly for phones) */}
-      <MobileBottomNav role={role} email={email} />
+      <MobileBottomNav role={role} email={email} storeName={effectiveStoreName} />
     </div>
   )
 }

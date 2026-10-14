@@ -12,9 +12,10 @@ import { ChevronLeft, ExternalLink, LogOut, Loader2, Activity, Sliders } from "l
 interface SidebarProps {
   role: "ADMIN" | "CASHIER" | "CUSTOMER";
   email: string;
+  storeName?: string;
 }
 
-export function Sidebar({ role, email }: SidebarProps) {
+export function Sidebar({ role, email, storeName }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLoggingOut, startLogoutTransition] = useTransition();
   const pathname = usePathname();
@@ -272,8 +273,8 @@ export function Sidebar({ role, email }: SidebarProps) {
               className="h-full w-full object-contain"
             />
           </div>
-          <span className="text-base font-black text-[var(--color-text)] tracking-tight">
-            SuperMarket
+          <span className="text-base font-black text-[var(--color-text)] tracking-tight truncate max-w-[180px]">
+            {storeName || "SuperMarket"}
           </span>
         </div>
 
@@ -319,8 +320,8 @@ export function Sidebar({ role, email }: SidebarProps) {
               />
             </div>
             {!isCollapsed && (
-              <span className="text-lg font-black text-[var(--color-text)] tracking-tight whitespace-nowrap">
-                SuperMarket
+              <span className="text-lg font-black text-[var(--color-text)] tracking-tight truncate max-w-[170px]" title={storeName || "SuperMarket"}>
+                {storeName || "SuperMarket"}
               </span>
             )}
           </div>

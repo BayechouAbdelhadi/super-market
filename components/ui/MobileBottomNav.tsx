@@ -31,9 +31,10 @@ import {
 interface MobileBottomNavProps {
   role: "ADMIN" | "CASHIER" | "CUSTOMER";
   email: string;
+  storeName?: string;
 }
 
-export function MobileBottomNav({ role, email }: MobileBottomNavProps) {
+export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isLoggingOut, startLogoutTransition] = useTransition();
   const pathname = usePathname();
@@ -171,8 +172,8 @@ export function MobileBottomNav({ role, email }: MobileBottomNavProps) {
                   className="h-full w-full object-cover rounded-[calc(var(--radius-button,12px)-4px)]"
                 />
               </div>
-              <SheetTitle className="text-base font-black text-[var(--color-text)] tracking-tight">
-                SuperMarket
+              <SheetTitle className="text-base font-black text-[var(--color-text)] tracking-tight truncate max-w-[180px]">
+                {storeName || "SuperMarket"}
               </SheetTitle>
             </div>
             <SheetClose
