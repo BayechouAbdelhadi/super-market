@@ -12,6 +12,7 @@ interface SupabaseCampaignRow {
   daily_limit: number | null;
   start_date: string;
   end_date: string;
+  scheduled_time?: string;
   last_run_date: string | null;
   subject: string;
   content: string;
@@ -48,6 +49,7 @@ function mapToDomain(row: SupabaseCampaignRow): MarketingCampaign {
     dailyLimit: row.daily_limit,
     startDate: row.start_date,
     endDate: row.end_date,
+    scheduledTime: row.scheduled_time || "00:00",
     lastRunDate: row.last_run_date,
     subject: row.subject,
     content: row.content,
@@ -79,6 +81,7 @@ function mapToDbRow(campaign: MarketingCampaign): SupabaseCampaignRow {
     daily_limit: campaign.dailyLimit,
     start_date: campaign.startDate,
     end_date: campaign.endDate,
+    scheduled_time: campaign.scheduledTime || "00:00",
     last_run_date: campaign.lastRunDate,
     subject: campaign.subject,
     content: campaign.content,

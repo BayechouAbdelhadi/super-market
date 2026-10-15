@@ -163,7 +163,7 @@ export function DealJobDetailModal({
           </span>
           <span className="text-[var(--color-text-muted)] opacity-50">·</span>
           <span className="text-[var(--color-text-muted)]">
-            Du {campaign.startDate} au {campaign.endDate}
+            Du {campaign.startDate} au {campaign.endDate} (🌙 Minuit · {campaign.scheduledTime || "00:00"})
           </span>
         </div>
       }

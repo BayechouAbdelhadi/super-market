@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS marketing_campaigns (
     daily_limit INTEGER, -- Quota par jour si DAILY_LIMIT (ex. 100)
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
+    scheduled_time TEXT NOT NULL DEFAULT '00:00', -- Heure d'exécution automatique (00:00 = Minuit)
     last_run_date DATE,
     subject TEXT NOT NULL,
     content TEXT NOT NULL,
@@ -78,3 +79,24 @@ CREATE POLICY "Admins have full access to marketing_campaign_recipients"
             AND profiles.role = 'ADMIN'
         )
     );
+
+-- ==============================================================================
+-- 4. Programmation automatique du Job à Minuit (00:00 UTC) via pg_cron
+-- ==============================================================================
+-- Si l'extension pg_cron est activée dans votre instance Supabase, ce cron
+-- exécute automatiquement le traitement des campagnes actives chaque nuit à 00:00.
+--
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- CREATE EXTENSION IF NOT EXISTS pg_net;
+--
+-- SELECT cron.schedule(
+--     'marketing-deals-midnight-job',
+--     '0 0 * * *', -- Tous les jours à 00:00 (Minuit)
+--     $$
+--     SELECT net.http_post(
+--         url := 'https://api.supermarketcalais.com/api/cron/deals',
+--         headers := '{"Content-Type": "application/json", "Authorization": "Bearer ' || current_setting('app.settings.service_role_key', true) || '"}'::jsonb
+--     );
+--     $$
+-- );
+

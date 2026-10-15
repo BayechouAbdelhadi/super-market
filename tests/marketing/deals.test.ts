@@ -193,6 +193,7 @@ describe('Marketing Deals & Email Campaigns', () => {
         dailyLimit: null,
         startDate: '2026-10-15',
         endDate: '2026-10-20',
+        scheduledTime: '00:00',
         lastRunDate: null,
         subject: 'Bon Plan Test',
         content: 'Contenu test',
@@ -291,6 +292,7 @@ describe('Marketing Deals & Email Campaigns', () => {
         dailyLimit: 2,
         startDate: '2026-10-15',
         endDate: '2026-10-25',
+        scheduledTime: '00:00',
         lastRunDate: null,
         subject: 'Lot 1',
         content: 'Lot 1 content',
@@ -355,6 +357,7 @@ describe('Marketing Deals & Email Campaigns', () => {
         dailyLimit: null,
         startDate: '2026-10-15',
         endDate: '2026-10-20',
+        scheduledTime: '00:00',
         lastRunDate: null,
         subject: 'Sujet',
         content: 'Texte',
@@ -424,6 +427,7 @@ describe('Marketing Deals & Email Campaigns', () => {
         dailyLimit: null,
         startDate: '2026-10-15',
         endDate: '2026-10-20',
+        scheduledTime: '00:00',
         lastRunDate: null,
         subject: 'Test',
         content: 'Test',
@@ -484,6 +488,7 @@ describe('Marketing Deals & Email Campaigns', () => {
         dailyLimit: null,
         startDate: '2026-10-20',
         endDate: '2026-10-25',
+        scheduledTime: '00:00',
         lastRunDate: null,
         subject: 'Offre exclusive membre VIP',
         content: 'Profitez de 20% de remise sur le rayon fruits et légumes.',
@@ -547,5 +552,137 @@ describe('Marketing Deals & Email Campaigns', () => {
       expect(afterDelete).toBeNull();
     });
   });
+
+  describe('Midnight Schedule Execution (00:00)', () => {
+    it('defaults scheduledTime to 00:00 (Midnight) in schema', () => {
+      const parsed = CreateCampaignSchema.parse({
+        title: 'Campagne de Minuit',
+        targetTiers: ['GOLD'],
+        dispatchMode: 'ALL_AT_ONCE',
+        startDate: '2026-10-15',
+        endDate: '2026-10-20',
+        subject: 'Offre nocturne',
+        content: 'Profitez de nos offres exclusives dès ce soir minuit.',
+      });
+
+      expect(parsed.scheduledTime).toBe('00:00');
+    });
+
+    it('rejects invalid scheduledTime format', () => {
+      const result = CreateCampaignSchema.safeParse({
+        title: 'Campagne Format Invalide',
+        targetTiers: ['GOLD'],
+        dispatchMode: 'ALL_AT_ONCE',
+        startDate: '2026-10-15',
+        endDate: '2026-10-20',
+        scheduledTime: '25:99',
+        subject: 'Offre test',
+        content: 'Contenu avec plus de dix caractères requis.',
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('Europe/Paris Timezone Enforcement', () => {
+    it('always resolves date in Europe/Paris across UTC midnight boundary', async () => {
+      const { getParisDateString, TIMEZONE_PARIS } = await import('@/lib/utils/timezone');
+      expect(TIMEZONE_PARIS).toBe('Europe/Paris');
+
+      // 2026-10-14 23:30:00 UTC corresponds to 2026-10-15 01:30:00 CEST in Paris
+      const lateUtc = new Date('2026-10-14T23:30:00.000Z');
+      expect(lateUtc.toISOString().slice(0, 10)).toBe('2026-10-14');
+      expect(getParisDateString(lateUtc)).toBe('2026-10-15');
+    });
+  });
+
+  describe('Due Campaign Detection and Triggering (isCampaignDueNow & triggerDueCampaigns)', () => {
+    it('detects a campaign whose scheduled time has arrived/passed today', async () => {
+      const { isCampaignDueNow } = await import('@/lib/marketing/service');
+      // 2026-10-15 14:00 UTC = 16:00 in Paris
+      const refDate = new Date('2026-10-15T14:00:00.000Z');
+
+      const dueCampaign: MarketingCampaign = {
+        id: 'c1',
+        title: 'Campagne de l’aube',
+        status: 'RUNNING',
+        targetTiers: ['GOLD'],
+        dispatchMode: 'ALL_AT_ONCE',
+        dailyLimit: null,
+        startDate: '2026-10-15',
+        endDate: '2026-10-22',
+        scheduledTime: '04:42',
+        lastRunDate: null,
+        subject: 'Offre',
+        content: 'Contenu',
+        imageUrl: null,
+        stats: { totalTargets: 5, sentCount: 0, failedCount: 0, remainingCount: 5, progressPercentage: 0 },
+        recipients: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completedAt: null,
+      };
+
+      expect(isCampaignDueNow(dueCampaign, refDate)).toBe(true);
+
+      // Future time today: scheduled at 18:00, refDate is 16:00 -> NOT due yet
+      const futureTodayCampaign: MarketingCampaign = {
+        ...dueCampaign,
+        scheduledTime: '18:00',
+      };
+      expect(isCampaignDueNow(futureTodayCampaign, refDate)).toBe(false);
+
+      // Completed or paused -> NOT due
+      expect(isCampaignDueNow({ ...dueCampaign, status: 'COMPLETED' }, refDate)).toBe(false);
+      expect(isCampaignDueNow({ ...dueCampaign, status: 'PAUSED' }, refDate)).toBe(false);
+
+      // DAILY_LIMIT already run today -> NOT due
+      expect(
+        isCampaignDueNow(
+          { ...dueCampaign, dispatchMode: 'DAILY_LIMIT', lastRunDate: '2026-10-15' },
+          refDate
+        )
+      ).toBe(false);
+    });
+
+    it('triggers due campaigns via triggerDueCampaigns', async () => {
+      const { triggerDueCampaigns } = await import('@/lib/marketing/service');
+      vi.spyOn(emailService, 'sendEmail').mockResolvedValue({ success: true, messageId: 'm-1' });
+
+      const campaign: MarketingCampaign = {
+        id: 'due-1',
+        title: 'Campagne Due',
+        status: 'RUNNING',
+        targetTiers: ['GOLD'],
+        dispatchMode: 'ALL_AT_ONCE',
+        dailyLimit: null,
+        startDate: '2020-01-01',
+        endDate: '2099-12-31',
+        scheduledTime: '00:01',
+        lastRunDate: null,
+        subject: 'Sujet test',
+        content: 'Contenu test',
+        imageUrl: null,
+        stats: { totalTargets: 1, sentCount: 0, failedCount: 0, remainingCount: 1, progressPercentage: 0 },
+        recipients: [
+          { customerId: 'c1', email: 'c1@test.com', fullName: 'Client 1', tier: 'GOLD', status: 'PENDING' },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completedAt: null,
+      };
+
+      await mockRepo.save(campaign);
+
+      const results = await triggerDueCampaigns(mockRepo);
+      expect(results.length).toBe(1);
+      expect(results[0].newStatus).toBe('COMPLETED');
+      expect(results[0].sentInBatch).toBe(1);
+
+      const updated = await mockRepo.getById('due-1');
+      expect(updated?.status).toBe('COMPLETED');
+    });
+  });
 });
+
 

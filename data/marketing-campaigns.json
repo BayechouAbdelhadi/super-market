@@ -1,4 +1,232 @@
 {
-  "campaigns": {},
-  "recipients": {}
+  "campaigns": {
+    "e32df71d-7432-49f4-96de-efb9d7f12237": {
+      "id": "e32df71d-7432-49f4-96de-efb9d7f12237",
+      "title": "title",
+      "status": "COMPLETED",
+      "targetTiers": [
+        "SILVER",
+        "GOLD",
+        "VIP"
+      ],
+      "dispatchMode": "ALL_AT_ONCE",
+      "dailyLimit": null,
+      "startDate": "2026-10-15",
+      "endDate": "2026-10-22",
+      "scheduledTime": "04:42",
+      "lastRunDate": "2026-10-15",
+      "subject": "object",
+      "content": "objectde text",
+      "imageUrl": "https://static.vecteezy.com/system/resources/thumbnails/083/933/835/small/beautiful-and-inspiring-picture-detailing-a-bright-hot-air-balloon-over-river-pure-cozy-perfect-for-creatives-moods-stock-image-free-photo.jpeg",
+      "ctaText": "Découvrir les offres en magasin",
+      "ctaUrl": "https://supermarket-calais.fr",
+      "stats": {
+        "totalTargets": 24,
+        "sentCount": 24,
+        "failedCount": 0,
+        "remainingCount": 0,
+        "progressPercentage": 100
+      },
+      "createdAt": "2026-10-15T14:40:36.564+00:00",
+      "updatedAt": "2026-10-15T14:52:50.781Z",
+      "completedAt": "2026-10-15T14:52:50.781Z",
+      "createdBy": "admin@supermarket.com"
+    }
+  },
+  "recipients": {
+    "e32df71d-7432-49f4-96de-efb9d7f12237": [
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.070Z"
+      },
+      {
+        "customerId": "ad83c7f8-5969-4ea0-8b29-50264764ef31",
+        "email": "rotac74464@copytosh.com",
+        "fullName": "rota test",
+        "tier": "GOLD",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.197Z"
+      },
+      {
+        "customerId": "c3d7e672-0f7a-4231-9a71-12df151b70a3",
+        "email": "coxin79432@meinvr.com",
+        "fullName": "coxin coxin",
+        "tier": "VIP",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.321Z"
+      },
+      {
+        "customerId": "02de23bf-f612-42d5-ac06-1fad16b8ea9d",
+        "email": "abdelbayechou@gmail2.com",
+        "fullName": "Dj Dja",
+        "tier": "VIP",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.440Z"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.581Z"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.733Z"
+      },
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.070Z"
+      },
+      {
+        "customerId": "ad83c7f8-5969-4ea0-8b29-50264764ef31",
+        "email": "rotac74464@copytosh.com",
+        "fullName": "rota test",
+        "tier": "GOLD",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.197Z"
+      },
+      {
+        "customerId": "c3d7e672-0f7a-4231-9a71-12df151b70a3",
+        "email": "coxin79432@meinvr.com",
+        "fullName": "coxin coxin",
+        "tier": "VIP",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.321Z"
+      },
+      {
+        "customerId": "02de23bf-f612-42d5-ac06-1fad16b8ea9d",
+        "email": "abdelbayechou@gmail2.com",
+        "fullName": "Dj Dja",
+        "tier": "VIP",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.440Z"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.581Z"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.733Z"
+      },
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.070Z"
+      },
+      {
+        "customerId": "ad83c7f8-5969-4ea0-8b29-50264764ef31",
+        "email": "rotac74464@copytosh.com",
+        "fullName": "rota test",
+        "tier": "GOLD",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.197Z"
+      },
+      {
+        "customerId": "c3d7e672-0f7a-4231-9a71-12df151b70a3",
+        "email": "coxin79432@meinvr.com",
+        "fullName": "coxin coxin",
+        "tier": "VIP",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.321Z"
+      },
+      {
+        "customerId": "02de23bf-f612-42d5-ac06-1fad16b8ea9d",
+        "email": "abdelbayechou@gmail2.com",
+        "fullName": "Dj Dja",
+        "tier": "VIP",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.440Z"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.581Z"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.733Z"
+      },
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.070Z"
+      },
+      {
+        "customerId": "ad83c7f8-5969-4ea0-8b29-50264764ef31",
+        "email": "rotac74464@copytosh.com",
+        "fullName": "rota test",
+        "tier": "GOLD",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.197Z"
+      },
+      {
+        "customerId": "c3d7e672-0f7a-4231-9a71-12df151b70a3",
+        "email": "coxin79432@meinvr.com",
+        "fullName": "coxin coxin",
+        "tier": "VIP",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.321Z"
+      },
+      {
+        "customerId": "02de23bf-f612-42d5-ac06-1fad16b8ea9d",
+        "email": "abdelbayechou@gmail2.com",
+        "fullName": "Dj Dja",
+        "tier": "VIP",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.440Z"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.581Z"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T14:52:50.733Z"
+      }
+    ]
+  }
 }

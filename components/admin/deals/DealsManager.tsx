@@ -79,6 +79,20 @@ export function DealsManager({
 
   useEffect(() => {
     fetchCampaigns();
+    // Heartbeat every 60s to automatically trigger and display due jobs
+    const timer = setInterval(() => {
+      fetch("/api/admin/deals")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.campaigns) {
+            setCampaigns(data.campaigns);
+            if (data.summary) setSummary(data.summary);
+          }
+        })
+        .catch(() => {});
+    }, 60000);
+
+    return () => clearInterval(timer);
   }, []);
 
   const handleRunBatch = async (campaign: MarketingCampaign) => {
@@ -371,7 +385,7 @@ export function DealsManager({
                       </span>
                       <span className="text-[var(--color-text-muted)] opacity-50">•</span>
                       <span className="text-[var(--color-text-muted)]">
-                        Période : {camp.startDate} au {camp.endDate}
+                        Période : {camp.startDate} au {camp.endDate} (🕐 {camp.scheduledTime || "00:00"})
                       </span>
                     </div>
                     <span className="font-mono text-[var(--color-primary)] font-bold">

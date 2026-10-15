@@ -24,6 +24,11 @@ export const CreateCampaignSchema = z
     endDate: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Format de date de fin invalide (AAAA-MM-JJ)."),
+    scheduledTime: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Format d'heure invalide (HH:MM).")
+      .default("00:00")
+      .optional(),
     subject: z
       .string()
       .trim()

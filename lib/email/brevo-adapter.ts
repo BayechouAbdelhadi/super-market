@@ -69,6 +69,14 @@ export class BrevoEmailAdapter implements IEmailService {
         sender = this.defaultSender;
       }
 
+      // If the sender uses the unauthenticated placeholder domain, fallback to the verified sender
+      if (sender.email.toLowerCase().includes("supermarket-calais.fr")) {
+        sender = {
+          email: this.defaultSender.email,
+          name: sender.name || this.defaultSender.name,
+        };
+      }
+
       const payload = {
         sender: {
           name: sender.name,

@@ -42,6 +42,7 @@ export interface MarketingCampaign {
   // Step 3: Schedule
   startDate: string; // YYYY-MM-DD
   endDate: string; // YYYY-MM-DD
+  scheduledTime: string; // HH:mm format, defaults to "00:00" (minuit)
   lastRunDate: string | null; // YYYY-MM-DD
   // Step 4: Content
   subject: string;
@@ -65,6 +66,7 @@ export interface CreateCampaignInput {
   dailyLimit?: number | null;
   startDate: string;
   endDate: string;
+  scheduledTime?: string; // HH:mm, defaults to "00:00" (minuit)
   subject: string;
   content: string;
   imageUrl?: string | null;

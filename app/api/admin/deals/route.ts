@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/loyalty/api-auth";
 import { CreateCampaignSchema } from "@/lib/marketing/validation";
 import {
   createMarketingCampaign,
+  triggerDueCampaigns,
 } from "@/lib/marketing/service";
 import { defaultMarketingRepo } from "@/lib/marketing/adapters/supabase-marketing-repository";
 
@@ -13,6 +14,13 @@ export async function GET() {
   if (!auth.authorized) return auth.response;
 
   try {
+    // Automatically trigger any campaigns due as of current Paris time
+    try {
+      await triggerDueCampaigns();
+    } catch (triggerErr) {
+      console.warn("[GET /api/admin/deals] Auto-trigger due campaigns warning:", triggerErr);
+    }
+
     const campaigns = await defaultMarketingRepo.getAll();
 
     // Summary statistics

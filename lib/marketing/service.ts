@@ -14,6 +14,7 @@ import { LoyaltyTier, ProfileWithCustomerRow } from "@/lib/loyalty/types";
 import { emailService } from "@/lib/email";
 import { getAppSettings } from "@/lib/settings/service";
 import { renderDealEmailHtml } from "./templates/deal-email";
+import { getParisDateString, getParisTimeString } from "@/lib/utils/timezone";
 
 /**
  * Queries active customers matching the selected loyalty tiers.
@@ -64,6 +65,76 @@ export async function getTargetCustomersByTiers(
 }
 
 /**
+ * Checks whether a campaign is currently due to execute according to Europe/Paris time.
+ */
+export function isCampaignDueNow(
+  campaign: MarketingCampaign,
+  referenceDate: Date = new Date()
+): boolean {
+  if (
+    campaign.status === "PAUSED" ||
+    campaign.status === "COMPLETED" ||
+    campaign.status === "CANCELLED"
+  ) {
+    return false;
+  }
+
+  const todayStr = getParisDateString(referenceDate);
+  const currentTimeStr = getParisTimeString(referenceDate);
+
+  // Has not reached start date yet
+  if (campaign.startDate > todayStr) {
+    return false;
+  }
+
+  // Already ended
+  if (campaign.endDate < todayStr) {
+    return false;
+  }
+
+  // For DAILY_LIMIT, if it has already run today in Paris, do not run again today
+  if (campaign.lastRunDate === todayStr && campaign.dispatchMode === "DAILY_LIMIT") {
+    return false;
+  }
+
+  // If there are no pending recipients left
+  if (campaign.stats && campaign.stats.remainingCount === 0) {
+    return false;
+  }
+
+  // Scheduled time check (e.g. "04:42" or "00:00")
+  const scheduledTime = campaign.scheduledTime?.trim() || "00:00";
+  if (currentTimeStr < scheduledTime) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Automatically triggers batches for all due campaigns according to Europe/Paris time.
+ */
+export async function triggerDueCampaigns(
+  repo: IMarketingCampaignRepository = defaultMarketingRepo
+): Promise<ProcessBatchResult[]> {
+  const campaigns = await repo.getAll();
+  const results: ProcessBatchResult[] = [];
+
+  for (const campaign of campaigns) {
+    if (isCampaignDueNow(campaign)) {
+      try {
+        const res = await processCampaignBatch(campaign.id, repo);
+        if (res) results.push(res);
+      } catch (err) {
+        console.error(`[MarketingService] Error processing due campaign ${campaign.id}:`, err);
+      }
+    }
+  }
+
+  return results;
+}
+
+/**
  * Creates and registers a new marketing campaign job.
  */
 export async function createMarketingCampaign(
@@ -82,7 +153,7 @@ export async function createMarketingCampaign(
   };
 
   const now = new Date().toISOString();
-  const todayStr = now.slice(0, 10);
+  const todayStr = getParisDateString();
 
   const initialStatus =
     recipients.length === 0
@@ -100,6 +171,7 @@ export async function createMarketingCampaign(
     dailyLimit: input.dispatchMode === "DAILY_LIMIT" ? input.dailyLimit || 100 : null,
     startDate: input.startDate,
     endDate: input.endDate,
+    scheduledTime: input.scheduledTime?.trim() || "00:00",
     lastRunDate: null,
     subject: input.subject.trim(),
     content: input.content.trim(),
@@ -115,6 +187,19 @@ export async function createMarketingCampaign(
   };
 
   await repo.save(campaign);
+
+  // If the campaign's scheduled date and time has already arrived or passed today in Paris,
+  // execute the first batch immediately!
+  if (isCampaignDueNow(campaign)) {
+    try {
+      await processCampaignBatch(campaign.id, repo);
+      const updated = await repo.getById(campaign.id);
+      if (updated) return updated;
+    } catch (err) {
+      console.error("[MarketingService] Auto-trigger immediately failed:", err);
+    }
+  }
+
   return campaign;
 }
 
@@ -250,7 +335,7 @@ export async function processCampaignBatch(
     progressPercentage,
   };
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getParisDateString();
   campaign.lastRunDate = todayStr;
   campaign.updatedAt = new Date().toISOString();
   campaign.recipients = updatedRecipients;

@@ -61,6 +61,7 @@ export function NewDealJobModal({
   const defaultEnd = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(defaultEnd);
+  const [scheduledTime, setScheduledTime] = useState("00:00");
 
   // Step 4: Content
   const [title, setTitle] = useState("");
@@ -198,6 +199,7 @@ export function NewDealJobModal({
         dailyLimit: dispatchMode === "DAILY_LIMIT" ? parseInt(dailyLimitStr, 10) : null,
         startDate,
         endDate,
+        scheduledTime: scheduledTime || "00:00",
         subject: subject.trim(),
         content: content.trim(),
         imageUrl: imageUrl.trim() || null,
@@ -234,6 +236,7 @@ export function NewDealJobModal({
     setSubject("");
     setContent("");
     setImageUrl("");
+    setScheduledTime("00:00");
     setPreviewTab("edit");
     onClose();
   }
@@ -547,6 +550,62 @@ export function NewDealJobModal({
                   onChange={(e) => setEndDate(e.target.value)}
                   className="w-full h-11 text-sm font-medium rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                 />
+              </div>
+            </div>
+
+            {/* Execution Hour: Interactive Time Input */}
+            <div className="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <label htmlFor="deal-scheduled-time" className="flex items-center gap-2 text-xs font-bold text-[var(--color-text)] cursor-pointer">
+                    <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>Heure d&apos;exécution du job *</span>
+                  </label>
+                  <p className="text-xs text-[var(--color-text-muted)]">
+                    Définissez l&apos;heure précise à laquelle les e-mails sont expédiés (par défaut à minuit).
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <input
+                    id="deal-scheduled-time"
+                    type="time"
+                    required
+                    value={scheduledTime}
+                    onChange={(e) => setScheduledTime(e.target.value)}
+                    className="h-11 px-3.5 text-sm font-bold font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
+                  />
+                  {scheduledTime === "00:00" && (
+                    <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold border border-indigo-500/20 whitespace-nowrap">
+                      🌙 Minuit
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick time presets */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--color-border)]/60 text-xs">
+                <span className="text-[11px] text-[var(--color-text-muted)] font-medium">Raccourcis :</span>
+                {[
+                  { label: "Minuit (00:00)", val: "00:00" },
+                  { label: "Matin (08:00)", val: "08:00" },
+                  { label: "Midi (12:00)", val: "12:00" },
+                  { label: "Après-midi (15:00)", val: "15:00" },
+                  { label: "Soir (18:30)", val: "18:30" },
+                ].map((preset) => (
+                  <button
+                    key={preset.val}
+                    type="button"
+                    onClick={() => setScheduledTime(preset.val)}
+                    className={`px-2.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
+                      scheduledTime === preset.val
+                        ? "bg-indigo-600 text-white font-bold shadow-2xs"
+                        : "bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:border-indigo-400"
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
               </div>
             </div>
 
