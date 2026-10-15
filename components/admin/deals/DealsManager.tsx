@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MarketingCampaign } from "@/lib/marketing/types";
-import { NewDealJobModal } from "./NewDealJobModal";
 import { DealJobDetailModal } from "./DealJobDetailModal";
+import { EmailVisualizerModal } from "./EmailVisualizerModal";
 import { toast } from "@/components/ui/sonner";
 import {
   Sparkles,
@@ -24,6 +25,7 @@ import {
   ExternalLink,
   ChevronRight,
   TrendingUp,
+  Eye,
 } from "lucide-react";
 
 interface DealsSummary {
@@ -52,9 +54,9 @@ export function DealsManager({
     totalFailed: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<MarketingCampaign | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [previewingCampaign, setPreviewingCampaign] = useState<MarketingCampaign | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "COMPLETED" | "PAUSED">("ALL");
 
@@ -214,15 +216,16 @@ export function DealsManager({
           </p>
         </div>
 
-        <Button
-          variant="primary"
-          size="md"
-          onClick={() => setIsNewModalOpen(true)}
-          className="gap-2 font-bold shrink-0 shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Créer une campagne</span>
-        </Button>
+        <Link href="/admin/deals/new">
+          <Button
+            variant="primary"
+            size="md"
+            className="gap-2 font-bold shrink-0 shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Créer une campagne</span>
+          </Button>
+        </Link>
       </div>
 
       {/* KPI Stats Overview */}
@@ -323,10 +326,12 @@ export function DealsManager({
               Créez votre première opération commerciale pour envoyer des offres personnalisées par email à vos clients fidèles.
             </p>
           </div>
-          <Button variant="primary" size="sm" onClick={() => setIsNewModalOpen(true)} className="gap-1.5 font-bold">
-            <Plus className="w-3.5 h-3.5" />
-            <span>Créer une campagne</span>
-          </Button>
+          <Link href="/admin/deals/new">
+            <Button variant="primary" size="sm" className="gap-1.5 font-bold">
+              <Plus className="w-3.5 h-3.5" />
+              <span>Créer une campagne</span>
+            </Button>
+          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
@@ -474,31 +479,33 @@ export function DealsManager({
                     )}
                   </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleOpenDetail(camp)}
-                    className="gap-1.5 text-xs font-semibold"
-                  >
-                    <span>Détails &amp; Destinataires</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPreviewingCampaign(camp)}
+                      className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/40 hover:bg-indigo-100/50"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                      <span>Visualiser l&apos;email (vue consommateur)</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenDetail(camp)}
+                      className="gap-1.5 text-xs font-semibold"
+                    >
+                      <span>Détails &amp; Destinataires</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
               </Card>
             );
           })}
         </div>
       )}
-
-      {/* Creation Modal */}
-      <NewDealJobModal
-        isOpen={isNewModalOpen}
-        onClose={() => setIsNewModalOpen(false)}
-        onCreated={fetchCampaigns}
-        storeName={storeName}
-        storeAddress={storeAddress}
-        storePhone={storePhone}
-      />
 
       {/* Detail / Logs Modal */}
       <DealJobDetailModal
@@ -507,6 +514,24 @@ export function DealsManager({
         campaign={selectedCampaign}
         onRefresh={fetchCampaigns}
       />
+
+      {/* Standalone Email Visualizer Modal */}
+      {previewingCampaign && (
+        <EmailVisualizerModal
+          isOpen={!!previewingCampaign}
+          onClose={() => setPreviewingCampaign(null)}
+          title={previewingCampaign.title}
+          subject={previewingCampaign.subject}
+          content={previewingCampaign.content}
+          imageUrl={previewingCampaign.imageUrl}
+          ctaText={previewingCampaign.ctaText || "Découvrir les offres en magasin"}
+          ctaUrl={previewingCampaign.ctaUrl || "https://supermarket-calais.fr"}
+          storeName={storeName}
+          storeAddress={storeAddress}
+          storePhone={storePhone}
+          targetTiers={previewingCampaign.targetTiers}
+        />
+      )}
     </div>
   );
 }

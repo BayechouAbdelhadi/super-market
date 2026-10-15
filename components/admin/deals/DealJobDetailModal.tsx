@@ -5,6 +5,8 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { MarketingCampaign, CampaignRecipient } from "@/lib/marketing/types";
 import { toast } from "@/components/ui/sonner";
+import { renderDealEmailHtml } from "@/lib/marketing/templates/deal-email";
+import { EmailVisualizerModal } from "./EmailVisualizerModal";
 import {
   Play,
   Pause,
@@ -19,6 +21,8 @@ import {
   ChevronDown,
   RefreshCw,
   Search,
+  Eye,
+  FileText,
 } from "lucide-react";
 
 interface DealJobDetailModalProps {
@@ -34,6 +38,8 @@ export function DealJobDetailModal({
   campaign,
   onRefresh,
 }: DealJobDetailModalProps) {
+  const [activeTab, setActiveTab] = useState<"overview" | "preview">("overview");
+  const [isVisualizerOpen, setIsVisualizerOpen] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
   const [recipientFilter, setRecipientFilter] = useState<"ALL" | "SENT" | "FAILED" | "PENDING">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
@@ -169,9 +175,88 @@ export function DealJobDetailModal({
       }
       maxWidth="lg"
     >
-      <div className="p-6 space-y-6">
-        {/* Real-time KPI Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="p-6 space-y-5">
+        {/* Top View Mode Tabs */}
+        <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
+          <div className="inline-flex p-1 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs">
+            <button
+              type="button"
+              onClick={() => setActiveTab("overview")}
+              className={`px-3.5 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "overview"
+                  ? "bg-[var(--color-surface)] text-[var(--color-text)] shadow-xs"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              }`}
+            >
+              <Users className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+              <span>Destinataires & Avancement</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("preview")}
+              className={`px-3.5 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "preview"
+                  ? "bg-[var(--color-surface)] text-[var(--color-primary)] shadow-xs"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              }`}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>Aperçu de l&apos;email envoyé</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsVisualizerOpen(true)}
+              className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>Visualiser l&apos;email (vue consommateur)</span>
+            </Button>
+            <div className="text-xs text-[var(--color-text-muted)] font-mono hidden md:block">
+              ID: {campaign.id.slice(0, 8)}...
+            </div>
+          </div>
+        </div>
+
+        {activeTab === "preview" ? (
+          /* Email Preview Tab */
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="p-3 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-between text-xs">
+              <div>
+                <strong className="block text-[var(--color-text)]">Objet : {campaign.subject}</strong>
+                <span className="text-[var(--color-text-muted)]">
+                  Bannière : {campaign.imageUrl ? "Personnalisée intégrée" : "Standard"} · Cible : {campaign.targetTiers.join(", ")}
+                </span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden bg-slate-100 dark:bg-slate-900 shadow-inner flex justify-center p-3 sm:p-5">
+              <iframe
+                title="Aperçu de la newsletter"
+                srcDoc={renderDealEmailHtml({
+                  customerName: "Marie Dupont",
+                  tier: campaign.targetTiers[0] || "GOLD",
+                  subject: campaign.subject,
+                  content: campaign.content,
+                  imageUrl: campaign.imageUrl,
+                  ctaText: campaign.ctaText || "Découvrir les offres en magasin",
+                  ctaUrl: campaign.ctaUrl || "https://supermarket-calais.fr",
+                  storeName: "Super Market Calais",
+                  storeAddress: "205 Avenue Antoine de Saint-Exupéry, 62100 Calais",
+                  storePhone: "06 71 54 05 28",
+                })}
+                className="w-full max-w-[620px] h-[550px] rounded-xl border border-[var(--color-border)] shadow-lg bg-white"
+              />
+            </div>
+          </div>
+        ) : (
+          /* Overview Tab */
+          <div className="space-y-5 animate-in fade-in duration-200">
+            {/* Real-time KPI Stats Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
             <span className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block">
               Audience ciblée
@@ -413,6 +498,8 @@ export function DealJobDetailModal({
             )}
           </div>
         </div>
+      </div>
+    )}
 
         {/* Close Button */}
         <div className="pt-2 flex justify-end border-t border-[var(--color-border)]">
@@ -421,6 +508,19 @@ export function DealJobDetailModal({
           </Button>
         </div>
       </div>
+
+      {/* Standalone Responsive Consumer Email Visualizer */}
+      <EmailVisualizerModal
+        isOpen={isVisualizerOpen}
+        onClose={() => setIsVisualizerOpen(false)}
+        title={campaign.title}
+        subject={campaign.subject}
+        content={campaign.content}
+        imageUrl={campaign.imageUrl}
+        ctaText={campaign.ctaText || "Découvrir les offres en magasin"}
+        ctaUrl={campaign.ctaUrl || "https://supermarket-calais.fr"}
+        targetTiers={campaign.targetTiers}
+      />
     </Modal>
   );
 }

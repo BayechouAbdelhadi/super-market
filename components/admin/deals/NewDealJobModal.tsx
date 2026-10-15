@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { LoyaltyTier } from "@/lib/loyalty/types";
 import { toast } from "@/components/ui/sonner";
 import { renderDealEmailHtml } from "@/lib/marketing/templates/deal-email";
+import { EmailVisualizerModal } from "./EmailVisualizerModal";
+import { getParisTimeString } from "@/lib/utils/timezone";
 import {
   Users,
   Calendar,
@@ -19,6 +21,11 @@ import {
   AlertCircle,
   Clock,
   Layers,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  Check,
+  Wand2,
 } from "lucide-react";
 
 interface NewDealJobModalProps {
@@ -35,6 +42,36 @@ const ALL_TIERS: { id: LoyaltyTier; label: string; desc: string; color: string }
   { id: "SILVER", label: "Silver", desc: "Clients fréquents (+500 pts)", color: "slate" },
   { id: "GOLD", label: "Gold", desc: "Clients fidèles (+2 000 pts)", color: "yellow" },
   { id: "VIP", label: "VIP", desc: "Clients premium (+5 000 pts)", color: "purple" },
+];
+
+export const CAMPAIGN_PRESETS = [
+  {
+    name: "🥦 Primeurs & -20% Frais",
+    title: "Arrivage Primeurs Frais & -20% Week-end",
+    subject: "🔥 Bonnes Affaires : -20% sur les Primeurs et Points Doublés ce week-end !",
+    content: `Profitez de nos offres fraîches exclusives dès ce vendredi dans votre magasin Super Market Calais !\n\n- 20% de remise immédiate sur l'ensemble du rayon fruits & légumes dès 25€ d'achat\n- Vos points fidélité sont doublés sur tout votre ticket de caisse\n- Dégustation gratuite de nos nouveaux arrivages locaux ce samedi matin\n\nOffre exclusive réservée à nos membres fidélité sur simple indication de votre nom ou numéro de téléphone lors de votre passage au comptoir caisse.`,
+    imageUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
+    ctaText: "Découvrir les offres en magasin",
+    ctaUrl: "https://supermarket-calais.fr",
+  },
+  {
+    name: "🍷 Terroir & Épicerie Fine",
+    title: "Sélection Terroir & Épicerie Fine d'Automne",
+    subject: "✨ Offre Privilège : Dégustation & Réductions exclusives sur notre Terroir",
+    content: `Découvrez notre nouvelle sélection d'épicerie fine et de produits du terroir soigneusement choisis pour vous :\n\n- 15% de remise sur nos fromages affinés et notre charcuterie artisanale\n- 1 bouteille de jus de pomme artisanal offerte dès 40€ d'achats en rayon terroir\n- Crédit fidélité instantané de 100 points bonus sur votre compte\n\nRendez-vous en magasin pour profiter de cette sélection gourmande disponible jusqu'à épuisement des stocks !`,
+    imageUrl: "https://images.unsplash.com/photo-1506617420156-8e4536971650?auto=format&fit=crop&w=1200&q=80",
+    ctaText: "Voir la sélection en boutique",
+    ctaUrl: "https://supermarket-calais.fr",
+  },
+  {
+    name: "⚡ Ventes Flash & Points x3",
+    title: "Journées Privilège : Points Triplés & Super Promos",
+    subject: "⚡ Ventes Flash : Points fidélité x3 et remises exceptionnelles en magasin !",
+    content: `Pour vous remercier de votre fidélité, toute l'équipe de Super Market Calais vous invite à ses Journées Privilège :\n\n- Points fidélité multipliés par 3 sur tous vos achats sans minimum\n- Jusqu'à -30% sur une sélection de plus de 150 produits du quotidien\n- 1 bon d'achat de 5€ offert dès 50€ d'achat valable sur votre prochaine visite\n\nPrésentez simplement votre nom ou numéro de téléphone en caisse pour activer vos avantages immédiats !`,
+    imageUrl: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1200&q=80",
+    ctaText: "Profiter des promotions",
+    ctaUrl: "https://supermarket-calais.fr",
+  },
 ];
 
 export function NewDealJobModal({
@@ -71,9 +108,77 @@ export function NewDealJobModal({
   const [ctaText, setCtaText] = useState("Découvrir les offres en magasin");
   const [ctaUrl, setCtaUrl] = useState("https://supermarket-calais.fr");
   const [previewTab, setPreviewTab] = useState<"edit" | "preview">("edit");
+  const [isVisualizerOpen, setIsVisualizerOpen] = useState(false);
+
+  // Paris local time tracking & 24h helper calculations
+  const [currentParisTime, setCurrentParisTime] = useState(() => getParisTimeString());
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentParisTime(getParisTimeString()), 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const [schedH, schedM] = scheduledTime.split(":").map((v) => parseInt(v || "0", 10));
+  const isMorning = !isNaN(schedH) && schedH < 12;
+  const pmEquivalent = !isNaN(schedH) && !isNaN(schedM)
+    ? `${String((schedH % 12) + 12).padStart(2, "0")}:${String(schedM).padStart(2, "0")}`
+    : "12:00";
+  const amEquivalent = !isNaN(schedH) && !isNaN(schedM)
+    ? `${String(schedH % 12).padStart(2, "0")}:${String(schedM).padStart(2, "0")}`
+    : "00:00";
+
+  const isStartDateToday = startDate === today;
+  const isTimePassedToday = isStartDateToday && scheduledTime <= currentParisTime;
+  const isSuspiciousMorningTime = isStartDateToday && isMorning && currentParisTime >= "12:00";
+
+  const getOffsetTime = (mins: number) => {
+    const [h, m] = currentParisTime.split(":").map(Number);
+    const total = (h || 0) * 60 + (m || 0) + mins;
+    const newH = Math.floor(total / 60) % 24;
+    const newM = total % 60;
+    return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
+  };
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/admin/deals/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Échec de l'upload.");
+
+      setImageUrl(data.url);
+      toast.success("Image importée avec succès !");
+    } catch (err: any) {
+      toast.error(err.message || "Erreur lors de l'envoi de l'image.");
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleApplyPreset = (preset: (typeof CAMPAIGN_PRESETS)[0]) => {
+    setTitle(preset.title);
+    setSubject(preset.subject);
+    setContent(preset.content);
+    setImageUrl(preset.imageUrl);
+    setCtaText(preset.ctaText);
+    setCtaUrl(preset.ctaUrl);
+    setErrorMsg("");
+    toast.success(`Exemple « ${preset.name} » pré-rempli !`);
+  };
 
   // Calculate live audience count when selected tiers change
   useEffect(() => {
@@ -297,6 +402,22 @@ export function NewDealJobModal({
               </div>
             );
           })}
+        </div>
+
+        {/* Universal Email Visualizer Shortcut */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/70 dark:border-indigo-800/60">
+          <div className="flex items-center gap-2 text-xs text-indigo-950 dark:text-indigo-200 font-medium">
+            <span className="text-base select-none">👁️</span>
+            <span>Envie de prévisualiser le rendu final des e-mails avant de continuer ?</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsVisualizerOpen(true)}
+            className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs cursor-pointer flex items-center justify-center gap-1.5 transition-all shrink-0"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>Visualiser l&apos;email (ce que les consommateurs recevront)</span>
+          </button>
         </div>
 
         {errorMsg && (
@@ -554,7 +675,7 @@ export function NewDealJobModal({
             </div>
 
             {/* Execution Hour: Interactive Time Input */}
-            <div className="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-3">
+            <div className="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
                   <label htmlFor="deal-scheduled-time" className="flex items-center gap-2 text-xs font-bold text-[var(--color-text)] cursor-pointer">
@@ -562,31 +683,121 @@ export function NewDealJobModal({
                     <span>Heure d&apos;exécution du job *</span>
                   </label>
                   <p className="text-xs text-[var(--color-text-muted)]">
-                    Définissez l&apos;heure précise à laquelle les e-mails sont expédiés (par défaut à minuit).
+                    Heure précise d&apos;envoi des emails (format 24h, heure de Paris).
                   </p>
+                  <div className="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Heure actuelle à Paris : <strong>{currentParisTime}</strong></span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-start sm:self-auto">
-                  <input
-                    id="deal-scheduled-time"
-                    type="time"
-                    required
-                    value={scheduledTime}
-                    onChange={(e) => setScheduledTime(e.target.value)}
-                    className="h-11 px-3.5 text-sm font-bold font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
-                  />
-                  {scheduledTime === "00:00" && (
-                    <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold border border-indigo-500/20 whitespace-nowrap">
-                      🌙 Minuit
-                    </span>
-                  )}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 self-start sm:self-auto">
+                  {/* AM/PM Switcher */}
+                  <div className="inline-flex p-0.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!isMorning) setScheduledTime(amEquivalent);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                        isMorning
+                          ? "bg-amber-500 text-white shadow-2xs"
+                          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                      }`}
+                    >
+                      ☀️ Matin
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isMorning) setScheduledTime(pmEquivalent);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                        !isMorning
+                          ? "bg-indigo-600 text-white shadow-2xs"
+                          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                      }`}
+                    >
+                      🌙 Après-midi
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="deal-scheduled-time"
+                      type="time"
+                      required
+                      value={scheduledTime}
+                      onChange={(e) => setScheduledTime(e.target.value)}
+                      className="h-11 px-3.5 text-sm font-bold font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
+                    />
+                    {scheduledTime === "00:00" && (
+                      <span className="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold border border-indigo-500/20 whitespace-nowrap">
+                        🌙 Minuit
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Quick time presets */}
+              {/* Warning for Suspicious Morning Time (e.g. 05:24 entered in the afternoon) */}
+              {isSuspiciousMorningTime && (
+                <div className="p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-950 dark:text-amber-200 space-y-2 animate-in fade-in">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="block font-bold">
+                        Attention au format 24h : vous avez saisi « {scheduledTime} » ({schedH}h{String(schedM).padStart(2, "0")} du matin)
+                      </strong>
+                      <p className="text-[11px] leading-relaxed opacity-90 mt-0.5">
+                        Il est actuellement <strong>{currentParisTime}</strong>. Cette heure du matin est donc déjà passée aujourd&apos;hui.
+                        Si vous vouliez programmer pour cet après-midi à <strong>{pmEquivalent}</strong> ({pmEquivalent.replace(":", "h")}), cliquez ci-dessous :
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pl-6">
+                    <button
+                      type="button"
+                      onClick={() => setScheduledTime(pmEquivalent)}
+                      className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center gap-1.5 transition-all"
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>Passer à {pmEquivalent} ({pmEquivalent.replace(":", "h")} après-midi)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Live Scheduling Timeline Status Badge */}
+              <div className="p-2.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs flex items-center justify-between gap-2">
+                <span className="text-[var(--color-text-muted)] font-medium">Statut du déclenchement :</span>
+                {isStartDateToday ? (
+                  scheduledTime > currentParisTime ? (
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span>🟢 Prévu aujourd&apos;hui à {scheduledTime} — En attente (ne sera PAS envoyé immédiatement)</span>
+                    </span>
+                  ) : (
+                    <span className="text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-blue-500" />
+                      <span>⚡ Heure passée ({scheduledTime}) : l&apos;envoi se lancera à la création</span>
+                    </span>
+                  )
+                ) : (
+                  <span className="text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-purple-500" />
+                    <span>📅 Programmé pour le {startDate} à {scheduledTime}</span>
+                  </span>
+                )}
+              </div>
+
+              {/* Quick time presets with dynamic test offsets */}
               <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--color-border)]/60 text-xs">
-                <span className="text-[11px] text-[var(--color-text-muted)] font-medium">Raccourcis :</span>
+                <span className="text-[11px] text-[var(--color-text-muted)] font-medium">Raccourcis rapides :</span>
                 {[
+                  { label: `⚡ Dans 2 min (${getOffsetTime(2)})`, val: getOffsetTime(2) },
+                  { label: `⚡ Dans 5 min (${getOffsetTime(5)})`, val: getOffsetTime(5) },
+                  { label: `⚡ Dans 15 min (${getOffsetTime(15)})`, val: getOffsetTime(15) },
                   { label: "Minuit (00:00)", val: "00:00" },
                   { label: "Matin (08:00)", val: "08:00" },
                   { label: "Midi (12:00)", val: "12:00" },
@@ -594,13 +805,13 @@ export function NewDealJobModal({
                   { label: "Soir (18:30)", val: "18:30" },
                 ].map((preset) => (
                   <button
-                    key={preset.val}
+                    key={preset.val + preset.label}
                     type="button"
                     onClick={() => setScheduledTime(preset.val)}
                     className={`px-2.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
                       scheduledTime === preset.val
                         ? "bg-indigo-600 text-white font-bold shadow-2xs"
-                        : "bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:border-indigo-400"
+                        : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:border-indigo-400"
                     }`}
                   >
                     {preset.label}
@@ -638,40 +849,89 @@ export function NewDealJobModal({
                 </p>
               </div>
 
-              {/* Edit / Preview Tabs */}
-              <div className="inline-flex p-1 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setPreviewTab("edit")}
-                  className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
-                    previewTab === "edit"
-                      ? "bg-[var(--color-surface)] text-[var(--color-text)] shadow-xs"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                  }`}
-                >
-                  Édition
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewTab("preview")}
-                  className={`px-3 py-1 rounded-lg font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    previewTab === "preview"
-                      ? "bg-[var(--color-surface)] text-[var(--color-primary)] shadow-xs"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                  }`}
+                  onClick={() => setIsVisualizerOpen(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span>Aperçu client</span>
+                  <span>Visualiser l&apos;email (ce que les consommateurs recevront)</span>
                 </button>
+
+                {/* Edit / Preview Tabs */}
+                <div className="inline-flex p-1 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewTab("edit")}
+                    className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                      previewTab === "edit"
+                        ? "bg-[var(--color-surface)] text-[var(--color-text)] shadow-xs"
+                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                    }`}
+                  >
+                    Édition
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewTab("preview")}
+                    className={`px-3 py-1 rounded-lg font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      previewTab === "preview"
+                        ? "bg-[var(--color-surface)] text-[var(--color-primary)] shadow-xs"
+                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                    }`}
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Aperçu</span>
+                  </button>
+                </div>
               </div>
             </div>
 
             {previewTab === "edit" ? (
               <div className="space-y-4">
+                {/* PREFILL BANNER & PRESETS */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-50/90 via-purple-50/70 to-pink-50/60 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-pink-950/20 border border-indigo-200/80 dark:border-indigo-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-950 dark:text-indigo-200">
+                      <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                      <span>Modèles prêts à l&apos;emploi</span>
+                    </div>
+                    <p className="text-[11px] text-indigo-800/80 dark:text-indigo-300/80">
+                      Pré-remplit en 1 clic un titre, un objet attractif, un message structuré et une image adaptée.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPreset(CAMPAIGN_PRESETS[0])}
+                      className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Wand2 className="w-3.5 h-3.5" />
+                      <span>⚡ Pré-remplir</span>
+                    </button>
+
+                    {CAMPAIGN_PRESETS.slice(1).map((preset) => (
+                      <button
+                        key={preset.name}
+                        type="button"
+                        onClick={() => handleApplyPreset(preset)}
+                        className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 hover:bg-indigo-50/50 text-[11px] font-semibold text-indigo-900 dark:text-indigo-200 transition-all cursor-pointer shadow-2xs"
+                      >
+                        {preset.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-[var(--color-text)]">
-                    Nom interne de la campagne *
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-[var(--color-text)]">
+                      Nom interne de la campagne *
+                    </label>
+                    <span className="text-[10px] text-[var(--color-text-muted)]">Visible uniquement par l&apos;équipe</span>
+                  </div>
                   <input
                     type="text"
                     required
@@ -710,42 +970,100 @@ export function NewDealJobModal({
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-[var(--color-text)]">
-                    Image / Bannière promotionnelle (URL)
-                  </label>
-                  <input
-                    type="url"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://images.unsplash.com/... ou URL de votre affiche"
-                    className="w-full h-11 text-sm font-medium rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  />
-                  <div className="flex items-center gap-2 pt-1 text-[11px] text-[var(--color-text-muted)]">
-                    <span>Exemple rapide :</span>
+                <div className="space-y-2 p-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-[var(--color-text)] flex items-center gap-1.5">
+                      <ImageIcon className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                      <span>Bannière promotionnelle de l&apos;offre (optionnelle)</span>
+                    </label>
+                    {imageUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setImageUrl("")}
+                        className="text-[11px] text-red-600 dark:text-red-400 hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Retirer l&apos;image</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <input
+                      type="url"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="https://... ou cliquez sur « Importer »"
+                      className="flex-1 h-10 text-xs font-medium rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    />
+
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="hidden"
+                    />
+
                     <button
                       type="button"
-                      onClick={() =>
-                        setImageUrl(
-                          "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80"
-                        )
-                      }
-                      className="text-[var(--color-primary)] hover:underline cursor-pointer"
+                      disabled={isUploadingImage}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="h-10 px-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-hover)] text-xs font-semibold text-[var(--color-text)] hover:border-[var(--color-primary)] transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
                     >
-                      Bannière Primeur Frais
+                      <Upload className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                      <span>{isUploadingImage ? "Importation..." : "Importer un fichier"}</span>
                     </button>
-                    <span className="opacity-40">•</span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setImageUrl(
-                          "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=80"
-                        )
-                      }
-                      className="text-[var(--color-primary)] hover:underline cursor-pointer"
-                    >
-                      Bannière Soldes / Promo
-                    </button>
+                  </div>
+
+                  {/* Thumbnail Preview */}
+                  {imageUrl && (
+                    <div className="relative mt-2 rounded-xl overflow-hidden border border-[var(--color-border)] bg-slate-900/5 max-h-36 flex items-center justify-center">
+                      <img
+                        src={imageUrl}
+                        alt="Aperçu bannière"
+                        className="w-full h-36 object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = "none";
+                        }}
+                      />
+                      <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[10px] text-white font-medium flex items-center gap-1">
+                        <Check className="w-3 h-3 text-emerald-400" />
+                        <span>Image prête pour l&apos;email</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Curated Presets */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] text-[var(--color-text-muted)]">
+                    <span className="font-medium">Suggestions :</span>
+                    {[
+                      {
+                        label: "🥬 Primeurs & Frais",
+                        url: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
+                      },
+                      {
+                        label: "🛒 Supermarché Promo",
+                        url: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1200&q=80",
+                      },
+                      {
+                        label: "🍇 Fruits de Saison",
+                        url: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=1200&q=80",
+                      },
+                      {
+                        label: "🍷 Épicerie & Terroir",
+                        url: "https://images.unsplash.com/photo-1506617420156-8e4536971650?auto=format&fit=crop&w=1200&q=80",
+                      },
+                    ].map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => setImageUrl(preset.url)}
+                        className="px-2 py-0.5 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-[var(--color-text)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all cursor-pointer text-[10px]"
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
@@ -799,7 +1117,17 @@ export function NewDealJobModal({
                 <span>Retour</span>
               </Button>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsVisualizerOpen(true)}
+                  className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Visualiser l&apos;email (ce que les consommateurs recevront)</span>
+                </Button>
+
                 <Button type="button" variant="ghost" onClick={handleClose} disabled={loadingSubmit}>
                   Annuler
                 </Button>
@@ -838,6 +1166,22 @@ export function NewDealJobModal({
           </div>
         )}
       </div>
+
+      {/* Standalone Responsive Email Visualizer */}
+      <EmailVisualizerModal
+        isOpen={isVisualizerOpen}
+        onClose={() => setIsVisualizerOpen(false)}
+        title={title}
+        subject={subject}
+        content={content}
+        imageUrl={imageUrl}
+        ctaText={ctaText}
+        ctaUrl={ctaUrl}
+        storeName={storeName}
+        storeAddress={storeAddress}
+        storePhone={storePhone}
+        targetTiers={selectedTiers}
+      />
     </Modal>
   );
 }

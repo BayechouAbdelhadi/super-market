@@ -1,55 +1,76 @@
 {
   "campaigns": {
-    "e32df71d-7432-49f4-96de-efb9d7f12237": {
-      "id": "e32df71d-7432-49f4-96de-efb9d7f12237",
-      "title": "title",
+    "08ce2aa1-4ea8-4149-aaf0-277e4e463579": {
+      "id": "08ce2aa1-4ea8-4149-aaf0-277e4e463579",
+      "title": "Arrivage Primeurs Frais & -20% Week-end",
       "status": "COMPLETED",
       "targetTiers": [
-        "SILVER",
         "GOLD",
         "VIP"
       ],
       "dispatchMode": "ALL_AT_ONCE",
       "dailyLimit": null,
-      "startDate": "2026-10-15",
-      "endDate": "2026-10-22",
-      "scheduledTime": "04:42",
-      "lastRunDate": "2026-10-15",
-      "subject": "object",
-      "content": "objectde text",
-      "imageUrl": "https://static.vecteezy.com/system/resources/thumbnails/083/933/835/small/beautiful-and-inspiring-picture-detailing-a-bright-hot-air-balloon-over-river-pure-cozy-perfect-for-creatives-moods-stock-image-free-photo.jpeg",
+      "startDate": "2026-10-16",
+      "endDate": "2026-10-23",
+      "scheduledTime": "00:09",
+      "lastRunDate": "2026-10-16",
+      "subject": "🔥 Bonnes Affaires : -20% sur les Primeurs et Points Doublés ce week-end !",
+      "content": "Profitez de nos offres fraîches exclusives dès ce vendredi dans votre magasin Super Market Calais !\n\n- 20% de remise immédiate sur l'ensemble du rayon fruits & légumes dès 25€ d'achat\n- Vos points fidélité sont doublés sur tout votre ticket de caisse\n- Dégustation gratuite de nos nouveaux arrivages locaux ce samedi matin\n\nOffre exclusive réservée à nos membres fidélité sur simple indication de votre nom ou numéro de téléphone lors de votre passage au comptoir caisse.",
+      "imageUrl": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
       "ctaText": "Découvrir les offres en magasin",
       "ctaUrl": "https://supermarket-calais.fr",
       "stats": {
-        "totalTargets": 24,
-        "sentCount": 24,
+        "totalTargets": 3,
+        "sentCount": 3,
         "failedCount": 0,
         "remainingCount": 0,
         "progressPercentage": 100
       },
-      "createdAt": "2026-10-15T14:40:36.564+00:00",
-      "updatedAt": "2026-10-15T14:52:50.781Z",
-      "completedAt": "2026-10-15T14:52:50.781Z",
+      "createdAt": "2026-10-15T22:07:28.865+00:00",
+      "updatedAt": "2026-10-15T22:09:30.503Z",
+      "completedAt": "2026-10-15T22:09:30.503Z",
+      "createdBy": "admin@supermarket.com"
+    },
+    "fd18cd7d-2740-4a51-9f7e-4254f68ab46d": {
+      "id": "fd18cd7d-2740-4a51-9f7e-4254f68ab46d",
+      "title": "Offres Exclusives Fidélité",
+      "status": "RUNNING",
+      "targetTiers": [
+        "SILVER"
+      ],
+      "dispatchMode": "DAILY_LIMIT",
+      "dailyLimit": 1,
+      "startDate": "2026-10-16",
+      "endDate": "2026-10-23",
+      "scheduledTime": "00:14",
+      "lastRunDate": "2026-10-16",
+      "subject": "🔥 Vos bons plans de la semaine chez Super Market Calais !",
+      "content": "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier.",
+      "imageUrl": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
+      "ctaText": "Découvrir les offres en magasin",
+      "ctaUrl": "https://supermarket-calais.fr",
+      "stats": {
+        "totalTargets": 6,
+        "sentCount": 2,
+        "failedCount": 0,
+        "remainingCount": 4,
+        "progressPercentage": 33
+      },
+      "createdAt": "2026-10-15T22:12:23.958+00:00",
+      "updatedAt": "2026-10-15T22:15:14.439Z",
+      "completedAt": null,
       "createdBy": "admin@supermarket.com"
     }
   },
   "recipients": {
-    "e32df71d-7432-49f4-96de-efb9d7f12237": [
-      {
-        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
-        "email": "cool@gmail.com",
-        "fullName": "cool cool",
-        "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.070Z"
-      },
+    "08ce2aa1-4ea8-4149-aaf0-277e4e463579": [
       {
         "customerId": "ad83c7f8-5969-4ea0-8b29-50264764ef31",
         "email": "rotac74464@copytosh.com",
         "fullName": "rota test",
         "tier": "GOLD",
         "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.197Z"
+        "sentAt": "2026-10-15T22:09:30.308Z"
       },
       {
         "customerId": "c3d7e672-0f7a-4231-9a71-12df151b70a3",
@@ -57,7 +78,7 @@
         "fullName": "coxin coxin",
         "tier": "VIP",
         "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.321Z"
+        "sentAt": "2026-10-15T22:09:30.433Z"
       },
       {
         "customerId": "02de23bf-f612-42d5-ac06-1fad16b8ea9d",
@@ -65,23 +86,31 @@
         "fullName": "Dj Dja",
         "tier": "VIP",
         "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.440Z"
+        "sentAt": "2026-10-15T22:09:30.502Z"
+      }
+    ],
+    "fd18cd7d-2740-4a51-9f7e-4254f68ab46d": [
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T22:15:14.438Z"
       },
       {
         "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
         "email": "mafexad328@meinvr.com",
         "fullName": "Machin Machin",
         "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.581Z"
+        "status": "PENDING"
       },
       {
         "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
         "email": "abdelbayechou@gmail.com",
         "fullName": "BAYECHOU1 Abdelhadi",
         "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.733Z"
+        "status": "PENDING"
       },
       {
         "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
@@ -89,143 +118,21 @@
         "fullName": "cool cool",
         "tier": "SILVER",
         "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.070Z"
-      },
-      {
-        "customerId": "ad83c7f8-5969-4ea0-8b29-50264764ef31",
-        "email": "rotac74464@copytosh.com",
-        "fullName": "rota test",
-        "tier": "GOLD",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.197Z"
-      },
-      {
-        "customerId": "c3d7e672-0f7a-4231-9a71-12df151b70a3",
-        "email": "coxin79432@meinvr.com",
-        "fullName": "coxin coxin",
-        "tier": "VIP",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.321Z"
-      },
-      {
-        "customerId": "02de23bf-f612-42d5-ac06-1fad16b8ea9d",
-        "email": "abdelbayechou@gmail2.com",
-        "fullName": "Dj Dja",
-        "tier": "VIP",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.440Z"
+        "sentAt": "2026-10-15T22:15:14.438Z"
       },
       {
         "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
         "email": "mafexad328@meinvr.com",
         "fullName": "Machin Machin",
         "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.581Z"
+        "status": "PENDING"
       },
       {
         "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
         "email": "abdelbayechou@gmail.com",
         "fullName": "BAYECHOU1 Abdelhadi",
         "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.733Z"
-      },
-      {
-        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
-        "email": "cool@gmail.com",
-        "fullName": "cool cool",
-        "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.070Z"
-      },
-      {
-        "customerId": "ad83c7f8-5969-4ea0-8b29-50264764ef31",
-        "email": "rotac74464@copytosh.com",
-        "fullName": "rota test",
-        "tier": "GOLD",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.197Z"
-      },
-      {
-        "customerId": "c3d7e672-0f7a-4231-9a71-12df151b70a3",
-        "email": "coxin79432@meinvr.com",
-        "fullName": "coxin coxin",
-        "tier": "VIP",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.321Z"
-      },
-      {
-        "customerId": "02de23bf-f612-42d5-ac06-1fad16b8ea9d",
-        "email": "abdelbayechou@gmail2.com",
-        "fullName": "Dj Dja",
-        "tier": "VIP",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.440Z"
-      },
-      {
-        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
-        "email": "mafexad328@meinvr.com",
-        "fullName": "Machin Machin",
-        "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.581Z"
-      },
-      {
-        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
-        "email": "abdelbayechou@gmail.com",
-        "fullName": "BAYECHOU1 Abdelhadi",
-        "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.733Z"
-      },
-      {
-        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
-        "email": "cool@gmail.com",
-        "fullName": "cool cool",
-        "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.070Z"
-      },
-      {
-        "customerId": "ad83c7f8-5969-4ea0-8b29-50264764ef31",
-        "email": "rotac74464@copytosh.com",
-        "fullName": "rota test",
-        "tier": "GOLD",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.197Z"
-      },
-      {
-        "customerId": "c3d7e672-0f7a-4231-9a71-12df151b70a3",
-        "email": "coxin79432@meinvr.com",
-        "fullName": "coxin coxin",
-        "tier": "VIP",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.321Z"
-      },
-      {
-        "customerId": "02de23bf-f612-42d5-ac06-1fad16b8ea9d",
-        "email": "abdelbayechou@gmail2.com",
-        "fullName": "Dj Dja",
-        "tier": "VIP",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.440Z"
-      },
-      {
-        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
-        "email": "mafexad328@meinvr.com",
-        "fullName": "Machin Machin",
-        "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.581Z"
-      },
-      {
-        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
-        "email": "abdelbayechou@gmail.com",
-        "fullName": "BAYECHOU1 Abdelhadi",
-        "tier": "SILVER",
-        "status": "SENT",
-        "sentAt": "2026-10-15T14:52:50.733Z"
+        "status": "PENDING"
       }
     ]
   }

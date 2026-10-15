@@ -154,11 +154,17 @@ export async function createMarketingCampaign(
 
   const now = new Date().toISOString();
   const todayStr = getParisDateString();
+  const currentTimeStr = getParisTimeString();
+
+  // If start date is in the past, or start date is today and scheduled time has arrived/passed
+  const isDueToday =
+    input.startDate < todayStr ||
+    (input.startDate === todayStr && currentTimeStr >= (input.scheduledTime?.trim() || "00:00"));
 
   const initialStatus =
     recipients.length === 0
       ? "DRAFT"
-      : input.startDate <= todayStr
+      : isDueToday
       ? "RUNNING"
       : "SCHEDULED";
 
