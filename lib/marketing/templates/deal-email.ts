@@ -93,34 +93,57 @@ export function renderDealEmailHtml(props: DealEmailTemplateProps): string {
   </style>
   <![endif]-->
   <style type="text/css">
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+      -webkit-text-size-adjust: 100%;
+    }
+    * {
+      box-sizing: border-box !important;
+    }
+    table {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+    }
+    img {
+      max-width: 100% !important;
+      height: auto !important;
+    }
     @media only screen and (max-width: 620px) {
-      .email-container { width: 100% !important; margin: 0 auto !important; border-radius: 0 !important; }
-      .mobile-padding { padding-left: 20px !important; padding-right: 20px !important; }
+      .outer-wrapper { padding: 12px 6px !important; }
+      .email-container { width: 100% !important; max-width: 100% !important; margin: 0 auto !important; border-radius: 12px !important; }
+      .mobile-padding { padding-left: 14px !important; padding-right: 14px !important; }
+      .mobile-header-padding { padding: 16px 14px 14px !important; }
       .mobile-hero-img { width: 100% !important; height: auto !important; }
       .mobile-hide { display: none !important; }
       .mobile-stack { display: block !important; width: 100% !important; }
+      .mobile-perk-cell { display: block !important; width: 100% !important; border-left: none !important; border-right: none !important; border-bottom: 1px solid #e2e8f0 !important; padding: 10px 4px !important; }
+      .mobile-perk-cell:last-child { border-bottom: none !important; }
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b;">
+<body style="margin: 0; padding: 0; width: 100%; max-width: 100%; overflow-x: hidden; background-color: #f1f5f9; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b;">
   <!-- Preheader text (preview snippet in inbox) -->
   <div style="display: none; font-size: 1px; color: #f1f5f9; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
     ${escapeHtml(subject)} — Offre exclusive réservée aux membres fidélité ${escapeHtml(currentTier.label)}.
   </div>
 
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f1f5f9; padding: 28px 12px;">
+  <table role="presentation" width="100%" class="outer-wrapper" cellspacing="0" cellpadding="0" border="0" style="background-color: #f1f5f9; width: 100%; max-width: 100%;">
     <tr>
-      <td align="center">
+      <td align="center" style="padding: 20px 8px;">
         <!-- Main Card Wrapper -->
-        <table role="presentation" class="email-container" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.03); border: 1px solid #e2e8f0; margin: 0 auto;">
+        <table role="presentation" class="email-container" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.03); border: 1px solid #e2e8f0; margin: 0 auto;">
           
           <!-- Top Brand Header Bar -->
           <tr>
-            <td style="padding: 24px 32px 20px; background-color: #ffffff; border-bottom: 1px solid #f1f5f9;">
+            <td class="mobile-header-padding" style="padding: 24px 32px 20px; background-color: #ffffff; border-bottom: 1px solid #f1f5f9;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
                   <td valign="middle">
-                    <div style="font-size: 18px; font-weight: 800; letter-spacing: -0.3px; color: #0f172a; text-transform: uppercase;">
+                    <div style="font-size: 17px; font-weight: 800; letter-spacing: -0.3px; color: #0f172a; text-transform: uppercase;">
                       🛒 ${escapeHtml(storeName)}
                     </div>
                     <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.8px; color: #64748b; text-transform: uppercase; margin-top: 2px;">
@@ -221,17 +244,17 @@ export function renderDealEmailHtml(props: DealEmailTemplateProps): string {
                   <td>
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
-                        <td width="33%" valign="top" style="padding: 6px 10px; text-align: center;">
+                        <td class="mobile-perk-cell" width="33%" valign="top" style="padding: 6px 8px; text-align: center;">
                           <div style="font-size: 18px; margin-bottom: 4px;">🏷️</div>
                           <div style="font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase;">En Caisse</div>
                           <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Indiquez votre nom ou tél</div>
                         </td>
-                        <td width="33%" valign="top" style="padding: 6px 10px; text-align: center; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                        <td class="mobile-perk-cell" width="33%" valign="top" style="padding: 6px 8px; text-align: center; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
                           <div style="font-size: 18px; margin-bottom: 4px;">⚡</div>
                           <div style="font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase;">Points Fidélité</div>
                           <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Cumulés automatiquement</div>
                         </td>
-                        <td width="33%" valign="top" style="padding: 6px 10px; text-align: center;">
+                        <td class="mobile-perk-cell" width="33%" valign="top" style="padding: 6px 8px; text-align: center;">
                           <div style="font-size: 18px; margin-bottom: 4px;">🎁</div>
                           <div style="font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase;">Remises</div>
                           <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Déductibles sur vos achats</div>

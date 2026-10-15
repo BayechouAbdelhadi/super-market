@@ -1,20 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { Modal } from "@/components/ui/modal";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+} from "@/components/ui/dialog";
 import { LoyaltyTier } from "@/lib/loyalty/types";
 import { renderDealEmailHtml } from "@/lib/marketing/templates/deal-email";
-import {
-  Smartphone,
-  Monitor,
-  Eye,
-  Check,
-  Sparkles,
-  ExternalLink,
-  ShieldCheck,
-  Store,
-} from "lucide-react";
+import { X, Wifi } from "lucide-react";
 
 interface EmailVisualizerModalProps {
   isOpen: boolean;
@@ -45,15 +40,12 @@ export function EmailVisualizerModal({
   storePhone = "06 71 54 05 28",
   targetTiers = ["GOLD"],
 }: EmailVisualizerModalProps) {
-  const [deviceView, setDeviceView] = useState<"desktop" | "mobile">("desktop");
-  const [previewTier, setPreviewTier] = useState<LoyaltyTier>(
-    targetTiers[0] || "GOLD"
-  );
-  const [customerName, setCustomerName] = useState("Marie Dupont");
-
   if (!isOpen) return null;
 
-  const html = renderDealEmailHtml({
+  const previewTier: LoyaltyTier = targetTiers[0] || "GOLD";
+  const customerName = "Marie Dupont";
+
+  const rawHtml = renderDealEmailHtml({
     customerName,
     tier: previewTier,
     subject: subject || "Bons plans exclusifs fidélité",
@@ -68,144 +60,118 @@ export function EmailVisualizerModal({
     storePhone,
   });
 
+  // Guarantee zero horizontal scrollbar inside the preview iframe
+  const antiHorizontalScrollStyle = `
+    <style>
+      html, body {
+        overflow-x: hidden !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      * {
+        box-sizing: border-box !important;
+      }
+      table {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+    </style>
+  `;
+
+  const html = rawHtml.includes("<head>")
+    ? rawHtml.replace("<head>", `<head>${antiHorizontalScrollStyle}`)
+    : `${antiHorizontalScrollStyle}${rawHtml}`;
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Visualiser l'e-mail (Aperçu consommateur)"
-      icon="👁️"
-      description="Découvrez exactement ce que les consommateurs recevront dans leur boîte mail (sur Mobile & Ordinateur)."
-      maxWidth="lg"
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <div className="p-4 sm:p-6 space-y-4">
-        {/* Visualizer Controls Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-border)]">
-          {/* Tier Switcher */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[var(--color-text-muted)]">
-              Palier client :
-            </span>
-            <div className="inline-flex p-0.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs">
-              {(["BRONZE", "SILVER", "GOLD", "VIP"] as LoyaltyTier[]).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setPreviewTier(t)}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                    previewTier === t
-                      ? "bg-[var(--color-primary)] text-white shadow-2xs"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
+      <DialogPortal>
+        {/* Dark Dim Backdrop overlay */}
+        <DialogOverlay className="fixed inset-0 isolate z-50 bg-black/80 backdrop-blur-sm transition-opacity duration-200" />
 
-          {/* Device Switcher */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[var(--color-text-muted)]">
-              Affichage :
-            </span>
-            <div className="inline-flex p-0.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs">
-              <button
-                type="button"
-                onClick={() => setDeviceView("desktop")}
-                className={`px-3 py-1 rounded-lg font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  deviceView === "desktop"
-                    ? "bg-[var(--color-surface-hover)] text-[var(--color-text)] font-bold shadow-2xs"
-                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                }`}
-              >
-                <Monitor className="w-3.5 h-3.5" />
-                <span>Ordinateur</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeviceView("mobile")}
-                className={`px-3 py-1 rounded-lg font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  deviceView === "mobile"
-                    ? "bg-[var(--color-surface-hover)] text-[var(--color-text)] font-bold shadow-2xs"
-                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                }`}
-              >
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>Mobile (iPhone / Android)</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <DialogPrimitive.Popup
+          data-slot="dialog-content"
+          className="fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none flex items-center justify-center p-0 max-h-[96vh] select-none"
+        >
+          {/* Smartphone Frame (Modal itself) */}
+          <div className="relative w-[360px] sm:w-[395px] max-w-[95vw] bg-neutral-950 rounded-[48px] p-2.5 sm:p-3 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] border-4 border-neutral-700/80 ring-1 ring-white/10 flex flex-col shrink-0 animate-in fade-in-0 zoom-in-95 duration-200">
+            {/* Top-Right Floating Close Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-600 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer z-10"
+              title="Fermer (Échap)"
+            >
+              <X className="w-4 h-4" />
+            </button>
 
-        {/* Realistic Webmail Envelope Header */}
-        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 space-y-2 text-xs">
-          <div className="flex items-center justify-between border-b border-[var(--color-border)]/70 pb-2">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-[var(--color-text)]">De :</span>
-              <span className="text-[var(--color-text)] font-medium">
-                {storeName} &lt;abdelbayechou@gmail.com&gt;
-              </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold border border-emerald-500/20">
-                <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                <span>Expéditeur vérifié Brevo</span>
-              </span>
-            </div>
-            <span className="text-[var(--color-text-muted)] hidden sm:inline">
-              Aujourd&apos;hui (Heure de Paris)
-            </span>
-          </div>
+            {/* Hardware buttons on phone edge */}
+            <div className="absolute -left-[7px] top-24 w-[3px] h-8 bg-neutral-700 rounded-l-sm" />
+            <div className="absolute -left-[7px] top-36 w-[3px] h-12 bg-neutral-700 rounded-l-sm" />
+            <div className="absolute -left-[7px] top-52 w-[3px] h-12 bg-neutral-700 rounded-l-sm" />
+            <div className="absolute -right-[7px] top-32 w-[3px] h-14 bg-neutral-700 rounded-r-sm" />
 
-          <div className="flex items-center gap-2 border-b border-[var(--color-border)]/70 pb-2">
-            <span className="font-bold text-[var(--color-text)]">À :</span>
-            <span className="text-[var(--color-text)]">
-              {customerName} &lt;client.fidelite@exemple.fr&gt;
-            </span>
-            <span className="text-[11px] text-[var(--color-text-muted)] font-mono">
-              ({previewTier})
-            </span>
-          </div>
+            {/* Status Bar */}
+            <div className="bg-neutral-950 text-neutral-300 px-5 pt-2 pb-2 rounded-t-[36px] flex items-center justify-between text-[11px] font-mono">
+              <span className="font-semibold text-white tracking-tight">10:00</span>
 
-          <div className="flex items-center gap-2 pt-0.5">
-            <span className="font-bold text-[var(--color-text)]">Objet :</span>
-            <strong className="text-[var(--color-primary)] font-bold text-sm">
-              {subject || "(Sans objet)"}
-            </strong>
-          </div>
-        </div>
-
-        {/* Email Canvas Preview */}
-        <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden bg-slate-100 dark:bg-slate-900 shadow-inner flex justify-center p-3 sm:p-6 min-h-[500px]">
-          <div
-            className={`transition-all duration-300 rounded-2xl overflow-hidden shadow-2xl border border-[var(--color-border)] bg-white ${
-              deviceView === "mobile"
-                ? "w-[375px] max-w-full ring-8 ring-slate-800"
-                : "w-full max-w-[620px]"
-            }`}
-          >
-            {deviceView === "mobile" && (
-              <div className="bg-slate-800 text-white text-[10px] py-1 px-4 flex justify-between items-center font-mono">
-                <span>09:41</span>
-                <span className="text-[9px] tracking-widest">●●● 5G</span>
+              {/* Center punch hole camera */}
+              <div className="w-3.5 h-3.5 bg-black rounded-full border border-neutral-800 shadow-inner flex items-center justify-center">
+                <div className="w-1 h-1 bg-neutral-900 rounded-full" />
               </div>
-            )}
-            <iframe
-              title="Aperçu Email Client"
-              srcDoc={html}
-              className="w-full h-[580px] bg-white border-0"
-            />
-          </div>
-        </div>
 
-        {/* Footer Close Button */}
-        <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]">
-          <p className="text-xs text-[var(--color-text-muted)]">
-            ✨ Design responsive certifié pour Gmail, Apple Mail, Outlook et Yahoo.
-          </p>
-          <Button variant="secondary" onClick={onClose}>
-            Fermer l&apos;aperçu
-          </Button>
-        </div>
-      </div>
-    </Modal>
+              <div className="flex items-center gap-2 text-[10px]">
+                <span className="font-sans font-bold text-white text-[10px]">5G</span>
+                <Wifi className="w-3 h-3 text-neutral-300" />
+                <div className="w-4 h-2 border border-neutral-400 rounded-[2px] p-0.5 flex items-center">
+                  <div className="w-full h-full bg-white rounded-[1px]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Phone Screen with strictly single vertical scroll (zero horizontal scroll) */}
+            <div className="relative rounded-[32px] overflow-hidden overflow-x-hidden bg-white shadow-inner flex flex-col h-[70vh] max-h-[620px] min-h-[460px]">
+              {/* App Top Bar */}
+              <div className="bg-neutral-900 text-white px-3.5 py-2 flex items-center justify-between text-xs font-medium shrink-0 border-b border-neutral-800">
+                <div className="flex items-center gap-1.5 truncate">
+                  <span className="text-amber-400 font-bold">🛒</span>
+                  <span className="truncate font-semibold tracking-wide text-xs">
+                    {storeName}
+                  </span>
+                </div>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-300 font-mono">
+                  Aperçu
+                </span>
+              </div>
+
+              {/* Email Body Canvas */}
+              <iframe
+                title="Aperçu Email Client"
+                srcDoc={html}
+                className="w-full h-full bg-white border-0 flex-1 overflow-x-hidden"
+                style={{ overflowX: "hidden" }}
+              />
+            </div>
+
+            {/* Bottom Chin with Simple Close Button */}
+            <div className="pt-2.5 pb-1 px-3 flex justify-center">
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-2 px-4 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border border-neutral-700/80 shadow-xs active:scale-[0.98]"
+              >
+                <X className="w-3.5 h-3.5 text-neutral-400" />
+                <span>Fermer l&apos;aperçu</span>
+              </button>
+            </div>
+          </div>
+        </DialogPrimitive.Popup>
+      </DialogPortal>
+    </Dialog>
   );
 }
