@@ -100,7 +100,7 @@ export function AnalyticsDashboard({ initialData, euroToPointsRatio }: Analytics
             <span>Flux en direct</span>
           </Link>
           <Link
-            href="/customers"
+            href="/admin/customers"
             className="hover:text-[var(--color-text)] transition-colors flex items-center gap-1 font-medium"
           >
             <Users className="w-3.5 h-3.5" />

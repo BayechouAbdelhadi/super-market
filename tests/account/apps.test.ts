@@ -48,7 +48,7 @@ describe('Account Apps Registry', () => {
       const custApp = CASHIER_APPS.find((app) => app.id === 'customers-dir');
       expect(custApp).toBeDefined();
       expect(custApp?.status).toBe('active');
-      expect(custApp?.href).toBe('/customers');
+      expect(custApp?.href).toBe('/cashier/customers');
     });
 
     it('returns cashier apps sorted by order', () => {
@@ -68,9 +68,9 @@ describe('Account Apps Registry', () => {
       const cashiersApp = ADMIN_APPS.find((app) => app.id === 'admin-cashiers');
       const liveApp = ADMIN_APPS.find((app) => app.id === 'admin-live');
 
-      expect(posApp?.href).toBe('/cashier/pos');
+      expect(posApp?.href).toBe('/admin/pos');
       expect(analyticsApp?.href).toBe('/admin/analytics');
-      expect(custApp?.href).toBe('/customers');
+      expect(custApp?.href).toBe('/admin/customers');
       expect(cashiersApp?.href).toBe('/admin/cashiers');
       expect(liveApp?.href).toBe('/admin/live');
     });

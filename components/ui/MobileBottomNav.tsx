@@ -57,12 +57,12 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
         },
         {
           name: "Caisse",
-          href: "/cashier/pos",
+          href: "/admin/pos",
           icon: <CreditCard className="w-5 h-5 shrink-0" />,
         },
         {
           name: "Clients",
-          href: "/customers",
+          href: "/admin/customers",
           icon: <Users className="w-5 h-5 shrink-0" />,
         },
         {
@@ -84,7 +84,7 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
         },
         {
           name: "Clients",
-          href: "/customers",
+          href: "/cashier/customers",
           icon: <Users className="w-5 h-5 shrink-0" />,
         },
       ];
@@ -98,7 +98,7 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
       {navItems.map((item) => {
         const isActive =
           pathname === item.href ||
-          (item.href === "/customers" && pathname === "/admin/customers");
+          (item.href !== "/admin" && item.href !== "/cashier" && pathname.startsWith(item.href));
         return (
           <Link
             key={item.href}

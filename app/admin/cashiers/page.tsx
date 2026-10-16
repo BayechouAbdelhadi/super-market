@@ -1,10 +1,11 @@
-import { ProtectedDashboard } from '@/components/ui/ProtectedDashboard'
-import { CashiersList } from '@/components/loyalty/CashiersList'
+import { CashiersList } from "@/components/loyalty/CashiersList";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "SuperMarket — Gestion des Caissiers",
+  description: "Création et gestion des comptes caissiers du magasin",
+};
 
 export default function AdminCashiersPage() {
-  return (
-    <ProtectedDashboard requiredRole="ADMIN">
-      <CashiersList />
-    </ProtectedDashboard>
-  )
+  return <CashiersList />;
 }

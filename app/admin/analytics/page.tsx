@@ -1,5 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/ui/DashboardLayout";
 import { getDashboardAnalytics } from "@/lib/loyalty/analytics-service";
 import { getAppSettings } from "@/lib/settings/service";
 import { AnalyticsDashboard } from "@/components/admin/analytics/AnalyticsDashboard";
@@ -11,22 +9,15 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminAnalyticsPage() {
-  const supabase = await createClient();
-  const [{ data: { user } }, initialAnalytics, settings] = await Promise.all([
-    supabase.auth.getUser(),
+  const [initialAnalytics, settings] = await Promise.all([
     getDashboardAnalytics(),
     getAppSettings(),
   ]);
 
-  const role = user?.user_metadata?.role || "ADMIN";
-  const email = user?.email || "";
-
   return (
-    <DashboardLayout role={role} email={email}>
-      <AnalyticsDashboard
-        initialData={initialAnalytics}
-        euroToPointsRatio={settings.loyalty.euroToPointsRatio}
-      />
-    </DashboardLayout>
+    <AnalyticsDashboard
+      initialData={initialAnalytics}
+      euroToPointsRatio={settings.loyalty.euroToPointsRatio}
+    />
   );
 }

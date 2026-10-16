@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/ui/DashboardLayout";
 import { getDashboardAnalytics } from "@/lib/loyalty/analytics-service";
 import { getAppSettings } from "@/lib/settings/service";
 import { Card } from "@/components/ui/card";
@@ -54,8 +53,7 @@ export default async function AdminHubPage() {
   const totalCustomers = analytics?.kpis.totalClients ?? 0;
 
   return (
-    <DashboardLayout role={role} email={email} storeName={settings.store.storeName}>
-      <div className="space-y-8">
+    <div className="space-y-8">
         {/* Admin Welcome Banner */}
         <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
@@ -108,7 +106,7 @@ export default async function AdminHubPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* App 1: Terminal Caisse Fidélité */}
             <Link
-              href="/cashier/pos"
+              href="/admin/pos"
               className="group block focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] rounded-2xl"
             >
               <Card
@@ -184,7 +182,7 @@ export default async function AdminHubPage() {
 
             {/* App 3: Gestion des Clients */}
             <Link
-              href="/customers"
+              href="/admin/customers"
               className="group block focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-2xl"
             >
               <Card
@@ -405,7 +403,6 @@ export default async function AdminHubPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 }
 

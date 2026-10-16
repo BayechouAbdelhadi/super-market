@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { ProtectedDashboard } from '@/components/ui/ProtectedDashboard'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getAppSettings } from '@/lib/settings/service'
@@ -40,8 +39,7 @@ export default async function CashierHubPage() {
   const euroRatio = settings.loyalty.euroToPointsRatio
 
   return (
-    <ProtectedDashboard requiredRole="CASHIER">
-      <div className="space-y-8">
+    <div className="space-y-8">
         {/* Cashier Welcome Banner */}
         <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
@@ -120,7 +118,7 @@ export default async function CashierHubPage() {
 
             {/* App 2: Annuaire des Clients */}
             <Link
-              href="/customers"
+              href="/cashier/customers"
               className="group block focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-2xl"
             >
               <Card
@@ -205,6 +203,5 @@ export default async function CashierHubPage() {
           </div>
         </Card>
       </div>
-    </ProtectedDashboard>
   )
 }

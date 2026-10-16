@@ -1,31 +1,31 @@
-import { ProtectedDashboard } from '@/components/ui/ProtectedDashboard'
-import { CustomersList } from '@/components/loyalty/CustomersList'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: "SuperMarket — Gestion des Clients",
-  description: "Gestion et CRUD des profils clients de votre magasin",
-}
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 interface CustomersPageProps {
   searchParams?: Promise<{ page?: string; limit?: string; q?: string }>;
 }
 
 export default async function CustomersPage({ searchParams }: CustomersPageProps) {
-  const params = searchParams ? await searchParams : {};
-  const initialPage = params.page ? parseInt(params.page, 10) : undefined;
-  const initialLimit = params.limit ? parseInt(params.limit, 10) : undefined;
-  const initialQuery = params.q || undefined;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return (
-    <ProtectedDashboard requiredRole="CASHIER">
-      <CustomersList 
-        title="Gestion des Clients"
-        subtitle="Consultez, modifiez et gérez l'ensemble des profils clients de votre magasin."
-        initialPage={initialPage}
-        initialLimit={initialLimit}
-        initialQuery={initialQuery}
-      />
-    </ProtectedDashboard>
-  )
+  if (!user) {
+    redirect("/login");
+  }
+
+  const role = user.user_metadata?.role || "CUSTOMER";
+  const params = searchParams ? await searchParams : {};
+  const search = new URLSearchParams();
+  if (params.page) search.set("page", params.page);
+  if (params.limit) search.set("limit", params.limit);
+  if (params.q) search.set("q", params.q);
+  const query = search.toString() ? `?${search.toString()}` : "";
+
+  if (role === "ADMIN") {
+    redirect(`/admin/customers${query}`);
+  }
+
+  redirect(`/cashier/customers${query}`);
 }
