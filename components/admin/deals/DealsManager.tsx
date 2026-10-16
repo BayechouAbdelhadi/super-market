@@ -202,13 +202,13 @@ export function DealsManager({
   return (
     <div className="space-y-6">
       {/* Top Header Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] shadow-xs">
         <div className="space-y-1.5">
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Marketing Fidélité &amp; Campagnes</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[var(--color-text)] tracking-tight">
+          <h1 className="text-xl sm:text-3xl font-black text-[var(--color-text)] tracking-tight">
             Bons Plans &amp; Emails Clients
           </h1>
           <p className="text-xs sm:text-sm text-[var(--color-text-muted)] max-w-xl">
@@ -216,11 +216,11 @@ export function DealsManager({
           </p>
         </div>
 
-        <Link href="/admin/deals/new">
+        <Link href="/admin/deals/new" className="w-full sm:w-auto">
           <Button
             variant="primary"
             size="md"
-            className="gap-2 font-bold shrink-0 shadow-sm"
+            className="w-full sm:w-auto gap-2 font-bold justify-center shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Créer une campagne</span>
@@ -229,12 +229,12 @@ export function DealsManager({
       </div>
 
       {/* KPI Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <Card padded="sm" className="space-y-1">
           <span className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block">
             Total Campagnes
           </span>
-          <strong className="text-xl sm:text-2xl font-bold font-mono text-[var(--color-text)] block">
+          <strong className="text-lg sm:text-2xl font-bold font-mono text-[var(--color-text)] block">
             {summary.totalCampaigns}
           </strong>
         </Card>
@@ -243,7 +243,7 @@ export function DealsManager({
           <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider block">
             Jobs Actifs
           </span>
-          <strong className="text-xl sm:text-2xl font-bold font-mono text-blue-600 dark:text-blue-400 block">
+          <strong className="text-lg sm:text-2xl font-bold font-mono text-blue-600 dark:text-blue-400 block">
             {summary.activeJobs}
           </strong>
         </Card>
@@ -252,7 +252,7 @@ export function DealsManager({
           <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider block">
             Emails Délivrés
           </span>
-          <strong className="text-xl sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 block">
+          <strong className="text-lg sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 block">
             {summary.totalEmailsSent}
           </strong>
         </Card>
@@ -261,7 +261,7 @@ export function DealsManager({
           <span className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block">
             Échecs Non-bloquants
           </span>
-          <strong className="text-xl sm:text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 block">
+          <strong className="text-lg sm:text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 block">
             {summary.totalFailed}
           </strong>
         </Card>
@@ -269,7 +269,7 @@ export function DealsManager({
 
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full text-xs">
           {[
             { id: "ALL", label: `Toutes (${campaigns.length})` },
             { id: "ACTIVE", label: `Actives (${summary.activeJobs})` },
@@ -280,7 +280,7 @@ export function DealsManager({
               key={tab.id}
               type="button"
               onClick={() => setStatusFilter(tab.id as any)}
-              className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === tab.id
                   ? "bg-[var(--color-text)] text-[var(--color-surface)] font-bold shadow-xs"
                   : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
@@ -312,7 +312,7 @@ export function DealsManager({
           </p>
         </div>
       ) : filteredCampaigns.length === 0 ? (
-        <div className="border border-dashed border-[var(--color-border)] rounded-2xl p-12 text-center bg-[var(--color-surface)]/50 space-y-4">
+        <div className="border border-dashed border-[var(--color-border)] rounded-2xl p-8 sm:p-12 text-center bg-[var(--color-surface)]/50 space-y-4">
           <div className="inline-flex p-3 rounded-full bg-[var(--color-surface-hover)] text-2xl">
             ✨
           </div>
@@ -350,23 +350,23 @@ export function DealsManager({
               <Card
                 key={camp.id}
                 padded="md"
-                className="space-y-4 hover:border-[var(--color-primary)]/40 transition-all shadow-xs"
+                className="space-y-4 hover:border-[var(--color-primary)]/40 transition-all shadow-xs min-w-0"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
+                  <div className="space-y-1 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {getStatusBadge(camp.status)}
-                      <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+                      <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight break-words">
                         {camp.title}
                       </h3>
                     </div>
-                    <p className="text-xs text-[var(--color-text-muted)] font-medium">
+                    <p className="text-xs text-[var(--color-text-muted)] font-medium break-words">
                       Objet : « {camp.subject} »
                     </p>
                   </div>
 
                   {/* Tier Badges */}
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="flex items-center gap-1.5 flex-wrap shrink-0">
                     <span className="text-[11px] text-[var(--color-text-muted)] font-medium">Cibles :</span>
                     {camp.targetTiers.map((t) => (
                       <span
@@ -380,20 +380,20 @@ export function DealsManager({
                 </div>
 
                 {/* Progress Bar & Real-time Advancement */}
-                <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-2">
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[var(--color-text)]">
+                <div className="p-3 sm:p-3.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-2.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs font-semibold">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="text-[var(--color-text)] font-bold">
                         {camp.dispatchMode === "ALL_AT_ONCE"
                           ? "Envoi groupé (One-shot)"
-                          : `Quota : ${camp.dailyLimit || 100} / jour`}
+                          : `Quota : ${camp.dailyLimit || 100}/jour`}
                       </span>
-                      <span className="text-[var(--color-text-muted)] opacity-50">•</span>
-                      <span className="text-[var(--color-text-muted)]">
+                      <span className="text-[var(--color-text-muted)] opacity-50 hidden sm:inline">•</span>
+                      <span className="text-[var(--color-text-muted)] text-[11px] sm:text-xs">
                         Période : {camp.startDate} au {camp.endDate} (🕐 {camp.scheduledTime || "00:00"})
                       </span>
                     </div>
-                    <span className="font-mono text-[var(--color-primary)] font-bold">
+                    <span className="font-mono text-[var(--color-primary)] font-bold self-start sm:self-auto">
                       {stats.progressPercentage}%
                     </span>
                   </div>
@@ -413,8 +413,8 @@ export function DealsManager({
                     />
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--color-text-muted)] pt-0.5 font-medium">
-                    <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-[var(--color-text-muted)] pt-0.5 font-medium">
+                    <div className="flex flex-wrap items-center gap-2.5">
                       <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
                         ✅ {stats.sentCount} envoyé{stats.sentCount > 1 ? "s" : ""}
                       </span>
@@ -426,28 +426,28 @@ export function DealsManager({
                       <span>⏳ {stats.remainingCount} restant{stats.remainingCount > 1 ? "s" : ""}</span>
                     </div>
 
-                    <span>
+                    <span className="text-[10px] sm:text-[11px]">
                       Dernière exécution : {camp.lastRunDate || "En attente"}
                     </span>
                   </div>
                 </div>
 
                 {/* Bottom Actions Bar */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     {camp.status !== "COMPLETED" && stats.remainingCount > 0 && (
                       <Button
                         variant="primary"
                         size="sm"
                         onClick={() => handleRunBatch(camp)}
                         loading={isActionRunning}
-                        className="gap-1.5 font-semibold text-xs"
+                        className="w-full sm:w-auto justify-center gap-1.5 font-semibold text-xs"
                       >
                         <Send className="w-3.5 h-3.5" />
                         <span>
                           {camp.dispatchMode === "ALL_AT_ONCE"
                             ? "Lancer l'envoi"
-                            : `Traiter le lot du jour (${Math.min(stats.remainingCount, camp.dailyLimit || 100)})`}
+                            : `Traiter le lot (${Math.min(stats.remainingCount, camp.dailyLimit || 100)})`}
                         </span>
                       </Button>
                     )}
@@ -458,7 +458,7 @@ export function DealsManager({
                         size="sm"
                         onClick={() => handlePause(camp)}
                         loading={isActionRunning}
-                        className="gap-1.5 text-xs text-amber-700 dark:text-amber-300 font-semibold"
+                        className="w-full sm:w-auto justify-center gap-1.5 text-xs text-amber-700 dark:text-amber-300 font-semibold"
                       >
                         <Pause className="w-3.5 h-3.5" />
                         <span>Pause</span>
@@ -471,7 +471,7 @@ export function DealsManager({
                         size="sm"
                         onClick={() => handleResume(camp)}
                         loading={isActionRunning}
-                        className="gap-1.5 text-xs text-emerald-700 dark:text-emerald-300 font-semibold"
+                        className="w-full sm:w-auto justify-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-300 font-semibold"
                       >
                         <Play className="w-3.5 h-3.5" />
                         <span>Reprendre</span>
@@ -479,25 +479,25 @@ export function DealsManager({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setPreviewingCampaign(camp)}
-                      className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/40 hover:bg-indigo-100/50"
+                      className="w-full sm:w-auto justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/40 hover:bg-indigo-100/50"
                     >
-                      <Eye className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                      <span>Visualiser l&apos;email (vue consommateur)</span>
+                      <Eye className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                      <span>Visualiser l&apos;email</span>
                     </Button>
 
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpenDetail(camp)}
-                      className="gap-1.5 text-xs font-semibold"
+                      className="w-full sm:w-auto justify-center gap-1.5 text-xs font-semibold"
                     >
                       <span>Détails &amp; Destinataires</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
+                      <ChevronRight className="w-3.5 h-3.5 shrink-0" />
                     </Button>
                   </div>
                 </div>

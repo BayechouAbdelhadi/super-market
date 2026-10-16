@@ -175,45 +175,45 @@ export function DealJobDetailModal({
       }
       maxWidth="lg"
     >
-      <div className="p-6 space-y-5">
+      <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5">
         {/* Top View Mode Tabs */}
-        <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-          <div className="inline-flex p-1 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[var(--color-border)] pb-3">
+          <div className="inline-flex p-1 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setActiveTab("overview")}
-              className={`px-3.5 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1.5 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === "overview"
                   ? "bg-[var(--color-surface)] text-[var(--color-text)] shadow-xs"
                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               }`}
             >
               <Users className="w-3.5 h-3.5 text-[var(--color-primary)]" />
-              <span>Destinataires & Avancement</span>
+              <span>Destinataires</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("preview")}
-              className={`px-3.5 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1.5 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === "preview"
                   ? "bg-[var(--color-surface)] text-[var(--color-primary)] shadow-xs"
                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               }`}
             >
               <Eye className="w-3.5 h-3.5" />
-              <span>Aperçu de l&apos;email envoyé</span>
+              <span>Aperçu email</span>
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsVisualizerOpen(true)}
-              className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
+              className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50 w-full sm:w-auto justify-center"
             >
               <Eye className="w-3.5 h-3.5" />
-              <span>Visualiser l&apos;email (vue consommateur)</span>
+              <span>Vue smartphone</span>
             </Button>
             <div className="text-xs text-[var(--color-text-muted)] font-mono hidden md:block">
               ID: {campaign.id.slice(0, 8)}...
@@ -330,8 +330,8 @@ export function DealJobDetailModal({
         </div>
 
         {/* Action Controls Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 p-3 sm:p-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             {campaign.status !== "COMPLETED" && (
               <Button
                 variant="primary"
@@ -339,13 +339,13 @@ export function DealJobDetailModal({
                 onClick={handleRunBatch}
                 loading={loadingAction}
                 disabled={stats.remainingCount === 0}
-                className="gap-1.5 font-bold"
+                className="gap-1.5 font-bold w-full sm:w-auto justify-center"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>
                   {campaign.dispatchMode === "ALL_AT_ONCE"
-                    ? "Envoyer à tous les restants maintenant"
-                    : `Traiter le lot du jour (${Math.min(stats.remainingCount, campaign.dailyLimit || 100)})`}
+                    ? "Envoyer aux restants"
+                    : `Traiter le lot (${Math.min(stats.remainingCount, campaign.dailyLimit || 100)})`}
                 </span>
               </Button>
             )}
@@ -356,7 +356,7 @@ export function DealJobDetailModal({
                 size="sm"
                 onClick={handlePause}
                 loading={loadingAction}
-                className="gap-1.5 font-semibold text-amber-700 dark:text-amber-300"
+                className="gap-1.5 font-semibold text-amber-700 dark:text-amber-300 w-full sm:w-auto justify-center"
               >
                 <Pause className="w-3.5 h-3.5" />
                 <span>Mettre en pause</span>
@@ -369,7 +369,7 @@ export function DealJobDetailModal({
                 size="sm"
                 onClick={handleResume}
                 loading={loadingAction}
-                className="gap-1.5 font-semibold text-emerald-700 dark:text-emerald-300"
+                className="gap-1.5 font-semibold text-emerald-700 dark:text-emerald-300 w-full sm:w-auto justify-center"
               >
                 <Play className="w-3.5 h-3.5" />
                 <span>Reprendre le job</span>
@@ -377,13 +377,13 @@ export function DealJobDetailModal({
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
               onClick={handleDelete}
               loading={loadingAction}
-              className="gap-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-semibold"
+              className="gap-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-semibold w-full sm:w-auto justify-center"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Supprimer le job</span>
@@ -439,13 +439,13 @@ export function DealJobDetailModal({
           </div>
 
           {/* Table / List */}
-          <div className="border border-[var(--color-border)] rounded-xl overflow-hidden bg-[var(--color-surface)] max-h-[300px] overflow-y-auto">
+          <div className="border border-[var(--color-border)] rounded-xl overflow-x-auto bg-[var(--color-surface)] max-h-[300px] overflow-y-auto">
             {filteredRecipients.length === 0 ? (
               <div className="p-8 text-center text-xs text-[var(--color-text-muted)]">
                 Aucun destinataire ne correspond aux filtres actuels.
               </div>
             ) : (
-              <table className="w-full text-xs text-left">
+              <table className="w-full min-w-[500px] text-xs text-left">
                 <thead className="bg-[var(--color-surface-hover)] border-b border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold uppercase tracking-wider sticky top-0">
                   <tr>
                     <th className="p-3">Destinataire</th>

@@ -60,6 +60,186 @@
       "updatedAt": "2026-10-15T22:15:14.439Z",
       "completedAt": null,
       "createdBy": "admin@supermarket.com"
+    },
+    "19a3288e-393b-4ce9-b1e5-7398fea702af": {
+      "id": "19a3288e-393b-4ce9-b1e5-7398fea702af",
+      "title": "Offres Exclusives Fidélité",
+      "status": "COMPLETED",
+      "targetTiers": [
+        "SILVER"
+      ],
+      "dispatchMode": "ALL_AT_ONCE",
+      "dailyLimit": null,
+      "startDate": "2026-10-16",
+      "endDate": "2026-10-23",
+      "scheduledTime": "00:52",
+      "lastRunDate": "2026-10-16",
+      "subject": "🔥 Vos bons plans de la semaine chez Super Market Calais !",
+      "content": "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier.",
+      "imageUrl": "http://localhost:3000/uploads/deals/b2b20414-e2bf-4554-bca2-d593722e45b1/img-1792104646527-7bde0886-394c-48c7-8.webp",
+      "ctaText": "Découvrir les offres en magasin",
+      "ctaUrl": "https://supermarket-calais.fr",
+      "stats": {
+        "totalTargets": 3,
+        "sentCount": 3,
+        "failedCount": 0,
+        "remainingCount": 0,
+        "progressPercentage": 100
+      },
+      "createdAt": "2026-10-15T22:50:54.207+00:00",
+      "updatedAt": "2026-10-15T22:52:28.931Z",
+      "completedAt": "2026-10-15T22:52:28.931Z",
+      "createdBy": "admin@supermarket.com"
+    },
+    "a15ef45e-69cd-4f47-8d31-edce407b3564": {
+      "id": "a15ef45e-69cd-4f47-8d31-edce407b3564",
+      "title": "Offres Exclusives Fidélité",
+      "status": "COMPLETED",
+      "targetTiers": [
+        "SILVER"
+      ],
+      "dispatchMode": "ALL_AT_ONCE",
+      "dailyLimit": null,
+      "startDate": "2026-10-16",
+      "endDate": "2026-10-23",
+      "scheduledTime": "01:04",
+      "lastRunDate": "2026-10-16",
+      "subject": "🔥 Vos bons plans de la semaine chez Super Market Calais !",
+      "content": "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier.",
+      "imageUrl": "https://api.supermarketcalais.com/storage/v1/object/public/super-market/compaigns/71325850-e780-4b17-972e-73233234b78e/img-1792105365799-7bde0886-394c-48c7-8.webp",
+      "ctaText": "Découvrir les offres en magasin",
+      "ctaUrl": "https://supermarket-calais.fr",
+      "stats": {
+        "totalTargets": 3,
+        "sentCount": 3,
+        "failedCount": 0,
+        "remainingCount": 0,
+        "progressPercentage": 100
+      },
+      "createdAt": "2026-10-15T23:03:11.702+00:00",
+      "updatedAt": "2026-10-15T23:04:03.600Z",
+      "completedAt": "2026-10-15T23:04:03.600Z",
+      "createdBy": "admin@supermarket.com"
+    },
+    "a3e07a41-d4b5-45b9-87ce-5a649e650032": {
+      "id": "a3e07a41-d4b5-45b9-87ce-5a649e650032",
+      "title": "Offres Exclusives Fidélité",
+      "status": "COMPLETED",
+      "targetTiers": [
+        "SILVER"
+      ],
+      "dispatchMode": "ALL_AT_ONCE",
+      "dailyLimit": null,
+      "startDate": "2026-10-16",
+      "endDate": "2026-10-23",
+      "scheduledTime": "01:07",
+      "lastRunDate": "2026-10-16",
+      "subject": "🔥 Vos bons plans de la semaine chez Super Market Calais !",
+      "content": "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier.",
+      "imageUrl": "https://api.supermarketcalais.com/storage/v1/object/public/super-market/compaigns/ff2c1a8f-921a-4f67-a0be-c4ebb9296a4d/img-1792105568099-7bde0886-394c-48c7-8.webp",
+      "ctaText": "Découvrir les offres en magasin",
+      "ctaUrl": "https://supermarket-calais.fr",
+      "stats": {
+        "totalTargets": 3,
+        "sentCount": 3,
+        "failedCount": 0,
+        "remainingCount": 0,
+        "progressPercentage": 100
+      },
+      "createdAt": "2026-10-15T23:06:13.23+00:00",
+      "updatedAt": "2026-10-15T23:07:09.237Z",
+      "completedAt": "2026-10-15T23:07:09.237Z",
+      "createdBy": "admin@supermarket.com"
+    },
+    "4994a87b-9ed1-4346-bb29-ddae018ca583": {
+      "id": "4994a87b-9ed1-4346-bb29-ddae018ca583",
+      "title": "Offres Exclusives Fidélité",
+      "status": "COMPLETED",
+      "targetTiers": [
+        "SILVER"
+      ],
+      "dispatchMode": "ALL_AT_ONCE",
+      "dailyLimit": null,
+      "startDate": "2026-10-16",
+      "endDate": "2026-10-23",
+      "scheduledTime": "14:46",
+      "lastRunDate": "2026-10-16",
+      "subject": "🔥 Vos bons plans de la semaine chez Super Market Calais !",
+      "content": "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier.",
+      "imageUrl": "https://api.supermarketcalais.com/storage/v1/object/public/super-market/compaigns/030c9343-c666-40d7-9474-c1e7e46b0819/img-1792154704655-7bde0886-394c-48c7-8.webp",
+      "ctaText": "Découvrir les offres en magasin",
+      "ctaUrl": "https://supermarket-calais.fr",
+      "stats": {
+        "totalTargets": 3,
+        "sentCount": 3,
+        "failedCount": 0,
+        "remainingCount": 0,
+        "progressPercentage": 100
+      },
+      "createdAt": "2026-10-16T12:45:08.738+00:00",
+      "updatedAt": "2026-10-16T12:46:01.092Z",
+      "completedAt": "2026-10-16T12:46:01.092Z",
+      "createdBy": "admin@supermarket.com"
+    },
+    "de6f3727-3a18-463d-9210-ec378b8b8e17": {
+      "id": "de6f3727-3a18-463d-9210-ec378b8b8e17",
+      "title": "Sélection Saveurs d'Orient & Épicerie du Monde",
+      "status": "COMPLETED",
+      "targetTiers": [
+        "SILVER"
+      ],
+      "dispatchMode": "ALL_AT_ONCE",
+      "dailyLimit": null,
+      "startDate": "2026-10-16",
+      "endDate": "2026-10-23",
+      "scheduledTime": "14:56",
+      "lastRunDate": "2026-10-16",
+      "subject": "✨ Arrivage Épicerie : Dattes Medjool, Épices & Spécialités d'Orient en promo !",
+      "content": "Découvrez notre nouvelle sélection d'épicerie orientale et de produits authentiques chez Super Market Calais :\n\n- 15% de remise sur nos dattes Medjool premium, fruits secs et graines\n- Sélection d'épices parfumées, thés à la menthe et douceurs traditionnelles\n- 100 points fidélité bonus crédités instantanément dès 35€ d'achat\n\nRendez-vous dès aujourd'hui en magasin pour savourer nos arrivages exclusifs !",
+      "imageUrl": "https://api.supermarketcalais.com/storage/v1/object/public/super-market/compaigns/9efbbaba-1b6d-4446-9973-4a4980417ed9/img-1792155286656-magasin-bi1-fruits-e.jpg",
+      "ctaText": "Voir les arrivages en magasin",
+      "ctaUrl": "https://supermarket-calais.fr",
+      "stats": {
+        "totalTargets": 3,
+        "sentCount": 3,
+        "failedCount": 0,
+        "remainingCount": 0,
+        "progressPercentage": 100
+      },
+      "createdAt": "2026-10-16T12:54:51.717+00:00",
+      "updatedAt": "2026-10-16T12:56:49.901Z",
+      "completedAt": "2026-10-16T12:56:49.901Z",
+      "createdBy": "admin@supermarket.com"
+    },
+    "86300cb2-2f2e-434b-a985-dce1e6bf9b74": {
+      "id": "86300cb2-2f2e-434b-a985-dce1e6bf9b74",
+      "title": "Offres Exclusives Fidélité",
+      "status": "COMPLETED",
+      "targetTiers": [
+        "SILVER"
+      ],
+      "dispatchMode": "ALL_AT_ONCE",
+      "dailyLimit": null,
+      "startDate": "2026-10-16",
+      "endDate": "2026-10-23",
+      "scheduledTime": "15:08",
+      "lastRunDate": "2026-10-16",
+      "subject": "🔥 Vos bons plans de la semaine chez Super Market Calais !",
+      "content": "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier.",
+      "imageUrl": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
+      "ctaText": "Découvrir les offres en magasin",
+      "ctaUrl": "https://supermarket-calais.fr",
+      "stats": {
+        "totalTargets": 3,
+        "sentCount": 3,
+        "failedCount": 0,
+        "remainingCount": 0,
+        "progressPercentage": 100
+      },
+      "createdAt": "2026-10-16T13:03:27.425+00:00",
+      "updatedAt": "2026-10-16T13:08:33.487Z",
+      "completedAt": "2026-10-16T13:08:33.487Z",
+      "createdBy": "admin@supermarket.com"
     }
   },
   "recipients": {
@@ -133,6 +313,162 @@
         "fullName": "BAYECHOU1 Abdelhadi",
         "tier": "SILVER",
         "status": "PENDING"
+      }
+    ],
+    "19a3288e-393b-4ce9-b1e5-7398fea702af": [
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T22:52:28.682Z"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T22:52:28.821Z"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T22:52:28.930Z"
+      }
+    ],
+    "a15ef45e-69cd-4f47-8d31-edce407b3564": [
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T23:04:03.327Z"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T23:04:03.493Z"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T23:04:03.599Z"
+      }
+    ],
+    "a3e07a41-d4b5-45b9-87ce-5a649e650032": [
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T23:07:08.973Z"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T23:07:09.135Z"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-15T23:07:09.236Z"
+      }
+    ],
+    "4994a87b-9ed1-4346-bb29-ddae018ca583": [
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-16T12:46:00.863Z"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-16T12:46:00.998Z"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-16T12:46:01.090Z"
+      }
+    ],
+    "de6f3727-3a18-463d-9210-ec378b8b8e17": [
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-16T12:56:49.688Z"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-16T12:56:49.818Z"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-16T12:56:49.900Z"
+      }
+    ],
+    "86300cb2-2f2e-434b-a985-dce1e6bf9b74": [
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-16T13:08:33.221Z"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-16T13:08:33.399Z"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "SENT",
+        "sentAt": "2026-10-16T13:08:33.486Z"
       }
     ]
   }

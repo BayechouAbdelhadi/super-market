@@ -99,22 +99,22 @@ export function EmailVisualizerModal({
           className="fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none flex items-center justify-center p-0 max-h-[96vh] select-none"
         >
           {/* Smartphone Frame (Modal itself) */}
-          <div className="relative w-[360px] sm:w-[395px] max-w-[95vw] bg-neutral-950 rounded-[48px] p-2.5 sm:p-3 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] border-4 border-neutral-700/80 ring-1 ring-white/10 flex flex-col shrink-0 animate-in fade-in-0 zoom-in-95 duration-200">
+          <div className="relative w-[92vw] sm:w-[395px] max-w-[395px] bg-neutral-950 rounded-[36px] sm:rounded-[48px] p-2 sm:p-3 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] border-4 border-neutral-700/80 ring-1 ring-white/10 flex flex-col shrink-0 animate-in fade-in-0 zoom-in-95 duration-200">
             {/* Top-Right Floating Close Button */}
             <button
               type="button"
               onClick={onClose}
-              className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-600 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer z-10"
+              className="absolute -top-2.5 -right-2 sm:-top-3 sm:-right-3 w-8 h-8 rounded-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-600 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer z-10"
               title="Fermer (Échap)"
             >
               <X className="w-4 h-4" />
             </button>
 
-            {/* Hardware buttons on phone edge */}
-            <div className="absolute -left-[7px] top-24 w-[3px] h-8 bg-neutral-700 rounded-l-sm" />
-            <div className="absolute -left-[7px] top-36 w-[3px] h-12 bg-neutral-700 rounded-l-sm" />
-            <div className="absolute -left-[7px] top-52 w-[3px] h-12 bg-neutral-700 rounded-l-sm" />
-            <div className="absolute -right-[7px] top-32 w-[3px] h-14 bg-neutral-700 rounded-r-sm" />
+            {/* Hardware buttons on phone edge (hidden on mobile to prevent overflow) */}
+            <div className="hidden sm:block absolute -left-[7px] top-24 w-[3px] h-8 bg-neutral-700 rounded-l-sm" />
+            <div className="hidden sm:block absolute -left-[7px] top-36 w-[3px] h-12 bg-neutral-700 rounded-l-sm" />
+            <div className="hidden sm:block absolute -left-[7px] top-52 w-[3px] h-12 bg-neutral-700 rounded-l-sm" />
+            <div className="hidden sm:block absolute -right-[7px] top-32 w-[3px] h-14 bg-neutral-700 rounded-r-sm" />
 
             {/* Status Bar */}
             <div className="bg-neutral-950 text-neutral-300 px-5 pt-2 pb-2 rounded-t-[36px] flex items-center justify-between text-[11px] font-mono">

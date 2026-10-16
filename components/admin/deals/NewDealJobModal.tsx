@@ -55,12 +55,21 @@ export const CAMPAIGN_PRESETS = [
     ctaUrl: "https://supermarket-calais.fr",
   },
   {
-    name: "🍷 Terroir & Épicerie Fine",
-    title: "Sélection Terroir & Épicerie Fine d'Automne",
-    subject: "✨ Offre Privilège : Dégustation & Réductions exclusives sur notre Terroir",
-    content: `Découvrez notre nouvelle sélection d'épicerie fine et de produits du terroir soigneusement choisis pour vous :\n\n- 15% de remise sur nos fromages affinés et notre charcuterie artisanale\n- 1 bouteille de jus de pomme artisanal offerte dès 40€ d'achats en rayon terroir\n- Crédit fidélité instantané de 100 points bonus sur votre compte\n\nRendez-vous en magasin pour profiter de cette sélection gourmande disponible jusqu'à épuisement des stocks !`,
-    imageUrl: "https://images.unsplash.com/photo-1506617420156-8e4536971650?auto=format&fit=crop&w=1200&q=80",
-    ctaText: "Voir la sélection en boutique",
+    name: "🥩 Boucherie Halal & Volailles",
+    title: "Arrivages Boucherie Halal & Volailles Fraîches",
+    subject: "🥩 Boucherie Halal : -15% sur nos viandes fraîches et volailles ce week-end !",
+    content: `Profitez de notre arrivage exceptionnel de viandes fraîches certifiées 100% Halal dans votre magasin Super Market Calais :\n\n- 15% de remise immédiate sur l'agneau, le veau et le boeuf de première qualité\n- Offres spéciales sur nos volailles fraîches et préparations bouchères maison\n- Points fidélité doublés sur l'ensemble du rayon boucherie dès 30€ d'achat\n\nNos artisans bouchers sont à votre disposition pour vos découpes personnalisées. Indiquez simplement votre numéro de téléphone en caisse pour activer vos réductions fidélité !`,
+    imageUrl: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=80",
+    ctaText: "Découvrir la boucherie en magasin",
+    ctaUrl: "https://supermarket-calais.fr",
+  },
+  {
+    name: "🌙 Saveurs d'Orient & Épicerie",
+    title: "Sélection Saveurs d'Orient & Épicerie du Monde",
+    subject: "✨ Arrivage Épicerie : Dattes Medjool, Épices & Spécialités d'Orient en promo !",
+    content: `Découvrez notre nouvelle sélection d'épicerie orientale et de produits authentiques chez Super Market Calais :\n\n- 15% de remise sur nos dattes Medjool premium, fruits secs et graines\n- Sélection d'épices parfumées, thés à la menthe et douceurs traditionnelles\n- 100 points fidélité bonus crédités instantanément dès 35€ d'achat\n\nRendez-vous dès aujourd'hui en magasin pour savourer nos arrivages exclusifs !`,
+    imageUrl: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=1200&q=80",
+    ctaText: "Voir les arrivages en magasin",
     ctaUrl: "https://supermarket-calais.fr",
   },
   {
@@ -416,7 +425,7 @@ export function NewDealJobModal({
             className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs cursor-pointer flex items-center justify-center gap-1.5 transition-all shrink-0"
           >
             <Eye className="w-3.5 h-3.5" />
-            <span>Visualiser l&apos;email (ce que les consommateurs recevront)</span>
+            <span>Visualiser l&apos;email</span>
           </button>
         </div>
 
@@ -856,7 +865,7 @@ export function NewDealJobModal({
                   className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span>Visualiser l&apos;email (ce que les consommateurs recevront)</span>
+                  <span>Visualiser l&apos;email</span>
                 </button>
 
                 {/* Edit / Preview Tabs */}
@@ -1051,8 +1060,8 @@ export function NewDealJobModal({
                         url: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=1200&q=80",
                       },
                       {
-                        label: "🍷 Épicerie & Terroir",
-                        url: "https://images.unsplash.com/photo-1506617420156-8e4536971650?auto=format&fit=crop&w=1200&q=80",
+                        label: "🥩 Boucherie Halal",
+                        url: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=80",
                       },
                     ].map((preset) => (
                       <button
@@ -1125,7 +1134,7 @@ export function NewDealJobModal({
                   className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span>Visualiser l&apos;email (ce que les consommateurs recevront)</span>
+                  <span>Visualiser l&apos;email</span>
                 </Button>
 
                 <Button type="button" variant="ghost" onClick={handleClose} disabled={loadingSubmit}>

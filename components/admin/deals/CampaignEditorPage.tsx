@@ -50,12 +50,21 @@ export const CAMPAIGN_PRESETS = [
     ctaUrl: "https://supermarket-calais.fr",
   },
   {
-    name: "🍷 Terroir & Épicerie Fine",
-    title: "Sélection Terroir & Épicerie Fine d'Automne",
-    subject: "✨ Offre Privilège : Dégustation & Réductions exclusives sur notre Terroir",
-    content: `Découvrez notre nouvelle sélection d'épicerie fine et de produits du terroir soigneusement choisis pour vous :\n\n- 15% de remise sur nos fromages affinés et notre charcuterie artisanale\n- 1 bouteille de jus de pomme artisanal offerte dès 40€ d'achats en rayon terroir\n- Crédit fidélité instantané de 100 points bonus sur votre compte\n\nRendez-vous en magasin pour profiter de cette sélection gourmande disponible jusqu'à épuisement des stocks !`,
-    imageUrl: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1200&q=80",
-    ctaText: "En savoir plus sur nos arrivages",
+    name: "🥩 Boucherie Halal & Volailles",
+    title: "Arrivages Boucherie Halal & Volailles Fraîches",
+    subject: "🥩 Boucherie Halal : -15% sur nos viandes fraîches et volailles ce week-end !",
+    content: `Profitez de notre arrivage exceptionnel de viandes fraîches certifiées 100% Halal dans votre magasin Super Market Calais :\n\n- 15% de remise immédiate sur l'agneau, le veau et le boeuf de première qualité\n- Offres spéciales sur nos volailles fraîches et préparations bouchères maison\n- Points fidélité doublés sur l'ensemble du rayon boucherie dès 30€ d'achat\n\nNos artisans bouchers sont à votre disposition pour vos découpes personnalisées. Indiquez simplement votre numéro de téléphone en caisse pour activer vos réductions fidélité !`,
+    imageUrl: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=80",
+    ctaText: "Découvrir la boucherie en magasin",
+    ctaUrl: "https://supermarket-calais.fr",
+  },
+  {
+    name: "🌙 Saveurs d'Orient & Épicerie",
+    title: "Sélection Saveurs d'Orient & Épicerie du Monde",
+    subject: "✨ Arrivage Épicerie : Dattes Medjool, Épices & Spécialités d'Orient en promo !",
+    content: `Découvrez notre nouvelle sélection d'épicerie orientale et de produits authentiques chez Super Market Calais :\n\n- 15% de remise sur nos dattes Medjool premium, fruits secs et graines\n- Sélection d'épices parfumées, thés à la menthe et douceurs traditionnelles\n- 100 points fidélité bonus crédités instantanément dès 35€ d'achat\n\nRendez-vous dès aujourd'hui en magasin pour savourer nos arrivages exclusifs !`,
+    imageUrl: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=1200&q=80",
+    ctaText: "Voir les arrivages en magasin",
     ctaUrl: "https://supermarket-calais.fr",
   },
   {
@@ -338,13 +347,13 @@ export function CampaignEditorPage({
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-12">
+    <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto pb-12 min-w-0">
       {/* Top Header Card */}
-      <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs space-y-2">
+      <div className="p-4 sm:p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs space-y-2">
         <div className="flex items-center gap-2">
           <Link
             href="/admin/deals"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors py-1 px-2.5 rounded-lg hover:bg-[var(--color-surface-hover)]"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors py-1 px-2 rounded-lg hover:bg-[var(--color-surface-hover)]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Retour aux campagnes</span>
@@ -355,9 +364,9 @@ export function CampaignEditorPage({
           </span>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--color-text)] tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-black text-[var(--color-text)] tracking-tight">
               Création &amp; Configuration de Campagne
             </h1>
             <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-0.5">
@@ -369,14 +378,14 @@ export function CampaignEditorPage({
               }
             </p>
           </div>
-          <span className="text-xs font-bold font-mono px-3.5 py-1.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20 shrink-0 self-start sm:self-auto">
+          <span className="text-xs font-bold font-mono px-3 py-1 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20 shrink-0 self-start sm:self-auto">
             Étape {step} / 4
           </span>
         </div>
       </div>
 
       {/* Stepper Tabs - Freely clickable to jump to any step */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
         {[
           { num: 1, label: "Audience & Cibles", icon: Users },
           { num: 2, label: "Mode d'envoi", icon: Layers },
@@ -394,7 +403,7 @@ export function CampaignEditorPage({
                 setErrorMsg("");
                 setStep(s.num);
               }}
-              className={`p-3.5 rounded-2xl border text-left transition-all flex items-center gap-3 cursor-pointer ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-left transition-all flex items-center gap-2 sm:gap-3 cursor-pointer min-w-0 ${
                 isCurrent
                   ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)] font-bold shadow-xs ring-2 ring-[var(--color-primary)]/20"
                   : isDone
@@ -403,7 +412,7 @@ export function CampaignEditorPage({
               }`}
             >
               <div
-                className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                   isDone
                     ? "bg-emerald-600 text-white"
                     : isCurrent
@@ -411,13 +420,13 @@ export function CampaignEditorPage({
                     : "bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]"
                 }`}
               >
-                {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : <Icon className="w-3.5 h-3.5" />}
+                {isDone ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" /> : <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
               </div>
-              <div className="min-w-0">
-                <span className="text-[10px] uppercase font-bold tracking-wider opacity-80 block">
+              <div className="min-w-0 flex-1">
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider opacity-80 block truncate">
                   Étape {s.num}
                 </span>
-                <strong className="text-xs truncate block">{s.label}</strong>
+                <strong className="text-[11px] sm:text-xs truncate block">{s.label}</strong>
               </div>
             </button>
           );
@@ -425,7 +434,7 @@ export function CampaignEditorPage({
       </div>
 
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 font-medium flex items-center gap-2.5 shadow-2xs">
+        <div className="p-3.5 sm:p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 font-medium flex items-center gap-2.5 shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
           <span>{errorMsg}</span>
         </div>
@@ -433,11 +442,11 @@ export function CampaignEditorPage({
 
       {/* STEP 1: AUDIENCE & CIBLAGE */}
       {step === 1 && (
-        <Card padded="lg" className="space-y-6 animate-in fade-in duration-200">
-          <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
+        <Card padded="lg" className="space-y-5 sm:space-y-6 animate-in fade-in duration-200 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 pb-3 border-b border-[var(--color-border)]">
             <div className="space-y-0.5">
-              <h2 className="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
-                <Users className="w-4 h-4 text-[var(--color-primary)]" />
+              <h2 className="text-sm sm:text-base font-bold text-[var(--color-text)] flex items-center gap-2">
+                <Users className="w-4 h-4 text-[var(--color-primary)] shrink-0" />
                 <span>1. Choisissez les catégories de clients à cibler</span>
               </h2>
               <p className="text-xs text-[var(--color-text-muted)]">
@@ -445,7 +454,7 @@ export function CampaignEditorPage({
               </p>
             </div>
 
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-2 text-xs self-start sm:self-auto shrink-0">
               <button
                 type="button"
                 onClick={handleSelectAllTiers}
@@ -502,7 +511,7 @@ export function CampaignEditorPage({
           </div>
 
           {/* Live Audience Counter */}
-          <div className="p-4 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <span className="text-2xl select-none">🎯</span>
               <div>
@@ -514,7 +523,7 @@ export function CampaignEditorPage({
                 </span>
               </div>
             </div>
-            <div className="text-right shrink-0">
+            <div className="text-left sm:text-right shrink-0">
               {loadingCount ? (
                 <span className="text-xs text-[var(--color-text-muted)] animate-pulse">Calcul...</span>
               ) : (
@@ -526,14 +535,14 @@ export function CampaignEditorPage({
           </div>
 
           {/* Navigation */}
-          <div className="pt-4 flex items-center justify-between border-t border-[var(--color-border)]">
-            <Link href="/admin/deals">
-              <Button type="button" variant="ghost">
+          <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-[var(--color-border)]">
+            <Link href="/admin/deals" className="w-full sm:w-auto">
+              <Button type="button" variant="ghost" className="w-full sm:w-auto justify-center">
                 Annuler
               </Button>
             </Link>
 
-            <Button type="button" variant="primary" onClick={handleNext} className="gap-2 font-bold">
+            <Button type="button" variant="primary" onClick={handleNext} className="w-full sm:w-auto justify-center gap-2 font-bold">
               <span>Continuer vers le mode d&apos;envoi</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
@@ -643,13 +652,13 @@ export function CampaignEditorPage({
           )}
 
           {/* Navigation */}
-          <div className="pt-4 flex items-center justify-between border-t border-[var(--color-border)]">
-            <Button type="button" variant="secondary" onClick={handleBack}>
+          <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-[var(--color-border)]">
+            <Button type="button" variant="secondary" onClick={handleBack} className="w-full sm:w-auto justify-center">
               <ArrowLeft className="w-4 h-4 mr-1.5" />
               <span>Précédent</span>
             </Button>
 
-            <Button type="button" variant="primary" onClick={handleNext} className="gap-2 font-bold">
+            <Button type="button" variant="primary" onClick={handleNext} className="w-full sm:w-auto justify-center gap-2 font-bold">
               <span>Continuer vers la planification</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
@@ -701,7 +710,7 @@ export function CampaignEditorPage({
           </div>
 
           {/* Smart 24H Time Input Block */}
-          <div className="p-4 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-4">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1">
                 <label htmlFor="deal-scheduled-time" className="flex items-center gap-2 text-xs font-bold text-[var(--color-text)] cursor-pointer">
@@ -717,7 +726,7 @@ export function CampaignEditorPage({
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 self-start sm:self-auto">
+              <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
                 {/* AM/PM Switcher */}
                 <div className="inline-flex p-0.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs">
                   <button
@@ -748,14 +757,14 @@ export function CampaignEditorPage({
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1 sm:flex-initial">
                   <input
                     id="deal-scheduled-time"
                     type="time"
                     required
                     value={scheduledTime}
                     onChange={(e) => setScheduledTime(e.target.value)}
-                    className="h-11 px-3.5 text-sm font-bold font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
+                    className="h-11 px-3 text-sm font-bold font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs w-full sm:w-auto"
                   />
                   {scheduledTime === "00:00" && (
                     <span className="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold border border-indigo-500/20 whitespace-nowrap">
@@ -771,21 +780,21 @@ export function CampaignEditorPage({
               <div className="p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-950 dark:text-amber-200 space-y-2 animate-in fade-in">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="block font-bold">
+                  <div className="space-y-0.5 min-w-0">
+                    <strong className="block font-bold break-words">
                       Attention au format 24h : vous avez saisi « {scheduledTime} » ({schedH}h{String(schedM).padStart(2, "0")} du matin)
                     </strong>
-                    <p className="text-[11px] leading-relaxed opacity-90 mt-0.5">
+                    <p className="text-[11px] leading-relaxed opacity-90 break-words">
                       Il est actuellement <strong>{currentParisTime}</strong>. Cette heure du matin est donc déjà passée aujourd&apos;hui.
                       Si vous vouliez programmer pour cet après-midi à <strong>{pmEquivalent}</strong> ({pmEquivalent.replace(":", "h")}), cliquez ci-dessous :
                     </p>
                   </div>
                 </div>
-                <div className="pl-6">
+                <div className="pl-0 sm:pl-6">
                   <button
                     type="button"
                     onClick={() => setScheduledTime(pmEquivalent)}
-                    className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center gap-1.5 transition-all"
+                    className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all"
                   >
                     <Clock className="w-3.5 h-3.5" />
                     <span>Passer à {pmEquivalent} ({pmEquivalent.replace(":", "h")} après-midi)</span>
@@ -795,26 +804,28 @@ export function CampaignEditorPage({
             )}
 
             {/* Live Scheduling Timeline Status Badge */}
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs flex items-center justify-between gap-2">
-              <span className="text-[var(--color-text-muted)] font-medium">Statut du déclenchement :</span>
-              {isStartDateToday ? (
-                scheduledTime > currentParisTime ? (
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span>🟢 Prévu aujourd&apos;hui à {scheduledTime} — En attente (ne sera PAS envoyé immédiatement)</span>
-                  </span>
+            <div className="p-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+              <span className="text-[var(--color-text-muted)] font-medium shrink-0">Statut du déclenchement :</span>
+              <div className="break-words min-w-0">
+                {isStartDateToday ? (
+                  scheduledTime > currentParisTime ? (
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                      <span>🟢 Prévu aujourd&apos;hui à {scheduledTime} — En attente</span>
+                    </span>
+                  ) : (
+                    <span className="text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                      <span>⚡ Heure passée ({scheduledTime}) : lancement immédiat</span>
+                    </span>
+                  )
                 ) : (
-                  <span className="text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blue-500" />
-                    <span>⚡ Heure passée ({scheduledTime}) : l&apos;envoi se lancera à la création</span>
+                  <span className="text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
+                    <span>📅 Programmé pour le {startDate} à {scheduledTime}</span>
                   </span>
-                )
-              ) : (
-                <span className="text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-purple-500" />
-                  <span>📅 Programmé pour le {startDate} à {scheduledTime}</span>
-                </span>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Quick time presets */}
@@ -847,13 +858,13 @@ export function CampaignEditorPage({
           </div>
 
           {/* Navigation */}
-          <div className="pt-4 flex items-center justify-between border-t border-[var(--color-border)]">
-            <Button type="button" variant="secondary" onClick={handleBack}>
+          <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-[var(--color-border)]">
+            <Button type="button" variant="secondary" onClick={handleBack} className="w-full sm:w-auto justify-center">
               <ArrowLeft className="w-4 h-4 mr-1.5" />
               <span>Précédent</span>
             </Button>
 
-            <Button type="button" variant="primary" onClick={handleNext} className="gap-2 font-bold">
+            <Button type="button" variant="primary" onClick={handleNext} className="w-full sm:w-auto justify-center gap-2 font-bold">
               <span>Continuer vers le contenu</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
@@ -877,11 +888,11 @@ export function CampaignEditorPage({
               </div>
 
               {/* Prefill button & Visualize Modal button */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={() => applyPreset(CAMPAIGN_PRESETS[0])}
-                  className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="flex-1 sm:flex-initial justify-center px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                   title="Remplir instantanément avec un modèle de promotion prêt à l'envoi"
                 >
                   <Wand2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -893,10 +904,11 @@ export function CampaignEditorPage({
                   type="button"
                   variant="outline"
                   onClick={() => setIsVisualizerOpen(true)}
-                  className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
+                  className="flex-1 sm:flex-initial justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50 whitespace-nowrap"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span>Visualiser l&apos;email (Aperçu en modale)</span>
+                  <span className="sm:hidden">Aperçu</span>
+                  <span className="hidden sm:inline">Visualiser l&apos;email</span>
                 </Button>
               </div>
             </div>
@@ -1059,29 +1071,35 @@ export function CampaignEditorPage({
             </div>
 
             {/* Bottom Action Bar */}
-            <div className="pt-4 flex items-center justify-between border-t border-[var(--color-border)]">
-              <Button type="button" variant="secondary" onClick={handleBack} disabled={loadingSubmit}>
+            <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-[var(--color-border)]">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleBack}
+                disabled={loadingSubmit}
+                className="w-full sm:w-auto order-3 sm:order-1 justify-center"
+              >
                 <ArrowLeft className="w-4 h-4 mr-1.5" />
                 <span>Précédent</span>
               </Button>
 
-              <div className="flex items-center gap-2.5">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 order-1 sm:order-2 w-full sm:w-auto">
                 {/* Visualizer modal button */}
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsVisualizerOpen(true)}
-                  className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
+                  className="w-full sm:w-auto justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span>Visualiser l&apos;email (Aperçu en modale)</span>
+                  <span>Aperçu de l&apos;email</span>
                 </Button>
 
                 <Button
                   type="submit"
                   variant="primary"
                   loading={loadingSubmit}
-                  className="font-bold gap-2 shadow-sm"
+                  className="w-full sm:w-auto justify-center font-bold gap-2 shadow-sm py-3 sm:py-2"
                 >
                   <Send className="w-4 h-4" />
                   <span>Programmer la campagne</span>

@@ -625,7 +625,7 @@ export default function Home() {
                   <Badge variant="brand" size="sm">Du terroir</Badge>
                 </div>
                 <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Produits laitiers, charcuterie, conserves fines, pâtes, sauces, condiments et toutes vos marques indispensables du quotidien.
+                  Produits laitiers, charcuterie halal, conserves fines, pâtes, sauces, condiments et toutes vos marques indispensables du quotidien.
                 </p>
               </div>
             </Card>
