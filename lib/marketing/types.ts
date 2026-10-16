@@ -10,7 +10,15 @@ export type CampaignStatus =
 
 export type DispatchMode = "ALL_AT_ONCE" | "DAILY_LIMIT";
 
-export type RecipientStatus = "PENDING" | "SENT" | "FAILED";
+export type RecipientStatus = "PENDING" | "SENT" | "FAILED" | "CANCELLED";
+
+export interface MarketingUnsubscribe {
+  id?: string;
+  email: string;
+  customerId?: string;
+  reason?: string;
+  createdAt: string;
+}
 
 export interface CampaignRecipient {
   customerId: string;

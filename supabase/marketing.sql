@@ -51,9 +51,28 @@ CREATE INDEX IF NOT EXISTS idx_marketing_recipients_campaign_id ON marketing_cam
 CREATE INDEX IF NOT EXISTS idx_marketing_recipients_status ON marketing_campaign_recipients(status);
 CREATE INDEX IF NOT EXISTS idx_marketing_recipients_customer ON marketing_campaign_recipients(customer_id);
 
--- 3. Row Level Security (RLS)
+-- Contrainte d'unicité absolue : un client ou e-mail ne peut JAMAIS être dupliqué dans la même campagne
+CREATE UNIQUE INDEX IF NOT EXISTS idx_marketing_recipients_unique_campaign_customer 
+    ON marketing_campaign_recipients(campaign_id, customer_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_marketing_recipients_unique_campaign_email 
+    ON marketing_campaign_recipients(campaign_id, lower(email));
+
+-- 3. Table: marketing_unsubscribes (Désabonnements & Opt-out marketing)
+CREATE TABLE IF NOT EXISTS marketing_unsubscribes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email TEXT NOT NULL,
+    customer_id UUID,
+    reason TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_marketing_unsubscribes_email ON marketing_unsubscribes(lower(email));
+CREATE INDEX IF NOT EXISTS idx_marketing_unsubscribes_customer ON marketing_unsubscribes(customer_id);
+
+-- 4. Row Level Security (RLS)
 ALTER TABLE marketing_campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE marketing_campaign_recipients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE marketing_unsubscribes ENABLE ROW LEVEL SECURITY;
 
 -- Seuls les administrateurs et le rôle de service peuvent lire et écrire les campagnes
 CREATE POLICY "Admins have full access to marketing_campaigns"
@@ -80,8 +99,26 @@ CREATE POLICY "Admins have full access to marketing_campaign_recipients"
         )
     );
 
+CREATE POLICY "Service role and Admins can manage marketing_unsubscribes"
+    ON marketing_unsubscribes
+    FOR ALL
+    USING (
+        auth.role() = 'service_role' OR
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.role = 'ADMIN'
+        )
+    );
+
+-- Allow public / unauthenticated users to insert their unsubscribe request
+CREATE POLICY "Public can insert marketing_unsubscribes"
+    ON marketing_unsubscribes
+    FOR INSERT
+    WITH CHECK (true);
+
 -- ==============================================================================
--- 4. Programmation automatique du Job à Minuit (00:00 UTC) via pg_cron
+-- 5. Programmation automatique du Job à Minuit (00:00 UTC) via pg_cron
 -- ==============================================================================
 -- Si l'extension pg_cron est activée dans votre instance Supabase, ce cron
 -- exécute automatiquement le traitement des campagnes actives chaque nuit à 00:00.

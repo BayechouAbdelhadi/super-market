@@ -144,6 +144,7 @@ export async function createUser(formData: FormData) {
   }
 
   // Send activation/invitation email via Brevo
+  let activationLink: string | undefined;
   try {
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
     const token = createSignedToken<AccountActivationPayload>({
@@ -157,7 +158,7 @@ export async function createUser(formData: FormData) {
     const host = headersList.get('host') || 'localhost:3000';
     const proto = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
     const origin = `${proto}://${host}`;
-    const activationLink = `${origin}/confirm-account?token=${encodeURIComponent(token)}`;
+    activationLink = `${origin}/confirm-account?token=${encodeURIComponent(token)}`;
 
     const settings = await getAppSettings();
     const shouldSendEmail =
@@ -191,7 +192,7 @@ export async function createUser(formData: FormData) {
   revalidatePath('/admin/customers');
   revalidatePath('/cashier');
   
-  return { success: true, role };
+  return { success: true, role, activationLink };
 }
 
 export async function createCashier(formData: FormData) {
@@ -262,4 +263,148 @@ export async function editUser(formData: FormData) {
   revalidatePath('/cashier');
   
   return { success: true };
+}
+
+const InviteUserSchema = z.object({
+  email: z.string().trim().email("L'adresse email est invalide."),
+  role: z.enum(['CUSTOMER', 'CASHIER']).default('CUSTOMER'),
+  first_name: z.string().trim().optional().default(""),
+  last_name: z.string().trim().optional().default(""),
+  phone_number: z.string().trim().optional().default(""),
+});
+
+export async function inviteUser(formData: FormData) {
+  const emailRaw = formData.get('email');
+  const roleRaw = formData.get('role') || 'CUSTOMER';
+  const firstNameRaw = formData.get('first_name') || '';
+  const lastNameRaw = formData.get('last_name') || '';
+  const phoneRaw = formData.get('phone_number') || '';
+
+  const parsed = InviteUserSchema.safeParse({
+    email: emailRaw,
+    role: roleRaw,
+    first_name: firstNameRaw,
+    last_name: lastNameRaw,
+    phone_number: phoneRaw,
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || "Données d'invitation invalides." };
+  }
+
+  const { email, role, first_name, last_name, phone_number } = parsed.data;
+  const emailNormalized = email.toLowerCase().trim();
+
+  // Verify caller's role for strict RBAC
+  const supabaseServer = await createServerClient();
+  const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
+
+  if (!currentUser) {
+    return { error: "Non autorisé. Veuillez vous connecter." };
+  }
+
+  const { data: callerProfile } = await supabaseServer
+    .from('profiles')
+    .select('role')
+    .eq('id', currentUser.id)
+    .single();
+
+  const callerRole = callerProfile?.role || currentUser.user_metadata?.role;
+
+  if (role === 'CASHIER' && callerRole !== 'ADMIN') {
+    return { error: "Seul un administrateur peut inviter un membre en tant que caissier." };
+  }
+
+  if (callerRole !== 'ADMIN' && callerRole !== 'CASHIER') {
+    return { error: "Accès refusé. Privilèges insuffisants pour inviter des utilisateurs." };
+  }
+
+  const adminClient = createAdminClient();
+
+  // Check if profile already exists
+  const { data: existingProfiles } = await adminClient
+    .from('profiles')
+    .select('id, email, first_name, last_name, role')
+    .eq('email', emailNormalized)
+    .limit(1);
+
+  const existingProfile = existingProfiles?.[0];
+
+  const headersList = await headers();
+  const host = headersList.get('host') || 'localhost:3000';
+  const proto = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+  const origin = `${proto}://${host}`;
+  const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+
+  const token = createSignedToken<AccountActivationPayload>({
+    email: emailNormalized,
+    role: existingProfile?.role || role,
+    type: 'ACCOUNT_ACTIVATION',
+    expiresAt,
+  });
+
+  const activationLink = `${origin}/confirm-account?token=${encodeURIComponent(token)}`;
+
+  if (existingProfile) {
+    // User already exists, resend invitation/activation email
+    try {
+      const settings = await getAppSettings();
+      const displayName = `${existingProfile.first_name || first_name || ''} ${existingProfile.last_name || last_name || ''}`.trim() || emailNormalized;
+      
+      await emailService.sendAccountActivation({
+        email: emailNormalized,
+        name: displayName,
+        activationLink,
+        role: existingProfile.role,
+        expiresInDays: 7,
+        sender: settings.notifications.senderEmail
+          ? {
+              email: settings.notifications.senderEmail,
+              name: settings.notifications.senderName || settings.store.storeName,
+            }
+          : undefined,
+      });
+
+      return {
+        success: true,
+        alreadyExists: true,
+        email: emailNormalized,
+        role: existingProfile.role,
+        activationLink,
+        message: `Un compte existe déjà pour ${emailNormalized}. Un nouvel e-mail d'activation a été envoyé avec succès !`,
+      };
+    } catch (err: any) {
+      console.error("[inviteUser] Error sending re-activation email:", err);
+      return {
+        success: true,
+        alreadyExists: true,
+        email: emailNormalized,
+        role: existingProfile.role,
+        activationLink,
+        message: `Compte existant. Le lien d'invitation a été régénéré avec succès.`,
+      };
+    }
+  }
+
+  // Create new user using createUser action
+  const createFormData = new FormData();
+  createFormData.set('first_name', first_name || (role === 'CASHIER' ? 'Nouveau' : 'Client'));
+  createFormData.set('last_name', last_name || (role === 'CASHIER' ? 'Caissier' : 'Fidélité'));
+  createFormData.set('email', emailNormalized);
+  const fallbackPhone = `06${crypto.randomBytes(4).readUInt32BE(0).toString().slice(0, 8)}`;
+  createFormData.set('phone_number', phone_number || fallbackPhone);
+  createFormData.set('role', role);
+
+  const createResult = await createUser(createFormData);
+  if (createResult.error) {
+    return { error: createResult.error };
+  }
+
+  return {
+    success: true,
+    email: emailNormalized,
+    role,
+    activationLink: (createResult as any).activationLink || activationLink,
+    message: `L'invitation a bien été envoyée par e-mail à ${emailNormalized} !`,
+  };
 }

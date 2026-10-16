@@ -6,6 +6,10 @@ import {
   pauseCampaign,
   resumeCampaign,
   deleteCampaign,
+  deduplicateRecipients,
+  unsubscribeCustomerEmail,
+  resubscribeCustomerEmail,
+  isCustomerEmailUnsubscribed,
 } from '@/lib/marketing/service';
 import { IMarketingCampaignRepository } from '@/lib/marketing/ports';
 import { MarketingCampaign, CampaignRecipient } from '@/lib/marketing/types';
@@ -42,6 +46,26 @@ class MockMarketingRepository implements IMarketingCampaignRepository {
     if (campaign) {
       campaign.recipients = recipients;
     }
+  }
+
+  private unsubscribes: Set<string> = new Set();
+
+  async getUnsubscribedEmails(): Promise<string[]> {
+    return Array.from(this.unsubscribes);
+  }
+
+  async isUnsubscribed(email: string): Promise<boolean> {
+    return this.unsubscribes.has(email.toLowerCase().trim());
+  }
+
+  async unsubscribe(email: string): Promise<boolean> {
+    this.unsubscribes.add(email.toLowerCase().trim());
+    return true;
+  }
+
+  async resubscribe(email: string): Promise<boolean> {
+    this.unsubscribes.delete(email.toLowerCase().trim());
+    return true;
   }
 }
 
@@ -195,6 +219,8 @@ describe('Marketing Deals & Email Campaigns', () => {
       expect(html).toContain('Super Market Calais');
       expect(html).toContain('205 Avenue Antoine de Saint-Exupéry, 62100 Calais');
       expect(html).toContain('06 71 54 05 28');
+      expect(html).toContain('Se désinscrire');
+      expect(html).toContain('Vous ne souhaitez plus recevoir ces e-mails ?');
     });
   });
 
@@ -698,6 +724,188 @@ describe('Marketing Deals & Email Campaigns', () => {
 
       const updated = await mockRepo.getById('due-1');
       expect(updated?.status).toBe('COMPLETED');
+    });
+  });
+
+  describe('Recipient Deduplication & Multi-Edit Draft Safety', () => {
+    it('strictly deduplicates recipients with duplicate customerIds or duplicate emails', () => {
+      const rawRecipients: CampaignRecipient[] = [
+        { customerId: 'cust-1', email: 'test@example.com', fullName: 'User 1', tier: 'SILVER', status: 'PENDING' },
+        { customerId: 'cust-1', email: 'test@example.com', fullName: 'User 1 Duplicate', tier: 'SILVER', status: 'PENDING' },
+        { customerId: 'cust-2', email: 'TEST@EXAMPLE.COM', fullName: 'User 2 (same email capitalized)', tier: 'SILVER', status: 'PENDING' },
+        { customerId: 'cust-3', email: 'unique@example.com', fullName: 'User 3', tier: 'GOLD', status: 'PENDING' },
+      ];
+
+      const deduplicated = deduplicateRecipients(rawRecipients);
+      expect(deduplicated.length).toBe(2);
+      expect(deduplicated[0].customerId).toBe('cust-1');
+      expect(deduplicated[1].customerId).toBe('cust-3');
+    });
+
+    it('prioritizes already SENT status over PENDING when deduplicating', () => {
+      const rawRecipients: CampaignRecipient[] = [
+        { customerId: 'cust-1', email: 'client@example.com', fullName: 'Client 1', tier: 'SILVER', status: 'PENDING' },
+        { customerId: 'cust-1', email: 'client@example.com', fullName: 'Client 1', tier: 'SILVER', status: 'SENT', sentAt: '2026-10-16T12:00:00Z' },
+      ];
+
+      const deduplicated = deduplicateRecipients(rawRecipients);
+      expect(deduplicated.length).toBe(1);
+      expect(deduplicated[0].status).toBe('SENT');
+      expect(deduplicated[0].sentAt).toBe('2026-10-16T12:00:00Z');
+    });
+
+    it('editing draft 5 times and running batch sends exactly ONE email per customer', async () => {
+      const sendEmailSpy = vi.spyOn(emailService, 'sendEmail').mockResolvedValue({
+        success: true,
+        messageId: 'mock-msg-id',
+      });
+
+      // Customer recipients for the draft
+      const baseRecipients: CampaignRecipient[] = [
+        { customerId: 'c1', email: 'user1@example.com', fullName: 'User One', tier: 'SILVER', status: 'PENDING' },
+        { customerId: 'c2', email: 'user2@example.com', fullName: 'User Two', tier: 'SILVER', status: 'PENDING' },
+        { customerId: 'c3', email: 'user3@example.com', fullName: 'User Three', tier: 'SILVER', status: 'PENDING' },
+      ];
+
+      const campaign: MarketingCampaign = {
+        id: 'draft-test-123',
+        title: 'Brouillon Offres Fraîches',
+        status: 'DRAFT',
+        targetTiers: ['SILVER'],
+        dispatchMode: 'ALL_AT_ONCE',
+        dailyLimit: null,
+        startDate: '2026-10-16',
+        endDate: '2026-10-23',
+        scheduledTime: '00:00',
+        lastRunDate: null,
+        subject: 'Bons plans du moment',
+        content: 'Contenu halal frais',
+        imageUrl: null,
+        stats: { totalTargets: 3, sentCount: 0, failedCount: 0, remainingCount: 3, progressPercentage: 0 },
+        recipients: [...baseRecipients],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completedAt: null,
+      };
+
+      // Simulate user editing and saving draft 5 times in a row!
+      for (let i = 1; i <= 5; i++) {
+        campaign.title = `Brouillon Offres Fraîches (Edit ${i})`;
+        // Simulate potential appending or re-saving recipients
+        campaign.recipients = deduplicateRecipients([...campaign.recipients, ...baseRecipients]);
+        await mockRepo.save(campaign);
+        await mockRepo.saveRecipients(campaign.id, campaign.recipients);
+      }
+
+      // Verify repository only has 3 unique recipients
+      const savedCampaign = await mockRepo.getById('draft-test-123');
+      expect(savedCampaign).not.toBeNull();
+      const uniqueRecipients = deduplicateRecipients(savedCampaign!.recipients);
+      expect(uniqueRecipients.length).toBe(3);
+
+      // Now change status to RUNNING and process the batch
+      savedCampaign!.status = 'RUNNING';
+      await mockRepo.save(savedCampaign!);
+
+      const result = await processCampaignBatch('draft-test-123', mockRepo);
+      expect(result).not.toBeNull();
+      expect(result!.sentInBatch).toBe(3);
+      expect(result!.newStatus).toBe('COMPLETED');
+      // Exactly 3 emails sent in total (1 per user), NEVER 3 * 5 = 15!
+      expect(sendEmailSpy).toHaveBeenCalledTimes(3);
+
+      const sentEmails = sendEmailSpy.mock.calls.map((call) => call[0].to[0].email);
+      expect(sentEmails.sort()).toEqual([
+        'user1@example.com',
+        'user2@example.com',
+        'user3@example.com',
+      ]);
+    });
+  });
+
+  describe('Unsubscribe Management & Opt-Out Enforcement', () => {
+    it('unsubscribes and resubscribes an email cleanly', async () => {
+      const email = 'client.optout@example.com';
+
+      // Initially not unsubscribed
+      expect(await isCustomerEmailUnsubscribed(email, mockRepo)).toBe(false);
+
+      // Unsubscribe
+      const unsubResult = await unsubscribeCustomerEmail(email, 'Demande client', mockRepo);
+      expect(unsubResult).toBe(true);
+      expect(await isCustomerEmailUnsubscribed(email, mockRepo)).toBe(true);
+
+      // Case-insensitive check
+      expect(await isCustomerEmailUnsubscribed('CLIENT.OPTOUT@EXAMPLE.COM', mockRepo)).toBe(true);
+
+      // Resubscribe
+      const resubResult = await resubscribeCustomerEmail(email, mockRepo);
+      expect(resubResult).toBe(true);
+      expect(await isCustomerEmailUnsubscribed(email, mockRepo)).toBe(false);
+    });
+
+    it('processCampaignBatch cancels and skips sending to an unsubscribed customer', async () => {
+      const sendEmailSpy = vi.spyOn(emailService, 'sendEmail').mockResolvedValue({
+        success: true,
+        messageId: 'optout-msg',
+      });
+
+      // Unsubscribe user2
+      await unsubscribeCustomerEmail('user2@example.com', 'Désabonné', mockRepo);
+
+      const campaign: MarketingCampaign = {
+        id: 'optout-campaign-1',
+        title: 'Campagne avec client désabonné',
+        status: 'RUNNING',
+        targetTiers: ['SILVER'],
+        dispatchMode: 'ALL_AT_ONCE',
+        dailyLimit: null,
+        startDate: '2026-10-16',
+        endDate: '2026-10-23',
+        scheduledTime: '00:00',
+        lastRunDate: null,
+        subject: 'Offre exclusive',
+        content: 'Profitez de nos offres',
+        imageUrl: null,
+        stats: { totalTargets: 2, sentCount: 0, failedCount: 0, remainingCount: 2, progressPercentage: 0 },
+        recipients: [
+          { customerId: 'c1', email: 'user1@example.com', fullName: 'User 1', tier: 'SILVER', status: 'PENDING' },
+          { customerId: 'c2', email: 'user2@example.com', fullName: 'User 2 (Unsubscribed)', tier: 'SILVER', status: 'PENDING' },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completedAt: null,
+      };
+
+      await mockRepo.save(campaign);
+
+      const result = await processCampaignBatch('optout-campaign-1', mockRepo);
+      expect(result).not.toBeNull();
+      // Only 1 email was sent (to user1)
+      expect(result!.sentInBatch).toBe(1);
+      expect(sendEmailSpy).toHaveBeenCalledTimes(1);
+      expect(sendEmailSpy.mock.calls[0][0].to[0].email).toBe('user1@example.com');
+
+      const updated = await mockRepo.getById('optout-campaign-1');
+      const user2Recipient = updated?.recipients.find((r) => r.customerId === 'c2');
+      expect(user2Recipient?.status).toBe('CANCELLED');
+    });
+
+    it('email template includes discreet unsubscribe link at the bottom', () => {
+      const html = renderDealEmailHtml({
+        customerName: 'Samir',
+        tier: 'VIP',
+        subject: 'Bons plans VIP',
+        content: 'Découvrez nos offres',
+        storeName: 'Super Market Calais',
+        storeAddress: '205 Avenue Saint-Exupéry',
+        unsubscribeUrl: 'https://supermarket-calais.fr/unsubscribe?email=samir%40test.com',
+      });
+
+      // Must be at the bottom and contain the unsubscribe link
+      expect(html).toContain('https://supermarket-calais.fr/unsubscribe?email=samir%40test.com');
+      expect(html).toContain('Se désinscrire');
+      expect(html).toContain('font-size: 10px');
     });
   });
 });

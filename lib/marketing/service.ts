@@ -16,12 +16,25 @@ import { getAppSettings } from "@/lib/settings/service";
 import { renderDealEmailHtml } from "./templates/deal-email";
 import { getParisDateString, getParisTimeString } from "@/lib/utils/timezone";
 
+import { deduplicateRecipients } from "./utils";
+export { deduplicateRecipients };
+
 /**
  * Queries active customers matching the selected loyalty tiers.
+ * Returns strictly deduplicated recipients (one entry per unique customer / email).
  */
 export async function getTargetCustomersByTiers(
-  tiers: LoyaltyTier[]
+  tiers: LoyaltyTier[],
+  repo: IMarketingCampaignRepository = defaultMarketingRepo
 ): Promise<CampaignRecipient[]> {
+  let unsubscribedSet = new Set<string>();
+  try {
+    const unsubscribed = await repo.getUnsubscribedEmails();
+    unsubscribedSet = new Set(unsubscribed.map((e) => e.trim().toLowerCase()));
+  } catch {
+    // Keep empty set on error
+  }
+
   const sb = await createClient();
   const { data, error } = await sb
     .from("profiles")
@@ -41,6 +54,10 @@ export async function getTargetCustomersByTiers(
 
   for (const row of data as ProfileWithCustomerRow[]) {
     if (!row.email || !row.email.includes("@")) continue;
+    const emailKey = row.email.trim().toLowerCase();
+    if (unsubscribedSet.has(emailKey)) {
+      continue; // Exclude unsubscribed customer from targeting!
+    }
 
     const cust = Array.isArray(row.customers) ? row.customers[0] : row.customers;
     const points = cust?.loyalty_points ?? 0;
@@ -61,7 +78,7 @@ export async function getTargetCustomersByTiers(
     }
   }
 
-  return recipients;
+  return deduplicateRecipients(recipients);
 }
 
 /**
@@ -143,14 +160,44 @@ export async function createMarketingCampaign(
   adminEmail?: string,
   repo: IMarketingCampaignRepository = defaultMarketingRepo
 ): Promise<MarketingCampaign> {
-  const recipients = await getTargetCustomersByTiers(input.targetTiers);
+  const freshRecipients = await getTargetCustomersByTiers(input.targetTiers, repo);
+
+  const campaignId = input.id || crypto.randomUUID();
+  const existing = input.id ? await repo.getById(input.id) : null;
+
+  // When editing an existing campaign/draft, merge without duplicating:
+  // Retain already SENT or FAILED status so customers are never emailed twice!
+  let mergedRecipients: CampaignRecipient[];
+  if (existing?.recipients && existing.recipients.length > 0) {
+    const existingMap = new Map<string, CampaignRecipient>();
+    for (const r of existing.recipients) {
+      const key = r.email.trim().toLowerCase();
+      if (!existingMap.has(key)) {
+        existingMap.set(key, r);
+      }
+    }
+
+    mergedRecipients = freshRecipients.map((fresh) => {
+      const existingR = existingMap.get(fresh.email.trim().toLowerCase());
+      return existingR || fresh;
+    });
+  } else {
+    mergedRecipients = freshRecipients;
+  }
+
+  const recipients = deduplicateRecipients(mergedRecipients);
+  const sentCount = recipients.filter((r) => r.status === "SENT").length;
+  const failedCount = recipients.filter((r) => r.status === "FAILED").length;
+  const remainingCount = recipients.filter((r) => r.status === "PENDING").length;
+  const progressPercentage =
+    recipients.length > 0 ? Math.round(((sentCount + failedCount) / recipients.length) * 100) : 0;
 
   const stats: CampaignStats = {
     totalTargets: recipients.length,
-    sentCount: 0,
-    failedCount: 0,
-    remainingCount: recipients.length,
-    progressPercentage: 0,
+    sentCount,
+    failedCount,
+    remainingCount,
+    progressPercentage,
   };
 
   const now = new Date().toISOString();
@@ -171,9 +218,6 @@ export async function createMarketingCampaign(
       ? "RUNNING"
       : "SCHEDULED";
 
-  const campaignId = input.id || crypto.randomUUID();
-  const existing = input.id ? await repo.getById(input.id) : null;
-
   const campaign: MarketingCampaign = {
     id: campaignId,
     title: input.title.trim() || "Brouillon sans titre",
@@ -192,7 +236,7 @@ export async function createMarketingCampaign(
     ctaUrl: input.ctaUrl?.trim() || "https://supermarket-calais.fr",
     stats,
     recipients,
-    createdAt: now,
+    createdAt: existing?.createdAt || now,
     updatedAt: now,
     completedAt: null,
     createdBy: adminEmail || "admin",
@@ -219,6 +263,7 @@ export async function createMarketingCampaign(
  * Processes a batch of emails for the given campaign.
  * Non-failing guarantee: If sending fails for an individual customer,
  * it records the error and continues processing remaining recipients.
+ * Duplication prevention guarantee: Each customer receives at most ONE email.
  */
 export async function processCampaignBatch(
   campaignId: string,
@@ -243,8 +288,29 @@ export async function processCampaignBatch(
     };
   }
 
-  const recipients = campaign.recipients || [];
-  const pendingRecipients = recipients.filter((r) => r.status === "PENDING");
+  const rawRecipients = campaign.recipients || [];
+  const recipients = deduplicateRecipients(rawRecipients);
+  campaign.recipients = recipients;
+
+  // Strict deduplication: customers who already received or failed must NEVER be sent again
+  const alreadyHandledEmails = new Set<string>(
+    recipients
+      .filter((r) => r.status === "SENT" || r.status === "FAILED")
+      .map((r) => r.email.trim().toLowerCase())
+  );
+
+  const pendingRecipients: CampaignRecipient[] = [];
+  const pendingEmailsSeen = new Set<string>();
+
+  for (const r of recipients) {
+    if (r.status !== "PENDING") continue;
+    const emailKey = r.email.trim().toLowerCase();
+    if (alreadyHandledEmails.has(emailKey) || pendingEmailsSeen.has(emailKey)) {
+      continue;
+    }
+    pendingEmailsSeen.add(emailKey);
+    pendingRecipients.push(r);
+  }
 
   if (pendingRecipients.length === 0) {
     // Already all completed
@@ -288,9 +354,37 @@ export async function processCampaignBatch(
 
   let sentInBatch = 0;
   let failedInBatch = 0;
+  const processedBatchEmails = new Set<string>();
+
+  let unsubscribedSet = new Set<string>();
+  try {
+    const unsubscribed = await repo.getUnsubscribedEmails();
+    unsubscribedSet = new Set(unsubscribed.map((e) => e.trim().toLowerCase()));
+  } catch {
+    // Keep empty set on error
+  }
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
+    "https://supermarket-calais.fr";
 
   for (const recipient of batch) {
+    const emailKey = recipient.email.trim().toLowerCase();
+    if (processedBatchEmails.has(emailKey)) {
+      continue;
+    }
+    processedBatchEmails.add(emailKey);
+
+    // If customer unsubscribed since campaign scheduling, cancel recipient and skip sending!
+    if (unsubscribedSet.has(emailKey)) {
+      recipient.status = "CANCELLED";
+      recipient.error = "Client désabonné des e-mails promotionnels";
+      continue;
+    }
+
     try {
+      const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(recipient.email)}`;
+
       const htmlContent = renderDealEmailHtml({
         customerName: recipient.fullName,
         tier: recipient.tier,
@@ -302,6 +396,7 @@ export async function processCampaignBatch(
         storeName,
         storeAddress,
         storePhone,
+        unsubscribeUrl,
       });
 
       const res = await emailService.sendEmail({
@@ -414,3 +509,35 @@ export async function deleteCampaign(
 ): Promise<boolean> {
   return await repo.delete(campaignId);
 }
+
+/**
+ * Unsubscribes an email address from receiving marketing campaigns.
+ */
+export async function unsubscribeCustomerEmail(
+  email: string,
+  reason?: string,
+  repo: IMarketingCampaignRepository = defaultMarketingRepo
+): Promise<boolean> {
+  return await repo.unsubscribe(email, reason);
+}
+
+/**
+ * Re-subscribes an email address to marketing campaigns.
+ */
+export async function resubscribeCustomerEmail(
+  email: string,
+  repo: IMarketingCampaignRepository = defaultMarketingRepo
+): Promise<boolean> {
+  return await repo.resubscribe(email);
+}
+
+/**
+ * Checks if an email address is unsubscribed.
+ */
+export async function isCustomerEmailUnsubscribed(
+  email: string,
+  repo: IMarketingCampaignRepository = defaultMarketingRepo
+): Promise<boolean> {
+  return await repo.isUnsubscribed(email);
+}
+

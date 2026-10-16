@@ -11,6 +11,7 @@ export interface DealEmailTemplateProps {
   storeName: string;
   storeAddress: string;
   storePhone?: string;
+  unsubscribeUrl?: string;
 }
 
 export function renderDealEmailHtml(props: DealEmailTemplateProps): string {
@@ -25,6 +26,7 @@ export function renderDealEmailHtml(props: DealEmailTemplateProps): string {
     storeName,
     storeAddress,
     storePhone,
+    unsubscribeUrl,
   } = props;
 
   // Resolve image URL (ensure absolute for email clients)
@@ -287,6 +289,10 @@ export function renderDealEmailHtml(props: DealEmailTemplateProps): string {
               <div style="padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; line-height: 1.5;">
                 Vous recevez ce message car vous êtes inscrit(e) au programme de fidélité en magasin chez ${escapeHtml(storeName)}.<br />
                 Pour toute question ou mise à jour de vos coordonnées, présentez-vous directement à notre comptoir caisse.
+              </div>
+              <div style="margin-top: 10px; font-size: 10px; color: #94a3b8; line-height: 1.4;">
+                Vous ne souhaitez plus recevoir ces e-mails ? 
+                <a href="${escapeHtml(unsubscribeUrl || "https://supermarket-calais.fr/unsubscribe")}" target="_blank" style="color: #64748b; text-decoration: underline;">Se désinscrire</a>
               </div>
             </td>
           </tr>
