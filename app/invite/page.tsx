@@ -83,12 +83,6 @@ export default async function InvitePage({
                 : "Votre compte a été créé. Définissez votre mot de passe pour suivre vos points et remises en temps réel."
               : "Vous êtes invité(e) à créer votre compte fidélité pour cumuler des points et profiter de réductions exclusives."}
           </p>
-
-          {!hasToken && (
-            <div className="pt-1 flex items-center justify-center">
-              <PrintInviteButton />
-            </div>
-          )}
         </div>
 
         {/* Main Content Area */}
@@ -235,7 +229,6 @@ export default async function InvitePage({
             <span>Retour à la page d&apos;accueil du magasin</span>
           </Link>
           <span className="hidden sm:inline text-slate-300">·</span>
-          <PrintInviteButton variant="ghost" className="h-7 text-xs text-slate-500 hover:text-slate-800" />
         </div>
       </div>
     </div>
