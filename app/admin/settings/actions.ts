@@ -49,12 +49,16 @@ export async function updateSettingsAction(data: AppSettings) {
   const result = await updateAppSettings(data, adminEmail);
 
   if (result.success) {
-    // Invalidate cached pages that consume loyalty configurations
+    // Invalidate cached pages and root layouts that consume store / loyalty configurations
     revalidatePath("/admin/settings");
     revalidatePath("/account/loyalty");
     revalidatePath("/account");
     revalidatePath("/cashier/pos");
+    revalidatePath("/cashier");
     revalidatePath("/admin");
+    revalidatePath("/admin/pos");
+    revalidatePath("/admin/invite");
+    revalidatePath("/", "layout");
   }
 
   return result;
@@ -85,7 +89,11 @@ export async function resetSettingsAction(): Promise<{ success: boolean; setting
   revalidatePath("/account/loyalty");
   revalidatePath("/account");
   revalidatePath("/cashier/pos");
+  revalidatePath("/cashier");
   revalidatePath("/admin");
+  revalidatePath("/admin/pos");
+  revalidatePath("/admin/invite");
+  revalidatePath("/", "layout");
 
   return { success: true, settings: result.settings };
 }

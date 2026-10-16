@@ -1,11 +1,25 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
+import fs from 'fs';
+import path from 'path';
 import { AppSettingsSchema } from '@/lib/settings/validation';
 import { DEFAULT_APP_SETTINGS } from '@/lib/settings/types';
 import { getAppSettings, updateAppSettings, resetAppSettings } from '@/lib/settings/service';
 
 describe('Application Settings & Configuration', () => {
+  const testFilePath = path.join(process.cwd(), 'data', 'test-app-settings.json');
+
   beforeEach(async () => {
     await resetAppSettings('test-suite');
+  });
+
+  afterAll(() => {
+    if (fs.existsSync(testFilePath)) {
+      try {
+        fs.unlinkSync(testFilePath);
+      } catch {
+        // Ignore cleanup error
+      }
+    }
   });
 
   describe('Default Configuration Constants', () => {

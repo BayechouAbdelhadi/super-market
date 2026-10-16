@@ -62,10 +62,15 @@ export const AppSettingsSchema = z.object({
       .trim()
       .min(2, "Le nom du magasin doit comporter au moins 2 caractères.")
       .max(100, "Le nom du magasin ne doit pas dépasser 100 caractères."),
-    tagline: z.string().trim().max(150, "Le sous-titre ne doit pas dépasser 150 caractères."),
-    address: z.string().trim().max(255, "L'adresse ne doit pas dépasser 255 caractères."),
-    phone: z.string().trim().max(30, "Le numéro de téléphone ne doit pas dépasser 30 caractères."),
-    email: z.string().trim().email("L'adresse email du magasin est invalide."),
+    tagline: z.string().trim().max(150, "Le sous-titre ne doit pas dépasser 150 caractères.").default(""),
+    address: z.string().trim().max(255, "L'adresse ne doit pas dépasser 255 caractères.").default(""),
+    phone: z.string().trim().max(30, "Le numéro de téléphone ne doit pas dépasser 30 caractères.").default(""),
+    email: z
+      .string()
+      .trim()
+      .email("L'adresse email du magasin est invalide.")
+      .or(z.literal(""))
+      .default(""),
   }),
   notifications: z.object({
     senderEmail: z

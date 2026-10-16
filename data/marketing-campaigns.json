@@ -51,15 +51,40 @@
       "ctaUrl": "https://supermarket-calais.fr",
       "stats": {
         "totalTargets": 3,
-        "sentCount": 1,
+        "sentCount": 2,
         "failedCount": 0,
-        "remainingCount": 2,
-        "progressPercentage": 33
+        "remainingCount": 1,
+        "progressPercentage": 67
       },
       "createdAt": "2026-10-15T22:12:23.958+00:00",
-      "updatedAt": "2026-10-15T22:15:14.439Z",
+      "updatedAt": "2026-10-16T21:05:54.856Z",
       "completedAt": null,
-      "createdBy": "admin@supermarket.com"
+      "createdBy": "admin@supermarket.com",
+      "recipients": [
+        {
+          "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+          "email": "cool@gmail.com",
+          "fullName": "cool cool",
+          "tier": "SILVER",
+          "status": "SENT",
+          "sentAt": "2026-10-15T22:15:14.438+00:00"
+        },
+        {
+          "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+          "email": "mafexad328@meinvr.com",
+          "fullName": "Machin Machin",
+          "tier": "SILVER",
+          "status": "SENT",
+          "sentAt": "2026-10-16T21:05:54.853Z"
+        },
+        {
+          "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+          "email": "abdelbayechou@gmail.com",
+          "fullName": "BAYECHOU1 Abdelhadi",
+          "tier": "SILVER",
+          "status": "PENDING"
+        }
+      ]
     },
     "19a3288e-393b-4ce9-b1e5-7398fea702af": {
       "id": "19a3288e-393b-4ce9-b1e5-7398fea702af",
@@ -512,14 +537,15 @@
         "fullName": "cool cool",
         "tier": "SILVER",
         "status": "SENT",
-        "sentAt": "2026-10-15T22:15:14.438Z"
+        "sentAt": "2026-10-15T22:15:14.438+00:00"
       },
       {
         "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
         "email": "mafexad328@meinvr.com",
         "fullName": "Machin Machin",
         "tier": "SILVER",
-        "status": "PENDING"
+        "status": "SENT",
+        "sentAt": "2026-10-16T21:05:54.853Z"
       },
       {
         "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",

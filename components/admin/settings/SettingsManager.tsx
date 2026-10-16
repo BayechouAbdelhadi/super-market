@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AppSettings, DEFAULT_APP_SETTINGS } from '@/lib/settings/types';
 import { updateSettingsAction, resetSettingsAction } from '@/app/admin/settings/actions';
 import { Card } from '@/components/ui/card';
@@ -26,6 +27,7 @@ interface SettingsManagerProps {
 }
 
 export function SettingsManager({ initialSettings }: SettingsManagerProps) {
+  const router = useRouter();
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
   const [activeTab, setActiveTab] = useState<'loyalty' | 'pos' | 'store' | 'notifications'>('loyalty');
   const [saving, setSaving] = useState(false);
@@ -136,6 +138,23 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       return;
     }
 
+    // Store identity validation
+    if (!settings.store.storeName || settings.store.storeName.trim().length < 2) {
+      setErrorMsg("Le nom de l'enseigne doit comporter au moins 2 caractères.");
+      setSaving(false);
+      return;
+    }
+
+    if (
+      settings.store.email &&
+      settings.store.email.trim() !== "" &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.store.email.trim())
+    ) {
+      setErrorMsg("L'adresse email de contact du magasin est invalide.");
+      setSaving(false);
+      return;
+    }
+
     // Parse comma separated arrays
     const parsedAmounts = quickAmountsStr
       .split(',')
@@ -177,6 +196,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
         setTierGoldStr(res.settings.loyalty.tierGoldMinPoints.toString());
         setTierVipStr(res.settings.loyalty.tierVipMinPoints.toString());
         toast.success("Paramètres enregistrés avec succès !");
+        router.refresh();
       } else {
         const err = res.error || "Une erreur est survenue lors de l'enregistrement.";
         setErrorMsg(err);
@@ -209,6 +229,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
         setQuickPointsStr(res.settings.pos.quickRedeemPoints.join(', '));
         setShowResetConfirm(false);
         toast.success("Configuration réinitialisée aux valeurs par défaut !");
+        router.refresh();
       } else {
         toast.error("Échec de la réinitialisation.");
       }
