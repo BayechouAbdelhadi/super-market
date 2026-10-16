@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/login/actions";
-import { ChevronLeft, ExternalLink, LogOut, Loader2, Activity, Sliders, Sparkles, UserPlus } from "lucide-react";
+import { ChevronLeft, ExternalLink, LogOut, Loader2, Activity, Sliders, Sparkles, QrCode } from "lucide-react";
 
 interface SidebarProps {
   role: "ADMIN" | "CASHIER" | "CUSTOMER";
@@ -79,9 +79,9 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
           ),
         },
         {
-          name: "Inviter Utilisateurs",
+          name: "Affiche & QR Code",
           href: "/admin/invite",
-          icon: <UserPlus className="w-5 h-5 shrink-0" />,
+          icon: <QrCode className="w-5 h-5 shrink-0" />,
         },
         {
           name: "Flux en direct",

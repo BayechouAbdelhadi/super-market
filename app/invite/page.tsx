@@ -2,41 +2,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { ConfirmAccountForm } from "@/components/auth/ConfirmAccountForm";
-import { SignUpForm } from "@/components/auth/SignUpForm";
 import {
   verifySignedToken,
   AccountActivationPayload,
 } from "@/lib/email/otp-security";
 import {
   Sparkles,
-  ShieldCheck,
   Tag,
   Gift,
   AlertCircle,
   ArrowLeft,
+  ArrowRight,
   Coins,
-  CheckCircle2,
 } from "lucide-react";
-import { PrintInviteButton } from "@/components/invite/PrintInviteButton";
 
 export default async function InvitePage({
   searchParams,
 }: {
   searchParams: Promise<{
     token?: string;
-    email?: string;
-    first_name?: string;
-    last_name?: string;
-    phone?: string;
     role?: string;
   }>;
 }) {
   const params = await searchParams;
   const token = params?.token?.trim() || "";
-  const emailParam = params?.email?.trim() || "";
-  const firstNameParam = params?.first_name?.trim() || "";
-  const lastNameParam = params?.last_name?.trim() || "";
-  const phoneParam = params?.phone?.trim() || "";
 
   // Verify HMAC-signed activation token if present
   const payload = token ? verifySignedToken<AccountActivationPayload>(token) : null;
@@ -66,7 +55,7 @@ export default async function InvitePage({
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            {isCashier ? "Invitation Équipe Caisse" : "Invitation Club Fidélité"}
+            {isCashier ? "Invitation Équipe Caisse" : "Programme Fidélité Magasin"}
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold text-[var(--color-text)] tracking-tight">
@@ -74,14 +63,14 @@ export default async function InvitePage({
               ? isCashier
                 ? "Activez votre compte caissier"
                 : "Activez votre compte fidélité"
-              : "Rejoignez Super Market Calais"}
+              : "Bienvenue chez Super Market Calais"}
           </h1>
           <p className="text-sm sm:text-base text-[var(--color-text-muted)] max-w-lg mx-auto leading-relaxed">
             {hasToken
               ? isCashier
                 ? "Vous avez été invité(e) par l'administrateur. Définissez votre mot de passe pour accéder à la caisse."
                 : "Votre compte a été créé. Définissez votre mot de passe pour suivre vos points et remises en temps réel."
-              : "Vous êtes invité(e) à créer votre compte fidélité pour cumuler des points et profiter de réductions exclusives."}
+              : "Rejoignez notre programme de fidélité gratuit pour cumuler des points et profiter de réductions immédiates à chaque passage en caisse."}
           </p>
         </div>
 
@@ -113,10 +102,10 @@ export default async function InvitePage({
 
                   <div className="pt-3 border-t border-[var(--color-border)] space-y-2">
                     <Link
-                      href="/invite"
+                      href="/signup"
                       className="w-full inline-flex items-center justify-center h-10 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors"
                     >
-                      Créer mon compte sans ce lien
+                      Créer mon compte
                     </Link>
                     <Link
                       href="/login"
@@ -131,96 +120,78 @@ export default async function InvitePage({
             </Card>
           </div>
         ) : (
-          /* Public / Direct Invitation Flow: 2-Column Benefits & Account Creation */
-          <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left: Perks & Reassurance */}
-            <div className="lg:col-span-5 space-y-5 order-2 lg:order-1">
-              <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm space-y-4">
-                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Coins className="w-5 h-5 text-amber-500" />
-                  Vos avantages fidélité exclusifs
+          /* Public / Direct Invitation Flow: Welcome & CTA to Signup */
+          <div className="w-full max-w-lg space-y-6">
+            <Card className="p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-[var(--color-border)] text-center space-y-6">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Vos avantages fidélité
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Fidélité Super Market Calais
                 </h2>
-
-                <ul className="space-y-3.5 text-xs sm:text-sm text-slate-600">
-                  <li className="flex items-start gap-3">
-                    <div className="p-1.5 rounded-lg bg-rose-50 text-rose-600 shrink-0 mt-0.5">
-                      <Tag className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <strong className="text-slate-900 block">1 € dépensé = 1 point</strong>
-                      Cumulez des points sur chaque passage en caisse en indiquant simplement votre nom ou numéro.
-                    </div>
-                  </li>
-
-                  <li className="flex items-start gap-3">
-                    <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 shrink-0 mt-0.5">
-                      <Gift className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <strong className="text-slate-900 block">Remises immédiates</strong>
-                      Convertissez vos points en réductions directes sur vos achats alimentaires et primeurs.
-                    </div>
-                  </li>
-
-                  <li className="flex items-start gap-3">
-                    <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 shrink-0 mt-0.5">
-                      <Sparkles className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <strong className="text-slate-900 block">Bons plans de la semaine</strong>
-                      Recevez en avant-première nos promotions et arrivages frais réservés aux adhérents.
-                    </div>
-                  </li>
-
-                  <li className="flex items-start gap-3">
-                    <div className="p-1.5 rounded-lg bg-amber-50 text-amber-600 shrink-0 mt-0.5">
-                      <ShieldCheck className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <strong className="text-slate-900 block">100% gratuit et sans engagement</strong>
-                      Aucune carte bancaire requise. Votre compte est utilisable instantanément au comptoir.
-                    </div>
-                  </li>
-                </ul>
+                <p className="text-xs sm:text-sm text-slate-600 max-w-sm mx-auto">
+                  Cumulez des points sur tous vos achats et bénéficiez de réductions directes.
+                </p>
               </div>
 
-              {/* Already Have an Account Prompt */}
-              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-center text-xs text-slate-600">
-                Vous possédez déjà un compte fidélité ?{" "}
-                <Link href="/login" className="font-bold text-rose-600 hover:text-rose-700 underline">
-                  Connectez-vous ici
-                </Link>
-              </div>
-            </div>
-
-            {/* Right: Registration Form */}
-            <div className="lg:col-span-7 order-1 lg:order-2">
-              <Card className="p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-[var(--color-border)]">
-                <div className="mb-5 pb-3 border-b border-slate-100">
-                  <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-rose-600" />
-                    Créer mon compte en 30 secondes
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Renseignez vos coordonnées pour activer votre profil fidélité.
-                  </p>
+              {/* 3 Key Benefits */}
+              <div className="grid grid-cols-1 gap-3 text-left">
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-rose-100/70 text-rose-600 shrink-0">
+                    <Coins className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs sm:text-sm font-bold text-slate-900">1 € dépensé = 1 point</div>
+                    <div className="text-[11px] text-slate-500">À chaque passage en caisse, sur tout le magasin</div>
+                  </div>
                 </div>
 
-                <SignUpForm
-                  initialData={{
-                    email: emailParam,
-                    firstName: firstNameParam,
-                    lastName: lastNameParam,
-                    phone: phoneParam,
-                  }}
-                />
-              </Card>
-            </div>
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-emerald-100/70 text-emerald-600 shrink-0">
+                    <Gift className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs sm:text-sm font-bold text-slate-900">Remises immédiates en caisse</div>
+                    <div className="text-[11px] text-slate-500">Déduisez directement vos points lors de vos achats</div>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-indigo-100/70 text-indigo-600 shrink-0">
+                    <Tag className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs sm:text-sm font-bold text-slate-900">Promotions &amp; bons plans exclusifs</div>
+                    <div className="text-[11px] text-slate-500">Offres réservées aux adhérents toute l&apos;année</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Primary Call to Action Button to Signup Page */}
+              <div className="space-y-3 pt-2">
+                <Link
+                  href="/signup"
+                  className="w-full h-12 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99]"
+                >
+                  <span>Créer mon compte fidélité (30 secondes)</span>
+                  <ArrowRight className="w-4 h-4 text-rose-400" />
+                </Link>
+
+                <p className="text-xs text-slate-500">
+                  Vous possédez déjà un compte fidélité ?{" "}
+                  <Link href="/login" className="font-bold text-rose-600 hover:underline">
+                    Connectez-vous
+                  </Link>
+                </p>
+              </div>
+            </Card>
           </div>
         )}
 
-        {/* Back Link & Quick Print */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
+        {/* Back Link */}
+        <div className="mt-8 text-center">
           <Link
             href="/"
             className="text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors inline-flex items-center gap-1.5"
@@ -228,7 +199,6 @@ export default async function InvitePage({
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Retour à la page d&apos;accueil du magasin</span>
           </Link>
-          <span className="hidden sm:inline text-slate-300">·</span>
         </div>
       </div>
     </div>
