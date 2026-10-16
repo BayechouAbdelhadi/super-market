@@ -150,6 +150,9 @@ export async function getDashboardAnalytics(): Promise<RealDashboardData> {
       totalCashiersCount: totalCashiersCount ?? 0,
     };
   } catch (err: any) {
+    if (err && typeof err === "object" && "digest" in err && (err as any).digest === "DYNAMIC_SERVER_USAGE") {
+      throw err;
+    }
     console.error("[Analytics Service] Unexpected error in getDashboardAnalytics:", err);
     return {
       generatedAt: new Date().toISOString(),
@@ -249,6 +252,9 @@ export async function getLiveFeedData(limit = 100): Promise<LiveFeedData> {
       },
     };
   } catch (err: any) {
+    if (err && typeof err === "object" && "digest" in err && (err as any).digest === "DYNAMIC_SERVER_USAGE") {
+      throw err;
+    }
     console.error("[Analytics Service] Unexpected error in getLiveFeedData:", err);
     return {
       generatedAt: new Date().toISOString(),

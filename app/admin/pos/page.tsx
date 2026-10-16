@@ -2,6 +2,8 @@ import { CashierDashboard } from "@/components/loyalty/CashierDashboard";
 import { getAppSettings } from "@/lib/settings/service";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "SuperMarket Fidélité — Caisse",
   description: "Recherche client et gestion des points de fidélité au comptoir",

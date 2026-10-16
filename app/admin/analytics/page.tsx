@@ -3,6 +3,8 @@ import { getAppSettings } from "@/lib/settings/service";
 import { AnalyticsDashboard } from "@/components/admin/analytics/AnalyticsDashboard";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "SuperMarket Calais — Analytics & Indicateurs",
   description: "Indicateurs d'activité commerciale, ventes du jour et flux des passages en caisse.",
