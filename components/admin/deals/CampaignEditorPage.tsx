@@ -24,6 +24,8 @@ import {
   AlertCircle,
   Wand2,
   Check,
+  Save,
+  RotateCcw,
 } from "lucide-react";
 
 interface CampaignEditorPageProps {
@@ -78,6 +80,8 @@ export const CAMPAIGN_PRESETS = [
   },
 ];
 
+const DRAFT_STORAGE_KEY = "supermarket_deal_campaign_draft_v2";
+
 export function CampaignEditorPage({
   storeName = "Super Market Calais",
   storeAddress = "205 Avenue Antoine de Saint-Exupéry, 62100 Calais",
@@ -86,6 +90,10 @@ export function CampaignEditorPage({
   const router = useRouter();
 
   // Wizard Step State (1 to 4)
+  // Step 1: Audience & Cibles
+  // Step 2: Mode d'envoi
+  // Step 3: Contenu & Aperçu
+  // Step 4: Planification 24h & Validation finale
   const [step, setStep] = useState<number>(1);
 
   // Audience State (Step 1)
@@ -97,7 +105,19 @@ export function CampaignEditorPage({
   const [dispatchMode, setDispatchMode] = useState<"ALL_AT_ONCE" | "DAILY_LIMIT">("ALL_AT_ONCE");
   const [dailyLimitStr, setDailyLimitStr] = useState<string>("50");
 
-  // Scheduling State (Step 3)
+  // Content State (Step 3)
+  const [title, setTitle] = useState("Offres Exclusives Fidélité");
+  const [subject, setSubject] = useState("🔥 Vos bons plans de la semaine chez Super Market Calais !");
+  const [content, setContent] = useState(
+    "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier."
+  );
+  const [imageUrl, setImageUrl] = useState<string | null>(
+    "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80"
+  );
+  const [ctaText, setCtaText] = useState("Découvrir les offres en magasin");
+  const [ctaUrl, setCtaUrl] = useState("https://supermarket-calais.fr");
+
+  // Scheduling State (Step 4 - Final Step)
   const today = getParisDateString();
   const [startDate, setStartDate] = useState<string>(today);
   const [endDate, setEndDate] = useState<string>(() => {
@@ -124,7 +144,6 @@ export function CampaignEditorPage({
     : "00:00";
 
   const isStartDateToday = startDate === today;
-  const isTimePassedToday = isStartDateToday && scheduledTime <= currentParisTime;
   const isSuspiciousMorningTime = isStartDateToday && isMorning && currentParisTime >= "12:00";
 
   const getOffsetTime = (mins: number) => {
@@ -135,17 +154,10 @@ export function CampaignEditorPage({
     return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
   };
 
-  // Content State (Step 4)
-  const [title, setTitle] = useState("Offres Exclusives Fidélité");
-  const [subject, setSubject] = useState("🔥 Vos bons plans de la semaine chez Super Market Calais !");
-  const [content, setContent] = useState(
-    "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier."
-  );
-  const [imageUrl, setImageUrl] = useState<string | null>(
-    "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80"
-  );
-  const [ctaText, setCtaText] = useState("Découvrir les offres en magasin");
-  const [ctaUrl, setCtaUrl] = useState("https://supermarket-calais.fr");
+  // Draft & Autosave States
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [isRestored, setIsRestored] = useState(false);
 
   // Visualizer Modal & Loading State
   const [isVisualizerOpen, setIsVisualizerOpen] = useState(false);
@@ -153,6 +165,118 @@ export function CampaignEditorPage({
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Campaign UUID ref for grouping uploads and draft updates
+  const campaignIdRef = useRef<string>(
+    typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `camp_${Date.now()}`
+  );
+
+  // 1. Restore draft on mount (from URL draftId or localStorage)
+  useEffect(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const draftIdFromUrl = urlParams.get("draftId");
+
+      if (draftIdFromUrl) {
+        fetch(`/api/admin/deals/${draftIdFromUrl}`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            if (d?.campaign) {
+              const c = d.campaign;
+              campaignIdRef.current = c.id;
+              if (c.title) setTitle(c.title);
+              if (c.subject) setSubject(c.subject);
+              if (c.content) setContent(c.content);
+              if (c.imageUrl !== undefined) setImageUrl(c.imageUrl);
+              if (c.ctaText) setCtaText(c.ctaText);
+              if (c.ctaUrl) setCtaUrl(c.ctaUrl);
+              if (c.targetTiers?.length) setSelectedTiers(c.targetTiers);
+              if (c.dispatchMode) setDispatchMode(c.dispatchMode);
+              if (c.dailyLimit) setDailyLimitStr(c.dailyLimit.toString());
+              if (c.startDate) setStartDate(c.startDate);
+              if (c.endDate) setEndDate(c.endDate);
+              if (c.scheduledTime) setScheduledTime(c.scheduledTime);
+              setLastSavedAt(new Date(c.updatedAt || Date.now()));
+              toast.success(`Brouillon « ${c.title} » chargé depuis le serveur !`);
+            }
+          })
+          .catch(() => {})
+          .finally(() => setIsRestored(true));
+        return;
+      }
+
+      // Check localStorage autosave
+      const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed) {
+          if (parsed.campaignId) campaignIdRef.current = parsed.campaignId;
+          if (parsed.selectedTiers) setSelectedTiers(parsed.selectedTiers);
+          if (parsed.dispatchMode) setDispatchMode(parsed.dispatchMode);
+          if (parsed.dailyLimitStr) setDailyLimitStr(parsed.dailyLimitStr);
+          if (parsed.title) setTitle(parsed.title);
+          if (parsed.subject) setSubject(parsed.subject);
+          if (parsed.content) setContent(parsed.content);
+          if (parsed.imageUrl !== undefined) setImageUrl(parsed.imageUrl);
+          if (parsed.ctaText) setCtaText(parsed.ctaText);
+          if (parsed.ctaUrl) setCtaUrl(parsed.ctaUrl);
+          if (parsed.startDate) setStartDate(parsed.startDate);
+          if (parsed.endDate) setEndDate(parsed.endDate);
+          if (parsed.scheduledTime) setScheduledTime(parsed.scheduledTime);
+          if (parsed.step) setStep(parsed.step);
+          if (parsed.savedAt) setLastSavedAt(new Date(parsed.savedAt));
+        }
+      }
+    } catch (e) {
+      console.warn("Could not restore draft:", e);
+    } finally {
+      setIsRestored(true);
+    }
+  }, []);
+
+  // 2. Autosave EVERY action done by the user into localStorage
+  useEffect(() => {
+    if (!isRestored) return;
+
+    try {
+      const draftData = {
+        campaignId: campaignIdRef.current,
+        selectedTiers,
+        dispatchMode,
+        dailyLimitStr,
+        title,
+        subject,
+        content,
+        imageUrl,
+        ctaText,
+        ctaUrl,
+        startDate,
+        endDate,
+        scheduledTime,
+        step,
+        savedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
+      setLastSavedAt(new Date());
+    } catch (e) {
+      console.warn("Autosave error:", e);
+    }
+  }, [
+    isRestored,
+    selectedTiers,
+    dispatchMode,
+    dailyLimitStr,
+    title,
+    subject,
+    content,
+    imageUrl,
+    ctaText,
+    ctaUrl,
+    startDate,
+    endDate,
+    scheduledTime,
+    step,
+  ]);
 
   // Live audience calculation
   useEffect(() => {
@@ -181,11 +305,6 @@ export function CampaignEditorPage({
       isMounted = false;
     };
   }, [selectedTiers]);
-
-  // Campaign UUID ref for grouping uploads under compaigns/${campaignId}/...
-  const campaignIdRef = useRef<string>(
-    typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `camp_${Date.now()}`
-  );
 
   // Handle Image Upload
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -262,6 +381,23 @@ export function CampaignEditorPage({
   };
 
   const validateStep3 = () => {
+    if (!title.trim() || title.trim().length < 3) {
+      setErrorMsg("Le titre interne doit comporter au moins 3 caractères.");
+      return false;
+    }
+    if (!subject.trim() || subject.trim().length < 3) {
+      setErrorMsg("L'objet de l'email doit comporter au moins 3 caractères.");
+      return false;
+    }
+    if (!content.trim() || content.trim().length < 10) {
+      setErrorMsg("Le message promotionnel doit comporter au moins 10 caractères.");
+      return false;
+    }
+    setErrorMsg("");
+    return true;
+  };
+
+  const validateStep4 = () => {
     if (!startDate || !endDate) {
       setErrorMsg("Veuillez définir une période valide.");
       return false;
@@ -285,32 +421,102 @@ export function CampaignEditorPage({
     if (step > 1) setStep(step - 1);
   };
 
+  // Save as Draft (Server-side persistence)
+  const handleSaveDraft = async () => {
+    setLoadingDraft(true);
+    setErrorMsg("");
+
+    try {
+      const payload = {
+        id: campaignIdRef.current,
+        title: title.trim() || `Brouillon du ${new Date().toLocaleDateString("fr-FR")}`,
+        status: "DRAFT",
+        targetTiers: selectedTiers,
+        dispatchMode,
+        dailyLimit: dispatchMode === "DAILY_LIMIT" ? parseInt(dailyLimitStr, 10) || 50 : null,
+        startDate,
+        endDate,
+        scheduledTime: scheduledTime || "00:00",
+        subject: subject.trim(),
+        content: content.trim(),
+        imageUrl: imageUrl?.trim() || null,
+        ctaText: ctaText.trim() || "Découvrir les offres en magasin",
+        ctaUrl: ctaUrl.trim() || "https://supermarket-calais.fr",
+      };
+
+      const res = await fetch("/api/admin/deals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Erreur lors de la sauvegarde du brouillon.");
+      }
+
+      if (data.campaign?.id) {
+        campaignIdRef.current = data.campaign.id;
+      }
+
+      setLastSavedAt(new Date());
+      toast.success("Brouillon sauvegardé avec succès dans vos campagnes !");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Impossible de sauvegarder le brouillon.");
+      toast.error(err.message || "Erreur de sauvegarde.");
+    } finally {
+      setLoadingDraft(false);
+    }
+  };
+
+  // Reset Draft / Start from scratch
+  const handleResetDraft = () => {
+    if (
+      typeof window !== "undefined" &&
+      window.confirm("Voulez-vous réinitialiser le formulaire et effacer le brouillon actuel ?")
+    ) {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      campaignIdRef.current =
+        typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `camp_${Date.now()}`;
+      setSelectedTiers(["GOLD", "VIP"]);
+      setDispatchMode("ALL_AT_ONCE");
+      setDailyLimitStr("50");
+      setTitle("Offres Exclusives Fidélité");
+      setSubject("🔥 Vos bons plans de la semaine chez Super Market Calais !");
+      setContent(
+        "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier."
+      );
+      setImageUrl("https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80");
+      setCtaText("Découvrir les offres en magasin");
+      setCtaUrl("https://supermarket-calais.fr");
+      setStartDate(today);
+      setEndDate(() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 7);
+        return getParisDateString(d);
+      });
+      setScheduledTime("00:00");
+      setStep(1);
+      setErrorMsg("");
+      setLastSavedAt(null);
+      toast.info("Formulaire réinitialisé.");
+    }
+  };
+
+  // Final Scheduling Submit (Step 4)
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg("");
 
-    if (!validateStep1() || !validateStep2() || !validateStep3()) return;
-
-    if (!title.trim() || title.trim().length < 3) {
-      setErrorMsg("Le titre interne doit comporter au moins 3 caractères.");
-      return;
-    }
-
-    if (!subject.trim() || subject.trim().length < 3) {
-      setErrorMsg("L'objet de l'email doit comporter au moins 3 caractères.");
-      return;
-    }
-
-    if (!content.trim() || content.trim().length < 10) {
-      setErrorMsg("Le message doit comporter au moins 10 caractères.");
-      return;
-    }
+    if (!validateStep1() || !validateStep2() || !validateStep3() || !validateStep4()) return;
 
     setLoadingSubmit(true);
 
     try {
       const payload = {
+        id: campaignIdRef.current,
         title: title.trim(),
+        status: "SCHEDULED",
         targetTiers: selectedTiers,
         dispatchMode,
         dailyLimit: dispatchMode === "DAILY_LIMIT" ? parseInt(dailyLimitStr, 10) : null,
@@ -332,14 +538,19 @@ export function CampaignEditorPage({
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || "Erreur lors de la création de la campagne.");
+        throw new Error(data.message || "Erreur lors de la programmation de la campagne.");
+      }
+
+      // Clear local draft upon successful launch
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
       }
 
       toast.success("Campagne enregistrée et programmée avec succès !");
       router.push("/admin/deals");
       router.refresh();
     } catch (err: any) {
-      setErrorMsg(err.message || "Impossible de sauvegarder la campagne.");
+      setErrorMsg(err.message || "Impossible de programmer la campagne.");
       toast.error(err.message || "Erreur de création.");
     } finally {
       setLoadingSubmit(false);
@@ -349,32 +560,71 @@ export function CampaignEditorPage({
   return (
     <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto pb-12 min-w-0">
       {/* Top Header Card */}
-      <div className="p-4 sm:p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs space-y-2">
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/deals"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors py-1 px-2 rounded-lg hover:bg-[var(--color-surface-hover)]"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Retour aux campagnes</span>
-          </Link>
-          <span className="text-xs text-[var(--color-text-muted)] opacity-40">/</span>
-          <span className="text-xs font-semibold text-[var(--color-primary)]">
-            Nouvelle campagne
-          </span>
+      <div className="p-4 sm:p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/deals"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors py-1 px-2 rounded-lg hover:bg-[var(--color-surface-hover)]"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Retour aux campagnes</span>
+            </Link>
+            <span className="text-xs text-[var(--color-text-muted)] opacity-40">/</span>
+            <span className="text-xs font-semibold text-[var(--color-primary)]">
+              Nouvelle campagne
+            </span>
+          </div>
+
+          {/* Autosave & Quick Actions */}
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+            {lastSavedAt && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] px-2.5 py-1 rounded-lg border border-[var(--color-border)]">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>
+                  Brouillon auto : {lastSavedAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                </span>
+              </span>
+            )}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleSaveDraft}
+              loading={loadingDraft}
+              className="gap-1.5 text-xs font-semibold"
+              title="Sauvegarder le brouillon sur le serveur"
+            >
+              <Save className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+              <span>Sauvegarder brouillon</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleResetDraft}
+              className="gap-1 text-xs text-[var(--color-text-muted)] hover:text-rose-600"
+              title="Réinitialiser le formulaire"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Effacer</span>
+            </Button>
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1 border-t border-[var(--color-border)]/60">
           <div>
-            <h1 className="text-xl sm:text-3xl font-black text-[var(--color-text)] tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-[var(--color-text)] tracking-tight">
               Création &amp; Configuration de Campagne
             </h1>
             <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-0.5">
               Étape {step} sur 4 : {
                 step === 1 ? "Ciblage de l'audience et des catégories de clients" :
                 step === 2 ? "Mode d'envoi (groupé ou quota quotidien lissé)" :
-                step === 3 ? "Période de validité et heure d'exécution 24h" :
-                "Contenu de l'e-mail, modèles et prévisualisation"
+                step === 3 ? "Contenu de l'e-mail, visuels et prévisualisation" :
+                "Période de validité et heure d'exécution 24h"
               }
             </p>
           </div>
@@ -384,13 +634,13 @@ export function CampaignEditorPage({
         </div>
       </div>
 
-      {/* Stepper Tabs - Freely clickable to jump to any step */}
+      {/* Stepper Tabs - Reordered: Audience -> Mode -> Content -> Scheduling */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
         {[
           { num: 1, label: "Audience & Cibles", icon: Users },
           { num: 2, label: "Mode d'envoi", icon: Layers },
-          { num: 3, label: "Planification 24h", icon: Calendar },
-          { num: 4, label: "Contenu & Aperçu", icon: FileText },
+          { num: 3, label: "Contenu & Aperçu", icon: FileText },
+          { num: 4, label: "Planification 24h", icon: Calendar },
         ].map((s) => {
           const Icon = s.icon;
           const isCurrent = step === s.num;
@@ -534,7 +784,7 @@ export function CampaignEditorPage({
             </div>
           </div>
 
-          {/* Navigation */}
+          {/* Step 1 Navigation */}
           <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-[var(--color-border)]">
             <Link href="/admin/deals" className="w-full sm:w-auto">
               <Button type="button" variant="ghost" className="w-full sm:w-auto justify-center">
@@ -542,10 +792,28 @@ export function CampaignEditorPage({
               </Button>
             </Link>
 
-            <Button type="button" variant="primary" onClick={handleNext} className="w-full sm:w-auto justify-center gap-2 font-bold">
-              <span>Continuer vers le mode d&apos;envoi</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleSaveDraft}
+                loading={loadingDraft}
+                className="w-full sm:w-auto justify-center gap-1.5 text-xs font-semibold"
+              >
+                <Save className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                <span>Enregistrer brouillon</span>
+              </Button>
+
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleNext}
+                className="w-full sm:w-auto justify-center gap-2 font-bold"
+              >
+                <span>Continuer vers le mode d&apos;envoi</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </Card>
       )}
@@ -651,426 +919,517 @@ export function CampaignEditorPage({
             </div>
           )}
 
-          {/* Navigation */}
+          {/* Step 2 Navigation */}
           <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-[var(--color-border)]">
-            <Button type="button" variant="secondary" onClick={handleBack} className="w-full sm:w-auto justify-center">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleBack}
+              className="w-full sm:w-auto justify-center"
+            >
               <ArrowLeft className="w-4 h-4 mr-1.5" />
               <span>Précédent</span>
             </Button>
 
-            <Button type="button" variant="primary" onClick={handleNext} className="w-full sm:w-auto justify-center gap-2 font-bold">
-              <span>Continuer vers la planification</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleSaveDraft}
+                loading={loadingDraft}
+                className="w-full sm:w-auto justify-center gap-1.5 text-xs font-semibold"
+              >
+                <Save className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                <span>Enregistrer brouillon</span>
+              </Button>
+
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleNext}
+                className="w-full sm:w-auto justify-center gap-2 font-bold"
+              >
+                <span>Continuer vers le contenu</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </Card>
       )}
 
-      {/* STEP 3: PLANIFICATION & HEURE 24H */}
+      {/* STEP 3: CONTENU & APERÇU (MAINTENANT AVANT LA PLANIFICATION) */}
       {step === 3 && (
         <Card padded="lg" className="space-y-6 animate-in fade-in duration-200">
-          <div className="pb-3 border-b border-[var(--color-border)] space-y-0.5">
-            <h2 className="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[var(--color-primary)]" />
-              <span>3. Définissez la période et l&apos;heure précise d&apos;envoi</span>
-            </h2>
-            <p className="text-xs text-[var(--color-text-muted)]">
-              Le job est synchronisé en permanence sur l&apos;heure locale Europe/Paris.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-[var(--color-text)]">
-                Date de début d&apos;envoi *
-              </label>
-              <input
-                type="date"
-                required
-                min={today}
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full h-11 text-sm font-medium rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
+            <div className="space-y-0.5">
+              <h2 className="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[var(--color-primary)]" />
+                <span>3. Rédigez le contenu et prévisualisez l&apos;email</span>
+              </h2>
+              <p className="text-xs text-[var(--color-text-muted)]">
+                Personnalisez votre offre commerciale. Vous pouvez visualiser le rendu exact via le simulateur smartphone.
+              </p>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-[var(--color-text)]">
-                Date de fin de validité *
-              </label>
-              <input
-                type="date"
-                required
-                min={startDate || today}
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full h-11 text-sm font-medium rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              />
+            {/* Prefill button & Visualize Modal button */}
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => applyPreset(CAMPAIGN_PRESETS[0])}
+                className="flex-1 sm:flex-initial justify-center px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                title="Remplir instantanément avec un modèle de promotion prêt à l'envoi"
+              >
+                <Wand2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span>⚡ Modèle prêt</span>
+              </button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsVisualizerOpen(true)}
+                className="flex-1 sm:flex-initial justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50 whitespace-nowrap"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Visualiser l&apos;email</span>
+              </Button>
             </div>
           </div>
 
-          {/* Smart 24H Time Input Block */}
-          <div className="p-3.5 sm:p-4 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-1">
-                <label htmlFor="deal-scheduled-time" className="flex items-center gap-2 text-xs font-bold text-[var(--color-text)] cursor-pointer">
-                  <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                  <span>Heure d&apos;exécution du job *</span>
-                </label>
-                <p className="text-xs text-[var(--color-text-muted)]">
-                  Heure précise d&apos;envoi des emails (format 24h, heure de Paris).
-                </p>
-                <div className="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1.5">
-                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Heure actuelle à Paris : <strong>{currentParisTime}</strong></span>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
-                {/* AM/PM Switcher */}
-                <div className="inline-flex p-0.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!isMorning) setScheduledTime(amEquivalent);
-                    }}
-                    className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                      isMorning
-                        ? "bg-amber-500 text-white shadow-2xs"
-                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                    }`}
-                  >
-                    ☀️ Matin
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (isMorning) setScheduledTime(pmEquivalent);
-                    }}
-                    className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                      !isMorning
-                        ? "bg-indigo-600 text-white shadow-2xs"
-                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                    }`}
-                  >
-                    🌙 Après-midi
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-                  <input
-                    id="deal-scheduled-time"
-                    type="time"
-                    required
-                    value={scheduledTime}
-                    onChange={(e) => setScheduledTime(e.target.value)}
-                    className="h-11 px-3 text-sm font-bold font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs w-full sm:w-auto"
-                  />
-                  {scheduledTime === "00:00" && (
-                    <span className="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold border border-indigo-500/20 whitespace-nowrap">
-                      🌙 Minuit
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Warning for Suspicious Morning Time */}
-            {isSuspiciousMorningTime && (
-              <div className="p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-950 dark:text-amber-200 space-y-2 animate-in fade-in">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <div className="space-y-0.5 min-w-0">
-                    <strong className="block font-bold break-words">
-                      Attention au format 24h : vous avez saisi « {scheduledTime} » ({schedH}h{String(schedM).padStart(2, "0")} du matin)
-                    </strong>
-                    <p className="text-[11px] leading-relaxed opacity-90 break-words">
-                      Il est actuellement <strong>{currentParisTime}</strong>. Cette heure du matin est donc déjà passée aujourd&apos;hui.
-                      Si vous vouliez programmer pour cet après-midi à <strong>{pmEquivalent}</strong> ({pmEquivalent.replace(":", "h")}), cliquez ci-dessous :
-                    </p>
-                  </div>
-                </div>
-                <div className="pl-0 sm:pl-6">
-                  <button
-                    type="button"
-                    onClick={() => setScheduledTime(pmEquivalent)}
-                    className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all"
-                  >
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>Passer à {pmEquivalent} ({pmEquivalent.replace(":", "h")} après-midi)</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Live Scheduling Timeline Status Badge */}
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
-              <span className="text-[var(--color-text-muted)] font-medium shrink-0">Statut du déclenchement :</span>
-              <div className="break-words min-w-0">
-                {isStartDateToday ? (
-                  scheduledTime > currentParisTime ? (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                      <span>🟢 Prévu aujourd&apos;hui à {scheduledTime} — En attente</span>
-                    </span>
-                  ) : (
-                    <span className="text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-                      <span>⚡ Heure passée ({scheduledTime}) : lancement immédiat</span>
-                    </span>
-                  )
-                ) : (
-                  <span className="text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
-                    <span>📅 Programmé pour le {startDate} à {scheduledTime}</span>
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Quick time presets */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--color-border)]/60 text-xs">
-              <span className="text-[11px] text-[var(--color-text-muted)] font-medium">Raccourcis rapides :</span>
-              {[
-                { label: `⚡ Dans 2 min (${getOffsetTime(2)})`, val: getOffsetTime(2) },
-                { label: `⚡ Dans 5 min (${getOffsetTime(5)})`, val: getOffsetTime(5) },
-                { label: `⚡ Dans 15 min (${getOffsetTime(15)})`, val: getOffsetTime(15) },
-                { label: "Minuit (00:00)", val: "00:00" },
-                { label: "Matin (08:00)", val: "08:00" },
-                { label: "Midi (12:00)", val: "12:00" },
-                { label: "Après-midi (15:00)", val: "15:00" },
-                { label: "Soir (18:30)", val: "18:30" },
-              ].map((preset) => (
+          {/* Ready-to-use Preset chips */}
+          <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-2">
+            <span className="text-[11px] font-semibold text-[var(--color-text-muted)] block">
+              Modèles de campagne prêts à l&apos;emploi :
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {CAMPAIGN_PRESETS.map((preset) => (
                 <button
-                  key={preset.val + preset.label}
+                  key={preset.name}
                   type="button"
-                  onClick={() => setScheduledTime(preset.val)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                    scheduledTime === preset.val
-                      ? "bg-indigo-600 text-white font-bold shadow-2xs"
-                      : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:border-indigo-400"
-                  }`}
+                  onClick={() => applyPreset(preset)}
+                  className="px-3 py-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 text-xs font-medium text-[var(--color-text)] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
-                  {preset.label}
+                  <span>{preset.name}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Navigation */}
+          {/* Campaign Internal Title */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-[var(--color-text)]">
+              Titre interne de la campagne *
+            </label>
+            <input
+              type="text"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Ex : Ventes Flash Primeurs -20% Week-end"
+              className="w-full h-11 text-sm font-semibold rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            />
+          </div>
+
+          {/* Banner Image Upload & Preview */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-[var(--color-text)]">
+              Image d&apos;en-tête (Bannière promotionnelle)
+            </label>
+
+            {imageUrl ? (
+              <div className="relative rounded-2xl border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface-hover)] group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imageUrl}
+                  alt="Bannière campagne"
+                  className="w-full h-44 object-cover object-center"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3 py-1.5 rounded-xl bg-white text-slate-900 text-xs font-bold hover:bg-slate-100 shadow-md cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Remplacer</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setImageUrl(null)}
+                    className="px-3 py-1.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-md cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Supprimer</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="p-6 rounded-2xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-primary)] bg-[var(--color-surface-hover)] text-center cursor-pointer transition-colors space-y-2"
+              >
+                <div className="inline-flex p-3 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-primary)]">
+                  <Upload className="w-5 h-5" />
+                </div>
+                <div className="text-xs font-bold text-[var(--color-text)]">
+                  {isUploadingImage ? "Téléversement en cours..." : "Cliquez pour importer une bannière"}
+                </div>
+                <p className="text-[11px] text-[var(--color-text-muted)]">
+                  Format recommandé : JPG, PNG ou WebP (environ 1200 x 600 px)
+                </p>
+              </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </div>
+
+          {/* Email Subject */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-[var(--color-text)]">
+              Objet de l&apos;email (ce que le client voit dans sa boîte de réception) *
+            </label>
+            <input
+              type="text"
+              required
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Ex : 🔥 Bonnes Affaires : -20% sur les Primeurs et Points Doublés !"
+              className="w-full h-11 text-sm font-semibold rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            />
+          </div>
+
+          {/* Email Message Content */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-[var(--color-text)]">
+                Corps du message promotionnel *
+              </label>
+              <span className="text-[11px] text-[var(--color-text-muted)]">
+                Astuce : Utilisez des tirets « - » pour créer des puces stylisées.
+              </span>
+            </div>
+            <textarea
+              required
+              rows={6}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Rédigez ici le détail des offres, dates et avantages..."
+              className="w-full text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] font-sans leading-relaxed"
+            />
+          </div>
+
+          {/* CTA Button Text & URL */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-[var(--color-text)]">
+                Texte du bouton d&apos;action (CTA)
+              </label>
+              <input
+                type="text"
+                value={ctaText}
+                onChange={(e) => setCtaText(e.target.value)}
+                placeholder="Découvrir les offres en magasin"
+                className="w-full h-11 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-[var(--color-text)]">
+                Lien du bouton (URL)
+              </label>
+              <input
+                type="url"
+                value={ctaUrl}
+                onChange={(e) => setCtaUrl(e.target.value)}
+                placeholder="https://supermarket-calais.fr"
+                className="w-full h-11 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+          </div>
+
+          {/* Step 3 Navigation */}
           <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-[var(--color-border)]">
-            <Button type="button" variant="secondary" onClick={handleBack} className="w-full sm:w-auto justify-center">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleBack}
+              className="w-full sm:w-auto justify-center"
+            >
               <ArrowLeft className="w-4 h-4 mr-1.5" />
               <span>Précédent</span>
             </Button>
 
-            <Button type="button" variant="primary" onClick={handleNext} className="w-full sm:w-auto justify-center gap-2 font-bold">
-              <span>Continuer vers le contenu</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsVisualizerOpen(true)}
+                className="w-full sm:w-auto justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Visualiser l&apos;email</span>
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleSaveDraft}
+                loading={loadingDraft}
+                className="w-full sm:w-auto justify-center gap-1.5 text-xs font-semibold"
+              >
+                <Save className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                <span>Enregistrer brouillon</span>
+              </Button>
+
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleNext}
+                className="w-full sm:w-auto justify-center gap-2 font-bold"
+              >
+                <span>Continuer vers la planification</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </Card>
       )}
 
-      {/* STEP 4: CONTENU & APERÇU EN MODALE (DERNIÈRE ÉTAPE) */}
+      {/* STEP 4: PLANIFICATION & HEURE 24H (DERNIÈRE ÉTAPE AVEC CONFIRMATION) */}
       {step === 4 && (
         <form onSubmit={handleSubmit}>
           <Card padded="lg" className="space-y-6 animate-in fade-in duration-200">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
-              <div className="space-y-0.5">
-                <h2 className="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-[var(--color-primary)]" />
-                  <span>4. Rédigez le contenu et prévisualisez l&apos;email</span>
-                </h2>
-                <p className="text-xs text-[var(--color-text-muted)]">
-                  Personnalisez l&apos;offre commerciale. Vous pouvez visualiser l&apos;e-mail complet via la modale d&apos;aperçu.
+            <div className="pb-3 border-b border-[var(--color-border)] space-y-0.5">
+              <h2 className="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[var(--color-primary)]" />
+                <span>4. Définissez la période et l&apos;heure précise d&apos;envoi</span>
+              </h2>
+              <p className="text-xs text-[var(--color-text-muted)]">
+                Dernière étape : choisissez la date de lancement et l&apos;heure d&apos;envoi exacte synchronisée sur l&apos;heure locale Europe/Paris.
+              </p>
+            </div>
+
+            {/* Campaign Summary Recap Box */}
+            <div className="p-4 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-1 min-w-0">
+                <span className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">
+                  Récapitulatif de la campagne
+                </span>
+                <strong className="text-sm font-bold text-[var(--color-text)] block truncate">
+                  {title}
+                </strong>
+                <p className="text-xs text-[var(--color-text-muted)] truncate">
+                  Objet : « {subject} »
                 </p>
               </div>
 
-              {/* Prefill button & Visualize Modal button */}
-              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={() => applyPreset(CAMPAIGN_PRESETS[0])}
-                  className="flex-1 sm:flex-initial justify-center px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                  title="Remplir instantanément avec un modèle de promotion prêt à l'envoi"
-                >
-                  <Wand2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                  <span>⚡ Pré-remplir</span>
-                </button>
-
-                {/* THE ONLY PLACE IN CREATION TO VISUALIZE THE EMAIL */}
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="text-left sm:text-right">
+                  <span className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold block">
+                    Audience ciblée
+                  </span>
+                  <span className="text-xs font-mono font-bold text-[var(--color-primary)]">
+                    {targetCount !== null ? `${targetCount} client(s)` : "Calcul..."} ({selectedTiers.join(", ")})
+                  </span>
+                </div>
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   onClick={() => setIsVisualizerOpen(true)}
-                  className="flex-1 sm:flex-initial justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50 whitespace-nowrap"
+                  className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50 ml-2"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span className="sm:hidden">Aperçu</span>
-                  <span className="hidden sm:inline">Visualiser l&apos;email</span>
+                  <span>Aperçu</span>
                 </Button>
               </div>
             </div>
 
-            {/* Ready-to-use Preset chips */}
-            <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-2">
-              <span className="text-[11px] font-semibold text-[var(--color-text-muted)] block">
-                Modèles de campagne prêts à l&apos;emploi :
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {CAMPAIGN_PRESETS.map((preset) => (
+            {/* Date Inputs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-[var(--color-text)]">
+                  Date de début d&apos;envoi *
+                </label>
+                <input
+                  type="date"
+                  required
+                  min={today}
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full h-11 text-sm font-medium rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-[var(--color-text)]">
+                  Date de fin de validité *
+                </label>
+                <input
+                  type="date"
+                  required
+                  min={startDate || today}
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full h-11 text-sm font-medium rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                />
+              </div>
+            </div>
+
+            {/* Smart 24H Time Input Block */}
+            <div className="p-3.5 sm:p-4 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <label htmlFor="deal-scheduled-time" className="flex items-center gap-2 text-xs font-bold text-[var(--color-text)] cursor-pointer">
+                    <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>Heure d&apos;exécution du job *</span>
+                  </label>
+                  <p className="text-xs text-[var(--color-text-muted)]">
+                    Heure précise d&apos;envoi des emails (format 24h, heure de Paris).
+                  </p>
+                  <div className="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Heure actuelle à Paris : <strong>{currentParisTime}</strong></span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                  {/* AM/PM Switcher */}
+                  <div className="inline-flex p-0.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!isMorning) setScheduledTime(amEquivalent);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                        isMorning
+                          ? "bg-amber-500 text-white shadow-2xs"
+                          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                      }`}
+                    >
+                      ☀️ Matin
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isMorning) setScheduledTime(pmEquivalent);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                        !isMorning
+                          ? "bg-indigo-600 text-white shadow-2xs"
+                          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                      }`}
+                    >
+                      🌙 Après-midi
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+                    <input
+                      id="deal-scheduled-time"
+                      type="time"
+                      required
+                      value={scheduledTime}
+                      onChange={(e) => setScheduledTime(e.target.value)}
+                      className="h-11 px-3 text-sm font-bold font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs w-full sm:w-auto"
+                    />
+                    {scheduledTime === "00:00" && (
+                      <span className="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold border border-indigo-500/20 whitespace-nowrap">
+                        🌙 Minuit
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Warning for Suspicious Morning Time */}
+              {isSuspiciousMorningTime && (
+                <div className="p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-950 dark:text-amber-200 space-y-2 animate-in fade-in">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div className="space-y-0.5 min-w-0">
+                      <strong className="block font-bold break-words">
+                        Attention au format 24h : vous avez saisi « {scheduledTime} » ({schedH}h{String(schedM).padStart(2, "0")} du matin)
+                      </strong>
+                      <p className="text-[11px] leading-relaxed opacity-90 break-words">
+                        Il est actuellement <strong>{currentParisTime}</strong>. Cette heure du matin est donc déjà passée aujourd&apos;hui.
+                        Si vous vouliez programmer pour cet après-midi à <strong>{pmEquivalent}</strong> ({pmEquivalent.replace(":", "h")}), cliquez ci-dessous :
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pl-0 sm:pl-6">
+                    <button
+                      type="button"
+                      onClick={() => setScheduledTime(pmEquivalent)}
+                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all"
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>Passer à {pmEquivalent} ({pmEquivalent.replace(":", "h")} après-midi)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Live Scheduling Timeline Status Badge */}
+              <div className="p-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+                <span className="text-[var(--color-text-muted)] font-medium shrink-0">Statut du déclenchement :</span>
+                <div className="break-words min-w-0">
+                  {isStartDateToday ? (
+                    scheduledTime > currentParisTime ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                        <span>🟢 Prévu aujourd&apos;hui à {scheduledTime} — En attente</span>
+                      </span>
+                    ) : (
+                      <span className="text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                        <span>⚡ Heure passée ({scheduledTime}) : lancement immédiat</span>
+                      </span>
+                    )
+                  ) : (
+                    <span className="text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
+                      <span>📅 Programmé pour le {startDate} à {scheduledTime}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick time presets */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--color-border)]/60 text-xs">
+                <span className="text-[11px] text-[var(--color-text-muted)] font-medium">Raccourcis rapides :</span>
+                {[
+                  { label: `⚡ Dans 2 min (${getOffsetTime(2)})`, val: getOffsetTime(2) },
+                  { label: `⚡ Dans 5 min (${getOffsetTime(5)})`, val: getOffsetTime(5) },
+                  { label: `⚡ Dans 15 min (${getOffsetTime(15)})`, val: getOffsetTime(15) },
+                  { label: "Minuit (00:00)", val: "00:00" },
+                  { label: "Matin (08:00)", val: "08:00" },
+                  { label: "Midi (12:00)", val: "12:00" },
+                  { label: "Après-midi (15:00)", val: "15:00" },
+                  { label: "Soir (18:30)", val: "18:30" },
+                ].map((preset) => (
                   <button
-                    key={preset.name}
+                    key={preset.val + preset.label}
                     type="button"
-                    onClick={() => applyPreset(preset)}
-                    className="px-3 py-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 text-xs font-medium text-[var(--color-text)] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    onClick={() => setScheduledTime(preset.val)}
+                    className={`px-2.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
+                      scheduledTime === preset.val
+                        ? "bg-indigo-600 text-white font-bold shadow-2xs"
+                        : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:border-indigo-400"
+                    }`}
                   >
-                    <span>{preset.name}</span>
+                    {preset.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Campaign Internal Title */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-[var(--color-text)]">
-                Titre interne de la campagne *
-              </label>
-              <input
-                type="text"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ex : Ventes Flash Primeurs -20% Week-end"
-                className="w-full h-11 text-sm font-semibold rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              />
-            </div>
-
-            {/* Banner Image Upload & Preview */}
-            <div className="space-y-2">
-              <label className="block text-xs font-semibold text-[var(--color-text)]">
-                Image d&apos;en-tête (Bannière promotionnelle)
-              </label>
-
-              {imageUrl ? (
-                <div className="relative rounded-2xl border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface-hover)] group">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={imageUrl}
-                    alt="Bannière campagne"
-                    className="w-full h-44 object-cover object-center"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-3 py-1.5 rounded-xl bg-white text-slate-900 text-xs font-bold hover:bg-slate-100 shadow-md cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>Remplacer</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setImageUrl(null)}
-                      className="px-3 py-1.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-md cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Supprimer</span>
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="p-6 rounded-2xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-primary)] bg-[var(--color-surface-hover)] text-center cursor-pointer transition-colors space-y-2"
-                >
-                  <div className="inline-flex p-3 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-primary)]">
-                    <Upload className="w-5 h-5" />
-                  </div>
-                  <div className="text-xs font-bold text-[var(--color-text)]">
-                    {isUploadingImage ? "Téléversement en cours..." : "Cliquez pour importer une bannière"}
-                  </div>
-                  <p className="text-[11px] text-[var(--color-text-muted)]">
-                    Format recommandé : JPG, PNG ou WebP (environ 1200 x 600 px)
-                  </p>
-                </div>
-              )}
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </div>
-
-            {/* Email Subject */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-[var(--color-text)]">
-                Objet de l&apos;email (ce que le client voit dans sa boîte de réception) *
-              </label>
-              <input
-                type="text"
-                required
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Ex : 🔥 Bonnes Affaires : -20% sur les Primeurs et Points Doublés !"
-                className="w-full h-11 text-sm font-semibold rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              />
-            </div>
-
-            {/* Email Message Content */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-semibold text-[var(--color-text)]">
-                  Corps du message promotionnel *
-                </label>
-                <span className="text-[11px] text-[var(--color-text-muted)]">
-                  Astuce : Utilisez des tirets « - » pour créer des puces stylisées.
-                </span>
-              </div>
-              <textarea
-                required
-                rows={6}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Rédigez ici le détail des offres, dates et avantages..."
-                className="w-full text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] font-sans leading-relaxed"
-              />
-            </div>
-
-            {/* CTA Button Text & URL */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-[var(--color-text)]">
-                  Texte du bouton d&apos;action (CTA)
-                </label>
-                <input
-                  type="text"
-                  value={ctaText}
-                  onChange={(e) => setCtaText(e.target.value)}
-                  placeholder="Découvrir les offres en magasin"
-                  className="w-full h-11 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-[var(--color-text)]">
-                  Lien du bouton (URL)
-                </label>
-                <input
-                  type="url"
-                  value={ctaUrl}
-                  onChange={(e) => setCtaUrl(e.target.value)}
-                  placeholder="https://supermarket-calais.fr"
-                  className="w-full h-11 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                />
-              </div>
-            </div>
-
-            {/* Bottom Action Bar */}
+            {/* Step 4 Final Bottom Action Bar */}
             <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-[var(--color-border)]">
               <Button
                 type="button"
@@ -1092,9 +1451,23 @@ export function CampaignEditorPage({
                   className="w-full sm:w-auto justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span>Aperçu de l&apos;email</span>
+                  <span>Visualiser l&apos;email</span>
                 </Button>
 
+                {/* Save Draft Button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSaveDraft}
+                  loading={loadingDraft}
+                  disabled={loadingSubmit}
+                  className="w-full sm:w-auto justify-center gap-1.5 text-xs font-semibold"
+                >
+                  <Save className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                  <span>Enregistrer brouillon</span>
+                </Button>
+
+                {/* Primary Final Submit Button */}
                 <Button
                   type="submit"
                   variant="primary"
@@ -1110,7 +1483,7 @@ export function CampaignEditorPage({
         </form>
       )}
 
-      {/* Standalone Fullscreen Email Visualizer Modal (available at Step 4) */}
+      {/* Standalone Fullscreen Email Visualizer Modal (available across all steps) */}
       <EmailVisualizerModal
         isOpen={isVisualizerOpen}
         onClose={() => setIsVisualizerOpen(false)}

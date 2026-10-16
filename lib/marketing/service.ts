@@ -72,6 +72,7 @@ export function isCampaignDueNow(
   referenceDate: Date = new Date()
 ): boolean {
   if (
+    campaign.status === "DRAFT" ||
     campaign.status === "PAUSED" ||
     campaign.status === "COMPLETED" ||
     campaign.status === "CANCELLED"
@@ -135,7 +136,7 @@ export async function triggerDueCampaigns(
 }
 
 /**
- * Creates and registers a new marketing campaign job.
+ * Creates and registers a new marketing campaign job or draft.
  */
 export async function createMarketingCampaign(
   input: CreateCampaignInput,
@@ -162,15 +163,20 @@ export async function createMarketingCampaign(
     (input.startDate === todayStr && currentTimeStr >= (input.scheduledTime?.trim() || "00:00"));
 
   const initialStatus =
-    recipients.length === 0
+    input.status === "DRAFT"
+      ? "DRAFT"
+      : recipients.length === 0
       ? "DRAFT"
       : isDueToday
       ? "RUNNING"
       : "SCHEDULED";
 
+  const campaignId = input.id || crypto.randomUUID();
+  const existing = input.id ? await repo.getById(input.id) : null;
+
   const campaign: MarketingCampaign = {
-    id: crypto.randomUUID(),
-    title: input.title.trim(),
+    id: campaignId,
+    title: input.title.trim() || "Brouillon sans titre",
     status: initialStatus,
     targetTiers: input.targetTiers,
     dispatchMode: input.dispatchMode,
@@ -178,7 +184,7 @@ export async function createMarketingCampaign(
     startDate: input.startDate,
     endDate: input.endDate,
     scheduledTime: input.scheduledTime?.trim() || "00:00",
-    lastRunDate: null,
+    lastRunDate: existing?.lastRunDate || null,
     subject: input.subject.trim(),
     content: input.content.trim(),
     imageUrl: input.imageUrl ? input.imageUrl.trim() : null,

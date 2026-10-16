@@ -240,6 +240,66 @@
       "updatedAt": "2026-10-16T13:08:33.487Z",
       "completedAt": "2026-10-16T13:08:33.487Z",
       "createdBy": "admin@supermarket.com"
+    },
+    "camp_1792157467819": {
+      "id": "camp_1792157467819",
+      "title": "Offres Exclusives Fidélité",
+      "status": "DRAFT",
+      "targetTiers": [
+        "SILVER"
+      ],
+      "dispatchMode": "ALL_AT_ONCE",
+      "dailyLimit": null,
+      "startDate": "2026-10-16",
+      "endDate": "2026-10-23",
+      "scheduledTime": "15:33",
+      "lastRunDate": null,
+      "subject": "🔥 Vos bons plans de la semaine chez Super Market Calais !",
+      "content": "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier.",
+      "imageUrl": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
+      "ctaText": "Découvrir les offres en magasin",
+      "ctaUrl": "https://supermarket-calais.fr",
+      "stats": {
+        "totalTargets": 3,
+        "sentCount": 0,
+        "failedCount": 0,
+        "remainingCount": 3,
+        "progressPercentage": 0
+      },
+      "createdAt": "2026-10-16T13:32:01.781Z",
+      "updatedAt": "2026-10-16T13:32:01.781Z",
+      "completedAt": null,
+      "createdBy": "admin@supermarket.com"
+    },
+    "a8809018-3ca8-4ef7-b428-1dc723f02c28": {
+      "id": "a8809018-3ca8-4ef7-b428-1dc723f02c28",
+      "title": "Offres Exclusives Fidélité",
+      "status": "SCHEDULED",
+      "targetTiers": [
+        "SILVER"
+      ],
+      "dispatchMode": "ALL_AT_ONCE",
+      "dailyLimit": null,
+      "startDate": "2026-10-16",
+      "endDate": "2026-10-23",
+      "scheduledTime": "15:36",
+      "lastRunDate": null,
+      "subject": "🔥 Vos bons plans de la semaine chez Super Market Calais !",
+      "content": "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier.",
+      "imageUrl": "https://api.supermarketcalais.com/storage/v1/object/public/super-market/compaigns/a8809018-3ca8-4ef7-b428-1dc723f02c28/img-1792157640663-magasin-bi1-fruits-e.jpg",
+      "ctaText": "Découvrir les offres en magasin",
+      "ctaUrl": "https://supermarket-calais.fr",
+      "stats": {
+        "totalTargets": 3,
+        "sentCount": 0,
+        "failedCount": 0,
+        "remainingCount": 3,
+        "progressPercentage": 0
+      },
+      "createdAt": "2026-10-16T13:34:37.922Z",
+      "updatedAt": "2026-10-16T13:34:37.922Z",
+      "completedAt": null,
+      "createdBy": "admin@supermarket.com"
     }
   },
   "recipients": {
@@ -469,6 +529,52 @@
         "tier": "SILVER",
         "status": "SENT",
         "sentAt": "2026-10-16T13:08:33.486Z"
+      }
+    ],
+    "camp_1792157467819": [
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "PENDING"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "PENDING"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "PENDING"
+      }
+    ],
+    "a8809018-3ca8-4ef7-b428-1dc723f02c28": [
+      {
+        "customerId": "0e7c6a83-0379-45dc-8cd9-256ca1951953",
+        "email": "cool@gmail.com",
+        "fullName": "cool cool",
+        "tier": "SILVER",
+        "status": "PENDING"
+      },
+      {
+        "customerId": "95aedba5-afa1-46d8-88b0-e9847e50da0e",
+        "email": "mafexad328@meinvr.com",
+        "fullName": "Machin Machin",
+        "tier": "SILVER",
+        "status": "PENDING"
+      },
+      {
+        "customerId": "0e2ee582-83fc-4af4-bbc8-3cc2bd7c21bb",
+        "email": "abdelbayechou@gmail.com",
+        "fullName": "BAYECHOU1 Abdelhadi",
+        "tier": "SILVER",
+        "status": "PENDING"
       }
     ]
   }

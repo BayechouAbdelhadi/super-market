@@ -60,7 +60,9 @@ export interface MarketingCampaign {
 }
 
 export interface CreateCampaignInput {
+  id?: string;
   title: string;
+  status?: CampaignStatus;
   targetTiers: LoyaltyTier[];
   dispatchMode: DispatchMode;
   dailyLimit?: number | null;

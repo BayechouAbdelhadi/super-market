@@ -26,6 +26,7 @@ import {
   ChevronRight,
   TrendingUp,
   Eye,
+  Edit3,
 } from "lucide-react";
 
 interface DealsSummary {
@@ -58,7 +59,7 @@ export function DealsManager({
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [previewingCampaign, setPreviewingCampaign] = useState<MarketingCampaign | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "COMPLETED" | "PAUSED">("ALL");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "DRAFT" | "COMPLETED" | "PAUSED">("ALL");
 
   const [runningActionId, setRunningActionId] = useState<string | null>(null);
 
@@ -148,8 +149,11 @@ export function DealsManager({
   };
 
   // Filter campaigns
+  const draftCount = campaigns.filter((c) => c.status === "DRAFT").length;
+
   const filteredCampaigns = campaigns.filter((c) => {
     if (statusFilter === "ACTIVE" && c.status !== "RUNNING" && c.status !== "SCHEDULED") return false;
+    if (statusFilter === "DRAFT" && c.status !== "DRAFT") return false;
     if (statusFilter === "COMPLETED" && c.status !== "COMPLETED") return false;
     if (statusFilter === "PAUSED" && c.status !== "PAUSED") return false;
 
@@ -273,6 +277,7 @@ export function DealsManager({
           {[
             { id: "ALL", label: `Toutes (${campaigns.length})` },
             { id: "ACTIVE", label: `Actives (${summary.activeJobs})` },
+            { id: "DRAFT", label: `Brouillons (${draftCount})` },
             { id: "PAUSED", label: "En pause" },
             { id: "COMPLETED", label: "Terminées" },
           ].map((tab) => (
@@ -435,7 +440,18 @@ export function DealsManager({
                 {/* Bottom Actions Bar */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
                   <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    {camp.status !== "COMPLETED" && stats.remainingCount > 0 && (
+                    {camp.status === "DRAFT" ? (
+                      <Link href={`/admin/deals/new?draftId=${camp.id}`} className="w-full sm:w-auto">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          className="w-full sm:w-auto justify-center gap-1.5 font-semibold text-xs"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Reprendre l&apos;édition</span>
+                        </Button>
+                      </Link>
+                    ) : camp.status !== "COMPLETED" && stats.remainingCount > 0 ? (
                       <Button
                         variant="primary"
                         size="sm"
@@ -450,7 +466,7 @@ export function DealsManager({
                             : `Traiter le lot (${Math.min(stats.remainingCount, camp.dailyLimit || 100)})`}
                         </span>
                       </Button>
-                    )}
+                    ) : null}
 
                     {camp.status === "RUNNING" && (
                       <Button

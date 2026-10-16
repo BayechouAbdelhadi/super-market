@@ -154,6 +154,22 @@ describe('Marketing Deals & Email Campaigns', () => {
       const result = CreateCampaignSchema.safeParse(invalid);
       expect(result.success).toBe(false);
     });
+
+    it('accepts partial content when status is DRAFT', () => {
+      const draft = {
+        title: 'Brouillon en cours',
+        status: 'DRAFT' as const,
+        targetTiers: ['GOLD'],
+        dispatchMode: 'ALL_AT_ONCE' as const,
+        startDate: '2026-10-15',
+        endDate: '2026-10-20',
+        subject: '',
+        content: '',
+      };
+
+      const result = CreateCampaignSchema.safeParse(draft);
+      expect(result.success).toBe(true);
+    });
   });
 
   describe('HTML Email Template (renderDealEmailHtml)', () => {
@@ -632,9 +648,10 @@ describe('Marketing Deals & Email Campaigns', () => {
       };
       expect(isCampaignDueNow(futureTodayCampaign, refDate)).toBe(false);
 
-      // Completed or paused -> NOT due
+      // Completed, paused, or draft -> NOT due
       expect(isCampaignDueNow({ ...dueCampaign, status: 'COMPLETED' }, refDate)).toBe(false);
       expect(isCampaignDueNow({ ...dueCampaign, status: 'PAUSED' }, refDate)).toBe(false);
+      expect(isCampaignDueNow({ ...dueCampaign, status: 'DRAFT' }, refDate)).toBe(false);
 
       // DAILY_LIMIT already run today -> NOT due
       expect(

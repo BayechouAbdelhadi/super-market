@@ -70,12 +70,15 @@ export async function POST(req: NextRequest) {
     }
 
     const campaign = await createMarketingCampaign(parsed.data, auth.user.email);
+    const isDraft = campaign.status === "DRAFT";
 
     return NextResponse.json(
       {
         success: true,
         campaign,
-        message: `Campagne « ${campaign.title} » programmée avec ${campaign.stats.totalTargets} client(s) ciblé(s).`,
+        message: isDraft
+          ? `Brouillon « ${campaign.title} » sauvegardé avec succès.`
+          : `Campagne « ${campaign.title} » programmée avec ${campaign.stats.totalTargets} client(s) ciblé(s).`,
       },
       { status: 201 }
     );

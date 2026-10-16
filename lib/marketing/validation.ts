@@ -2,15 +2,17 @@ import { z } from "zod";
 
 export const CreateCampaignSchema = z
   .object({
+    id: z.string().optional(),
     title: z
       .string()
       .trim()
-      .min(3, "Le titre de la campagne doit contenir au moins 3 caractères.")
+      .min(1, "Le titre de la campagne est requis.")
       .max(120, "Le titre ne doit pas dépasser 120 caractères."),
+    status: z.enum(["DRAFT", "SCHEDULED", "RUNNING"]).optional(),
     targetTiers: z
       .array(z.enum(["BRONZE", "SILVER", "GOLD", "VIP"]))
-      .min(1, "Veuillez sélectionner au moins une catégorie de clients (palier)."),
-    dispatchMode: z.enum(["ALL_AT_ONCE", "DAILY_LIMIT"]),
+      .default(["BRONZE", "SILVER", "GOLD", "VIP"]),
+    dispatchMode: z.enum(["ALL_AT_ONCE", "DAILY_LIMIT"]).default("ALL_AT_ONCE"),
     dailyLimit: z
       .number()
       .int()
@@ -32,12 +34,12 @@ export const CreateCampaignSchema = z
     subject: z
       .string()
       .trim()
-      .min(3, "L'objet de l'email doit comporter au moins 3 caractères.")
-      .max(150, "L'objet ne doit pas dépasser 150 caractères."),
+      .max(150, "L'objet ne doit pas dépasser 150 caractères.")
+      .default(""),
     content: z
       .string()
       .trim()
-      .min(10, "Le contenu de l'offre doit comporter au moins 10 caractères."),
+      .default(""),
     imageUrl: z
       .string()
       .trim()
@@ -50,6 +52,27 @@ export const CreateCampaignSchema = z
   })
   .refine(
     (data) => {
+      if (data.status === "DRAFT") return true;
+      return data.title.trim().length >= 3;
+    },
+    {
+      message: "Le titre de la campagne doit contenir au moins 3 caractères.",
+      path: ["title"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.status === "DRAFT") return true;
+      return data.targetTiers.length >= 1;
+    },
+    {
+      message: "Veuillez sélectionner au moins une catégorie de clients (palier).",
+      path: ["targetTiers"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.status === "DRAFT" && data.dailyLimit === undefined) return true;
       if (data.dispatchMode === "DAILY_LIMIT") {
         return typeof data.dailyLimit === "number" && data.dailyLimit > 0;
       }
@@ -62,11 +85,32 @@ export const CreateCampaignSchema = z
   )
   .refine(
     (data) => {
+      if (data.status === "DRAFT") return true;
       return data.endDate >= data.startDate;
     },
     {
       message: "La date de fin doit être postérieure ou égale à la date de début.",
       path: ["endDate"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.status === "DRAFT") return true;
+      return data.subject.trim().length >= 3;
+    },
+    {
+      message: "L'objet de l'email doit comporter au moins 3 caractères.",
+      path: ["subject"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.status === "DRAFT") return true;
+      return data.content.trim().length >= 10;
+    },
+    {
+      message: "Le contenu de l'offre doit comporter au moins 10 caractères.",
+      path: ["content"],
     }
   );
 
