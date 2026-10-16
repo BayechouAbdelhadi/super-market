@@ -6,7 +6,19 @@ import QRCode from "qrcode";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
-import { Printer, Download, Copy, Check, Sparkles, QrCode, FileImage } from "lucide-react";
+import {
+  Printer,
+  Copy,
+  Check,
+  Sparkles,
+  QrCode,
+  FileImage,
+  Coins,
+  Gift,
+  Tag,
+  CheckCircle2,
+  Smartphone,
+} from "lucide-react";
 
 interface PrintInviteQrModalProps {
   isOpen: boolean;
@@ -33,7 +45,7 @@ export function PrintInviteQrModal({
   useEffect(() => {
     if (isOpen && finalUrl) {
       QRCode.toDataURL(finalUrl, {
-        width: 700,
+        width: 800,
         margin: 2,
         color: {
           dark: "#0f172a",
@@ -49,6 +61,7 @@ export function PrintInviteQrModal({
     }
   }, [isOpen, finalUrl]);
 
+  // 1. Isolated print
   const handlePrint = () => {
     const flyerElement = printableRef.current || document.getElementById("printable-qr-flyer");
     if (!flyerElement) {
@@ -56,7 +69,6 @@ export function PrintInviteQrModal({
       return;
     }
 
-    // Create an isolated hidden iframe for printing exclusively the flyer
     const iframe = document.createElement("iframe");
     iframe.style.position = "fixed";
     iframe.style.right = "0";
@@ -74,7 +86,6 @@ export function PrintInviteQrModal({
       return;
     }
 
-    // Clone all stylesheets and style blocks from the host document
     const headStyles = Array.from(
       document.querySelectorAll('link[rel="stylesheet"], style')
     )
@@ -92,7 +103,7 @@ export function PrintInviteQrModal({
           <style>
             @page {
               size: A4 portrait;
-              margin: 15mm auto;
+              margin: 12mm auto;
             }
             * {
               box-sizing: border-box;
@@ -113,19 +124,19 @@ export function PrintInviteQrModal({
               justify-content: center !important;
               align-items: center !important;
               min-height: 100vh !important;
-              padding: 10mm 0 !important;
+              padding: 8mm 0 !important;
             }
             #printable-qr-flyer {
               display: block !important;
               visibility: visible !important;
               width: 100% !important;
-              max-width: 480px !important;
+              max-width: 500px !important;
               margin: 0 auto !important;
-              padding: 28px 24px !important;
-              border: 1.5px solid #cbd5e1 !important;
-              border-radius: 24px !important;
+              padding: 32px 28px !important;
+              border: 2px solid #e2e8f0 !important;
+              border-radius: 28px !important;
               box-shadow: none !important;
-              background: #ffffff !important;
+              background: linear-gradient(180deg, #fffdfa 0%, #ffffff 50%, #fff1f2 100%) !important;
               page-break-inside: avoid !important;
               break-inside: avoid !important;
             }
@@ -187,7 +198,6 @@ export function PrintInviteQrModal({
         }
       });
 
-      // Safety timeout in case an image hangs
       setTimeout(() => {
         if (!isExecuted) {
           isExecuted = true;
@@ -197,25 +207,15 @@ export function PrintInviteQrModal({
     }
   };
 
-  const handleDownloadQrOnly = () => {
-    if (!qrDataUrl) return;
-    const a = document.createElement("a");
-    a.href = qrDataUrl;
-    a.download = "supermarket-calais-qrcode.png";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    toast.success("Image du QR Code seul téléchargée !");
-  };
-
+  // 2. Download Canvas PNG
   const handleDownloadWholeFlyer = async () => {
     if (!qrDataUrl) return;
     setIsExporting(true);
     try {
-      toast.info("Génération de l'affiche en haute résolution...");
+      toast.info("Génération de l'affiche marketing HD...");
       const canvas = document.createElement("canvas");
       canvas.width = 1200;
-      canvas.height = 1600;
+      canvas.height = 1650;
       const ctx = canvas.getContext("2d");
       if (!ctx) {
         toast.error("Erreur d'initialisation graphique.");
@@ -223,7 +223,6 @@ export function PrintInviteQrModal({
         return;
       }
 
-      // Draw rounded rectangle helper
       const drawRoundRect = (
         c: CanvasRenderingContext2D,
         x: number,
@@ -239,18 +238,25 @@ export function PrintInviteQrModal({
         }
       };
 
-      // 1. Background
-      ctx.fillStyle = "#ffffff";
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      bgGrad.addColorStop(0, "#fffbf5");
+      bgGrad.addColorStop(0.5, "#ffffff");
+      bgGrad.addColorStop(1, "#fff1f2");
+      ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 2. Outer decorative border
-      ctx.strokeStyle = "#e2e8f0";
+      ctx.strokeStyle = "#fed7aa";
       ctx.lineWidth = 4;
       ctx.beginPath();
-      drawRoundRect(ctx, 36, 36, canvas.width - 72, canvas.height - 72, 32);
+      drawRoundRect(ctx, 36, 36, canvas.width - 72, canvas.height - 72, 36);
       ctx.stroke();
 
-      // 3. Logo
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      drawRoundRect(ctx, 48, 48, canvas.width - 96, canvas.height - 96, 30);
+      ctx.stroke();
+
       const logoImg = new window.Image();
       logoImg.crossOrigin = "anonymous";
       logoImg.src = "/logo-hq.png";
@@ -262,52 +268,67 @@ export function PrintInviteQrModal({
       if (logoImg.complete && logoImg.naturalWidth > 0) {
         ctx.save();
         ctx.beginPath();
-        ctx.arc(600, 160, 60, 0, Math.PI * 2, true);
+        ctx.arc(600, 150, 64, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.clip();
-        ctx.drawImage(logoImg, 540, 100, 120, 120);
+        ctx.drawImage(logoImg, 536, 86, 128, 128);
         ctx.restore();
 
-        ctx.strokeStyle = "#cbd5e1";
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#f43f5e";
+        ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.arc(600, 160, 60, 0, Math.PI * 2, true);
+        ctx.arc(600, 150, 64, 0, Math.PI * 2, true);
         ctx.stroke();
       }
 
-      // 4. Store Title
       ctx.fillStyle = "#0f172a";
       ctx.font = "900 52px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("SUPER MARKET CALAIS", 600, 275);
+      ctx.fillText("SUPER MARKET CALAIS", 600, 260);
 
-      // 5. Badge: Programme Fidélité Magasin
-      ctx.fillStyle = "#ffe4e6";
-      const badgeW = 440;
-      const badgeH = 48;
+      ctx.fillStyle = "#e11d48";
+      const badgeW = 460;
+      const badgeH = 50;
       const badgeX = 600 - badgeW / 2;
-      const badgeY = 305;
+      const badgeY = 285;
       ctx.beginPath();
-      drawRoundRect(ctx, badgeX, badgeY, badgeW, badgeH, 24);
+      drawRoundRect(ctx, badgeX, badgeY, badgeW, badgeH, 25);
       ctx.fill();
-      ctx.strokeStyle = "#fecdd3";
-      ctx.lineWidth = 2;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 22px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("✦  CLUB FIDÉLITÉ OFFICIEL  ✦", 600, 318);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "900 48px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("ÉCONOMISEZ SUR VOS COURSES !", 600, 400);
+
+      ctx.fillStyle = "#475569";
+      ctx.font = "600 24px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("Scannez ce QR Code et activez votre cagnotte en 30 secondes en caisse", 600, 445);
+
+      const qrFrameW = 580;
+      const qrFrameH = 620;
+      const qrFrameX = 600 - qrFrameW / 2;
+      const qrFrameY = 485;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      drawRoundRect(ctx, qrFrameX, qrFrameY, qrFrameW, qrFrameH, 32);
+      ctx.fill();
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = 6;
       ctx.stroke();
 
-      ctx.fillStyle = "#be123c";
+      ctx.fillStyle = "#fff1f2";
+      ctx.beginPath();
+      drawRoundRect(ctx, qrFrameX + 40, qrFrameY + 20, qrFrameW - 80, 44, 22);
+      ctx.fill();
+
+      ctx.fillStyle = "#e11d48";
       ctx.font = "bold 20px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("✦  PROGRAMME FIDÉLITÉ MAGASIN  ✦", 600, 336);
+      ctx.fillText("📲  POINTEZ L'APPAREIL PHOTO DE VOTRE TÉLÉPHONE", 600, qrFrameY + 49);
 
-      // 6. Header Text
-      ctx.fillStyle = "#0f172a";
-      ctx.font = "800 42px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("Créez votre compte fidélité en 30s !", 600, 420);
-
-      ctx.fillStyle = "#64748b";
-      ctx.font = "500 24px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("Scannez ce code avec l'appareil photo de votre smartphone", 600, 465);
-
-      // 7. QR Code Frame & Image
       const qrImg = new window.Image();
       qrImg.src = qrDataUrl;
       await new Promise<void>((resolve) => {
@@ -315,68 +336,85 @@ export function PrintInviteQrModal({
         qrImg.onerror = () => resolve();
       });
 
-      // Frame around QR
-      ctx.fillStyle = "#ffffff";
+      ctx.drawImage(qrImg, 340, qrFrameY + 80, 520, 520);
+
+      const cardY = 1145;
+      const cardH = 145;
+      const cardW = 340;
+
+      ctx.fillStyle = "#fffbeb";
       ctx.beginPath();
-      drawRoundRect(ctx, 310, 520, 580, 580, 32);
+      drawRoundRect(ctx, 80, cardY, cardW, cardH, 20);
       ctx.fill();
-      ctx.strokeStyle = "#0f172a";
-      ctx.lineWidth = 6;
+      ctx.strokeStyle = "#fde68a";
+      ctx.lineWidth = 2;
       ctx.stroke();
 
-      ctx.drawImage(qrImg, 330, 540, 540, 540);
+      ctx.fillStyle = "#b45309";
+      ctx.font = "900 28px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("1 € = 1 Point", 250, cardY + 55);
+      ctx.fillStyle = "#78350f";
+      ctx.font = "500 19px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("Cagnottez sur chaque ticket", 250, cardY + 95);
 
-      // 8. Perks (2 Cards)
-      // Left Card: Cumul de points
-      ctx.fillStyle = "#f8fafc";
+      ctx.fillStyle = "#f0fdf4";
       ctx.beginPath();
-      drawRoundRect(ctx, 140, 1160, 440, 150, 24);
+      drawRoundRect(ctx, 430, cardY, cardW, cardH, 20);
       ctx.fill();
-      ctx.strokeStyle = "#e2e8f0";
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#bbf7d0";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#15803d";
+      ctx.font = "900 28px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("Remises en Caisse", 600, cardY + 55);
+      ctx.fillStyle = "#14532d";
+      ctx.font = "500 19px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("Déduisez vos points en euros", 600, cardY + 95);
+
+      ctx.fillStyle = "#fff1f2";
+      ctx.beginPath();
+      drawRoundRect(ctx, 780, cardY, cardW, cardH, 20);
+      ctx.fill();
+      ctx.strokeStyle = "#fecdd3";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#be123c";
+      ctx.font = "900 28px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("Offres Exclusives", 950, cardY + 55);
+      ctx.fillStyle = "#9f1239";
+      ctx.font = "500 19px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("Promos réservées au Club", 950, cardY + 95);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.beginPath();
+      drawRoundRect(ctx, 160, 1330, 880, 56, 28);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 22px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("✓  100% GRATUIT  ·  SANS CARTE BANCAIRE  ·  VALABLE IMMÉDIATEMENT", 600, 1365);
+
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(140, 1425);
+      ctx.lineTo(1060, 1425);
       ctx.stroke();
 
       ctx.fillStyle = "#0f172a";
-      ctx.font = "bold 32px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("Cumul de points", 360, 1225);
-      ctx.fillStyle = "#64748b";
-      ctx.font = "500 22px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("À chaque passage en caisse", 360, 1270);
-
-      // Right Card: Promos exclusives
-      ctx.fillStyle = "#fff1f2";
-      ctx.beginPath();
-      drawRoundRect(ctx, 620, 1160, 440, 150, 24);
-      ctx.fill();
-      ctx.strokeStyle = "#fecdd3";
-      ctx.lineWidth = 3;
-      ctx.stroke();
+      ctx.font = "bold 26px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("205 Avenue Antoine de Saint-Exupéry, 62100 Calais", 600, 1475);
 
       ctx.fillStyle = "#e11d48";
-      ctx.font = "bold 32px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("Promos exclusives", 840, 1225);
-      ctx.fillStyle = "#64748b";
-      ctx.font = "500 22px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("Réception d'offres réservées", 840, 1270);
-
-      // 9. Divider
-      ctx.strokeStyle = "#e2e8f0";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(140, 1370);
-      ctx.lineTo(1060, 1370);
-      ctx.stroke();
-
-      // 10. Store Address & URL
-      ctx.fillStyle = "#1e293b";
-      ctx.font = "600 24px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("205 Avenue Antoine de Saint-Exupéry, 62100 Calais", 600, 1425);
+      ctx.font = "600 22px monospace";
+      ctx.fillText(finalUrl, 600, 1515);
 
       ctx.fillStyle = "#64748b";
-      ctx.font = "500 20px monospace";
-      ctx.fillText(finalUrl, 600, 1465);
+      ctx.font = "italic 20px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("« Votre supermarché de quartier toujours à vos côtés ! »", 600, 1560);
 
-      // Trigger download
       const link = document.createElement("a");
       link.download = "affiche-fidelite-supermarket-calais.png";
       link.href = canvas.toDataURL("image/png");
@@ -392,6 +430,17 @@ export function PrintInviteQrModal({
     }
   };
 
+  const handleDownloadQrOnly = () => {
+    if (!qrDataUrl) return;
+    const a = document.createElement("a");
+    a.href = qrDataUrl;
+    a.download = "supermarket-calais-qrcode.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.success("Image du QR Code seul téléchargée !");
+  };
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(finalUrl);
     setCopied(true);
@@ -401,7 +450,6 @@ export function PrintInviteQrModal({
 
   return (
     <>
-      {/* Global CSS to cleanly isolate printable flyer if window.print() or Ctrl+P is triggered */}
       <style>{`
         @media print {
           @page {
@@ -416,7 +464,6 @@ export function PrintInviteQrModal({
             margin: 0 !important;
             padding: 0 !important;
           }
-          /* Completely hide any top-level layout element that does not contain the flyer */
           body > *:not(:has(#printable-qr-flyer)) {
             display: none !important;
           }
@@ -441,16 +488,16 @@ export function PrintInviteQrModal({
           #printable-qr-flyer {
             display: block !important;
             visibility: visible !important;
-            border: 1.5px solid #cbd5e1 !important;
-            border-radius: 24px !important;
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 28px !important;
             box-shadow: none !important;
             max-width: 160mm !important;
             width: 100% !important;
-            margin: 15mm auto !important;
+            margin: 10mm auto !important;
             padding: 28px 24px !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
-            background: #ffffff !important;
+            background: linear-gradient(180deg, #fffdfa 0%, #ffffff 50%, #fff1f2 100%) !important;
           }
           * {
             -webkit-print-color-adjust: exact !important;
@@ -472,15 +519,18 @@ export function PrintInviteQrModal({
             Imprimez cette affiche pour vos comptoirs de caisse ou téléchargez l&apos;image pour vos communications.
           </p>
 
-          {/* Printable Flyer Preview Container */}
+          {/* THE ENHANCED ALLURING POSTER */}
           <div
             id="printable-qr-flyer"
             ref={printableRef}
-            className="w-full max-w-sm sm:max-w-md mx-auto bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 text-center shadow-xs space-y-4"
+            className="w-full max-w-sm sm:max-w-md mx-auto rounded-3xl border-2 border-rose-200/90 p-5 sm:p-6 text-center shadow-lg shadow-rose-950/5 space-y-4 relative overflow-hidden bg-gradient-to-b from-[#fffdfa] via-white to-[#fff1f2]"
           >
+            {/* Top decorative gradient bar */}
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-400 via-rose-500 to-rose-600" />
+
             {/* Header Brand */}
-            <div className="flex flex-col items-center">
-              <div className="h-14 w-14 rounded-full bg-slate-50 border border-slate-200 p-1 flex items-center justify-center mb-1.5 overflow-hidden shadow-xs">
+            <div className="flex flex-col items-center pt-1">
+              <div className="h-14 w-14 rounded-full bg-white border-2 border-rose-200 p-1 flex items-center justify-center mb-1.5 overflow-hidden shadow-xs ring-4 ring-rose-50">
                 <Image
                   src="/logo-hq.png"
                   alt="SuperMarket Logo"
@@ -493,25 +543,31 @@ export function PrintInviteQrModal({
               <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">
                 Super Market Calais
               </h2>
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mt-1">
-                <Sparkles className="w-3 h-3" />
-                Programme Fidélité Magasin
+
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-600 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-wider mt-1 shadow-xs">
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                Club Fidélité Officiel
               </div>
             </div>
 
-            {/* Title & Call to Action */}
-            <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug">
-                Créez votre compte fidélité en 30 secondes !
+            {/* Magnetic Catchy Headline */}
+            <div className="space-y-1 pt-1">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight uppercase tracking-tight">
+                Économisez sur vos courses !
               </h3>
-              <p className="text-[11px] sm:text-xs text-slate-600 max-w-xs mx-auto">
-                Scannez ce code avec l&apos;appareil photo de votre smartphone pour commencer à cumuler vos points.
+              <p className="text-[11px] sm:text-xs text-slate-600 font-medium max-w-xs mx-auto">
+                Scannez ce QR Code et activez votre cagnotte en 30 secondes en caisse.
               </p>
             </div>
 
-            {/* Crisp QR Code Container */}
+            {/* Crisp Focal QR Code Container */}
             <div className="flex justify-center my-1">
-              <div className="p-2.5 sm:p-3 bg-white rounded-2xl border-2 border-slate-900 shadow-xs inline-block">
+              <div className="p-2.5 sm:p-3 bg-white rounded-2xl border-2 border-slate-900 shadow-md inline-block relative">
+                <div className="mb-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-bold flex items-center justify-center gap-1">
+                  <Smartphone className="w-3 h-3 text-rose-500" />
+                  <span>Pointez votre smartphone</span>
+                </div>
+
                 {qrDataUrl ? (
                   <img
                     src={qrDataUrl}
@@ -523,27 +579,52 @@ export function PrintInviteQrModal({
                     Génération du code...
                   </div>
                 )}
+
+                <div className="mt-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  ✦ Inscription instantanée ✦
+                </div>
               </div>
             </div>
 
-            {/* Perks: Cumul de points & Promos exclusives */}
-            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 text-slate-700">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center text-center">
-                <div className="text-xs sm:text-sm font-extrabold text-slate-900">Cumul de points</div>
-                <div className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">À chaque passage en caisse</div>
+            {/* Three Marketing Benefit Badges */}
+            <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-rose-100 text-left">
+              <div className="p-1.5 sm:p-2 rounded-xl bg-amber-50/80 border border-amber-200/70 flex flex-col items-center text-center">
+                <div className="p-1 rounded-md bg-amber-100 text-amber-700 mb-0.5">
+                  <Coins className="w-3 h-3" />
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-black text-slate-900">1 € = 1 Pt</div>
+                <div className="text-[9px] text-slate-600 mt-0.5 leading-tight">À chaque caisse</div>
               </div>
-              <div className="p-2 sm:p-2.5 rounded-xl bg-rose-50/50 border border-rose-100 flex flex-col items-center text-center">
-                <div className="text-xs sm:text-sm font-extrabold text-rose-600">Promos exclusives</div>
-                <div className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Réception d&apos;offres réservées</div>
+
+              <div className="p-1.5 sm:p-2 rounded-xl bg-emerald-50/80 border border-emerald-200/70 flex flex-col items-center text-center">
+                <div className="p-1 rounded-md bg-emerald-100 text-emerald-700 mb-0.5">
+                  <Gift className="w-3 h-3" />
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-black text-emerald-800">Remises</div>
+                <div className="text-[9px] text-slate-600 mt-0.5 leading-tight">Déduites direct</div>
               </div>
+
+              <div className="p-1.5 sm:p-2 rounded-xl bg-rose-50/80 border border-rose-200/70 flex flex-col items-center text-center">
+                <div className="p-1 rounded-md bg-rose-100 text-rose-700 mb-0.5">
+                  <Tag className="w-3 h-3" />
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-black text-rose-700">Bons plans</div>
+                <div className="text-[9px] text-slate-600 mt-0.5 leading-tight">Exclusifs Club</div>
+              </div>
+            </div>
+
+            {/* Reassurance Ribbon */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-slate-900 text-white text-[10px] font-bold">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+              <span>100% Gratuit · Sans carte bancaire</span>
             </div>
 
             {/* Store Address & URL Footer */}
-            <div className="pt-2 text-[10px] sm:text-[11px] text-slate-500 border-t border-slate-100 space-y-0.5">
-              <div className="font-semibold text-slate-800">
+            <div className="pt-2 text-[10px] text-slate-500 border-t border-rose-100 space-y-0.5">
+              <div className="font-bold text-slate-900">
                 205 Avenue Antoine de Saint-Exupéry, 62100 Calais
               </div>
-              <div className="text-[10px] text-slate-400 font-mono truncate">
+              <div className="text-[10px] text-rose-600 font-mono truncate font-semibold">
                 {finalUrl}
               </div>
             </div>
@@ -551,7 +632,6 @@ export function PrintInviteQrModal({
 
           {/* Action Buttons (Excluded from print) */}
           <div className="space-y-2.5 pt-1 no-print">
-            {/* Primary Action: Print */}
             <Button
               type="button"
               onClick={handlePrint}
@@ -561,7 +641,6 @@ export function PrintInviteQrModal({
               <span>Imprimer l&apos;affiche (Format A4 / A5)</span>
             </Button>
 
-            {/* Secondary Actions: Download Options & Link Copy */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <Button
                 type="button"
@@ -571,7 +650,7 @@ export function PrintInviteQrModal({
                 className="h-10 px-2 rounded-xl border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-700 hover:text-slate-900"
               >
                 <FileImage className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                <span className="truncate">Télécharger l&apos;affiche</span>
+                <span className="truncate">Affiche PNG HD</span>
               </Button>
 
               <Button
@@ -581,7 +660,7 @@ export function PrintInviteQrModal({
                 className="h-10 px-2 rounded-xl border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-700 hover:text-slate-900"
               >
                 <QrCode className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                <span className="truncate">QR Code seul (PNG)</span>
+                <span className="truncate">QR Code seul</span>
               </Button>
 
               <Button
@@ -591,7 +670,7 @@ export function PrintInviteQrModal({
                 className="h-10 px-2 rounded-xl border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-700 hover:text-slate-900"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <Copy className="w-3.5 h-3.5 text-slate-600 shrink-0" />}
-                <span className="truncate">{copied ? "Lien copié !" : "Copier le lien"}</span>
+                <span className="truncate">{copied ? "Copié !" : "Copier le lien"}</span>
               </Button>
             </div>
           </div>
