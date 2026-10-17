@@ -81,6 +81,24 @@ export const CAMPAIGN_PRESETS = [
     ctaText: "Profiter des promotions",
     ctaUrl: "https://supermarket-calais.fr",
   },
+  {
+    name: "❄️ Surgelés Hunkar & Idéal Délices",
+    title: "Rayon Surgelés : +100 Références & Exclusivités",
+    subject: "❄️ Arrivage Surgelés : Hunkar & Idéal Délices en exclusivité à prix cassés !",
+    content: `Découvrez notre rayon surgelés avec plus de 100 références à prix imbattables dans votre magasin Super Market Calais :\n\n- En exclusivité : toute la gamme de spécialités des marques Hunkar et Idéal Délices\n- Plats préparés, viandes surgelées, légumes et délices prêts à cuisiner\n- Points fidélité doublés sur tout le rayon surgelés dès 20€ d'achat\n\nRemplissez votre congélateur sans compromis sur la qualité ni sur votre budget !`,
+    imageUrl: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=1200&q=80",
+    ctaText: "Découvrir le rayon surgelés",
+    ctaUrl: "https://supermarket-calais.fr",
+  },
+  {
+    name: "🥤 Boissons Pack N°1 Calais",
+    title: "N°1 des Boissons en Pack à Calais : +60 Références",
+    subject: "🥤 Spécial Boissons : Le N°1 en pack sur Calais vous régale à petits prix !",
+    content: `Super Market Calais est votre destination numéro 1 pour les boissons en pack sur Calais !\n\n- Plus de 60 références disponibles en stock permanent : sodas, jus, eaux gazeuses et thés glacés\n- Prix dégressifs et promos sur les packs familiaux\n- 50 points fidélité offerts dès 3 packs achetés\n\nFaites le plein de fraîcheur au meilleur prix de la région !`,
+    imageUrl: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=1200&q=80",
+    ctaText: "Voir les offres boissons",
+    ctaUrl: "https://supermarket-calais.fr",
+  },
 ];
 
 export function NewDealJobModal({
