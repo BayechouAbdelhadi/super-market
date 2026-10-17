@@ -1006,6 +1006,9 @@ export default function Home() {
                   <span>{appSettings.store.phone}</span>
                 </a>
               )}
+              <Link href="/politique-de-confidentialite" className="hover:text-[var(--color-text)] transition-colors">
+                <span>Confidentialité</span>
+              </Link>
               <Link href="/login" className="hover:text-[var(--color-text)] transition-colors">
                 <span>Votre compte</span>
               </Link>
@@ -1014,7 +1017,14 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px]">
             <p>© {new Date().getFullYear()} {appSettings.store.storeName}. Tous droits réservés.</p>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                href="/politique-de-confidentialite"
+                className="hover:text-[var(--color-primary)] transition-colors underline underline-offset-2"
+              >
+                Politique de confidentialité
+              </Link>
+              <span className="opacity-40">•</span>
               <span>Du lundi au dimanche 7j/7</span>
               <span className="opacity-40">•</span>
               <span>Relais Pickup La Poste</span>
