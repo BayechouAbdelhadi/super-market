@@ -3,7 +3,7 @@ import { cn } from "cn"
 
 export interface CardProps extends React.ComponentProps<"div"> {
   interactive?: boolean
-  padded?: boolean | "sm" | "md" | "lg"
+  padded?: boolean | "none" | "sm" | "md" | "lg"
 }
 
 function Card({
@@ -15,6 +15,7 @@ function Card({
   const paddingClasses = padded !== undefined
     ? {
         false: "",
+        none: "",
         true: "p-4 sm:p-6",
         sm: "p-3 sm:p-4",
         md: "p-4 sm:p-6",

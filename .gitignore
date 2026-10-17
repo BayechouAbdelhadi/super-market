@@ -40,3 +40,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 data/app-settings.json
+scripts/change-admin-password.mjs

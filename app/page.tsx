@@ -369,7 +369,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
             {/* 1. Poulet Frais & Charcuterie */}
             <Card
-              padded="none"
+              padded={false}
               className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-rose-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-rose-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
@@ -416,7 +416,7 @@ export default function Home() {
 
             {/* 2. Boissons en pack */}
             <Card
-              padded="none"
+              padded={false}
               className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-orange-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
@@ -463,7 +463,7 @@ export default function Home() {
 
             {/* 3. Surgelés */}
             <Card
-              padded="none"
+              padded={false}
               className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-sky-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-sky-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
@@ -510,7 +510,7 @@ export default function Home() {
 
             {/* 4. Pâtisserie Orientale */}
             <Card
-              padded="none"
+              padded={false}
               className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-amber-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
@@ -557,7 +557,7 @@ export default function Home() {
 
             {/* 5. Fruits & Légumes Frais */}
             <Card
-              padded="none"
+              padded={false}
               className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-emerald-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
@@ -604,7 +604,7 @@ export default function Home() {
 
             {/* 6. Épicerie & Saveurs du Monde */}
             <Card
-              padded="none"
+              padded={false}
               className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-orange-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
               <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
