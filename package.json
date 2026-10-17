@@ -8,7 +8,8 @@
         "start": "next start",
         "lint": "eslint",
         "test": "vitest run",
-        "create-vps-key": "bash ./create-vps-key.sh super-market"
+        "create-vps-key": "bash ./create-vps-key.sh super-market",
+        "fb:posts": "node scripts/get-facebook-posts.mjs"
     },
     "dependencies": {
         "@base-ui/react": "^1.8.0",
