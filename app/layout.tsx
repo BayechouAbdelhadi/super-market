@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const inter = Inter({
-  variable: "--font-sans",
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
@@ -32,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${inter.variable} font-sans antialiased`}>
+    <html lang="fr" className={`${inter.variable} ${inter.className} font-sans antialiased`}>
       <body className="h-full overflow-hidden font-sans">
         {children}
         <Toaster />

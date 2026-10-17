@@ -134,132 +134,126 @@ export default function Home() {
 
   return (
     <div className="h-full w-full overflow-hidden flex flex-col bg-[var(--color-background)] text-[var(--color-text)] font-sans selection:bg-[var(--color-primary)]/20 selection:text-[var(--color-text)]">
-      {/* Top Fixed Header Shell */}
-      <div className="shrink-0 z-40">
-        {/* Top Banner Notice */}
-        <div className="bg-gradient-to-r from-[var(--color-primary)] via-rose-600 to-[var(--color-primary)] text-white text-xs py-2 px-4 text-center font-medium shadow-xs">
-          <div className="max-w-6xl mx-auto flex items-center justify-center gap-2 flex-wrap">
-            <span className="font-extrabold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full text-[10px]">
-              Calais Saint-Exupéry
-            </span>
-            <span>Votre supermarché de quartier ouvert 7j/7 avec primeur frais et point relais Pickup !</span>
-            <a
-              href={GOOGLE_MAPS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline font-bold hover:text-white/90 inline-flex items-center gap-1 ml-1"
-            >
-              <span>Voir sur Google Maps</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
-        </div>
-
-        {/* Main Header */}
-        <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur-md transition-all">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3.5">
-            <div className="h-14 w-14 sm:h-15 sm:w-15 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center p-0.5 shadow-md overflow-hidden shrink-0">
-              <Image
-                src="/logo-hq.png"
-                alt="SuperMarket Calais Logo"
-                width={60}
-                height={60}
-                priority
-                className="h-full w-full object-contain"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-black text-xl tracking-tight text-[var(--color-text)]">
-                  {appSettings.store.storeName}
-                </span>
-                <span
-                  className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-                    openStatus.isOpen
-                      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
-                      : "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"
-                  }`}
-                >
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      openStatus.isOpen ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
-                    }`}
-                  />
-                  <span>{openStatus.isOpen ? "Ouvert" : "Fermé"}</span>
-                </span>
-              </div>
-              <p className="text-[11px] text-[var(--color-text-muted)] hidden sm:block">
-                Saint-Exupéry, Calais • Primeur &amp; Relais Pickup
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Contact & Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {appSettings.store.phone && (
-              <a
-                href={`tel:${appSettings.store.phone.replace(/\s+/g, "")}`}
-                className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-xs font-semibold text-[var(--color-text)] transition-colors"
-              >
-                <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>{appSettings.store.phone}</span>
-              </a>
-            )}
-
-            <Link href="/login">
-              <Button
-                variant="primary"
-                size="sm"
-                className="text-xs font-bold shadow-[0_2px_8px_rgba(255,56,92,0.25)] h-9 gap-1.5"
-              >
-                <span>Votre compte</span>
-                <ArrowRight className="w-3.5 h-3.5 opacity-80" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-      </div>
-
       {/* Main Scrollable Viewport Container (§ 25.1) */}
       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col relative">
-        {/* Orbital Background & Atmosphere System */}
+        {/* Rich Radial Gradient Atmospheric Background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-          {/* Subtle Radial Mesh Gradient Backdrop */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,56,92,0.12),rgba(255,255,255,0))]" />
+          {/* Top Center Main Radial Aura */}
+          <div className="absolute -top-[10%] left-1/2 -translate-x-1/2 w-[1100px] h-[750px] bg-[radial-gradient(ellipse_at_center,rgba(255,56,92,0.18)_0%,rgba(251,146,60,0.12)_35%,rgba(255,255,255,0)_70%)] blur-2xl" />
 
-          {/* Large Rotating Orbital Ring 1 */}
-          <div className="absolute top-[8%] left-1/2 -translate-x-1/2 w-[720px] sm:w-[980px] lg:w-[1200px] h-[720px] sm:h-[980px] lg:h-[1200px] rounded-full border border-[var(--color-primary)]/15 border-dashed animate-spin-orbital-slow opacity-60">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[var(--color-primary)] shadow-[0_0_20px_var(--color-primary)]" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_15px_#f59e0b]" />
-          </div>
+          {/* Right Floating Warm Amber Radial Halo */}
+          <div className="absolute top-[280px] -right-[10%] w-[800px] h-[800px] bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.16)_0%,rgba(251,113,133,0.08)_40%,rgba(255,255,255,0)_70%)] blur-3xl animate-pulse-glow" style={{ animationDuration: "8s" }} />
 
-          {/* Counter-Rotating Orbital Ring 2 */}
-          <div className="absolute top-[14%] left-1/2 -translate-x-1/2 w-[480px] sm:w-[680px] lg:w-[820px] h-[480px] sm:h-[680px] lg:h-[820px] rounded-full border border-amber-500/15 animate-spin-orbital-reverse opacity-70">
-            <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-emerald-400 shadow-[0_0_16px_#10b981]" />
-            <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-rose-400 shadow-[0_0_12px_#fb7185]" />
-          </div>
+          {/* Left Mid-page Fresh Mint & Sky Radial Halo */}
+          <div className="absolute top-[750px] -left-[15%] w-[850px] h-[850px] bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12)_0%,rgba(56,189,248,0.08)_40%,rgba(255,255,255,0)_70%)] blur-3xl animate-pulse-glow" style={{ animationDelay: "4s", animationDuration: "9s" }} />
 
-          {/* Glowing Ambient Gradient Orbs */}
-          <div className="absolute -top-32 left-[15%] w-[420px] h-[420px] rounded-full bg-gradient-to-br from-rose-500/15 to-transparent blur-3xl animate-pulse-glow" />
-          <div className="absolute top-[250px] right-[10%] w-[480px] h-[480px] rounded-full bg-gradient-to-bl from-amber-400/15 via-orange-500/10 to-transparent blur-3xl animate-pulse-glow" style={{ animationDelay: "3s" }} />
-          <div className="absolute top-[800px] left-[5%] w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-emerald-500/10 to-sky-500/10 blur-3xl animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
+          {/* Bottom Warm Coral Radial Anchor */}
+          <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(255,56,92,0.1)_0%,rgba(245,158,11,0.06)_45%,rgba(255,255,255,0)_75%)] blur-3xl" />
         </div>
 
-        {/* Full-width 100% Super Market Calais Storefront Banner on Top of the Site */}
-        <section className="w-full relative shrink-0 aspect-[16/7] sm:aspect-[21/8] md:aspect-[24/8] max-h-[480px] min-h-[240px] bg-neutral-900 border-b border-[var(--color-border)] overflow-hidden group z-10">
+        {/* Full-width 100% Super Market Calais Storefront Banner with Transparent Floating Header */}
+        <section className="w-full relative shrink-0 aspect-[16/8] sm:aspect-[21/9] md:aspect-[24/9] max-h-[520px] min-h-[300px] bg-neutral-900 border-b border-[var(--color-border)] overflow-hidden group z-10 flex flex-col justify-between">
           <Image
-            src="/super-market-calais-enhanced.webp"
+            src="/super-market-calais-storefront.webp"
             alt="Super Market Calais — Magasin & Devanture au 205 Avenue Antoine de Saint-Exupéry"
             fill
             priority
             className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-1000 ease-out"
             sizes="100vw"
           />
-          {/* Light gradient strictly at the bottom to maintain text legibility while letting the photo shine brightly */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex flex-col justify-end p-5 sm:p-8 md:p-12 text-white">
+
+          {/* Transparent Gradient Protection: Soft at bottom for text contrast, clear at top for white transparent header */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 pointer-events-none" />
+
+          {/* Light Pink-White Linear Gradient Top Navigation Header (No Transparency) */}
+          <div className="relative z-20 w-full bg-[linear-gradient(105deg,#ffffff_0%,#fff9fa_25%,#fff1f4_50%,#fff9fa_75%,#ffffff_100%)] border-b border-[rgba(255,56,92,0.12)] shadow-xs">
+            {/* Top Micro Notice Bar with Light Rose-White Solid Gradient */}
+            <div className="bg-[linear-gradient(90deg,#fffdfd_0%,#fff5f7_50%,#fffdfd_100%)] text-neutral-900 text-[11px] py-1.5 px-4 text-center font-medium border-b border-[rgba(255,56,92,0.08)]">
+              <div className="max-w-6xl mx-auto flex items-center justify-center gap-2 flex-wrap">
+                <span className="font-extrabold uppercase tracking-wider bg-[var(--color-primary)] text-white px-2.5 py-0.5 rounded-full text-[10px] shadow-[0_2px_8px_rgba(255,56,92,0.35)]">
+                  Calais Saint-Exupéry
+                </span>
+                <span className="text-neutral-800 font-medium">Votre supermarché de quartier ouvert 7j/7 avec primeur frais et point relais Pickup !</span>
+                <a
+                  href={GOOGLE_MAPS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--color-primary)] font-bold hover:underline inline-flex items-center gap-1 ml-1"
+                >
+                  <span>Google Maps</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+
+            {/* Main Navigation Bar */}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4">
+              {/* Logo & Brand */}
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 sm:h-13 sm:w-13 rounded-full bg-white border border-[rgba(255,56,92,0.25)] shadow-xs flex items-center justify-center p-0.5 overflow-hidden shrink-0">
+                  <Image
+                    src="/logo-hq.png"
+                    alt="SuperMarket Calais Logo"
+                    width={56}
+                    height={56}
+                    priority
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-xl tracking-tight text-neutral-950">
+                      {appSettings.store.storeName}
+                    </span>
+                    <span
+                      className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
+                        openStatus.isOpen
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          : "bg-amber-50 text-amber-800 border-amber-200"
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          openStatus.isOpen ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                        }`}
+                      />
+                      <span>{openStatus.isOpen ? "Ouvert" : "Fermé"}</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#8e293f] font-semibold hidden sm:block">
+                    Saint-Exupéry, Calais • Primeur &amp; Relais Pickup
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick Contact & Action Buttons */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                {appSettings.store.phone && (
+                  <a
+                    href={`tel:${appSettings.store.phone.replace(/\s+/g, "")}`}
+                    className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[rgba(255,56,92,0.22)] bg-white hover:bg-rose-50/60 text-xs font-semibold text-neutral-900 hover:border-[var(--color-primary)] transition-all shadow-xs"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                    <span>{appSettings.store.phone}</span>
+                  </a>
+                )}
+
+                <Link href="/login">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="text-xs font-bold shadow-[0_2px_12px_rgba(255,56,92,0.35)] h-9 gap-1.5"
+                  >
+                    <span>Votre compte</span>
+                    <ArrowRight className="w-3.5 h-3.5 opacity-80" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Info & Tagline on top of Image */}
+          <div className="relative z-20 p-5 sm:p-8 md:p-12 text-white mt-auto">
             <div className="max-w-6xl mx-auto w-full space-y-3">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900/80 backdrop-blur-md border border-white/20 text-xs font-bold text-white w-fit shadow-lg shadow-black/40">
                 <Store className="w-3.5 h-3.5 text-[var(--color-primary)]" />
@@ -290,9 +284,9 @@ export default function Home() {
           </div>
         </section>
 
-        <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-10 sm:py-20 max-w-6xl mx-auto w-full space-y-20 relative z-10">
+        <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 pt-5 sm:pt-7 pb-12 sm:pb-16 max-w-6xl mx-auto w-full space-y-16 relative z-10">
         {/* 1. Hero Section */}
-        <section className="space-y-6 max-w-3xl mx-auto text-center pt-2 relative">
+        <section className="space-y-4 max-w-3xl mx-auto text-center relative">
           {/* Ambient live badge with subtle glow */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-semibold text-[var(--color-text-muted)] shadow-[0_2px_12px_rgba(0,0,0,0.06)] hover:border-[var(--color-border-hover)] transition-all">
             <span
@@ -358,7 +352,156 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 2. Calais Store Identity & Location Highlight Cards */}
+        {/* 2. Nos Rayons & Produits Frais (Products First) */}
+        <section className="w-full space-y-6">
+          <div className="text-left space-y-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase tracking-wider">
+              <span>Arrivages &amp; Sélections</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
+              Nos Rayons &amp; Produits Frais
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
+              Une sélection rigoureuse pour régaler toute la famille au meilleur prix à Calais
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+            {/* 1. Poulet Frais & Charcuterie */}
+            <Card
+              padded="lg"
+              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-rose-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-rose-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-28 h-28 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/15 transition-all pointer-events-none" />
+              <div className="h-13 w-13 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
+                🍗
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+                    Poulet Frais &amp; Charcuterie
+                  </h3>
+                  <Badge variant="brand" size="sm">Fraîcheur</Badge>
+                </div>
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                  Poulet frais disponible en barquette : filet de poulet, cuisses, ailes et pilons de qualité supérieure, accompagnés de notre sélection de charcuterie traditionnelle.
+                </p>
+              </div>
+            </Card>
+
+            {/* 2. Boissons en pack */}
+            <Card
+              padded="lg"
+              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-blue-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/15 transition-all pointer-events-none" />
+              <div className="h-13 w-13 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
+                🥤
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+                    Boissons en Pack
+                  </h3>
+                  <Badge variant="brand" size="sm">N°1 à Calais</Badge>
+                </div>
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                  Le numéro 1 de la boisson en pack sur Calais ! Plus de 60 références en stock permanent : sodas, jus, eaux et boissons rafraîchissantes aux meilleurs prix.
+                </p>
+              </div>
+            </Card>
+
+            {/* 3. Surgelés */}
+            <Card
+              padded="lg"
+              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-sky-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-sky-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-28 h-28 bg-sky-500/5 rounded-full blur-2xl group-hover:bg-sky-500/15 transition-all pointer-events-none" />
+              <div className="h-13 w-13 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
+                ❄️
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+                    Rayon Surgelés
+                  </h3>
+                  <Badge variant="neutral" size="sm">+100 réf.</Badge>
+                </div>
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                  Plus de 100 références à découvrir, avec en exclusivité les marques <strong>Hunkar</strong> et <strong>Idéal Délices</strong> pour vos plats, viandes et spécialités.
+                </p>
+              </div>
+            </Card>
+
+            {/* 4. Pâtisserie Orientale */}
+            <Card
+              padded="lg"
+              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-amber-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-28 h-28 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/15 transition-all pointer-events-none" />
+              <div className="h-13 w-13 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
+                🍯
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+                    Pâtisserie Orientale
+                  </h3>
+                  <Badge variant="brand" size="sm">Gourmandise</Badge>
+                </div>
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                  Un assortiment raffiné de douceurs et pâtisseries orientales traditionnelles : cornes de gazelle, baklawas, makrouts et délices au miel pour tous vos moments de fête.
+                </p>
+              </div>
+            </Card>
+
+            {/* 5. Fruits & Légumes Frais */}
+            <Card
+              padded="lg"
+              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-emerald-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/15 transition-all pointer-events-none" />
+              <div className="h-13 w-13 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
+                🥦
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+                    Fruits &amp; Légumes Frais
+                  </h3>
+                  <Badge variant="neutral" size="sm">Primeur</Badge>
+                </div>
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                  Arrivages réguliers de fruits savoureux et légumes de saison pour vous garantir fraîcheur, goût et vitamines au quotidien.
+                </p>
+              </div>
+            </Card>
+
+            {/* 6. Épicerie & Saveurs du Monde */}
+            <Card
+              padded="lg"
+              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-orange-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-28 h-28 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/15 transition-all pointer-events-none" />
+              <div className="h-13 w-13 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
+                🥖
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+                    Épicerie &amp; Produits Frais
+                  </h3>
+                  <Badge variant="neutral" size="sm">Du terroir</Badge>
+                </div>
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                  Produits laitiers, conserves fines, épices du monde, riz, sauces, condiments et toutes vos marques indispensables du quotidien.
+                </p>
+              </div>
+            </Card>
+          </div>
+        </section>
+
+        {/* 3. Calais Store Identity & Location Highlight Cards */}
         <section className="w-full space-y-6">
           <div className="text-left space-y-1">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
@@ -600,155 +743,6 @@ export default function Home() {
               </div>
             </div>
           </Card>
-        </section>
-
-        {/* 4. Products & Departments Feature Cards */}
-        <section className="w-full space-y-6">
-          <div className="text-left space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase tracking-wider">
-              <span>Arrivages &amp; Sélections</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
-              Nos Rayons &amp; Produits Frais
-            </h2>
-            <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-              Une sélection rigoureuse pour régaler toute la famille au meilleur prix à Calais
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-            {/* 1. Poulet Frais & Charcuterie */}
-            <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-rose-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-rose-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                🍗
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
-                    Poulet Frais &amp; Charcuterie
-                  </h3>
-                  <Badge variant="brand" size="sm">Fraîcheur</Badge>
-                </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Poulet frais disponible en barquette : filet de poulet, cuisses, ailes et pilons de qualité supérieure, accompagnés de notre sélection de charcuterie traditionnelle.
-                </p>
-              </div>
-            </Card>
-
-            {/* 2. Boissons en pack */}
-            <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-blue-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                🥤
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
-                    Boissons en Pack
-                  </h3>
-                  <Badge variant="brand" size="sm">N°1 à Calais</Badge>
-                </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Le numéro 1 de la boisson en pack sur Calais ! Plus de 60 références en stock permanent : sodas, jus, eaux et boissons rafraîchissantes aux meilleurs prix.
-                </p>
-              </div>
-            </Card>
-
-            {/* 3. Surgelés */}
-            <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-sky-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-sky-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-sky-500/5 rounded-full blur-2xl group-hover:bg-sky-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                ❄️
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
-                    Rayon Surgelés
-                  </h3>
-                  <Badge variant="neutral" size="sm">+100 réf.</Badge>
-                </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Plus de 100 références à découvrir, avec en exclusivité les marques <strong>Hunkar</strong> et <strong>Idéal Délices</strong> pour vos plats, viandes et spécialités.
-                </p>
-              </div>
-            </Card>
-
-            {/* 4. Pâtisserie Orientale */}
-            <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-amber-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                🍯
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
-                    Pâtisserie Orientale
-                  </h3>
-                  <Badge variant="brand" size="sm">Gourmandise</Badge>
-                </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Un assortiment raffiné de douceurs et pâtisseries orientales traditionnelles : cornes de gazelle, baklawas, makrouts et délices au miel pour tous vos moments de fête.
-                </p>
-              </div>
-            </Card>
-
-            {/* 5. Fruits & Légumes Frais */}
-            <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-emerald-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                🥦
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
-                    Fruits &amp; Légumes Frais
-                  </h3>
-                  <Badge variant="neutral" size="sm">Primeur</Badge>
-                </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Arrivages réguliers de fruits savoureux et légumes de saison pour vous garantir fraîcheur, goût et vitamines au quotidien.
-                </p>
-              </div>
-            </Card>
-
-            {/* 6. Épicerie & Saveurs du Monde */}
-            <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-orange-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                🥖
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
-                    Épicerie &amp; Produits Frais
-                  </h3>
-                  <Badge variant="neutral" size="sm">Du terroir</Badge>
-                </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Produits laitiers, conserves fines, épices du monde, riz, sauces, condiments et toutes vos marques indispensables du quotidien.
-                </p>
-              </div>
-            </Card>
-          </div>
         </section>
 
         {/* 5. Loyalty Program Spotlight */}
