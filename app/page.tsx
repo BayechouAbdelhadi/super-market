@@ -369,133 +369,283 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
             {/* 1. Poulet Frais & Charcuterie */}
             <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-rose-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-rose-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+              padded="none"
+              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-rose-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-rose-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                🍗
+              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
+                <Image
+                  src="/categories/poulet-frais-sample.jpg"
+                  alt="Poulet Frais en barquette & Charcuterie à Calais"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                <div className="absolute top-3 right-3 z-10">
+                  <Badge variant="brand" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
+                    Fraîcheur
+                  </Badge>
+                </div>
+                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
+                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
+                    🍗
+                  </span>
+                  <span className="text-white text-xs font-bold drop-shadow-md">
+                    Découpes fraîches
+                  </span>
+                </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-[var(--color-primary)] transition-colors">
                     Poulet Frais &amp; Charcuterie
                   </h3>
-                  <Badge variant="brand" size="sm">Fraîcheur</Badge>
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                    Poulet frais disponible en barquette : filet de poulet, cuisses, ailes et pilons de qualité supérieure, accompagnés de notre sélection de charcuterie traditionnelle.
+                  </p>
                 </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Poulet frais disponible en barquette : filet de poulet, cuisses, ailes et pilons de qualité supérieure, accompagnés de notre sélection de charcuterie traditionnelle.
-                </p>
+                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
+                  <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Arrivage quotidien
+                  </span>
+                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">100% Halal</span>
+                </div>
               </div>
             </Card>
 
             {/* 2. Boissons en pack */}
             <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-blue-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+              padded="none"
+              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-orange-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                🥤
+              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
+                <Image
+                  src="/categories/fanta-pack-sample.jpg"
+                  alt="Pack de Fanta Orange en canettes à Calais"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                <div className="absolute top-3 right-3 z-10">
+                  <Badge variant="brand" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
+                    N°1 à Calais
+                  </Badge>
+                </div>
+                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
+                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
+                    🥤
+                  </span>
+                  <span className="text-white text-xs font-bold drop-shadow-md">
+                    Packs en gros
+                  </span>
+                </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-orange-600 transition-colors">
                     Boissons en Pack
                   </h3>
-                  <Badge variant="brand" size="sm">N°1 à Calais</Badge>
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                    Le numéro 1 de la boisson en pack sur Calais ! Plus de 60 références en stock permanent : sodas, jus, eaux minérales et boissons rafraîchissantes aux meilleurs prix.
+                  </p>
                 </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Le numéro 1 de la boisson en pack sur Calais ! Plus de 60 références en stock permanent : sodas, jus, eaux et boissons rafraîchissantes aux meilleurs prix.
-                </p>
+                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
+                  <span className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    +60 références
+                  </span>
+                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">Prix de gros</span>
+                </div>
               </div>
             </Card>
 
             {/* 3. Surgelés */}
             <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-sky-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-sky-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+              padded="none"
+              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-sky-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-sky-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-sky-500/5 rounded-full blur-2xl group-hover:bg-sky-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                ❄️
+              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
+                <Image
+                  src="/categories/surgeles-assortiment.jpg"
+                  alt="Assortiment de spécialités surgelées böreks, köftes, lahmacun et légumes à Calais"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                <div className="absolute top-3 right-3 z-10">
+                  <Badge variant="neutral" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
+                    +100 réf.
+                  </Badge>
+                </div>
+                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
+                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
+                    ❄️
+                  </span>
+                  <span className="text-white text-xs font-bold drop-shadow-md">
+                    Viandes, böreks &amp; plats
+                  </span>
+                </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-sky-600 transition-colors">
                     Rayon Surgelés
                   </h3>
-                  <Badge variant="neutral" size="sm">+100 réf.</Badge>
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                    Plus de 100 références à découvrir, avec en exclusivité les marques <strong>Hunkar</strong> et <strong>Idéal Délices</strong> pour vos plats, viandes et spécialités.
+                  </p>
                 </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Plus de 100 références à découvrir, avec en exclusivité les marques <strong>Hunkar</strong> et <strong>Idéal Délices</strong> pour vos plats, viandes et spécialités.
-                </p>
+                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
+                  <span className="flex items-center gap-1.5 text-sky-600 dark:text-sky-400 font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Exclusivité marques
+                  </span>
+                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">Chaîne du froid</span>
+                </div>
               </div>
             </Card>
 
             {/* 4. Pâtisserie Orientale */}
             <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-amber-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+              padded="none"
+              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-amber-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                🍯
+              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
+                <Image
+                  src="/categories/baklava-sample.jpg"
+                  alt="Baklava oriental traditionnel aux pistaches et miel à Calais"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                <div className="absolute top-3 right-3 z-10">
+                  <Badge variant="brand" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
+                    Gourmandise
+                  </Badge>
+                </div>
+                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
+                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
+                    🍯
+                  </span>
+                  <span className="text-white text-xs font-bold drop-shadow-md">
+                    Baklava au miel
+                  </span>
+                </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-amber-600 transition-colors">
                     Pâtisserie Orientale
                   </h3>
-                  <Badge variant="brand" size="sm">Gourmandise</Badge>
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                    Un assortiment raffiné de douceurs et pâtisseries orientales traditionnelles : baklawas croustillants au miel et pistaches, cornes de gazelle et makrouts.
+                  </p>
                 </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Un assortiment raffiné de douceurs et pâtisseries orientales traditionnelles : cornes de gazelle, baklawas, makrouts et délices au miel pour tous vos moments de fête.
-                </p>
+                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
+                  <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Baklavas pur miel
+                  </span>
+                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">Artisanal</span>
+                </div>
               </div>
             </Card>
 
             {/* 5. Fruits & Légumes Frais */}
             <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-emerald-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+              padded="none"
+              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-emerald-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                🥦
+              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
+                <Image
+                  src="/categories/fruits-legumes-sample.jpg"
+                  alt="Fruits et Légumes Frais primeur marché à Calais"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                <div className="absolute top-3 right-3 z-10">
+                  <Badge variant="neutral" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
+                    Primeur
+                  </Badge>
+                </div>
+                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
+                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
+                    🥦
+                  </span>
+                  <span className="text-white text-xs font-bold drop-shadow-md">
+                    Marché de saison
+                  </span>
+                </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-emerald-600 transition-colors">
                     Fruits &amp; Légumes Frais
                   </h3>
-                  <Badge variant="neutral" size="sm">Primeur</Badge>
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                    Arrivages réguliers de fruits savoureux et légumes de saison pour vous garantir fraîcheur, goût et vitamines au quotidien.
+                  </p>
                 </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Arrivages réguliers de fruits savoureux et légumes de saison pour vous garantir fraîcheur, goût et vitamines au quotidien.
-                </p>
+                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
+                  <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Fraîcheur garantie
+                  </span>
+                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">Vitamines</span>
+                </div>
               </div>
             </Card>
 
             {/* 6. Épicerie & Saveurs du Monde */}
             <Card
-              padded="lg"
-              className="space-y-4 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-orange-400/50 group bg-[var(--color-surface)] relative overflow-hidden"
+              padded="none"
+              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-orange-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
             >
-              <div className="absolute top-0 right-0 w-28 h-28 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/15 transition-all pointer-events-none" />
-              <div className="h-13 w-13 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-xs">
-                🥖
+              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
+                <Image
+                  src="/categories/epicerie-sample.jpg"
+                  alt="Épicerie fine condiments épices huiles du terroir à Calais"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                <div className="absolute top-3 right-3 z-10">
+                  <Badge variant="neutral" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
+                    Du terroir
+                  </Badge>
+                </div>
+                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
+                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
+                    🥖
+                  </span>
+                  <span className="text-white text-xs font-bold drop-shadow-md">
+                    Épicerie &amp; saveurs
+                  </span>
+                </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
+              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-orange-600 transition-colors">
                     Épicerie &amp; Produits Frais
                   </h3>
-                  <Badge variant="neutral" size="sm">Du terroir</Badge>
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
+                    Produits laitiers, conserves fines, épices du monde, riz, sauces, condiments et toutes vos marques indispensables du quotidien.
+                  </p>
                 </div>
-                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Produits laitiers, conserves fines, épices du monde, riz, sauces, condiments et toutes vos marques indispensables du quotidien.
-                </p>
+                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
+                  <span className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Large choix
+                  </span>
+                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">Essentiels</span>
+                </div>
               </div>
             </Card>
           </div>
