@@ -11,7 +11,7 @@ export async function GET() {
 
     const data = await getDashboardAnalytics();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error) {
     console.error("[API Analytics GET] Error:", error);
     return NextResponse.json(
       { error: "Impossible de charger les données du tableau de bord." },

@@ -3,19 +3,18 @@
 import crypto from 'crypto'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
-import { createClient as createServerClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
-import { resolveUserRole } from '@/lib/auth/roles'
+import { getSessionCaller } from '@/lib/auth/session'
+import { SupabaseUserAccountRepository } from '@/lib/auth/adapters/supabase-user-account-repository'
 import { getAppOrigin } from '@/lib/utils/app-url'
 import { emailService } from '@/lib/email'
-import {
-  createSignedToken,
-  AccountActivationPayload,
-} from '@/lib/email/otp-security'
+import { createActivationLink } from '@/lib/auth/links'
+import { AUTH_CONFIG } from '@/lib/auth/config'
 import { normalizePhone } from '@/lib/loyalty/domain'
 import { PasswordSchema } from '@/lib/auth/password-rules'
 import { getAppSettings } from '@/lib/settings/service'
 import { z } from 'zod'
+
+const accounts = new SupabaseUserAccountRepository();
 
 const CreateUserSchema = z.object({
   first_name: z.string().trim().min(2, "Le prénom doit contenir au moins 2 caractères."),
@@ -54,14 +53,11 @@ export async function createUser(formData: FormData) {
   const lastNameClean = last_name.trim();
 
   // Verify caller's role for strict RBAC
-  const supabaseServer = await createServerClient();
-  const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
-
-  if (!currentUser) {
+  const caller = await getSessionCaller();
+  if (!caller.ok) {
     return { error: "Non autorisé. Veuillez vous connecter." };
   }
-
-  const callerRole = await resolveUserRole(supabaseServer, currentUser);
+  const callerRole = caller.role;
 
   // Le caissier ne peut créer QUE des clients. L'admin peut créer n'importe quel rôle.
   if (callerRole === 'CASHIER' && role !== 'CUSTOMER') {
@@ -72,92 +68,47 @@ export async function createUser(formData: FormData) {
     return { error: "Accès refusé." };
   }
 
-  const adminClient = createAdminClient();
-
   // Verify uniqueness of email and phone in profiles
-  const { data: existingProfiles } = await adminClient
-    .from('profiles')
-    .select('id, email, phone_number')
-    .or(`email.eq.${emailNormalized},phone_number.eq.${phoneNormalized}`)
-    .limit(1);
-
-  if (existingProfiles && existingProfiles.length > 0) {
-    const isEmail = existingProfiles[0].email?.toLowerCase() === emailNormalized;
+  const conflict = await accounts.findConflict(emailNormalized, phoneNormalized);
+  if (conflict) {
     return {
-      error: isEmail
+      error: conflict === 'email'
         ? "Un compte existe déjà avec cette adresse email."
         : "Un compte existe déjà avec ce numéro de téléphone.",
     };
   }
 
-  // Generate secure initial password if not provided
-  let securePassword = crypto.randomBytes(16).toString("hex") + "A1!";
+  // Optional chosen password (a secure random one is generated otherwise)
+  let chosenPassword: string | undefined;
   if (password && password.trim()) {
     const pwdCheck = PasswordSchema.safeParse(password.trim());
     if (!pwdCheck.success) {
       return { error: pwdCheck.error.issues[0]?.message || "Le mot de passe ne respecte pas les critères de sécurité." };
     }
-    securePassword = password.trim();
+    chosenPassword = password.trim();
   }
 
-  // Create user with email_confirm: true via Supabase Admin API
-  const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+  const created = await accounts.createAccount({
     email: emailNormalized,
-    password: securePassword,
-    email_confirm: true,
-    user_metadata: {
-      first_name: firstNameClean,
-      last_name: lastNameClean,
-      phone_number: phoneNormalized,
-      role
-    }
+    firstName: firstNameClean,
+    lastName: lastNameClean,
+    phone: phoneNormalized,
+    role,
+    password: chosenPassword,
   });
 
-  if (authError || !authData.user) {
-    console.error(`[Server Action] createUser Error (${emailNormalized}):`, authError?.message);
-    return { error: authError?.message || "Erreur lors de la création du compte." };
-  }
-
-  const userId = authData.user.id;
-
-  // Insert profile
-  const { error: profileError } = await adminClient.from('profiles').upsert({
-    id: userId,
-    first_name: firstNameClean,
-    last_name: lastNameClean,
-    email: emailNormalized,
-    phone_number: phoneNormalized,
-    role
-  });
-
-  if (profileError) {
-    console.error("[Server Action] Profile upsert error:", profileError.message);
-    await adminClient.auth.admin.deleteUser(userId).catch(() => null);
-    return { error: "Impossible de créer le profil (conflit de données)." };
-  }
-
-  // If role is CUSTOMER, create initial customer loyalty record
-  if (role === 'CUSTOMER') {
-    await adminClient.from('customers').upsert({
-      id: userId,
-      loyalty_points: 0,
-      status: 'BRONZE'
-    });
+  if (!created.ok) {
+    return {
+      error: created.reason === 'AUTH_FAILED'
+        ? created.detail || "Erreur lors de la création du compte."
+        : "Impossible de créer le profil (conflit de données).",
+    };
   }
 
   // Send activation/invitation email via Brevo
   let activationLink: string | undefined;
   try {
-    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
-    const token = createSignedToken<AccountActivationPayload>({
-      email: emailNormalized,
-      role,
-      type: 'ACCOUNT_ACTIVATION',
-      expiresAt,
-    });
-
-    const origin = getAppOrigin(await headers());
-    activationLink = `${origin}/confirm-account?token=${encodeURIComponent(token)}`;
+    activationLink = createActivationLink(getAppOrigin(await headers()), emailNormalized, role);
 
     const settings = await getAppSettings();
     const shouldSendEmail =
@@ -171,7 +122,7 @@ export async function createUser(formData: FormData) {
         name: `${firstNameClean} ${lastNameClean}`,
         activationLink,
         role,
-        expiresInDays: 7,
+        expiresInDays: AUTH_CONFIG.activationLinkTtlDays,
         sender: settings.notifications.senderEmail
           ? {
               email: settings.notifications.senderEmail,
@@ -195,16 +146,6 @@ export async function createUser(formData: FormData) {
   return { success: true, role };
 }
 
-export async function createCashier(formData: FormData) {
-  formData.set('role', 'CASHIER');
-  const password = formData.get('password') as string;
-  const result = await createUser(formData);
-  if (result.error) {
-    return { error: result.error };
-  }
-  return { success: true, password };
-}
-
 export async function editUser(formData: FormData) {
   const validatedFields = EditUserSchema.safeParse({
     user_id: formData.get('user_id'),
@@ -220,14 +161,11 @@ export async function editUser(formData: FormData) {
   const { user_id, first_name, last_name, phone_number } = validatedFields.data;
 
   // To update profile metadata, we need the session to enforce RLS and check caller role
-  const supabaseServer = await createServerClient();
-  const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
-
-  if (!currentUser) {
+  const caller = await getSessionCaller();
+  if (!caller.ok) {
     return { error: "Non autorisé. Veuillez vous connecter." };
   }
-
-  const callerRole = await resolveUserRole(supabaseServer, currentUser);
+  const { supabase: supabaseServer, role: callerRole } = caller;
 
   // Le caissier ne peut modifier QUE des clients.
   if (callerRole === 'CASHIER') {
@@ -296,14 +234,11 @@ export async function inviteUser(formData: FormData) {
   const emailNormalized = email.toLowerCase().trim();
 
   // Verify caller's role for strict RBAC
-  const supabaseServer = await createServerClient();
-  const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
-
-  if (!currentUser) {
+  const caller = await getSessionCaller();
+  if (!caller.ok) {
     return { error: "Non autorisé. Veuillez vous connecter." };
   }
-
-  const callerRole = await resolveUserRole(supabaseServer, currentUser);
+  const callerRole = caller.role;
 
   if (role === 'CASHIER' && callerRole !== 'ADMIN') {
     return { error: "Seul un administrateur peut inviter un membre en tant que caissier." };
@@ -313,33 +248,19 @@ export async function inviteUser(formData: FormData) {
     return { error: "Accès refusé. Privilèges insuffisants pour inviter des utilisateurs." };
   }
 
-  const adminClient = createAdminClient();
-
   // Check if profile already exists
-  const { data: existingProfiles } = await adminClient
-    .from('profiles')
-    .select('id, email, first_name, last_name, role')
-    .eq('email', emailNormalized)
-    .limit(1);
-
-  const existingProfile = existingProfiles?.[0];
+  const existingProfile = await accounts.findProfileByEmail(emailNormalized);
 
   // SECURITY: only an administrator may re-issue an activation link for a staff account.
   if (existingProfile && existingProfile.role !== 'CUSTOMER' && callerRole !== 'ADMIN') {
     return { error: "Accès refusé. Seul un administrateur peut réinviter un membre du personnel." };
   }
 
-  const origin = getAppOrigin(await headers());
-  const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
-
-  const token = createSignedToken<AccountActivationPayload>({
-    email: emailNormalized,
-    role: existingProfile?.role || role,
-    type: 'ACCOUNT_ACTIVATION',
-    expiresAt,
-  });
-
-  const activationLink = `${origin}/confirm-account?token=${encodeURIComponent(token)}`;
+  const activationLink = createActivationLink(
+    getAppOrigin(await headers()),
+    emailNormalized,
+    existingProfile?.role || role
+  );
 
   if (existingProfile) {
     // User already exists, resend invitation/activation email
@@ -352,7 +273,7 @@ export async function inviteUser(formData: FormData) {
         name: displayName,
         activationLink,
         role: existingProfile.role,
-        expiresInDays: 7,
+        expiresInDays: AUTH_CONFIG.activationLinkTtlDays,
         sender: settings.notifications.senderEmail
           ? {
               email: settings.notifications.senderEmail,
@@ -368,7 +289,7 @@ export async function inviteUser(formData: FormData) {
         role: existingProfile.role,
         message: `Un compte existe déjà pour ${emailNormalized}. Un nouvel e-mail d'activation a été envoyé avec succès !`,
       };
-    } catch (err: any) {
+    } catch (err) {
       console.error("[inviteUser] Error sending re-activation email:", err);
       return {
         success: true,

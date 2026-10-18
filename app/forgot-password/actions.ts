@@ -5,12 +5,12 @@ import { cookies, headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { emailService } from '@/lib/email'
-import {
-  createSignedToken,
-  PENDING_RESET_COOKIE,
-} from '@/lib/email/otp-security'
+import { PENDING_RESET_COOKIE } from '@/lib/email/otp-security'
+import { createPasswordResetToken } from '@/lib/auth/links'
+import { AUTH_CONFIG } from '@/lib/auth/config'
 import { z } from 'zod'
 import { getAppOrigin } from '@/lib/utils/app-url'
+import { RATE_LIMITS, checkRateLimits, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
 
 const ForgotPasswordSchema = z.object({
   email: z.string().trim().email("Adresse email invalide."),
@@ -26,6 +26,14 @@ export async function requestPasswordReset(formData: FormData) {
   }
 
   const emailNormalized = parseResult.data.email.toLowerCase().trim()
+
+  const limit = checkRateLimits([
+    [`reset:ip:${getClientIp(await headers())}`, RATE_LIMITS.passwordResetPerIp],
+    [`reset:email:${emailNormalized}`, RATE_LIMITS.passwordResetPerEmail],
+  ])
+  if (!limit.allowed) {
+    redirect(`/forgot-password?message=${encodeURIComponent(rateLimitMessage(limit))}`)
+  }
   const supabase = await createClient()
 
   // Find user in profiles
@@ -41,9 +49,8 @@ export async function requestPasswordReset(formData: FormData) {
   const origin = getAppOrigin(await headers())
 
   // Generate secure signed token payload (valid for 60 minutes)
-  const RESET_EXPIRY_MINUTES = 60
-  const expiresAt = Date.now() + RESET_EXPIRY_MINUTES * 60 * 1000
-  const resetToken = createSignedToken({ email: emailNormalized, type: 'PASSWORD_RESET', expiresAt })
+  const RESET_EXPIRY_MINUTES = AUTH_CONFIG.passwordResetTtlMinutes
+  const resetToken = createPasswordResetToken(emailNormalized)
 
   // The reset link points directly to our public web application
   const resetLink = `${origin}/reset-password?email=${encodeURIComponent(emailNormalized)}&token=${resetToken}`

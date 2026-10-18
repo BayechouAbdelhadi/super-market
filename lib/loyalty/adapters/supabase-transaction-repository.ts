@@ -1,4 +1,4 @@
-import { ITransactionRepository } from "../ports";
+import { ITransactionRepository, Page } from "../ports";
 import { Transaction } from "../types";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { LOYALTY_CONFIG } from "../config";
@@ -41,7 +41,8 @@ export class SupabaseTransactionRepository implements ITransactionRepository {
 
     if (error || !tx) {
       console.error("[SupabaseTransactionRepository] create error:", error);
-      throw new Error(error?.message || "Impossible d'enregistrer la transaction.");
+      // Never surface raw database messages to clients (already logged above)
+      throw new Error("Impossible d'enregistrer la transaction.");
     }
 
     return tx as Transaction;
@@ -65,5 +66,22 @@ export class SupabaseTransactionRepository implements ITransactionRepository {
     }
 
     return data as Transaction[];
+  }
+
+  async getPageByCustomerId(customerId: string, limit: number, offset: number): Promise<Page<Transaction>> {
+    const sb = await this.getClient();
+    const { data, error, count } = await sb
+      .from("transactions")
+      .select("*", { count: "exact" })
+      .eq("customer_id", customerId)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error || !data) {
+      console.error("[SupabaseTransactionRepository] getPageByCustomerId error:", error);
+      return { items: [], total: 0 };
+    }
+
+    return { items: data as Transaction[], total: count ?? data.length };
   }
 }

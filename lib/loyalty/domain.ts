@@ -1,4 +1,4 @@
-import { LoyaltyTier } from "./types";
+import { LoyaltyTier, PurchaseRecord, Transaction } from "./types";
 import { LOYALTY_CONFIG } from "./config";
 
 /**
@@ -252,3 +252,17 @@ export function matchCustomerQuery(
   );
 }
 
+
+/**
+ * Maps a stored transaction to the purchase history entry shown to cashiers.
+ */
+export function toPurchaseRecord(t: Transaction): PurchaseRecord {
+  return {
+    id: t.id,
+    amount: Number(t.amount_total) || 0,
+    points_earned: Number(t.points_earned) || 0,
+    points_redeemed: Number(t.points_redeemed) || 0,
+    transaction_date: t.created_at,
+    created_by: t.cashier_id ? `Caissier (${t.cashier_id.slice(0, 6)})` : LOYALTY_CONFIG.defaults.cashierName,
+  };
+}

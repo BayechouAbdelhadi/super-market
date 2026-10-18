@@ -60,3 +60,29 @@ export function paginateArray<T>(
     meta,
   };
 }
+
+export interface PageParams {
+  page: number;
+  limit: number;
+  offset: number;
+}
+
+/**
+ * Parses `page` / `limit` query parameters (1-based page, limit clamped to `maxLimit`).
+ * Returns null when neither parameter is present (caller keeps its unpaginated response).
+ */
+export function parsePageParams(
+  searchParams: URLSearchParams,
+  defaultLimit: number,
+  maxLimit: number
+): PageParams | null {
+  const pageParam = searchParams.get("page");
+  const limitParam = searchParams.get("limit");
+  if (!pageParam && !limitParam) {
+    return null;
+  }
+
+  const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
+  const limit = Math.min(maxLimit, Math.max(1, parseInt(limitParam || `${defaultLimit}`, 10) || defaultLimit));
+  return { page, limit, offset: (page - 1) * limit };
+}

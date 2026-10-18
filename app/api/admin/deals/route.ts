@@ -40,7 +40,7 @@ export async function GET() {
         totalFailed,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[GET /api/admin/deals] Error:", err);
     return NextResponse.json(
       { error: "FETCH_FAILED", message: "Impossible de récupérer les campagnes." },
@@ -82,10 +82,10 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (err: any) {
+  } catch (err) {
     console.error("[POST /api/admin/deals] Error:", err);
     return NextResponse.json(
-      { error: "CREATION_FAILED", message: err?.message || "Erreur lors de la création de la campagne." },
+      { error: "CREATION_FAILED", message: "Erreur lors de la création de la campagne." },
       { status: 500 }
     );
   }

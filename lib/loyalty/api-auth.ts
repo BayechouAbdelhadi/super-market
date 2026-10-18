@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { resolveUserRole, type AppRole } from "@/lib/auth/roles";
+import { getSessionCaller } from "@/lib/auth/session";
+import type { AppRole } from "@/lib/auth/roles";
 
 export type AllowedRole = AppRole;
 
@@ -22,10 +22,9 @@ export type AuthResult = AuthSuccess | AuthFailure;
  * Enforces strict authentication and RBAC before executing route logic.
  */
 export async function requireAuth(allowedRoles: AllowedRole[] = ["ADMIN", "CASHIER"]): Promise<AuthResult> {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const caller = await getSessionCaller(allowedRoles);
 
-  if (error || !user) {
+  if (!caller.ok && caller.reason === "UNAUTHENTICATED") {
     return {
       authorized: false,
       response: NextResponse.json(
@@ -35,9 +34,7 @@ export async function requireAuth(allowedRoles: AllowedRole[] = ["ADMIN", "CASHI
     };
   }
 
-  const role: AllowedRole = await resolveUserRole(supabase, user);
-
-  if (!allowedRoles.includes(role)) {
+  if (!caller.ok) {
     return {
       authorized: false,
       response: NextResponse.json(
@@ -49,7 +46,7 @@ export async function requireAuth(allowedRoles: AllowedRole[] = ["ADMIN", "CASHI
 
   return {
     authorized: true,
-    user: { id: user.id, email: user.email },
-    role,
+    user: { id: caller.user.id, email: caller.user.email },
+    role: caller.role,
   };
 }

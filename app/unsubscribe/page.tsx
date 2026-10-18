@@ -8,6 +8,8 @@ import { CheckCircle2, AlertCircle, ArrowLeft, RefreshCw, MailCheck, ShieldCheck
 function UnsubscribeContent() {
   const searchParams = useSearchParams();
   const rawEmail = searchParams.get("email") || "";
+  // HMAC signature from the email link: required by the API to re-subscribe
+  const sig = searchParams.get("sig") || undefined;
   const initialStatus = searchParams.get("status");
 
   const [email, setEmail] = useState(rawEmail);
@@ -83,7 +85,7 @@ function UnsubscribeContent() {
       const res = await fetch("/api/marketing/unsubscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, action: "resubscribe" }),
+        body: JSON.stringify({ email, action: "resubscribe", sig }),
       });
       const data = await res.json();
 

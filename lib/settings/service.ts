@@ -1,55 +1,82 @@
-import fs from "fs";
-import path from "path";
 import { AppSettings, DEFAULT_APP_SETTINGS } from "./types";
 import { AppSettingsSchema } from "./validation";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { ISettingsStore, StoredSettings } from "./ports";
+import { SupabaseSettingsStore } from "./adapters/supabase-settings-store";
+import { FileSettingsStore } from "./adapters/file-settings-store";
 
-const isTestEnv = process.env.NODE_ENV === "test" || process.env.VITEST === "true";
-const SETTINGS_FILE_DIR = path.join(process.cwd(), "data");
-const SETTINGS_FILE_PATH = isTestEnv
-  ? path.join(SETTINGS_FILE_DIR, "test-app-settings.json")
-  : path.join(SETTINGS_FILE_DIR, "app-settings.json");
+export interface SettingsStores {
+  /** Primary cloud store */
+  primary: ISettingsStore;
+  /** Local offline backup */
+  backup: ISettingsStore;
+}
+
+const defaultStores: SettingsStores = {
+  primary: new SupabaseSettingsStore(),
+  backup: new FileSettingsStore(),
+};
 
 let memoryCache: AppSettings | null = null;
+
+/**
+ * Validates stored settings and fills any missing section with defaults.
+ */
+function toAppSettings(stored: StoredSettings | null): AppSettings | null {
+  if (!stored) {
+    return null;
+  }
+  const validated = AppSettingsSchema.safeParse(stored.settings);
+  if (!validated.success) {
+    return null;
+  }
+  return {
+    ...DEFAULT_APP_SETTINGS,
+    ...validated.data,
+    loyalty: { ...DEFAULT_APP_SETTINGS.loyalty, ...validated.data.loyalty },
+    pos: { ...DEFAULT_APP_SETTINGS.pos, ...validated.data.pos },
+    store: { ...DEFAULT_APP_SETTINGS.store, ...validated.data.store },
+    notifications: { ...DEFAULT_APP_SETTINGS.notifications, ...validated.data.notifications },
+    updatedAt: stored.updatedAt,
+    updatedBy: stored.updatedBy,
+  };
+}
+
+/**
+ * Persists settings to both stores. Store failures are logged, never fatal.
+ */
+async function persist(settings: AppSettings, stores: SettingsStores) {
+  try {
+    await stores.backup.save(settings);
+  } catch (fileErr) {
+    console.error("[AppSettings] Failed to write settings file:", fileErr);
+  }
+
+  try {
+    await stores.primary.save(settings);
+  } catch (err) {
+    console.warn("[AppSettings] Supabase connection failed:", err);
+  }
+}
 
 /**
  * Loads current application settings.
  * Priority: Supabase Table (Primary Cloud Store) -> Local File System Store -> In-Memory Cache -> Defaults
  */
-export async function getAppSettings(): Promise<AppSettings> {
+export async function getAppSettings(stores: SettingsStores = defaultStores): Promise<AppSettings> {
   // 1. Primary: Try Supabase app_settings table first if configured
   try {
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from("app_settings")
-      .select("settings_json, updated_at, updated_by")
-      .eq("id", "current")
-      .maybeSingle();
+    const remote = toAppSettings(await stores.primary.load());
+    if (remote) {
+      memoryCache = remote;
 
-    if (!error && data?.settings_json) {
-      const validated = AppSettingsSchema.safeParse(data.settings_json);
-      if (validated.success) {
-        memoryCache = {
-          ...DEFAULT_APP_SETTINGS,
-          ...validated.data,
-          loyalty: { ...DEFAULT_APP_SETTINGS.loyalty, ...validated.data.loyalty },
-          pos: { ...DEFAULT_APP_SETTINGS.pos, ...validated.data.pos },
-          store: { ...DEFAULT_APP_SETTINGS.store, ...validated.data.store },
-          notifications: { ...DEFAULT_APP_SETTINGS.notifications, ...validated.data.notifications },
-          updatedAt: data.updated_at,
-          updatedBy: data.updated_by,
-        };
-
-        // Keep local file storage in sync as an offline backup
-        try {
-          if (!fs.existsSync(SETTINGS_FILE_DIR)) fs.mkdirSync(SETTINGS_FILE_DIR, { recursive: true });
-          fs.writeFileSync(SETTINGS_FILE_PATH, JSON.stringify(memoryCache, null, 2), "utf-8");
-        } catch {
-          // Ignore file write error in restricted runtime
-        }
-
-        return memoryCache;
+      // Keep local file storage in sync as an offline backup
+      try {
+        await stores.backup.save(remote);
+      } catch {
+        // Ignore file write error in restricted runtime
       }
+
+      return memoryCache;
     }
   } catch {
     // Supabase unavailable or running in offline/isolated environment -> fall through
@@ -57,23 +84,10 @@ export async function getAppSettings(): Promise<AppSettings> {
 
   // 2. Secondary: Try local file system storage
   try {
-    if (fs.existsSync(SETTINGS_FILE_PATH)) {
-      const raw = fs.readFileSync(SETTINGS_FILE_PATH, "utf-8");
-      const parsed = JSON.parse(raw);
-      const validated = AppSettingsSchema.safeParse(parsed);
-      if (validated.success) {
-        memoryCache = {
-          ...DEFAULT_APP_SETTINGS,
-          ...validated.data,
-          loyalty: { ...DEFAULT_APP_SETTINGS.loyalty, ...validated.data.loyalty },
-          pos: { ...DEFAULT_APP_SETTINGS.pos, ...validated.data.pos },
-          store: { ...DEFAULT_APP_SETTINGS.store, ...validated.data.store },
-          notifications: { ...DEFAULT_APP_SETTINGS.notifications, ...validated.data.notifications },
-          updatedAt: parsed.updatedAt,
-          updatedBy: parsed.updatedBy,
-        };
-        return memoryCache;
-      }
+    const local = toAppSettings(await stores.backup.load());
+    if (local) {
+      memoryCache = local;
+      return memoryCache;
     }
   } catch (err) {
     console.warn("[AppSettings] Failed to read from file storage, falling back:", err);
@@ -94,7 +108,8 @@ export async function getAppSettings(): Promise<AppSettings> {
  */
 export async function updateAppSettings(
   input: unknown,
-  adminEmail: string = "Admin"
+  adminEmail: string = "Admin",
+  stores: SettingsStores = defaultStores
 ): Promise<{ success: boolean; settings?: AppSettings; error?: string }> {
   const parseResult = AppSettingsSchema.safeParse(input);
 
@@ -112,37 +127,8 @@ export async function updateAppSettings(
     updatedBy: adminEmail,
   };
 
-  // 1. Update in-memory cache
   memoryCache = newSettings;
-
-  // 2. Persist to file store
-  try {
-    if (!fs.existsSync(SETTINGS_FILE_DIR)) {
-      fs.mkdirSync(SETTINGS_FILE_DIR, { recursive: true });
-    }
-    fs.writeFileSync(SETTINGS_FILE_PATH, JSON.stringify(newSettings, null, 2), "utf-8");
-  } catch (fileErr) {
-    console.error("[AppSettings] Failed to write settings file:", fileErr);
-  }
-
-  // 3. Attempt Supabase sync (upsert into app_settings)
-  try {
-    const supabase = createAdminClient();
-    const { error } = await supabase.from("app_settings").upsert(
-      {
-        id: "current",
-        settings_json: newSettings,
-        updated_at: newSettings.updatedAt,
-        updated_by: adminEmail,
-      },
-      { onConflict: "id" }
-    );
-    if (error) {
-      console.warn("[AppSettings] Supabase upsert error:", error.message);
-    }
-  } catch (err) {
-    console.warn("[AppSettings] Supabase connection failed:", err);
-  }
+  await persist(newSettings, stores);
 
   return {
     success: true,
@@ -154,7 +140,8 @@ export async function updateAppSettings(
  * Resets application settings to default constants.
  */
 export async function resetAppSettings(
-  adminEmail: string = "Admin"
+  adminEmail: string = "Admin",
+  stores: SettingsStores = defaultStores
 ): Promise<{ success: boolean; settings: AppSettings }> {
   const defaultReset: AppSettings = {
     ...DEFAULT_APP_SETTINGS,
@@ -163,30 +150,7 @@ export async function resetAppSettings(
   };
 
   memoryCache = defaultReset;
-
-  try {
-    if (!fs.existsSync(SETTINGS_FILE_DIR)) {
-      fs.mkdirSync(SETTINGS_FILE_DIR, { recursive: true });
-    }
-    fs.writeFileSync(SETTINGS_FILE_PATH, JSON.stringify(defaultReset, null, 2), "utf-8");
-  } catch (err) {
-    console.error("[AppSettings] Failed to write default settings file:", err);
-  }
-
-  try {
-    const supabase = createAdminClient();
-    await supabase.from("app_settings").upsert(
-      {
-        id: "current",
-        settings_json: defaultReset,
-        updated_at: defaultReset.updatedAt,
-        updated_by: adminEmail,
-      },
-      { onConflict: "id" }
-    );
-  } catch {
-    // Non-fatal if Supabase is offline
-  }
+  await persist(defaultReset, stores);
 
   return {
     success: true,

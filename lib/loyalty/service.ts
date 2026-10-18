@@ -5,8 +5,9 @@ import {
   Transaction,
   MovementRecord,
   CreateCustomerInput,
+  PurchaseRecord,
 } from "./types";
-import { ICustomerRepository, ITransactionRepository } from "./ports";
+import { ICustomerRepository, ITransactionRepository, Page } from "./ports";
 import { SupabaseCustomerRepository } from "./adapters/supabase-customer-repository";
 import { SupabaseTransactionRepository } from "./adapters/supabase-transaction-repository";
 import { LOYALTY_CONFIG } from "./config";
@@ -22,6 +23,7 @@ import {
   applyPurchasePoints,
   applyRedeemPoints,
   calculateRedemptionPointsEarned,
+  toPurchaseRecord,
 } from "./domain";
 
 export {
@@ -47,6 +49,31 @@ export async function searchCustomers(
   customerRepo: ICustomerRepository = defaultCustomerRepo
 ): Promise<CustomerSummary[]> {
   return await customerRepo.search(query);
+}
+
+/**
+ * Searches customers with database-side pagination via the Customer Port.
+ */
+export async function searchCustomersPage(
+  query: string,
+  limit: number,
+  offset: number,
+  customerRepo: ICustomerRepository = defaultCustomerRepo
+): Promise<Page<CustomerSummary>> {
+  return await customerRepo.searchPage(query, limit, offset);
+}
+
+/**
+ * Lists a customer's purchase history with database-side pagination (newest first).
+ */
+export async function getCustomerPurchasesPage(
+  customerId: string,
+  limit: number,
+  offset: number,
+  transactionRepo: ITransactionRepository = defaultTransactionRepo
+): Promise<Page<PurchaseRecord>> {
+  const { items, total } = await transactionRepo.getPageByCustomerId(customerId, limit, offset);
+  return { items: items.map(toPurchaseRecord), total };
 }
 
 /**
@@ -110,8 +137,8 @@ export async function createCustomer(
       return { success: false, error: "Impossible de récupérer la fiche client après création." };
     }
     return { success: true, customer: detail };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Erreur de création du compte client." };
+  } catch (err) {
+    return { success: false, error: (err instanceof Error && err.message) || "Erreur de création du compte client." };
   }
 }
 
@@ -182,8 +209,8 @@ export async function recordPurchase(
       },
       customer: updatedDetail!,
     };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Impossible d'enregistrer la transaction." };
+  } catch (err) {
+    return { success: false, error: (err instanceof Error && err.message) || "Impossible d'enregistrer la transaction." };
   }
 }
 
@@ -292,7 +319,7 @@ export async function redeemPoints(
       },
       customer: updatedDetail!,
     };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Impossible d'enregistrer la déduction des points." };
+  } catch (err) {
+    return { success: false, error: (err instanceof Error && err.message) || "Impossible d'enregistrer la déduction des points." };
   }
 }

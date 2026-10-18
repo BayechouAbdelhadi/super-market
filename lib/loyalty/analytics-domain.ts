@@ -4,6 +4,7 @@ import {
   LiveOperationRecord,
   RealDashboardData,
 } from "./analytics-types";
+import { LoyaltyTier } from "./types";
 
 /**
  * Formats a currency amount in French format (e.g. "12 450,50")
@@ -201,7 +202,7 @@ export function buildLiveOperations(
       : "Caisse";
 
     const isRedeem = (t.points_redeemed || 0) > 0;
-    const tier = (custData?.status as any) || "BRONZE";
+    const tier = (custData?.status as LoyaltyTier | undefined) || "BRONZE";
 
     const txDate = new Date(t.created_at);
     const formattedTime = txDate.toLocaleTimeString("fr-FR", {

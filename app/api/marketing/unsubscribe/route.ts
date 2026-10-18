@@ -5,10 +5,32 @@ import {
   resubscribeCustomerEmail,
   isCustomerEmailUnsubscribed,
 } from "@/lib/marketing/service";
+import { verifySignedValue } from "@/lib/email/otp-security";
+import { RATE_LIMITS, checkRateLimit, getClientIp, rateLimitMessage } from "@/lib/security/rate-limit";
+
+function rateLimited(req: NextRequest): NextResponse | null {
+  const limit = checkRateLimit(`unsubscribe:ip:${getClientIp(req.headers)}`, RATE_LIMITS.unsubscribePerIp);
+  return limit.allowed ? null : NextResponse.json({ error: rateLimitMessage(limit) }, { status: 429 });
+}
+import { UNSUBSCRIBE_SIGNATURE_PURPOSE } from "@/lib/marketing/utils";
+
+/**
+ * SECURITY: unsubscribing stays possible from any link (including links sent
+ * before signatures existed — the safe direction). Re-subscribing and status
+ * checks change consent / reveal customers, so they require the HMAC `sig`
+ * carried by the unsubscribe link of the email itself.
+ */
+function hasValidSignature(email: string, sig: string | null | undefined): boolean {
+  return verifySignedValue(UNSUBSCRIBE_SIGNATURE_PURPOSE, email, sig);
+}
+
+const INVALID_SIGNATURE_MESSAGE =
+  "Lien invalide. Pour modifier vos préférences, utilisez le lien reçu dans votre dernier e-mail.";
 
 const UnsubscribeBodySchema = z.object({
   email: z.string().email("Format d'adresse e-mail invalide"),
   reason: z.string().max(500).optional(),
+  sig: z.string().max(200).optional(),
   action: z.enum(["unsubscribe", "resubscribe", "status"]).optional().default("unsubscribe"),
 });
 
@@ -41,9 +63,13 @@ function extractEmailFromParams(searchParams: URLSearchParams): string | null {
  * Supports one-click browser links from emails or status checks
  */
 export async function GET(req: NextRequest) {
+  const blocked = rateLimited(req);
+  if (blocked) return blocked;
+
   const searchParams = req.nextUrl.searchParams;
   const email = extractEmailFromParams(searchParams);
   const action = searchParams.get("action") || "unsubscribe";
+  const sig = searchParams.get("sig");
   const wantsJson =
     searchParams.get("format") === "json" ||
     req.headers.get("accept")?.includes("application/json") ||
@@ -60,6 +86,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  if ((action === "status" || action === "resubscribe") && !hasValidSignature(email, sig)) {
+    return NextResponse.json({ error: INVALID_SIGNATURE_MESSAGE }, { status: 403 });
+  }
+
   if (action === "status") {
     const unsubscribed = await isCustomerEmailUnsubscribed(email);
     return NextResponse.json({ success: true, unsubscribed, email });
@@ -71,7 +101,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: true, resubscribed: true, email });
     }
     const redirectUrl = new URL(
-      `/unsubscribe?email=${encodeURIComponent(email)}&status=resubscribed`,
+      `/unsubscribe?email=${encodeURIComponent(email)}&status=resubscribed${sig ? `&sig=${encodeURIComponent(sig)}` : ""}`,
       req.url
     );
     return NextResponse.redirect(redirectUrl);
@@ -85,7 +115,7 @@ export async function GET(req: NextRequest) {
   }
 
   const redirectUrl = new URL(
-    `/unsubscribe?email=${encodeURIComponent(email)}&status=unsubscribed`,
+    `/unsubscribe?email=${encodeURIComponent(email)}&status=unsubscribed${sig ? `&sig=${encodeURIComponent(sig)}` : ""}`,
     req.url
   );
   return NextResponse.redirect(redirectUrl);
@@ -96,6 +126,9 @@ export async function GET(req: NextRequest) {
  * Handles structured programmatic or client form unsubscribe / resubscribe requests
  */
 export async function POST(req: NextRequest) {
+  const blocked = rateLimited(req);
+  if (blocked) return blocked;
+
   try {
     const body = await req.json();
     const parsed = UnsubscribeBodySchema.safeParse(body);
@@ -107,8 +140,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, reason, action } = parsed.data;
+    const { email, reason, action, sig } = parsed.data;
     const cleanEmail = email.trim().toLowerCase();
+
+    if ((action === "status" || action === "resubscribe") && !hasValidSignature(cleanEmail, sig)) {
+      return NextResponse.json({ error: INVALID_SIGNATURE_MESSAGE }, { status: 403 });
+    }
 
     if (action === "status") {
       const unsubscribed = await isCustomerEmailUnsubscribed(cleanEmail);
@@ -133,9 +170,10 @@ export async function POST(req: NextRequest) {
       email: cleanEmail,
       message: "Votre désabonnement a bien été pris en compte.",
     });
-  } catch (err: any) {
+  } catch (err) {
+    console.error("[POST /api/marketing/unsubscribe] Error:", err);
     return NextResponse.json(
-      { error: err?.message || "Erreur interne lors du traitement" },
+      { error: "Erreur interne lors du traitement" },
       { status: 500 }
     );
   }

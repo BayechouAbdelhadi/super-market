@@ -55,6 +55,3 @@ export function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
     </span>
   );
 }
-
-// Re-export TierBadge for compatibility
-export const TierBadge = StatusBadge;

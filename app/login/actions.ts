@@ -2,8 +2,16 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
 import { resolveUserRole } from '@/lib/auth/roles'
+import { RATE_LIMITS, checkRateLimits, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
+
+const LoginSchema = z.object({
+  email: z.string().trim().toLowerCase().min(1, "L'adresse email est obligatoire."),
+  password: z.string().min(1, "Le mot de passe est obligatoire."),
+})
 
 export type AuthActionResult = {
   success?: boolean
@@ -25,15 +33,24 @@ export async function login(
     return { error: "Données de formulaire manquantes." }
   }
 
-  const email = ((formData.get('email') as string) || '').trim().toLowerCase()
-  const password = (formData.get('password') as string) || ''
+  const parsed = LoginSchema.safeParse({
+    email: formData.get('email') ?? '',
+    password: formData.get('password') ?? '',
+  })
 
-  if (!email) {
-    return { error: "L'adresse email est obligatoire." }
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || "Données invalides." }
   }
 
-  if (!password) {
-    return { error: "Le mot de passe est obligatoire." }
+  const { email, password } = parsed.data
+
+  const ip = getClientIp(await headers())
+  const limit = checkRateLimits([
+    [`login:account:${email}`, RATE_LIMITS.loginPerAccount],
+    [`login:ip:${ip}`, RATE_LIMITS.loginPerIp],
+  ])
+  if (!limit.allowed) {
+    return { error: rateLimitMessage(limit) }
   }
 
   const supabase = await createClient()

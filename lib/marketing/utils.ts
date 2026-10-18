@@ -36,3 +36,6 @@ export function deduplicateRecipients(recipients: CampaignRecipient[]): Campaign
 
   return unique;
 }
+
+/** Purpose bound into the HMAC of unsubscribe links (see `signValue`). */
+export const UNSUBSCRIBE_SIGNATURE_PURPOSE = "marketing-unsubscribe";

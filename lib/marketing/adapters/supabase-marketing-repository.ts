@@ -1,8 +1,35 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { IMarketingCampaignRepository } from "../ports";
-import { MarketingCampaign, CampaignRecipient } from "../types";
+import {
+  MarketingCampaign,
+  CampaignRecipient,
+  CampaignStats,
+  CampaignStatus,
+  DispatchMode,
+  RecipientStatus,
+} from "../types";
+import { LoyaltyTier } from "@/lib/loyalty/types";
 import { deduplicateRecipients } from "../utils";
 import { defaultMarketingRepo as jsonFallbackRepo } from "./json-marketing-repository";
+
+/** PostgREST returns at most 1000 rows per request: read full sets page by page. */
+const PAGE_SIZE = 1000;
+
+async function selectAllPages<T>(
+  fetchPage: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>
+): Promise<{ data: T[] | null; error: unknown }> {
+  const all: T[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await fetchPage(from, from + PAGE_SIZE - 1);
+    if (error || !data) {
+      return { data: null, error };
+    }
+    all.push(...data);
+    if (data.length < PAGE_SIZE) {
+      return { data: all, error: null };
+    }
+  }
+}
 
 interface SupabaseCampaignRow {
   id: string;
@@ -20,8 +47,8 @@ interface SupabaseCampaignRow {
   image_url: string | null;
   cta_text: string | null;
   cta_url: string | null;
-  stats: any;
-  recipients?: any[];
+  stats: CampaignStats;
+  recipients?: CampaignRecipient[];
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -44,9 +71,9 @@ function mapToDomain(row: SupabaseCampaignRow): MarketingCampaign {
   return {
     id: row.id,
     title: row.title,
-    status: row.status as any,
-    targetTiers: (row.target_tiers || []) as any,
-    dispatchMode: row.dispatch_mode as any,
+    status: row.status as CampaignStatus,
+    targetTiers: (row.target_tiers || []) as LoyaltyTier[],
+    dispatchMode: row.dispatch_mode as DispatchMode,
     dailyLimit: row.daily_limit,
     startDate: row.start_date,
     endDate: row.end_date,
@@ -103,8 +130,8 @@ function mapRecipientToDomain(row: SupabaseRecipientRow): CampaignRecipient {
     customerId: row.customer_id,
     email: row.email,
     fullName: row.full_name,
-    tier: row.tier as any,
-    status: row.status as any,
+    tier: row.tier as LoyaltyTier,
+    status: row.status as RecipientStatus,
     sentAt: row.sent_at || undefined,
     error: row.error || undefined,
   };
@@ -187,10 +214,14 @@ export class SupabaseMarketingRepository implements IMarketingCampaignRepository
     if (isAvailable) {
       try {
         const supabase = createAdminClient();
-        const { data, error } = await supabase
-          .from("marketing_campaigns")
-          .select("*")
-          .order("created_at", { ascending: false });
+        const { data, error } = await selectAllPages<SupabaseCampaignRow>((from, to) =>
+          supabase
+            .from("marketing_campaigns")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .order("id", { ascending: true })
+            .range(from, to)
+        );
 
         if (!error && data) {
           return (data as SupabaseCampaignRow[]).map(mapToDomain);
@@ -221,10 +252,14 @@ export class SupabaseMarketingRepository implements IMarketingCampaignRepository
 
           // Fetch relational recipients if available
           try {
-            const { data: recData, error: recError } = await supabase
-              .from("marketing_campaign_recipients")
-              .select("*")
-              .eq("campaign_id", id);
+            const { data: recData, error: recError } = await selectAllPages<SupabaseRecipientRow>((from, to) =>
+              supabase
+                .from("marketing_campaign_recipients")
+                .select("*")
+                .eq("campaign_id", id)
+                .order("id", { ascending: true })
+                .range(from, to)
+            );
 
             if (!recError && recData && recData.length > 0) {
               campaign.recipients = deduplicateRecipients(
@@ -330,10 +365,14 @@ export class SupabaseMarketingRepository implements IMarketingCampaignRepository
     if (isAvailable) {
       try {
         const supabase = createAdminClient();
-        const { data, error } = await supabase
-          .from("marketing_campaign_recipients")
-          .select("*")
-          .eq("campaign_id", campaignId);
+        const { data, error } = await selectAllPages<SupabaseRecipientRow>((from, to) =>
+          supabase
+            .from("marketing_campaign_recipients")
+            .select("*")
+            .eq("campaign_id", campaignId)
+            .order("id", { ascending: true })
+            .range(from, to)
+        );
 
         if (!error && data && data.length > 0) {
           return deduplicateRecipients(
@@ -428,11 +467,15 @@ export class SupabaseMarketingRepository implements IMarketingCampaignRepository
     if (isAvailable) {
       try {
         const supabase = createAdminClient();
-        const { data, error } = await supabase
-          .from("marketing_unsubscribes")
-          .select("email");
+        const { data, error } = await selectAllPages<{ email: string }>((from, to) =>
+          supabase
+            .from("marketing_unsubscribes")
+            .select("email")
+            .order("email", { ascending: true })
+            .range(from, to)
+        );
         if (!error && data) {
-          const tableEmails = data.map((r: any) => r.email.toLowerCase().trim());
+          const tableEmails = data.map((r) => r.email.toLowerCase().trim());
           const jsonEmails = await jsonFallbackRepo.getUnsubscribedEmails();
           return Array.from(new Set([...tableEmails, ...jsonEmails]));
         }

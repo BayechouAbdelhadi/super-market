@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { redeemPoints } from "@/lib/loyalty/service";
 import { requireAuth } from "@/lib/loyalty/api-auth";
+import { readCustomerId } from "@/lib/loyalty/route-params";
 import { RedeemPointsSchema } from "@/lib/loyalty/validation";
 
 export async function POST(
@@ -13,7 +14,8 @@ export async function POST(
       return auth.response;
     }
 
-    const { id } = await context.params;
+    const { id, response: invalidId } = await readCustomerId(context.params);
+    if (invalidId) return invalidId;
     const body = await req.json();
 
     const validation = RedeemPointsSchema.safeParse(body);

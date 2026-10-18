@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createCustomer, searchCustomers } from "@/lib/loyalty/service";
+import { createCustomer, searchCustomers, searchCustomersPage } from "@/lib/loyalty/service";
+import { parsePageParams } from "@/lib/loyalty/pagination";
 import { requireAuth } from "@/lib/loyalty/api-auth";
 import { CreateCustomerSchema } from "@/lib/loyalty/validation";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 import { emailService } from "@/lib/email";
-import {
-  createSignedToken,
-  AccountActivationPayload,
-} from "@/lib/email/otp-security";
+import { createActivationLink } from "@/lib/auth/links";
+import { AUTH_CONFIG } from "@/lib/auth/config";
 import { getAppOrigin } from "@/lib/utils/app-url";
 
 export async function GET(req: NextRequest) {
@@ -18,24 +17,15 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q") ?? "";
-  const pageParam = searchParams.get("page");
-  const limitParam = searchParams.get("limit");
+  const pageParams = parsePageParams(
+    searchParams,
+    LOYALTY_CONFIG.pagination.defaultPageSize,
+    LOYALTY_CONFIG.pagination.maxPageSize
+  );
 
-  const customers = await searchCustomers(q);
-  const total = customers.length;
-
-  if (pageParam || limitParam) {
-    const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
-    const limit = Math.min(
-      LOYALTY_CONFIG.pagination.maxPageSize,
-      Math.max(
-        1,
-        parseInt(limitParam || `${LOYALTY_CONFIG.pagination.defaultPageSize}`, 10) ||
-          LOYALTY_CONFIG.pagination.defaultPageSize
-      )
-    );
-    const start = (page - 1) * limit;
-    const paginated = customers.slice(start, start + limit);
+  if (pageParams) {
+    const { page, limit, offset } = pageParams;
+    const { items, total } = await searchCustomersPage(q, limit, offset);
 
     return NextResponse.json({
       query: q,
@@ -43,10 +33,13 @@ export async function GET(req: NextRequest) {
       limit,
       total,
       totalPages: Math.ceil(total / limit),
-      count: paginated.length,
-      customers: paginated,
+      count: items.length,
+      customers: items,
     });
   }
+
+  const customers = await searchCustomers(q);
+  const total = customers.length;
 
   return NextResponse.json({
     query: q,
@@ -104,16 +97,7 @@ export async function POST(req: NextRequest) {
     // Send account activation email to the customer
     if (customer.email) {
       try {
-        const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
-        const token = createSignedToken<AccountActivationPayload>({
-          email: customer.email.toLowerCase().trim(),
-          role: "CUSTOMER",
-          type: "ACCOUNT_ACTIVATION",
-          expiresAt,
-        });
-
-        const origin = getAppOrigin(req.headers);
-        const activationLink = `${origin}/confirm-account?token=${encodeURIComponent(token)}`;
+        const activationLink = createActivationLink(getAppOrigin(req.headers), customer.email, "CUSTOMER");
 
         emailService
           .sendAccountActivation({
@@ -121,7 +105,7 @@ export async function POST(req: NextRequest) {
             name: customer.full_name,
             activationLink,
             role: "CUSTOMER",
-            expiresInDays: 7,
+            expiresInDays: AUTH_CONFIG.activationLinkTtlDays,
           })
           .catch((err) => {
             console.error(

@@ -4,8 +4,12 @@
 DO $$
 DECLARE
   target_email TEXT := 'admin@supermarket.com';
-  new_password TEXT := 'AdminSecurePass123!';
+  new_password TEXT := 'CHANGE_ME'; -- never commit the real password
 BEGIN
+  IF new_password = 'CHANGE_ME' OR length(new_password) < 12 THEN
+    RAISE EXCEPTION 'Set a strong, unique password (12+ characters) before running this script.';
+  END IF;
+
   -- Mettre à jour le mot de passe hashé dans auth.users
   UPDATE auth.users
   SET 

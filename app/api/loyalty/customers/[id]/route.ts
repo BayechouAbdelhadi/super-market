@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCustomerDetail } from "@/lib/loyalty/service";
 import { requireAuth } from "@/lib/loyalty/api-auth";
+import { readCustomerId } from "@/lib/loyalty/route-params";
 
 export async function GET(
   _req: NextRequest,
@@ -11,7 +12,8 @@ export async function GET(
     return auth.response;
   }
 
-  const { id } = await context.params;
+  const { id, response: invalidId } = await readCustomerId(context.params);
+  if (invalidId) return invalidId;
   const customer = await getCustomerDetail(id);
 
   if (!customer) {

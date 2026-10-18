@@ -61,10 +61,10 @@ async function handleCronExecution(req: NextRequest) {
       totalProcessedCampaigns: results.length,
       details: results,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[Cron Marketing Deals] Erreur lors du job de minuit:", err);
     return NextResponse.json(
-      { error: "INTERNAL_ERROR", message: err?.message || "Erreur interne du cron de minuit." },
+      { error: "INTERNAL_ERROR", message: "Erreur interne du cron de minuit." },
       { status: 500 }
     );
   }

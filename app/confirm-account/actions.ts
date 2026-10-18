@@ -2,11 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
-import {
-  verifySignedToken,
-  AccountActivationPayload,
-} from '@/lib/email/otp-security'
+import { setPasswordFromToken } from '@/lib/auth/password-service'
 import { PasswordSchema } from '@/lib/auth/password-rules'
 import { z } from 'zod'
 
@@ -55,69 +51,51 @@ export async function confirmAccount(
     }
   }
 
-  // 1. Verify cryptographic token
-  const payload = token ? verifySignedToken<AccountActivationPayload>(token) : null
-
-  if (!payload || payload.type !== 'ACCOUNT_ACTIVATION') {
-    return {
-      error: "Ce lien d'activation est invalide ou a expiré. Veuillez contacter le magasin.",
-    }
-  }
-
-  if (Date.now() > payload.expiresAt) {
-    return {
-      error: "Ce lien d'activation a expiré. Veuillez contacter l'administrateur ou faire une demande de réinitialisation.",
-    }
-  }
-
-  const targetEmail = payload.email.toLowerCase().trim()
-
-  // 2. Locate user strictly by token email
-  const adminClient = createAdminClient()
-  let targetUserId: string | null = null
-
-  const { data: profile } = await adminClient
-    .from('profiles')
-    .select('id')
-    .eq('email', targetEmail)
-    .single()
-
-  if (profile?.id) {
-    targetUserId = profile.id
-  } else {
-    const { data: usersData } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 100 })
-    const matched = usersData?.users?.find(
-      (u) => u.email?.toLowerCase().trim() === targetEmail
-    )
-    targetUserId = matched?.id || null
-  }
-
-  if (!targetUserId) {
-    console.error("[ConfirmAccount] Target user not found:", targetEmail)
-    return {
-      error: `Aucun compte associé à l'adresse email ${targetEmail} n'a été trouvé.`,
-    }
-  }
-
-  // 3. Update password and confirm user
-  const { error: adminError } = await adminClient.auth.admin.updateUserById(targetUserId, {
+  // 1-3. Verify the signed, single-use activation token, then set the password
+  // and confirm ONLY the account named by the token.
+  const result = await setPasswordFromToken({
+    flow: 'ACCOUNT_ACTIVATION',
+    token,
     password: parseResult.data.password,
-    email_confirm: true,
   })
 
-  if (adminError) {
-    console.error("[ConfirmAccount] updateUserById error:", adminError.message)
-    return {
-      error: `Erreur lors de la mise à jour : ${adminError.message}`,
+  if (!result.ok) {
+    switch (result.reason) {
+      case 'EXPIRED':
+        return {
+          error: "Ce lien d'activation a expiré. Veuillez contacter l'administrateur ou faire une demande de réinitialisation.",
+        }
+      case 'ALREADY_USED':
+        return {
+          error: "Ce lien d'activation a déjà été utilisé. Connectez-vous ou faites une demande de réinitialisation du mot de passe.",
+        }
+      case 'ACCOUNT_NOT_FOUND':
+        console.error("[ConfirmAccount] Target user not found:", result.email)
+        return {
+          error: `Aucun compte associé à l'adresse email ${result.email} n'a été trouvé.`,
+        }
+      case 'UPDATE_FAILED':
+        console.error("[ConfirmAccount] updateUserById error:", result.detail)
+        return {
+          error: `Erreur lors de la mise à jour : ${result.detail}`,
+        }
+      case 'UNAVAILABLE':
+        return { error: "Service momentanément indisponible. Veuillez réessayer." }
+      default:
+        return {
+          error: "Ce lien d'activation est invalide ou a expiré. Veuillez contacter le magasin.",
+        }
     }
   }
+
+  const targetEmail = result.email
 
   // 4. Purge any existing session in the browser to avoid session hijacking or privilege mismatch
   const supabase = await createClient()
   await supabase.auth.signOut().catch(() => null)
 
   // 5. Redirect to login with success message
-  const roleName = payload.role === 'CASHIER' ? 'caissier' : 'fidélité'
+  const roleName = result.role === 'CASHIER' ? 'caissier' : 'fidélité'
   redirect(
     `/login?success=${encodeURIComponent(
       `Votre compte ${roleName} (${targetEmail}) a été activé avec succès ! Connectez-vous avec votre nouveau mot de passe.`

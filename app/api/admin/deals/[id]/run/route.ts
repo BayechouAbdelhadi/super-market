@@ -29,10 +29,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       result,
       message: `Lot traité : ${result.sentInBatch} envoyé(s), ${result.failedInBatch} échec(s).`,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[POST /api/admin/deals/[id]/run] Error:", err);
     return NextResponse.json(
-      { error: "EXECUTION_ERROR", message: err?.message || "Erreur lors de l'exécution du lot." },
+      { error: "EXECUTION_ERROR", message: "Erreur lors de l'exécution du lot." },
       { status: 500 }
     );
   }

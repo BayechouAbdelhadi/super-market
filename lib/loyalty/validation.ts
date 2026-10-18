@@ -39,3 +39,8 @@ export const RedeemPointsSchema = z.object({
 });
 
 export type RedeemPointsPayload = z.infer<typeof RedeemPointsSchema>;
+
+/**
+ * Zod schema for the `[id]` route segment of customer endpoints (auth user UUID)
+ */
+export const CustomerIdSchema = z.string().uuid("Identifiant client invalide.");

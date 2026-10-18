@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         tier: r.tier,
       })),
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
       { error: "COUNT_FAILED", message: "Impossible de calculer le nombre de clients." },
       { status: 500 }

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { recordPurchase, getCustomerDetail } from "@/lib/loyalty/service";
+import { recordPurchase, getCustomerDetail, getCustomerPurchasesPage } from "@/lib/loyalty/service";
+import { parsePageParams } from "@/lib/loyalty/pagination";
 import { requireAuth } from "@/lib/loyalty/api-auth";
+import { readCustomerId } from "@/lib/loyalty/route-params";
 import { RecordPurchaseSchema } from "@/lib/loyalty/validation";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 
@@ -13,7 +15,8 @@ export async function GET(
     return auth.response;
   }
 
-  const { id } = await context.params;
+  const { id, response: invalidId } = await readCustomerId(context.params);
+  if (invalidId) return invalidId;
   const customer = await getCustomerDetail(id);
 
   if (!customer) {
@@ -24,23 +27,15 @@ export async function GET(
   }
 
   const { searchParams } = new URL(req.url);
-  const pageParam = searchParams.get("page");
-  const limitParam = searchParams.get("limit");
-  const purchases = customer.purchases || [];
-  const total = purchases.length;
+  const pageParams = parsePageParams(
+    searchParams,
+    LOYALTY_CONFIG.pagination.tablePageSize,
+    LOYALTY_CONFIG.pagination.maxPageSize
+  );
 
-  if (pageParam || limitParam) {
-    const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
-    const limit = Math.min(
-      LOYALTY_CONFIG.pagination.maxPageSize,
-      Math.max(
-        1,
-        parseInt(limitParam || `${LOYALTY_CONFIG.pagination.tablePageSize}`, 10) ||
-          LOYALTY_CONFIG.pagination.tablePageSize
-      )
-    );
-    const start = (page - 1) * limit;
-    const paginated = purchases.slice(start, start + limit);
+  if (pageParams) {
+    const { page, limit, offset } = pageParams;
+    const { items, total } = await getCustomerPurchasesPage(id, limit, offset);
 
     return NextResponse.json({
       customer_id: id,
@@ -48,10 +43,13 @@ export async function GET(
       limit,
       total,
       totalPages: Math.ceil(total / limit),
-      count: paginated.length,
-      purchases: paginated,
+      count: items.length,
+      purchases: items,
     });
   }
+
+  const purchases = customer.purchases || [];
+  const total = purchases.length;
 
   return NextResponse.json({
     customer_id: id,
@@ -71,7 +69,8 @@ export async function POST(
       return auth.response;
     }
 
-    const { id } = await context.params;
+    const { id, response: invalidId } = await readCustomerId(context.params);
+    if (invalidId) return invalidId;
     const body = await req.json();
 
     const validation = RecordPurchaseSchema.safeParse(body);

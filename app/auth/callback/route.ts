@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import type { EmailOtpType } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
   } else if (token_hash) {
     const { error } = await supabase.auth.verifyOtp({
       token_hash,
-      type: (type as any) || 'recovery',
+      type: (type as EmailOtpType | null) || 'recovery',
     })
     if (error) {
       console.error('[Auth Callback] verifyOtp error:', error.message)

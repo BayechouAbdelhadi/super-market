@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CreateCampaignSchema } from '@/lib/marketing/validation';
 import { renderDealEmailHtml } from '@/lib/marketing/templates/deal-email';
 import {
@@ -75,6 +75,12 @@ describe('Marketing Deals & Email Campaigns', () => {
   beforeEach(() => {
     mockRepo = new MockMarketingRepository();
     vi.clearAllMocks();
+    // Unsubscribe links are HMAC-signed: provide a signing secret
+    vi.stubEnv('AUTH_TOKEN_SECRET', 'test-auth-token-secret');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   describe('Validation Schema (CreateCampaignSchema)', () => {

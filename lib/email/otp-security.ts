@@ -6,6 +6,8 @@ export const PENDING_SIGNUP_COOKIE = "sm_pending_signup";
 export interface PendingResetPayload {
   email: string;
   type?: 'PASSWORD_RESET';
+  /** Single-use id (absent on tokens issued before single-use links) */
+  jti?: string;
   expiresAt: number;
 }
 
@@ -13,6 +15,8 @@ export interface AccountActivationPayload {
   email: string;
   role: 'CUSTOMER' | 'CASHIER' | 'ADMIN';
   type: 'ACCOUNT_ACTIVATION';
+  /** Single-use id (absent on tokens issued before single-use links) */
+  jti?: string;
   expiresAt: number;
 }
 
@@ -176,6 +180,24 @@ export function decryptToken<T extends object>(token: string, secret?: string): 
     }
   }
   return null;
+}
+
+/**
+ * Signs a value for a given purpose (e.g. an email address in an unsubscribe link).
+ * The purpose is part of the MAC so a signature cannot be reused in another flow.
+ */
+export function signValue(purpose: string, value: string, secret: string = getPrimarySecret()): string {
+  return crypto.createHmac("sha256", secret).update(`${purpose}:${value}`).digest("base64url");
+}
+
+/**
+ * Constant-time verification of a signature produced by `signValue`.
+ */
+export function verifySignedValue(purpose: string, value: string, signature: string | null | undefined): boolean {
+  if (!signature) {
+    return false;
+  }
+  return getTokenSecrets().some((secret) => safeEqual(signValue(purpose, value, secret), signature));
 }
 
 /**

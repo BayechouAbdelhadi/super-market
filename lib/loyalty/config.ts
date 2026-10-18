@@ -44,11 +44,15 @@ export const LOYALTY_CONFIG = {
     defaultPageSize: 20,
     maxPageSize: 50,
     tablePageSize: 5,
+    // Accounts preloaded in back-office lists (customers, cashiers)
+    backOfficeListLimit: 100,
     pageSizeOptions: [5, 10, 20, 50] as unknown as number[],
   },
   defaults: {
     cashierName: "Caisse #1",
     redeemReason: "Remise fidélité en caisse",
+    // Tier assigned to every new loyalty account
+    tier: "BRONZE" as const,
   },
   search: {
     debounceMs: 300,

@@ -5,8 +5,12 @@ DO $$
 DECLARE
   new_admin_id UUID := gen_random_uuid();
   admin_email TEXT := 'admin@supermarket.com';
-  admin_password TEXT := 'AdminSecurePass123!';
+  admin_password TEXT := 'CHANGE_ME'; -- never commit the real password
 BEGIN
+  IF admin_password = 'CHANGE_ME' OR length(admin_password) < 12 THEN
+    RAISE EXCEPTION 'Set a strong, unique password (12+ characters) before running this script.';
+  END IF;
+
   -- 1. Insert the user into the Supabase auth.users table
   INSERT INTO auth.users (
     instance_id,

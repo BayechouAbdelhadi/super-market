@@ -1,15 +1,12 @@
-import { createClient } from '@/lib/supabase/server'
+import { SupabaseDirectoryRepository } from '@/lib/loyalty/adapters/supabase-directory-repository'
+import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
 import { Card } from '@/components/ui/card'
 import { UserManager } from '@/components/shared/UserManager'
 
+const directory = new SupabaseDirectoryRepository()
+
 export async function CashiersList() {
-  const supabase = await createClient()
-  const { data: cashiers } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('role', 'CASHIER')
-    .order('created_at', { ascending: false })
-    .limit(100)
+  const cashiers = await directory.listRecentProfilesByRole('CASHIER', LOYALTY_CONFIG.pagination.backOfficeListLimit)
 
   return (
     <div className="space-y-8">
@@ -20,7 +17,7 @@ export async function CashiersList() {
 
       <Card className="p-6">
         <UserManager 
-          initialUsers={cashiers || []} 
+          initialUsers={cashiers} 
           roleToManage="CASHIER" 
           title="Gestion des Caissiers" 
           description="Ajoutez ou modifiez les profils des caissiers de votre établissement." 

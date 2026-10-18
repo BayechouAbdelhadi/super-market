@@ -1,5 +1,5 @@
-import crypto from "crypto";
-import { ICustomerRepository } from "../ports";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { ICustomerRepository, Page } from "../ports";
 import {
   CustomerDetail,
   CustomerSummary,
@@ -9,8 +9,9 @@ import {
   Transaction,
 } from "../types";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { normalizePhone, calculateTier } from "../domain";
+import { IUserAccountRepository } from "@/lib/auth/ports";
+import { SupabaseUserAccountRepository } from "@/lib/auth/adapters/supabase-user-account-repository";
+import { normalizePhone, calculateTier, toPurchaseRecord } from "../domain";
 import { LOYALTY_CONFIG } from "../config";
 
 /**
@@ -18,22 +19,31 @@ import { LOYALTY_CONFIG } from "../config";
  * Encapsulates all SQL/Supabase interactions for customers (Hexagonal Architecture).
  */
 export class SupabaseCustomerRepository implements ICustomerRepository {
+  constructor(private readonly accounts: IUserAccountRepository = new SupabaseUserAccountRepository()) {}
+
   private async getClient() {
     return await createServerClient();
   }
 
-  async search(query: string, limit: number = LOYALTY_CONFIG.pagination.defaultPageSize): Promise<CustomerSummary[]> {
-    const sb = await this.getClient();
+  /** Strips PostgREST filter syntax from a search term (see `buildSearchQuery`). */
+  private normalizeSearchTerm(query: string): string {
     // SECURITY: strip PostgREST filter syntax (",", "(", ")", quotes, backslash) so the
-    // search term cannot add or break conditions inside the `.or()` filter below.
-    const trimmed = query.replace(/[,()"\\]/g, " ").trim().toLowerCase();
+    // search term cannot add or break conditions inside the `.or()` filter.
+    return query.replace(/[,()"\\]/g, " ").trim().toLowerCase();
+  }
+
+  private buildSearchQuery(sb: SupabaseClient, query: string, withCount: boolean) {
+    const trimmed = this.normalizeSearchTerm(query);
 
     let dbQuery = sb
       .from("profiles")
-      .select(`
+      .select(
+        `
         id, first_name, last_name, email, phone_number,
         customers ( loyalty_points, status )
-      `)
+      `,
+        withCount ? { count: "exact" } : undefined
+      )
       .eq("role", "CUSTOMER");
 
     if (trimmed) {
@@ -41,35 +51,59 @@ export class SupabaseCustomerRepository implements ICustomerRepository {
         `first_name.ilike.%${trimmed}%,last_name.ilike.%${trimmed}%,email.ilike.%${trimmed}%,phone_number.ilike.%${trimmed}%`
       );
     }
+    return dbQuery;
+  }
 
-    const { data, error } = await dbQuery.limit(limit);
+  private toSummary(p: ProfileWithCustomerRow): CustomerSummary {
+    const cust = Array.isArray(p.customers) ? p.customers[0] : p.customers;
+    const available_points = cust?.loyalty_points ?? 0;
+    const tier = (cust?.status as LoyaltyTier) || calculateTier(available_points) || "BRONZE";
+    const firstName = p.first_name || "";
+    const lastName = p.last_name || "";
+    const fullName = `${firstName} ${lastName}`.trim() || p.email || "Client";
+
+    return {
+      id: p.id,
+      first_name: firstName,
+      last_name: lastName,
+      full_name: fullName,
+      email: p.email || "",
+      phone: p.phone_number || "",
+      phone_normalized: p.phone_number || "",
+      tier,
+      historical_points: available_points,
+      available_points,
+    };
+  }
+
+  async search(query: string, limit: number = LOYALTY_CONFIG.pagination.defaultPageSize): Promise<CustomerSummary[]> {
+    const sb = await this.getClient();
+    const { data, error } = await this.buildSearchQuery(sb, query, false).limit(limit);
 
     if (error || !data) {
       console.error("[SupabaseCustomerRepository] search error:", error);
       return [];
     }
 
-    return (data as ProfileWithCustomerRow[]).map((p) => {
-      const cust = Array.isArray(p.customers) ? p.customers[0] : p.customers;
-      const available_points = cust?.loyalty_points ?? 0;
-      const tier = (cust?.status as LoyaltyTier) || calculateTier(available_points) || "BRONZE";
-      const firstName = p.first_name || "";
-      const lastName = p.last_name || "";
-      const fullName = `${firstName} ${lastName}`.trim() || p.email || "Client";
+    return (data as ProfileWithCustomerRow[]).map((p) => this.toSummary(p));
+  }
 
-      return {
-        id: p.id,
-        first_name: firstName,
-        last_name: lastName,
-        full_name: fullName,
-        email: p.email || "",
-        phone: p.phone_number || "",
-        phone_normalized: p.phone_number || "",
-        tier,
-        historical_points: available_points,
-        available_points,
-      };
-    });
+  async searchPage(query: string, limit: number, offset: number): Promise<Page<CustomerSummary>> {
+    const sb = await this.getClient();
+    const { data, error, count } = await this.buildSearchQuery(sb, query, true)
+      .order("last_name", { ascending: true })
+      .order("id", { ascending: true })
+      .range(offset, offset + limit - 1);
+
+    if (error || !data) {
+      console.error("[SupabaseCustomerRepository] searchPage error:", error);
+      return { items: [], total: 0 };
+    }
+
+    return {
+      items: (data as ProfileWithCustomerRow[]).map((p) => this.toSummary(p)),
+      total: count ?? data.length,
+    };
   }
 
   async getById(id: string, transactionsLimit: number = LOYALTY_CONFIG.pagination.maxPageSize): Promise<CustomerDetail | null> {
@@ -126,14 +160,7 @@ export class SupabaseCustomerRepository implements ICustomerRepository {
       created_at: profile.created_at,
       updated_at: cust?.updated_at || profile.created_at,
       transactions,
-      purchases: transactions.map((t) => ({
-        id: t.id,
-        amount: Number(t.amount_total) || 0,
-        points_earned: Number(t.points_earned) || 0,
-        points_redeemed: Number(t.points_redeemed) || 0,
-        transaction_date: t.created_at,
-        created_by: t.cashier_id ? `Caissier (${t.cashier_id.slice(0, 6)})` : LOYALTY_CONFIG.defaults.cashierName,
-      })),
+      purchases: transactions.map(toPurchaseRecord),
       movements: transactions.map((t) => {
         const isEarn = (t.points_earned || 0) > 0;
         const isRedeem = (t.points_redeemed || 0) > 0;
@@ -176,58 +203,31 @@ export class SupabaseCustomerRepository implements ICustomerRepository {
   }
 
   async createAuthAndProfile(data: CreateCustomerInput): Promise<{ id: string; email: string }> {
-    const phoneNormalized = normalizePhone(data.phone);
     const emailNormalized = data.email.toLowerCase().trim();
-    const firstName = data.first_name.trim();
-    const lastName = data.last_name.trim();
 
-    const adminClient = createAdminClient();
-    const securePassword = crypto.randomBytes(16).toString("hex") + "A1!";
-
-    // Create user in Supabase Auth (Brevo confirmation email will prompt them to set their password)
-    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+    // Shared account creation (auth + profile + Bronze loyalty record, with rollback).
+    // The customer sets their password through the emailed activation link.
+    const created = await this.accounts.createAccount({
       email: emailNormalized,
-      password: securePassword,
-      email_confirm: true,
-      user_metadata: {
-        first_name: firstName,
-        last_name: lastName,
-        phone_number: phoneNormalized,
-        role: "CUSTOMER",
-      },
-    });
-
-    if (authError || !authData.user) {
-      console.error("[CustomerRepository] auth.admin.createUser error:", authError?.message);
-      throw new Error(authError?.message || "Erreur de création du compte client.");
-    }
-
-    const userId = authData.user.id;
-
-    // Create profile
-    const { error: profileError } = await adminClient.from("profiles").upsert({
-      id: userId,
-      first_name: firstName,
-      last_name: lastName,
-      email: emailNormalized,
-      phone_number: phoneNormalized,
+      firstName: data.first_name.trim(),
+      lastName: data.last_name.trim(),
+      phone: normalizePhone(data.phone),
       role: "CUSTOMER",
     });
 
-    if (profileError) {
-      console.error("[CustomerRepository] Profile upsert error:", profileError.message);
-      await adminClient.auth.admin.deleteUser(userId).catch(() => null);
+    if (!created.ok) {
+      // Never surface raw auth-server messages to clients (logged by the account adapter)
+      if (created.reason === "AUTH_FAILED") {
+        throw new Error(
+          created.detail?.toLowerCase().includes("already")
+            ? "Un compte existe déjà avec cette adresse email."
+            : "Erreur de création du compte client."
+        );
+      }
       throw new Error("Impossible de créer le profil client (email ou téléphone en double).");
     }
 
-    // Create loyalty record
-    await adminClient.from("customers").upsert({
-      id: userId,
-      loyalty_points: 0,
-      status: "BRONZE",
-    });
-
-    return { id: userId, email: emailNormalized };
+    return { id: created.id, email: emailNormalized };
   }
 
   async updateLoyaltyPoints(id: string, availablePoints: number, tier?: LoyaltyTier): Promise<void> {

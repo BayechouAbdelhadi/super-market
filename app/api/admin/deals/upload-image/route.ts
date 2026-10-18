@@ -113,10 +113,10 @@ export async function POST(req: NextRequest) {
           uploadError.message || uploadError
         );
       }
-    } catch (sbErr: any) {
+    } catch (sbErr) {
       console.warn(
         "[Upload Image] Supabase client error, attempting local fallback:",
-        sbErr?.message || sbErr
+        sbErr instanceof Error ? sbErr.message : sbErr
       );
     }
 
@@ -141,10 +141,10 @@ export async function POST(req: NextRequest) {
       fullUrl,
       fileName,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[POST /api/admin/deals/upload-image] Error:", err);
     return NextResponse.json(
-      { error: "UPLOAD_FAILED", message: err?.message || "Échec du téléchargement de l'image." },
+      { error: "UPLOAD_FAILED", message: "Échec du téléchargement de l'image." },
       { status: 500 }
     );
   }

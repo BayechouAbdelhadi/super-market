@@ -5,8 +5,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const settings = await getAppSettings();
-    return NextResponse.json({ settings });
+    // Public endpoint: expose only what storefront / POS screens need
+    // (no sender configuration, no admin email in updatedBy).
+    const { notifications: _notifications, updatedBy: _updatedBy, ...publicSettings } = await getAppSettings();
+    return NextResponse.json({ settings: publicSettings });
   } catch (err) {
     return NextResponse.json(
       { error: "SETTINGS_ERROR", message: "Impossible de charger la configuration." },

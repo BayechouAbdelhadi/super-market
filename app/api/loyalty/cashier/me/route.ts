@@ -24,7 +24,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ cashier: profile });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error retrieving authenticated user for cashier/me:", err);
     return NextResponse.json(
       { error: "INTERNAL_ERROR", message: "Erreur lors de la récupération du profil." },

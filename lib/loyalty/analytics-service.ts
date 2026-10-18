@@ -5,7 +5,25 @@ import {
   buildLiveOperations,
   getStartOfToday,
 } from "./analytics-domain";
-import { createClient as createServerClient } from "@/lib/supabase/server";
+import { IAnalyticsRepository, AnalyticsProfileRow, AnalyticsCustomerRow } from "./ports";
+import { SupabaseAnalyticsRepository } from "./adapters/supabase-analytics-repository";
+
+const defaultAnalyticsRepo: IAnalyticsRepository = new SupabaseAnalyticsRepository();
+
+/** Analytics window safety cap (rows) for the 7-day dashboard trend. */
+const DASHBOARD_TRANSACTIONS_CAP = 5000;
+
+async function loadUsersById(repo: IAnalyticsRepository, ids: string[]) {
+  const { profiles, customers } = await repo.getUsersByIds(ids);
+  return {
+    profilesById: new Map<string, AnalyticsProfileRow>(profiles.map((p) => [p.id, p])),
+    customersById: new Map<string, AnalyticsCustomerRow>(customers.map((c) => [c.id, c])),
+  };
+}
+
+function isDynamicServerUsage(err: unknown): boolean {
+  return typeof err === "object" && err !== null && "digest" in err && (err as { digest?: unknown }).digest === "DYNAMIC_SERVER_USAGE";
+}
 
 /**
  * BFF Service to fetch and assemble real analytics directly from Supabase.
@@ -14,9 +32,10 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
  * - Limits queries to bounded date ranges (last 7 days) and paginated sets
  * - Avoids unbounded memory allocation in Node.js heap
  */
-export async function getDashboardAnalytics(): Promise<RealDashboardData> {
+export async function getDashboardAnalytics(
+  repo: IAnalyticsRepository = defaultAnalyticsRepo
+): Promise<RealDashboardData> {
   try {
-    const sb = await createServerClient();
     const now = new Date();
     const todayStart = getStartOfToday(now);
 
@@ -26,40 +45,18 @@ export async function getDashboardAnalytics(): Promise<RealDashboardData> {
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
     // 1. Fetch recent transactions bounded to the active analytics window (last 7 days + limit safety)
-    const { data: rawRecentTransactions, error: txError } = await sb
-      .from("transactions")
-      .select("id, customer_id, cashier_id, amount_total, points_earned, points_redeemed, created_at")
-      .gte("created_at", sevenDaysAgo.toISOString())
-      .order("created_at", { ascending: false })
-      .limit(5000);
-
-    if (txError) {
-      console.warn("[Analytics Service] Error fetching recent transactions:", txError.message);
-    }
+    const recentTransactions = await repo.getRecentTransactions({
+      since: sevenDaysAgo,
+      limit: DASHBOARD_TRANSACTIONS_CAP,
+    });
 
     // 2. Fetch total count of all transactions using PostgreSQL count (zero payload memory)
-    const { count: totalSalesCount } = await sb
-      .from("transactions")
-      .select("*", { count: "exact", head: true });
+    const totalSalesCount = await repo.countTransactions();
 
     // 3. Exact counts for customers & cashiers directly from database
-    const { count: totalClientsCount } = await sb
-      .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .eq("role", "CUSTOMER");
-
-    const { count: totalCashiersCount } = await sb
-      .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .eq("role", "CASHIER");
-
-    const { count: newClientsTodayCount } = await sb
-      .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .eq("role", "CUSTOMER")
-      .gte("created_at", todayStart.toISOString());
-
-    const recentTransactions = rawRecentTransactions || [];
+    const totalClientsCount = await repo.countProfiles("CUSTOMER");
+    const totalCashiersCount = await repo.countProfiles("CASHIER");
+    const newClientsTodayCount = await repo.countProfiles("CUSTOMER", todayStart);
 
     // 4. Calculate today's metrics from the recent transactions dataset
     let caToday = 0;
@@ -100,23 +97,7 @@ export async function getDashboardAnalytics(): Promise<RealDashboardData> {
     );
 
     // Fetch ONLY profiles involved in the latest 25 operations
-    let profilesById = new Map<string, any>();
-    let customersById = new Map<string, any>();
-
-    if (relevantUserIds.length > 0) {
-      const { data: relevantProfiles } = await sb
-        .from("profiles")
-        .select("id, first_name, last_name, email, role, created_at")
-        .in("id", relevantUserIds);
-
-      const { data: relevantCustomers } = await sb
-        .from("customers")
-        .select("id, loyalty_points, status")
-        .in("id", relevantUserIds);
-
-      profilesById = new Map((relevantProfiles || []).map((p) => [p.id, p]));
-      customersById = new Map((relevantCustomers || []).map((c) => [c.id, c]));
-    }
+    const { profilesById, customersById } = await loadUsersById(repo, relevantUserIds);
 
     // Aggregate real daily sales for the last 7 days
     const dailySalesTrend = aggregateDailySales(recentTransactions, 7, now);
@@ -149,8 +130,8 @@ export async function getDashboardAnalytics(): Promise<RealDashboardData> {
       liveOperations,
       totalCashiersCount: totalCashiersCount ?? 0,
     };
-  } catch (err: any) {
-    if (err && typeof err === "object" && "digest" in err && (err as any).digest === "DYNAMIC_SERVER_USAGE") {
+  } catch (err) {
+    if (isDynamicServerUsage(err)) {
       throw err;
     }
     console.error("[Analytics Service] Unexpected error in getDashboardAnalytics:", err);
@@ -179,23 +160,15 @@ export async function getDashboardAnalytics(): Promise<RealDashboardData> {
  * BFF Service to fetch extended live operations feed for the dedicated live monitoring screen.
  * Offloads sorting and user retrieval with bounded queries.
  */
-export async function getLiveFeedData(limit = 100): Promise<LiveFeedData> {
+export async function getLiveFeedData(
+  limit = 100,
+  repo: IAnalyticsRepository = defaultAnalyticsRepo
+): Promise<LiveFeedData> {
   try {
-    const sb = await createServerClient();
     const now = new Date();
     const todayStart = getStartOfToday(now);
 
-    const { data: rawTxs, error: txError } = await sb
-      .from("transactions")
-      .select("id, customer_id, cashier_id, amount_total, points_earned, points_redeemed, created_at")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (txError) {
-      console.warn("[Analytics Service] Error fetching live feed transactions:", txError.message);
-    }
-
-    const txs = rawTxs || [];
+    const txs = await repo.getRecentTransactions({ limit });
 
     let caToday = 0;
     let operationsToday = 0;
@@ -220,23 +193,7 @@ export async function getLiveFeedData(limit = 100): Promise<LiveFeedData> {
       )
     );
 
-    let profilesById = new Map<string, any>();
-    let customersById = new Map<string, any>();
-
-    if (relevantUserIds.length > 0) {
-      const { data: relevantProfiles } = await sb
-        .from("profiles")
-        .select("id, first_name, last_name, email, role, created_at")
-        .in("id", relevantUserIds);
-
-      const { data: relevantCustomers } = await sb
-        .from("customers")
-        .select("id, loyalty_points, status")
-        .in("id", relevantUserIds);
-
-      profilesById = new Map((relevantProfiles || []).map((p) => [p.id, p]));
-      customersById = new Map((relevantCustomers || []).map((c) => [c.id, c]));
-    }
+    const { profilesById, customersById } = await loadUsersById(repo, relevantUserIds);
 
     const operations = buildLiveOperations(txs, profilesById, customersById, limit);
 
@@ -251,8 +208,8 @@ export async function getLiveFeedData(limit = 100): Promise<LiveFeedData> {
         totalLoaded: operations.length,
       },
     };
-  } catch (err: any) {
-    if (err && typeof err === "object" && "digest" in err && (err as any).digest === "DYNAMIC_SERVER_USAGE") {
+  } catch (err) {
+    if (isDynamicServerUsage(err)) {
       throw err;
     }
     console.error("[Analytics Service] Unexpected error in getLiveFeedData:", err);

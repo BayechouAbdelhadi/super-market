@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 data/app-settings.json
 scripts/change-admin-password.mjs
+
+# runtime fallback stores (contain personal data: never commit)
+/data/*.json

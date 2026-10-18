@@ -1,9 +1,9 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { SupabaseUserAccountRepository } from '@/lib/auth/adapters/supabase-user-account-repository'
 import { normalizePhone } from '@/lib/loyalty/domain'
 import { emailService } from '@/lib/email'
 import {
@@ -16,12 +16,17 @@ import {
   PENDING_SIGNUP_COOKIE,
 } from '@/lib/email/otp-security'
 import { PasswordSchema } from '@/lib/auth/password-rules'
+import { RATE_LIMITS, checkRateLimits, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
 import { z } from 'zod'
 
 export type SignUpActionResult = {
   success?: boolean
   error?: string | null
 }
+
+const accounts = new SupabaseUserAccountRepository()
+
+const OtpCodeSchema = z.string().trim().regex(/^\d{6}$/)
 
 const SignUpSchema = z.object({
   first_name: z.string().trim().min(2, "Le prénom est obligatoire (au moins 2 caractères)."),
@@ -90,19 +95,21 @@ export async function signup(
   const firstNameClean = first_name.trim()
   const lastNameClean = last_name.trim()
 
-  const adminClient = createAdminClient()
+  const ip = getClientIp(await headers())
+  const limit = checkRateLimits([
+    [`signup:ip:${ip}`, RATE_LIMITS.signupPerIp],
+    [`signup:email:${emailNormalized}`, RATE_LIMITS.signupPerEmail],
+  ])
+  if (!limit.allowed) {
+    return { error: rateLimitMessage(limit) }
+  }
 
-  // Verify that account does not already exist (use adminClient to bypass RLS on public signup)
-  const { data: existingUser } = await adminClient
-    .from('profiles')
-    .select('id, email, phone_number')
-    .or(`email.eq.${emailNormalized},phone_number.eq.${phoneNormalized}`)
-    .limit(1)
+  // Verify that account does not already exist (service-role lookup: public signup has no session)
+  const conflict = await accounts.findConflict(emailNormalized, phoneNormalized)
 
-  if (existingUser && existingUser.length > 0) {
-    const isEmailConflict = existingUser[0].email?.toLowerCase() === emailNormalized
+  if (conflict) {
     return {
-      error: isEmailConflict
+      error: conflict === 'email'
         ? "Un compte existe déjà avec cette adresse email."
         : "Ce numéro de téléphone est déjà associé à un compte existant.",
     }
@@ -157,10 +164,11 @@ export async function signup(
  * Verifies code, creates user in Supabase with STRICT role 'CUSTOMER'.
  */
 export async function confirmSignUpOtp(formData: FormData) {
-  const code = (formData.get('code') as string || '').trim();
   const emailParam = (formData.get('email') as string || '').trim();
+  const codeResult = OtpCodeSchema.safeParse(formData.get('code') ?? '');
+  const code = codeResult.success ? codeResult.data : '';
 
-  if (!code || code.length !== 6) {
+  if (!codeResult.success) {
     redirect(`/signup/verify?email=${encodeURIComponent(emailParam)}&message=${encodeURIComponent("Veuillez saisir un code à 6 chiffres valide.")}`)
   }
 
@@ -182,6 +190,12 @@ export async function confirmSignUpOtp(formData: FormData) {
   }
 
   // Verify OTP hash
+  // Caps online guessing of the 6-digit code
+  const verifyLimit = checkRateLimits([[`signup-otp:${pendingData.email}`, RATE_LIMITS.otpVerifyPerEmail]]);
+  if (!verifyLimit.allowed) {
+    redirect(`/signup/verify?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent(rateLimitMessage(verifyLimit))}`)
+  }
+
   if (!verifyOtpHash(code, pendingData.otpHash)) {
     redirect(`/signup/verify?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent("Code de confirmation incorrect. Veuillez vérifier vos emails.")}`)
   }
@@ -191,51 +205,24 @@ export async function confirmSignUpOtp(formData: FormData) {
   // Under NO circumstances can 'ADMIN' or 'CASHIER' ever be created here.
   const STRICT_ROLE = 'CUSTOMER' as const;
 
-  const adminClient = createAdminClient();
-
-  // Create confirmed user in Supabase (Brevo OTP has already been verified)
-  const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+  // Create the confirmed account (email verified by the OTP above), its profile
+  // with the hardcoded CUSTOMER role, and the initial Bronze loyalty record.
+  const created = await accounts.createAccount({
     email: pendingData.email,
+    firstName: pendingData.first_name,
+    lastName: pendingData.last_name,
+    phone: pendingData.phone,
+    role: STRICT_ROLE, // IMMUTABLE: ONLY role CUSTOMER
     password: pendingData.password,
-    email_confirm: true, // Marked as verified immediately
-    user_metadata: {
-      first_name: pendingData.first_name,
-      last_name: pendingData.last_name,
-      phone_number: pendingData.phone,
-      role: STRICT_ROLE,
-    },
   });
 
-  if (authError || !authData.user) {
-    console.error("[SignUp Confirm Error]", authError?.message);
-    redirect(`/signup/verify?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent(authError?.message || "Erreur lors de la création du compte.")}`)
+  if (!created.ok && created.reason === 'AUTH_FAILED') {
+    redirect(`/signup/verify?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent(created.detail || "Erreur lors de la création du compte.")}`)
   }
 
-  const userId = authData.user.id;
-
-  // Create profile with hardcoded role CUSTOMER
-  const { error: profileError } = await adminClient.from('profiles').upsert({
-    id: userId,
-    first_name: pendingData.first_name,
-    last_name: pendingData.last_name,
-    email: pendingData.email,
-    phone_number: pendingData.phone,
-    role: STRICT_ROLE, // IMMUTABLE: ONLY role CUSTOMER
-  });
-
-  if (profileError) {
-    console.error("[SignUp Confirm] Profile upsert error:", profileError.message);
-    // Rollback: delete auth user to avoid orphan accounts
-    await adminClient.auth.admin.deleteUser(userId).catch(() => null);
+  if (!created.ok) {
     redirect(`/signup?message=${encodeURIComponent("Ce numéro de téléphone ou cette adresse email est déjà utilisé.")}`);
   }
-
-  // Create initial loyalty customer record (Bronze tier, 0 points)
-  await adminClient.from('customers').upsert({
-    id: userId,
-    loyalty_points: 0,
-    status: 'BRONZE',
-  });
 
   // Clear cookie
   cookieStore.delete(PENDING_SIGNUP_COOKIE);
@@ -269,6 +256,11 @@ export async function resendSignUpOtp(formData: FormData) {
   const pendingData = readPendingSignUp(rawToken);
   if (!pendingData) {
     redirect(`/signup?message=${encodeURIComponent("Session invalide. Veuillez recommencer.")}`)
+  }
+
+  const resendLimit = checkRateLimits([[`signup-resend:${pendingData.email}`, RATE_LIMITS.otpResendPerEmail]]);
+  if (!resendLimit.allowed) {
+    redirect(`/signup/verify?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent(rateLimitMessage(resendLimit))}`)
   }
 
   const newOtp = generateSecureOtp();

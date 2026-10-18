@@ -6,18 +6,21 @@ import {
   CampaignStats,
   ProcessBatchResult,
 } from "./types";
-import { IMarketingCampaignRepository } from "./ports";
+import { IMarketingCampaignRepository, ICampaignAudienceRepository } from "./ports";
 import { defaultMarketingRepo } from "./adapters/supabase-marketing-repository";
-import { createClient } from "@/lib/supabase/server";
+import { SupabaseCampaignAudienceRepository } from "./adapters/supabase-audience-repository";
 import { calculateTier } from "@/lib/loyalty/domain";
-import { LoyaltyTier, ProfileWithCustomerRow } from "@/lib/loyalty/types";
+import { LoyaltyTier } from "@/lib/loyalty/types";
 import { emailService } from "@/lib/email";
 import { getAppSettings } from "@/lib/settings/service";
 import { renderDealEmailHtml } from "./templates/deal-email";
 import { getParisDateString, getParisTimeString } from "@/lib/utils/timezone";
 
-import { deduplicateRecipients } from "./utils";
+import { deduplicateRecipients, UNSUBSCRIBE_SIGNATURE_PURPOSE } from "./utils";
+import { signValue } from "@/lib/email/otp-security";
 export { deduplicateRecipients };
+
+const defaultAudienceRepo: ICampaignAudienceRepository = new SupabaseCampaignAudienceRepository();
 
 /**
  * Queries active customers matching the selected loyalty tiers.
@@ -25,7 +28,8 @@ export { deduplicateRecipients };
  */
 export async function getTargetCustomersByTiers(
   tiers: LoyaltyTier[],
-  repo: IMarketingCampaignRepository = defaultMarketingRepo
+  repo: IMarketingCampaignRepository = defaultMarketingRepo,
+  audienceRepo: ICampaignAudienceRepository = defaultAudienceRepo
 ): Promise<CampaignRecipient[]> {
   let unsubscribedSet = new Set<string>();
   try {
@@ -35,24 +39,10 @@ export async function getTargetCustomersByTiers(
     // Keep empty set on error
   }
 
-  const sb = await createClient();
-  const { data, error } = await sb
-    .from("profiles")
-    .select(`
-      id, first_name, last_name, email, phone_number,
-      customers ( loyalty_points, status )
-    `)
-    .eq("role", "CUSTOMER")
-    .not("email", "is", null);
-
-  if (error || !data) {
-    console.error("[MarketingService] Error fetching targeted customers:", error);
-    return [];
-  }
-
+  const data = await audienceRepo.listCustomersWithEmail();
   const recipients: CampaignRecipient[] = [];
 
-  for (const row of data as ProfileWithCustomerRow[]) {
+  for (const row of data) {
     if (!row.email || !row.email.includes("@")) continue;
     const emailKey = row.email.trim().toLowerCase();
     if (unsubscribedSet.has(emailKey)) {
@@ -383,7 +373,8 @@ export async function processCampaignBatch(
     }
 
     try {
-      const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(recipient.email)}`;
+      const unsubscribeEmail = recipient.email.trim().toLowerCase();
+      const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(unsubscribeEmail)}&sig=${signValue(UNSUBSCRIBE_SIGNATURE_PURPOSE, unsubscribeEmail)}`;
 
       const htmlContent = renderDealEmailHtml({
         customerName: recipient.fullName,
@@ -415,10 +406,10 @@ export async function processCampaignBatch(
         recipient.error = res.error || "Échec d'envoi Brevo";
         failedInBatch++;
       }
-    } catch (err: any) {
+    } catch (err) {
       // Catch any unexpected network / runtime exceptions
       recipient.status = "FAILED";
-      recipient.error = err?.message || "Erreur inconnue lors de l'envoi";
+      recipient.error = (err instanceof Error && err.message) || "Erreur inconnue lors de l'envoi";
       failedInBatch++;
     }
   }
