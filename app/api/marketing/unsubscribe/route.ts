@@ -4,22 +4,21 @@ import {
   unsubscribeCustomerEmail,
   resubscribeCustomerEmail,
   isCustomerEmailUnsubscribed,
+  requestUnsubscribeConfirmation,
 } from "@/lib/marketing/service";
 import { verifySignedValue } from "@/lib/email/otp-security";
+import { UNSUBSCRIBE_SIGNATURE_PURPOSE } from "@/lib/marketing/utils";
 import { RATE_LIMITS, getClientIp, rateLimitMessage } from "@/lib/security/rate-limit";
 import { enforceRateLimits } from "@/lib/security/enforce";
-
-async function rateLimited(req: NextRequest): Promise<NextResponse | null> {
-  const limit = await enforceRateLimits([[`unsubscribe:ip:${getClientIp(req.headers)}`, RATE_LIMITS.unsubscribePerIp]]);
-  return limit.allowed ? null : NextResponse.json({ error: rateLimitMessage(limit) }, { status: 429 });
-}
-import { UNSUBSCRIBE_SIGNATURE_PURPOSE } from "@/lib/marketing/utils";
+import { getAppOrigin } from "@/lib/utils/app-url";
 
 /**
- * SECURITY: unsubscribing stays possible from any link (including links sent
- * before signatures existed — the safe direction). Re-subscribing and status
- * checks change consent / reveal customers, so they require the HMAC `sig`
- * carried by the unsubscribe link of the email itself.
+ * SECURITY: every change of marketing consent (unsubscribe, re-subscribe) and
+ * every status check requires the HMAC `sig` carried by the link in our emails,
+ * so nobody can change or probe someone else's preferences.
+ * A request typed into the public form (no `sig`) only triggers a confirmation
+ * email with a signed link (double opt-out), with the same answer whether or not
+ * the address is known.
  */
 function hasValidSignature(email: string, sig: string | null | undefined): boolean {
   return verifySignedValue(UNSUBSCRIBE_SIGNATURE_PURPOSE, email, sig);
@@ -28,6 +27,9 @@ function hasValidSignature(email: string, sig: string | null | undefined): boole
 const INVALID_SIGNATURE_MESSAGE =
   "Lien invalide. Pour modifier vos préférences, utilisez le lien reçu dans votre dernier e-mail.";
 
+const CONFIRMATION_SENT_MESSAGE =
+  "Si cette adresse est inscrite à nos offres, vous allez recevoir un e-mail pour confirmer votre désabonnement.";
+
 const UnsubscribeBodySchema = z.object({
   email: z.string().email("Format d'adresse e-mail invalide"),
   reason: z.string().max(500).optional(),
@@ -35,40 +37,33 @@ const UnsubscribeBodySchema = z.object({
   action: z.enum(["unsubscribe", "resubscribe", "status"]).optional().default("unsubscribe"),
 });
 
-/**
- * Helper to extract email from query params or base64 token
- */
-function extractEmailFromParams(searchParams: URLSearchParams): string | null {
-  const directEmail = searchParams.get("email");
-  if (directEmail && directEmail.includes("@")) {
-    return directEmail.trim().toLowerCase();
-  }
+async function rateLimited(req: NextRequest): Promise<NextResponse | null> {
+  const limit = await enforceRateLimits([[`unsubscribe:ip:${getClientIp(req.headers)}`, RATE_LIMITS.unsubscribePerIp]]);
+  return limit.allowed ? null : NextResponse.json({ error: rateLimitMessage(limit) }, { status: 429 });
+}
 
-  const token = searchParams.get("token");
-  if (token) {
-    try {
-      const decoded = Buffer.from(token, "base64url").toString("utf-8");
-      if (decoded.includes("@")) {
-        return decoded.trim().toLowerCase();
-      }
-    } catch {
-      // invalid token
-    }
-  }
+function readEmail(value: string | null): string | null {
+  const parsed = z.string().trim().toLowerCase().email().safeParse(value ?? "");
+  return parsed.success ? parsed.data : null;
+}
 
-  return null;
+function preferencesPageUrl(req: NextRequest, email: string, status: string, sig: string): URL {
+  return new URL(
+    `/unsubscribe?email=${encodeURIComponent(email)}&status=${status}&sig=${encodeURIComponent(sig)}`,
+    req.url
+  );
 }
 
 /**
- * GET /api/marketing/unsubscribe?email=...
- * Supports one-click browser links from emails or status checks
+ * GET /api/marketing/unsubscribe?email=...&sig=...
+ * One-click links from emails (signed), and signed status checks.
  */
 export async function GET(req: NextRequest) {
   const blocked = await rateLimited(req);
   if (blocked) return blocked;
 
   const searchParams = req.nextUrl.searchParams;
-  const email = extractEmailFromParams(searchParams);
+  const email = readEmail(searchParams.get("email"));
   const action = searchParams.get("action") || "unsubscribe";
   const sig = searchParams.get("sig");
   const wantsJson =
@@ -83,12 +78,14 @@ export async function GET(req: NextRequest) {
         { status: 400 }
       );
     }
-    const redirectUrl = new URL("/unsubscribe?error=missing_email", req.url);
-    return NextResponse.redirect(redirectUrl);
+    return NextResponse.redirect(new URL("/unsubscribe?error=missing_email", req.url));
   }
 
-  if ((action === "status" || action === "resubscribe") && !hasValidSignature(email, sig)) {
-    return NextResponse.json({ error: INVALID_SIGNATURE_MESSAGE }, { status: 403 });
+  if (!sig || !hasValidSignature(email, sig)) {
+    if (wantsJson) {
+      return NextResponse.json({ error: INVALID_SIGNATURE_MESSAGE }, { status: 403 });
+    }
+    return NextResponse.redirect(new URL("/unsubscribe?error=invalid_link", req.url));
   }
 
   if (action === "status") {
@@ -101,11 +98,7 @@ export async function GET(req: NextRequest) {
     if (wantsJson) {
       return NextResponse.json({ success: true, resubscribed: true, email });
     }
-    const redirectUrl = new URL(
-      `/unsubscribe?email=${encodeURIComponent(email)}&status=resubscribed${sig ? `&sig=${encodeURIComponent(sig)}` : ""}`,
-      req.url
-    );
-    return NextResponse.redirect(redirectUrl);
+    return NextResponse.redirect(preferencesPageUrl(req, email, "resubscribed", sig));
   }
 
   // Default: unsubscribe
@@ -114,17 +107,13 @@ export async function GET(req: NextRequest) {
   if (wantsJson) {
     return NextResponse.json({ success: true, unsubscribed: true, email });
   }
-
-  const redirectUrl = new URL(
-    `/unsubscribe?email=${encodeURIComponent(email)}&status=unsubscribed${sig ? `&sig=${encodeURIComponent(sig)}` : ""}`,
-    req.url
-  );
-  return NextResponse.redirect(redirectUrl);
+  return NextResponse.redirect(preferencesPageUrl(req, email, "unsubscribed", sig));
 }
 
 /**
  * POST /api/marketing/unsubscribe
- * Handles structured programmatic or client form unsubscribe / resubscribe requests
+ * - with a valid `sig`: unsubscribe / re-subscribe / status for that address;
+ * - "unsubscribe" without `sig` (public form): sends a signed confirmation email.
  */
 export async function POST(req: NextRequest) {
   const blocked = await rateLimited(req);
@@ -143,8 +132,24 @@ export async function POST(req: NextRequest) {
 
     const { email, reason, action, sig } = parsed.data;
     const cleanEmail = email.trim().toLowerCase();
+    const isSigned = hasValidSignature(cleanEmail, sig);
 
-    if ((action === "status" || action === "resubscribe") && !hasValidSignature(cleanEmail, sig)) {
+    if (!isSigned && action === "unsubscribe" && !sig) {
+      // Double opt-out: identical answer whether the address is known, unknown or throttled
+      const limit = await enforceRateLimits([
+        [`unsubscribe-confirm:email:${cleanEmail}`, RATE_LIMITS.unsubscribeConfirmationPerEmail],
+      ]);
+      if (limit.allowed) {
+        await requestUnsubscribeConfirmation(cleanEmail, getAppOrigin(req.headers));
+      }
+      return NextResponse.json({
+        success: true,
+        confirmationSent: true,
+        message: CONFIRMATION_SENT_MESSAGE,
+      });
+    }
+
+    if (!isSigned) {
       return NextResponse.json({ error: INVALID_SIGNATURE_MESSAGE }, { status: 403 });
     }
 
@@ -163,7 +168,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Unsubscribe action
     await unsubscribeCustomerEmail(cleanEmail, reason || "Désabonnement utilisateur");
     return NextResponse.json({
       success: true,

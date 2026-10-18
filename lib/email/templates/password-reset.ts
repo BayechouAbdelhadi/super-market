@@ -1,4 +1,5 @@
 import { PasswordResetEmailProps, EmailTemplateResult } from "../types";
+import { escapeHtml } from "./escape-html";
 
 /**
  * Renders the Password Reset Email Template
@@ -9,6 +10,8 @@ export function renderPasswordResetEmail(
 ): EmailTemplateResult {
   const { name, resetLink, resetCode, expiresInMinutes = 15 } = props;
   const greeting = name ? `Bonjour ${name},` : "Bonjour,";
+  // HTML version: the name is user-supplied (public signup), never inject it raw
+  const htmlGreeting = name ? `Bonjour ${escapeHtml(name)},` : "Bonjour,";
   const subject = "Réinitialisation de votre mot de passe - Super Market Calais";
 
   const html = `<!DOCTYPE html>
@@ -157,7 +160,7 @@ export function renderPasswordResetEmail(
         <div class="store-sub">Sécurité &amp; Accès au Compte</div>
       </div>
       <div class="content">
-        <div class="greeting">${greeting}</div>
+        <div class="greeting">${htmlGreeting}</div>
         <div class="message">
           Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte client <strong>Super Market Calais</strong>.
         </div>

@@ -54,6 +54,13 @@ export interface AccountActivationEmailProps {
   sender?: EmailSender;
 }
 
+export interface UnsubscribeConfirmationEmailProps {
+  email: string;
+  /** Signed link that unsubscribes this address when opened */
+  unsubscribeLink: string;
+  sender?: EmailSender;
+}
+
 export interface EmailTemplateResult {
   subject: string;
   html: string;

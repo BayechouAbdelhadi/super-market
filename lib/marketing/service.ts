@@ -11,7 +11,9 @@ import { defaultMarketingRepo } from "./adapters/supabase-marketing-repository";
 import { SupabaseCampaignAudienceRepository } from "./adapters/supabase-audience-repository";
 import { calculateTier } from "@/lib/loyalty/domain";
 import { LoyaltyTier } from "@/lib/loyalty/types";
-import { emailService } from "@/lib/email";
+import { emailService, IEmailService } from "@/lib/email";
+import { IUserAccountRepository } from "@/lib/auth/ports";
+import { SupabaseUserAccountRepository } from "@/lib/auth/adapters/supabase-user-account-repository";
 import { getAppSettings } from "@/lib/settings/service";
 import { renderDealEmailHtml } from "./templates/deal-email";
 import { getParisDateString, getParisTimeString } from "@/lib/utils/timezone";
@@ -374,8 +376,7 @@ export async function processCampaignBatch(
     }
 
     try {
-      const unsubscribeEmail = recipient.email.trim().toLowerCase();
-      const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(unsubscribeEmail)}&sig=${signValue(UNSUBSCRIBE_SIGNATURE_PURPOSE, unsubscribeEmail)}`;
+      const unsubscribeUrl = buildUnsubscribeUrl(baseUrl, recipient.email);
 
       const htmlContent = renderDealEmailHtml({
         customerName: recipient.fullName,
@@ -505,6 +506,54 @@ export async function deleteCampaign(
 /**
  * Unsubscribes an email address from receiving marketing campaigns.
  */
+/**
+ * Signed one-click unsubscribe link for an email address (see UNSUBSCRIBE_SIGNATURE_PURPOSE).
+ */
+export function buildUnsubscribeUrl(baseUrl: string, email: string): string {
+  const cleanEmail = email.trim().toLowerCase();
+  const sig = signValue(UNSUBSCRIBE_SIGNATURE_PURPOSE, cleanEmail);
+  return `${baseUrl}/unsubscribe?email=${encodeURIComponent(cleanEmail)}&sig=${sig}`;
+}
+
+export interface UnsubscribeRequestDeps {
+  accounts: Pick<IUserAccountRepository, "findProfileByEmail">;
+  mailer: Pick<IEmailService, "sendUnsubscribeConfirmation">;
+  repo: IMarketingCampaignRepository;
+}
+
+/**
+ * Use case: unsubscribe request typed into the public form (double opt-out).
+ * Emails a signed confirmation link, only to addresses of existing customers who
+ * are still subscribed. Callers must answer identically whatever happens here
+ * (no account enumeration).
+ */
+export async function requestUnsubscribeConfirmation(
+  email: string,
+  baseUrl: string,
+  deps: UnsubscribeRequestDeps = {
+    accounts: new SupabaseUserAccountRepository(),
+    mailer: emailService,
+    repo: defaultMarketingRepo,
+  }
+): Promise<void> {
+  const cleanEmail = email.trim().toLowerCase();
+  const profile = await deps.accounts.findProfileByEmail(cleanEmail);
+  if (!profile || profile.role !== "CUSTOMER") {
+    return;
+  }
+  if (await deps.repo.isUnsubscribed(cleanEmail)) {
+    return;
+  }
+
+  const result = await deps.mailer.sendUnsubscribeConfirmation({
+    email: cleanEmail,
+    unsubscribeLink: buildUnsubscribeUrl(baseUrl, cleanEmail),
+  });
+  if (!result.success) {
+    console.error("[MarketingService] Unsubscribe confirmation email failed:", result.error);
+  }
+}
+
 export async function unsubscribeCustomerEmail(
   email: string,
   reason?: string,

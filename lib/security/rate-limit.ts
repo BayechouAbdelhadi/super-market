@@ -29,6 +29,7 @@ export const RATE_LIMITS = {
   passwordResetPerIp: { limit: 10, windowMs: 15 * MINUTE },
   passwordResetPerEmail: { limit: 5, windowMs: 15 * MINUTE },
   unsubscribePerIp: { limit: 60, windowMs: 1 * MINUTE },
+  unsubscribeConfirmationPerEmail: { limit: 3, windowMs: 60 * MINUTE },
 } satisfies Record<string, RateLimitRule>;
 
 interface Bucket {

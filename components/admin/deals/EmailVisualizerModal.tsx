@@ -152,6 +152,8 @@ export function EmailVisualizerModal({
               {/* Email Body Canvas */}
               <iframe
                 title="Aperçu Email Client"
+                // Email preview: no scripts, links open in a new tab
+                sandbox="allow-popups allow-popups-to-escape-sandbox"
                 srcDoc={html}
                 className="w-full h-full bg-white border-0 flex-1 overflow-x-hidden"
                 style={{ overflowX: "hidden" }}

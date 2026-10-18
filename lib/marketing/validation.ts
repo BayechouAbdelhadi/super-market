@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+/** SECURITY: only http(s) links in emails — `z.url()` alone also accepts `javascript:` and `data:` URLs. */
+const isHttpUrl = (value: string) => /^https?:\/\//i.test(value);
+
 export const CreateCampaignSchema = z
   .object({
     id: z.string().optional(),
@@ -44,11 +47,18 @@ export const CreateCampaignSchema = z
       .string()
       .trim()
       .url("L'URL de l'image est invalide.")
+      .refine(isHttpUrl, "L'URL de l'image doit commencer par http:// ou https://.")
       .nullable()
       .optional()
       .or(z.literal("")),
     ctaText: z.string().trim().max(40).optional(),
-    ctaUrl: z.string().trim().url("L'URL du lien est invalide.").optional().or(z.literal("")),
+    ctaUrl: z
+      .string()
+      .trim()
+      .url("L'URL du lien est invalide.")
+      .refine(isHttpUrl, "L'URL du lien doit commencer par http:// ou https://.")
+      .optional()
+      .or(z.literal("")),
   })
   .refine(
     (data) => {

@@ -4,6 +4,7 @@ import {
   VerificationOtpEmailProps,
   PasswordResetEmailProps,
   AccountActivationEmailProps,
+  UnsubscribeConfirmationEmailProps,
 } from "./types";
 
 /**
@@ -31,4 +32,9 @@ export interface IEmailService {
    * Sends an account confirmation/activation email when created by Admin or Cashier
    */
   sendAccountActivation(props: AccountActivationEmailProps): Promise<EmailResult>;
+
+  /**
+   * Sends the double opt-out email confirming a marketing unsubscribe request
+   */
+  sendUnsubscribeConfirmation(props: UnsubscribeConfirmationEmailProps): Promise<EmailResult>;
 }

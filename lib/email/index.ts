@@ -7,6 +7,7 @@ export * from "./brevo-adapter";
 export * from "./templates/verification-otp";
 export * from "./templates/password-reset";
 export * from "./templates/account-activation";
+export * from "./templates/unsubscribe-confirmation";
 
 /**
  * Singleton instance of the email service

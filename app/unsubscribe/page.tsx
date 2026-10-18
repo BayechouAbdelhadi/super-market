@@ -13,22 +13,30 @@ function UnsubscribeContent() {
   const initialStatus = searchParams.get("status");
 
   const [email, setEmail] = useState(rawEmail);
+  const linkError = searchParams.get("error");
+  // Only a signed link from one of our emails can change preferences directly
+  const isSignedLink = Boolean(rawEmail && sig);
+
   const [isUnsubscribed, setIsUnsubscribed] = useState(
-    initialStatus === "unsubscribed" || Boolean(rawEmail)
+    isSignedLink && initialStatus !== "resubscribed"
   );
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    linkError === "invalid_link"
+      ? "Ce lien n'est pas valide. Saisissez votre adresse ci-dessous pour recevoir un lien de confirmation."
+      : null
+  );
 
-  // If email was passed in URL, auto-ensure it's unsubscribed on mount
+  // Signed link from an email: confirm the unsubscribe on mount
   useEffect(() => {
-    if (rawEmail && rawEmail.includes("@")) {
+    if (isSignedLink && initialStatus !== "resubscribed" && rawEmail.includes("@")) {
       setEmail(rawEmail);
       // Ensure backend knows it's unsubscribed
       fetch("/api/marketing/unsubscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: rawEmail, action: "unsubscribe" }),
+        body: JSON.stringify({ email: rawEmail, action: "unsubscribe", sig }),
       })
         .then((res) => res.json())
         .then((data) => {
@@ -41,7 +49,7 @@ function UnsubscribeContent() {
           // Silent fallback, state is already positive
         });
     }
-  }, [rawEmail]);
+  }, [rawEmail, sig, isSignedLink, initialStatus]);
 
   const handleUnsubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,11 +66,15 @@ function UnsubscribeContent() {
       const res = await fetch("/api/marketing/unsubscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, action: "unsubscribe" }),
+        // The signature only belongs to the address of the link it came with
+        body: JSON.stringify({ email, action: "unsubscribe", sig: email === rawEmail ? sig : undefined }),
       });
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (res.ok && data.success && data.confirmationSent) {
+        // Double opt-out: the change happens when the emailed link is opened
+        setMessage(data.message);
+      } else if (res.ok && data.success) {
         setIsUnsubscribed(true);
         setMessage("Votre demande de désabonnement a bien été prise en compte.");
       } else {

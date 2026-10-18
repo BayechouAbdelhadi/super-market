@@ -5,11 +5,13 @@ import {
   VerificationOtpEmailProps,
   PasswordResetEmailProps,
   AccountActivationEmailProps,
+  UnsubscribeConfirmationEmailProps,
   EmailSender,
 } from "./types";
 import { renderVerificationOtpEmail } from "./templates/verification-otp";
 import { renderPasswordResetEmail } from "./templates/password-reset";
 import { renderAccountActivationEmail } from "./templates/account-activation";
+import { renderUnsubscribeConfirmationEmail } from "./templates/unsubscribe-confirmation";
 
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
@@ -161,6 +163,17 @@ export class BrevoEmailAdapter implements IEmailService {
     const { subject, html, text } = renderAccountActivationEmail(props);
     return await this.sendEmail({
       to: [{ email: props.email, name: props.name }],
+      subject,
+      htmlContent: html,
+      textContent: text,
+      sender: props.sender,
+    });
+  }
+
+  async sendUnsubscribeConfirmation(props: UnsubscribeConfirmationEmailProps): Promise<EmailResult> {
+    const { subject, html, text } = renderUnsubscribeConfirmationEmail(props);
+    return await this.sendEmail({
+      to: [{ email: props.email }],
       subject,
       htmlContent: html,
       textContent: text,

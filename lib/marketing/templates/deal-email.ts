@@ -1,5 +1,6 @@
 import { LoyaltyTier } from "@/lib/loyalty/types";
 import { PRODUCTION_APP_URL } from "@/lib/utils/app-url";
+import { escapeHtml } from "@/lib/email/templates/escape-html";
 
 export interface DealEmailTemplateProps {
   customerName: string;
@@ -352,12 +353,4 @@ function formatEditorialContent(raw: string): string {
     .join("");
 }
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
 

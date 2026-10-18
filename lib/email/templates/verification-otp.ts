@@ -1,4 +1,5 @@
 import { VerificationOtpEmailProps, EmailTemplateResult } from "../types";
+import { escapeHtml } from "./escape-html";
 
 /**
  * Renders the Confirmation OTP Email Template
@@ -9,6 +10,8 @@ export function renderVerificationOtpEmail(
 ): EmailTemplateResult {
   const { name, otp, expiresInMinutes = 15 } = props;
   const greeting = name ? `Bonjour ${name},` : "Bonjour,";
+  // HTML version: the name is user-supplied (public signup), never inject it raw
+  const htmlGreeting = name ? `Bonjour ${escapeHtml(name)},` : "Bonjour,";
   const subject = `${otp} est votre code de confirmation Super Market`;
 
   const html = `<!DOCTYPE html>
@@ -146,7 +149,7 @@ export function renderVerificationOtpEmail(
         <div class="store-sub">Programme Fidélité &amp; Primeur de Quartier</div>
       </div>
       <div class="content">
-        <div class="greeting">${greeting}</div>
+        <div class="greeting">${htmlGreeting}</div>
         <div class="message">
           Merci de créer votre compte client chez <strong>Super Market Calais</strong> ! 
           Pour finaliser votre inscription et activer votre espace fidélité, veuillez saisir le code de confirmation ci-dessous :

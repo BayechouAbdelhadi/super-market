@@ -1,4 +1,5 @@
 import { AccountActivationEmailProps, EmailTemplateResult } from "../types";
+import { escapeHtml } from "./escape-html";
 
 /**
  * Renders the Account Activation / Invitation Email Template
@@ -11,6 +12,8 @@ export function renderAccountActivationEmail(
   const { name, activationLink, role, expiresInDays = 7 } = props;
   const isCashier = role === 'CASHIER';
   const greeting = name ? `Bonjour ${name},` : "Bonjour,";
+  // HTML version: the name is user-supplied (public signup), never inject it raw
+  const htmlGreeting = name ? `Bonjour ${escapeHtml(name)},` : "Bonjour,";
 
   const subject = isCashier
     ? "Invitation à rejoindre l'équipe caisse — Super Market Calais"
@@ -161,7 +164,7 @@ export function renderAccountActivationEmail(
       </div>
       
       <div class="content">
-        <div class="greeting">${greeting}</div>
+        <div class="greeting">${htmlGreeting}</div>
         <div class="headline">${headline}</div>
         
         <p class="paragraph">${mainParagraph}</p>

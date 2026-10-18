@@ -31,7 +31,8 @@ export async function updateSession(request: NextRequest) {
   // Refresh session if expired
   const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-  if (userError) {
+  // "Auth session missing" is the normal state of anonymous visitors: only log real failures
+  if (userError && userError.name !== 'AuthSessionMissingError') {
     console.error(`[Middleware] Supabase Auth Error on ${request.nextUrl.pathname}:`, userError.message)
   }
 

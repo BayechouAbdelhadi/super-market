@@ -236,6 +236,8 @@ export function DealJobDetailModal({
             <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden bg-slate-100 dark:bg-slate-900 shadow-inner flex justify-center p-3 sm:p-5">
               <iframe
                 title="Aperçu de la newsletter"
+                // Email preview: no scripts, links open in a new tab
+                sandbox="allow-popups allow-popups-to-escape-sandbox"
                 srcDoc={renderDealEmailHtml({
                   customerName: "Marie Dupont",
                   tier: campaign.targetTiers[0] || "GOLD",
