@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { resolveUserRole } from '@/lib/auth/roles'
 import { DashboardLayout } from '@/components/ui/DashboardLayout'
 import { redirect } from 'next/navigation'
 
@@ -16,7 +17,7 @@ export async function ProtectedDashboard({
     redirect('/login')
   }
 
-  const role = user.user_metadata?.role || 'CUSTOMER'
+  const role = await resolveUserRole(supabase, user)
 
   // Admin can access everything, Cashiers can access CASHIER and CUSTOMER, Customers can access CUSTOMER
   if (requiredRole === 'ADMIN' && role !== 'ADMIN') {

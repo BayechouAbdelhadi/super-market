@@ -5,6 +5,8 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveUserRole } from '@/lib/auth/roles'
+import { getAppOrigin } from '@/lib/utils/app-url'
 import { emailService } from '@/lib/email'
 import {
   createSignedToken,
@@ -59,7 +61,7 @@ export async function createUser(formData: FormData) {
     return { error: "Non autorisé. Veuillez vous connecter." };
   }
 
-  const callerRole = currentUser?.user_metadata?.role || 'CUSTOMER';
+  const callerRole = await resolveUserRole(supabaseServer, currentUser);
 
   // Le caissier ne peut créer QUE des clients. L'admin peut créer n'importe quel rôle.
   if (callerRole === 'CASHIER' && role !== 'CUSTOMER') {
@@ -154,10 +156,7 @@ export async function createUser(formData: FormData) {
       expiresAt,
     });
 
-    const headersList = await headers();
-    const host = headersList.get('host') || 'localhost:3000';
-    const proto = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
-    const origin = `${proto}://${host}`;
+    const origin = getAppOrigin(await headers());
     activationLink = `${origin}/confirm-account?token=${encodeURIComponent(token)}`;
 
     const settings = await getAppSettings();
@@ -192,7 +191,8 @@ export async function createUser(formData: FormData) {
   revalidatePath('/admin/customers');
   revalidatePath('/cashier');
   
-  return { success: true, role, activationLink };
+  // SECURITY: the activation link is only ever delivered by email, never to the caller.
+  return { success: true, role };
 }
 
 export async function createCashier(formData: FormData) {
@@ -227,7 +227,7 @@ export async function editUser(formData: FormData) {
     return { error: "Non autorisé. Veuillez vous connecter." };
   }
 
-  const callerRole = currentUser?.user_metadata?.role || 'CUSTOMER';
+  const callerRole = await resolveUserRole(supabaseServer, currentUser);
 
   // Le caissier ne peut modifier QUE des clients.
   if (callerRole === 'CASHIER') {
@@ -303,13 +303,7 @@ export async function inviteUser(formData: FormData) {
     return { error: "Non autorisé. Veuillez vous connecter." };
   }
 
-  const { data: callerProfile } = await supabaseServer
-    .from('profiles')
-    .select('role')
-    .eq('id', currentUser.id)
-    .single();
-
-  const callerRole = callerProfile?.role || currentUser.user_metadata?.role;
+  const callerRole = await resolveUserRole(supabaseServer, currentUser);
 
   if (role === 'CASHIER' && callerRole !== 'ADMIN') {
     return { error: "Seul un administrateur peut inviter un membre en tant que caissier." };
@@ -330,10 +324,12 @@ export async function inviteUser(formData: FormData) {
 
   const existingProfile = existingProfiles?.[0];
 
-  const headersList = await headers();
-  const host = headersList.get('host') || 'localhost:3000';
-  const proto = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
-  const origin = `${proto}://${host}`;
+  // SECURITY: only an administrator may re-issue an activation link for a staff account.
+  if (existingProfile && existingProfile.role !== 'CUSTOMER' && callerRole !== 'ADMIN') {
+    return { error: "Accès refusé. Seul un administrateur peut réinviter un membre du personnel." };
+  }
+
+  const origin = getAppOrigin(await headers());
   const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 
   const token = createSignedToken<AccountActivationPayload>({
@@ -370,7 +366,6 @@ export async function inviteUser(formData: FormData) {
         alreadyExists: true,
         email: emailNormalized,
         role: existingProfile.role,
-        activationLink,
         message: `Un compte existe déjà pour ${emailNormalized}. Un nouvel e-mail d'activation a été envoyé avec succès !`,
       };
     } catch (err: any) {
@@ -380,7 +375,6 @@ export async function inviteUser(formData: FormData) {
         alreadyExists: true,
         email: emailNormalized,
         role: existingProfile.role,
-        activationLink,
         message: `Compte existant. Le lien d'invitation a été régénéré avec succès.`,
       };
     }
@@ -404,7 +398,6 @@ export async function inviteUser(formData: FormData) {
     success: true,
     email: emailNormalized,
     role,
-    activationLink: (createResult as any).activationLink || activationLink,
     message: `L'invitation a bien été envoyée par e-mail à ${emailNormalized} !`,
   };
 }

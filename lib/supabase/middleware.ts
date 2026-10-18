@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { resolveUserRole } from '@/lib/auth/roles'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -69,9 +70,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if (user) {
-    const role = user.user_metadata?.role || 'CUSTOMER'
-    
+  const needsRole = isPublicAuthEntry || isAccountRoute || isStaffRoute
+
+  if (user && needsRole) {
+    const role = await resolveUserRole(supabase, user)
+
     // Redirect authenticated users from login / signup to their appropriate dashboard
     // Keep users on /reset-password so they can set their new password
     if (isPublicAuthEntry) {

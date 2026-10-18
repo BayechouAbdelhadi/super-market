@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { resolveUserRole } from "@/lib/auth/roles";
 import { redirect } from "next/navigation";
 
 interface CustomersPageProps {
@@ -15,7 +16,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
     redirect("/login");
   }
 
-  const role = user.user_metadata?.role || "CUSTOMER";
+  const role = await resolveUserRole(supabase, user);
   const params = searchParams ? await searchParams : {};
   const search = new URLSearchParams();
   if (params.page) search.set("page", params.page);

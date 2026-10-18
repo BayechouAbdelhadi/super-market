@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { resolveUserRole } from '@/lib/auth/roles'
 
 export type AuthActionResult = {
   success?: boolean
@@ -60,7 +61,7 @@ export async function login(
     }
   }
 
-  const role = authData.user?.user_metadata?.role || 'CUSTOMER'
+  const role = authData.user ? await resolveUserRole(supabase, authData.user) : 'CUSTOMER'
 
   let redirectPath: string
   if (role === 'ADMIN') {

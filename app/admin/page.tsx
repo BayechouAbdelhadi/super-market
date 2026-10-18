@@ -32,7 +32,6 @@ export default async function AdminHubPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const role = user?.user_metadata?.role || "ADMIN";
   const email = user?.email || "";
 
   // Fetch profile, quick analytics overview, and store settings

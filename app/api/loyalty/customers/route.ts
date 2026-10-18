@@ -8,6 +8,7 @@ import {
   createSignedToken,
   AccountActivationPayload,
 } from "@/lib/email/otp-security";
+import { getAppOrigin } from "@/lib/utils/app-url";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuth(["CASHIER", "ADMIN"]);
@@ -111,11 +112,7 @@ export async function POST(req: NextRequest) {
           expiresAt,
         });
 
-        const host = req.headers.get("host") || "localhost:3000";
-        const proto =
-          req.headers.get("x-forwarded-proto") ||
-          (host.includes("localhost") ? "http" : "https");
-        const origin = `${proto}://${host}`;
+        const origin = getAppOrigin(req.headers);
         const activationLink = `${origin}/confirm-account?token=${encodeURIComponent(token)}`;
 
         emailService

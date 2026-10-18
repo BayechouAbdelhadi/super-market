@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { resolveUserRole } from '@/lib/auth/roles'
 import { logout } from '@/app/login/actions'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -32,7 +33,7 @@ export default async function CustomerLoyaltyAppPage() {
     redirect('/login')
   }
 
-  const role = user.user_metadata?.role || 'CUSTOMER'
+  const role = await resolveUserRole(supabase, user)
   if (role === 'ADMIN') redirect('/admin')
   if (role === 'CASHIER') redirect('/cashier')
 

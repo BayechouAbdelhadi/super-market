@@ -4,7 +4,8 @@
 -- Purpose:
 -- 1. Ensure the 'super-market' bucket exists, is public, and accepts images.
 -- 2. Allow 'anon' (unauthenticated) and public consumers to READ/VIEW email images.
--- 3. Allow 'ADMIN' users to WRITE (INSERT, UPDATE, DELETE) campaign images
+-- 3. Allow 'ADMIN' users (public.profiles.role — never the user-editable
+--    user_metadata JWT claim) to WRITE (INSERT, UPDATE, DELETE) campaign images
 --    stored under the 'compaigns/${campaignId}/...' directory.
 -- =========================================================================
 
@@ -69,8 +70,7 @@ TO authenticated
 WITH CHECK (
   bucket_id = 'super-market'
   AND (
-    (auth.jwt() -> 'user_metadata' ->> 'role') = 'ADMIN'
-    OR (auth.jwt() ->> 'role') = 'service_role'
+    (auth.jwt() ->> 'role') = 'service_role'
     OR EXISTS (
       SELECT 1 FROM public.profiles 
       WHERE id = auth.uid() AND role = 'ADMIN'
@@ -86,8 +86,7 @@ TO authenticated
 USING (
   bucket_id = 'super-market'
   AND (
-    (auth.jwt() -> 'user_metadata' ->> 'role') = 'ADMIN'
-    OR (auth.jwt() ->> 'role') = 'service_role'
+    (auth.jwt() ->> 'role') = 'service_role'
     OR EXISTS (
       SELECT 1 FROM public.profiles 
       WHERE id = auth.uid() AND role = 'ADMIN'
@@ -97,8 +96,7 @@ USING (
 WITH CHECK (
   bucket_id = 'super-market'
   AND (
-    (auth.jwt() -> 'user_metadata' ->> 'role') = 'ADMIN'
-    OR (auth.jwt() ->> 'role') = 'service_role'
+    (auth.jwt() ->> 'role') = 'service_role'
     OR EXISTS (
       SELECT 1 FROM public.profiles 
       WHERE id = auth.uid() AND role = 'ADMIN'
@@ -114,8 +112,7 @@ TO authenticated
 USING (
   bucket_id = 'super-market'
   AND (
-    (auth.jwt() -> 'user_metadata' ->> 'role') = 'ADMIN'
-    OR (auth.jwt() ->> 'role') = 'service_role'
+    (auth.jwt() ->> 'role') = 'service_role'
     OR EXISTS (
       SELECT 1 FROM public.profiles 
       WHERE id = auth.uid() AND role = 'ADMIN'

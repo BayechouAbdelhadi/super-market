@@ -63,6 +63,11 @@ BEGIN
     current_timestamp
   );
 
+  -- 3. Insert the profile row: the application reads roles from profiles.role
+  INSERT INTO public.profiles (id, email, first_name, last_name, role)
+  VALUES (new_admin_id, lower(admin_email), 'Super', 'Admin', 'ADMIN')
+  ON CONFLICT (id) DO UPDATE SET role = 'ADMIN';
+
   -- FIX: Supabase GoTrue crashes if these columns are NULL
   UPDATE auth.users
   SET confirmation_token = '',

@@ -9,7 +9,9 @@ import { emailService } from '@/lib/email'
 import {
   generateSecureOtp,
   hashOtp,
-  createSignedToken,
+  verifyOtpHash,
+  createEncryptedToken,
+  decryptToken,
   verifySignedToken,
   PENDING_SIGNUP_COOKIE,
 } from '@/lib/email/otp-security'
@@ -37,6 +39,15 @@ interface PendingSignUpPayload {
   password: string;
   otpHash: string;
   expiresAt: number;
+}
+
+/**
+ * Reads the pending signup cookie. It is encrypted because it carries the
+ * chosen password; plain signed cookies issued before encryption are still
+ * accepted until they expire (15 min).
+ */
+function readPendingSignUp(rawToken: string): PendingSignUpPayload | null {
+  return decryptToken<PendingSignUpPayload>(rawToken) ?? verifySignedToken<PendingSignUpPayload>(rawToken)
 }
 
 /**
@@ -128,7 +139,7 @@ export async function signup(
     expiresAt,
   };
 
-  const signedToken = createSignedToken(payload);
+  const signedToken = createEncryptedToken(payload);
   const cookieStore = await cookies();
   cookieStore.set(PENDING_SIGNUP_COOKIE, signedToken, {
     httpOnly: true,
@@ -160,7 +171,7 @@ export async function confirmSignUpOtp(formData: FormData) {
     redirect(`/signup?message=${encodeURIComponent("Session de confirmation expirée. Veuillez recommencer.")}`)
   }
 
-  const pendingData = verifySignedToken<PendingSignUpPayload>(rawToken);
+  const pendingData = readPendingSignUp(rawToken);
   if (!pendingData) {
     redirect(`/signup?message=${encodeURIComponent("Jeton de confirmation invalide. Veuillez recommencer.")}`)
   }
@@ -171,8 +182,7 @@ export async function confirmSignUpOtp(formData: FormData) {
   }
 
   // Verify OTP hash
-  const inputHash = hashOtp(code);
-  if (inputHash !== pendingData.otpHash) {
+  if (!verifyOtpHash(code, pendingData.otpHash)) {
     redirect(`/signup/verify?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent("Code de confirmation incorrect. Veuillez vérifier vos emails.")}`)
   }
 
@@ -256,7 +266,7 @@ export async function resendSignUpOtp(formData: FormData) {
     redirect(`/signup?message=${encodeURIComponent("Session expirée. Veuillez recommencer l'inscription.")}`)
   }
 
-  const pendingData = verifySignedToken<PendingSignUpPayload>(rawToken);
+  const pendingData = readPendingSignUp(rawToken);
   if (!pendingData) {
     redirect(`/signup?message=${encodeURIComponent("Session invalide. Veuillez recommencer.")}`)
   }
@@ -283,7 +293,7 @@ export async function resendSignUpOtp(formData: FormData) {
     expiresAt: newExpiresAt,
   };
 
-  cookieStore.set(PENDING_SIGNUP_COOKIE, createSignedToken(updatedPayload), {
+  cookieStore.set(PENDING_SIGNUP_COOKIE, createEncryptedToken(updatedPayload), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

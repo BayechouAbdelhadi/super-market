@@ -24,7 +24,9 @@ export class SupabaseCustomerRepository implements ICustomerRepository {
 
   async search(query: string, limit: number = LOYALTY_CONFIG.pagination.defaultPageSize): Promise<CustomerSummary[]> {
     const sb = await this.getClient();
-    const trimmed = query.trim().toLowerCase();
+    // SECURITY: strip PostgREST filter syntax (",", "(", ")", quotes, backslash) so the
+    // search term cannot add or break conditions inside the `.or()` filter below.
+    const trimmed = query.replace(/[,()"\\]/g, " ").trim().toLowerCase();
 
     let dbQuery = sb
       .from("profiles")

@@ -1,9 +1,16 @@
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { defaultMarketingRepo } from "@/lib/marketing/adapters/supabase-marketing-repository";
 import { triggerDueCampaigns } from "@/lib/marketing/service";
 import { getParisDateString, getParisTimeString, TIMEZONE_PARIS } from "@/lib/utils/timezone";
 
 export const dynamic = "force-dynamic";
+
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  return bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB);
+}
 
 /**
  * Cron Job Endpoint for Marketing Deals (Exécuté chaque nuit à Minuit 00:00).
@@ -26,19 +33,18 @@ async function handleCronExecution(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  // Sécurité : Vérifie le token secret s'il est configuré
-  if (cronSecret || serviceRoleKey) {
-    const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
-    const isAuthorized =
-      (cronSecret && bearer === cronSecret) ||
-      (serviceRoleKey && bearer === serviceRoleKey);
+  // Sécurité : refuse toujours l'accès si aucun secret n'est configuré (fail closed)
+  const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
+  const isAuthorized =
+    bearer.length > 0 &&
+    ((!!cronSecret && safeEqual(bearer, cronSecret)) ||
+      (!!serviceRoleKey && safeEqual(bearer, serviceRoleKey)));
 
-    if (!isAuthorized) {
-      return NextResponse.json(
-        { error: "UNAUTHORIZED", message: "Accès non autorisé au déclencheur du cron." },
-        { status: 401 }
-      );
-    }
+  if (!isAuthorized) {
+    return NextResponse.json(
+      { error: "UNAUTHORIZED", message: "Accès non autorisé au déclencheur du cron." },
+      { status: 401 }
+    );
   }
 
   try {

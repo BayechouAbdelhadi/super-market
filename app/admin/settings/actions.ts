@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { resolveUserRole } from "@/lib/auth/roles";
 import { revalidatePath } from "next/cache";
 import { getAppSettings, updateAppSettings, resetAppSettings } from "@/lib/settings/service";
 import { AppSettings } from "@/lib/settings/types";
@@ -18,7 +19,7 @@ export async function getSettingsAction() {
     return { success: false, error: "Non autorisé. Veuillez vous connecter." };
   }
 
-  const role = user.user_metadata?.role || "CUSTOMER";
+  const role = await resolveUserRole(supabase, user);
   if (role !== "ADMIN") {
     return { success: false, error: "Accès refusé. Seuls les administrateurs peuvent accéder à la configuration." };
   }
@@ -40,7 +41,7 @@ export async function updateSettingsAction(data: AppSettings) {
     return { success: false, error: "Non autorisé. Veuillez vous connecter." };
   }
 
-  const role = user.user_metadata?.role || "CUSTOMER";
+  const role = await resolveUserRole(supabase, user);
   if (role !== "ADMIN") {
     return { success: false, error: "Accès refusé. Réservé aux administrateurs." };
   }
@@ -77,7 +78,7 @@ export async function resetSettingsAction(): Promise<{ success: boolean; setting
     return { success: false, error: "Non autorisé. Veuillez vous connecter." };
   }
 
-  const role = user.user_metadata?.role || "CUSTOMER";
+  const role = await resolveUserRole(supabase, user);
   if (role !== "ADMIN") {
     return { success: false, error: "Accès refusé. Réservé aux administrateurs." };
   }

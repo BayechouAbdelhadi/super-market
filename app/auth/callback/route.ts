@@ -8,7 +8,12 @@ export async function GET(request: NextRequest) {
   const type = requestUrl.searchParams.get('type')
   const next = requestUrl.searchParams.get('next') || '/reset-password'
 
-  const redirectTo = new URL(next, request.url)
+  // SECURITY: only same-origin relative paths ("/x"), never "//evil.tld" or "https://evil.tld" (open redirect)
+  const isSafeNext = next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\')
+  const redirectTo = new URL(isSafeNext ? next : '/reset-password', request.url)
+  if (redirectTo.origin !== requestUrl.origin) {
+    redirectTo.href = new URL('/reset-password', request.url).href
+  }
   let response = NextResponse.redirect(redirectTo)
 
   const supabase = createServerClient(

@@ -8,8 +8,12 @@ import {
 import {
   generateSecureOtp,
   hashOtp,
+  verifyOtpHash,
   createSignedToken,
   verifySignedToken,
+  createEncryptedToken,
+  decryptToken,
+  verifyPasswordResetToken,
 } from "@/lib/email/otp-security";
 
 describe("Email Templates", () => {
@@ -96,6 +100,14 @@ describe("Email Templates", () => {
 });
 
 describe("OTP Security and Cryptography", () => {
+  beforeEach(() => {
+    vi.stubEnv("AUTH_TOKEN_SECRET", "test-auth-token-secret");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("generates a 6-digit numeric OTP", () => {
     for (let i = 0; i < 20; i++) {
       const otp = generateSecureOtp();
@@ -104,7 +116,7 @@ describe("OTP Security and Cryptography", () => {
     }
   });
 
-  it("hashes OTP consistently with SHA-256", () => {
+  it("hashes OTP consistently with a keyed HMAC-SHA256", () => {
     const hash1 = hashOtp("123456");
     const hash2 = hashOtp("123456");
     const hash3 = hashOtp("654321");
@@ -135,6 +147,45 @@ describe("OTP Security and Cryptography", () => {
 
     // Wrong secret key
     expect(verifySignedToken(token, "wrong-secret")).toBeNull();
+  });
+
+  it("keys the OTP hash so it cannot be brute-forced without the secret", () => {
+    expect(hashOtp("123456", "secret-a")).not.toBe(hashOtp("123456", "secret-b"));
+    expect(verifyOtpHash("123456", hashOtp("123456"))).toBe(true);
+    expect(verifyOtpHash("654321", hashOtp("123456"))).toBe(false);
+  });
+
+  it("never signs with the public anon key or a hardcoded fallback", () => {
+    vi.stubEnv("AUTH_TOKEN_SECRET", "");
+    vi.stubEnv("NEXT_BREVO_API_KEY", "");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "public-anon-key");
+
+    expect(() => createSignedToken({ email: "a@b.c" })).toThrow();
+  });
+
+  it("encrypts payloads so the holder cannot read them", () => {
+    const payload = { email: "test@example.com", password: "S3cret!Pass" };
+    const token = createEncryptedToken(payload);
+
+    expect(token).not.toContain(Buffer.from(JSON.stringify(payload)).toString("base64url"));
+    expect(decryptToken<typeof payload>(token)).toEqual(payload);
+    expect(decryptToken(token, "wrong-secret")).toBeNull();
+
+    const parts = token.split(".");
+    parts[2] = parts[2].slice(0, -2) + (parts[2].endsWith("A") ? "BB" : "AA");
+    expect(decryptToken(parts.join("."))).toBeNull();
+  });
+
+  it("accepts reset tokens but rejects activation tokens in the reset flow", () => {
+    const expiresAt = Date.now() + 60_000;
+    const reset = createSignedToken({ email: "a@b.c", type: "PASSWORD_RESET", expiresAt });
+    const legacyReset = createSignedToken({ email: "a@b.c", expiresAt });
+    const activation = createSignedToken({ email: "a@b.c", role: "ADMIN", type: "ACCOUNT_ACTIVATION", expiresAt });
+
+    expect(verifyPasswordResetToken(reset)?.email).toBe("a@b.c");
+    expect(verifyPasswordResetToken(legacyReset)?.email).toBe("a@b.c");
+    expect(verifyPasswordResetToken(activation)).toBeNull();
   });
 });
 

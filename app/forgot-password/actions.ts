@@ -10,6 +10,7 @@ import {
   PENDING_RESET_COOKIE,
 } from '@/lib/email/otp-security'
 import { z } from 'zod'
+import { getAppOrigin } from '@/lib/utils/app-url'
 
 const ForgotPasswordSchema = z.object({
   email: z.string().trim().email("Adresse email invalide."),
@@ -37,15 +38,12 @@ export async function requestPasswordReset(formData: FormData) {
   const name = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : undefined
 
   // Retrieve origin for reset link
-  const headersList = await headers()
-  const host = headersList.get('host') || 'localhost:3000'
-  const proto = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https')
-  const origin = `${proto}://${host}`
+  const origin = getAppOrigin(await headers())
 
   // Generate secure signed token payload (valid for 60 minutes)
   const RESET_EXPIRY_MINUTES = 60
   const expiresAt = Date.now() + RESET_EXPIRY_MINUTES * 60 * 1000
-  const resetToken = createSignedToken({ email: emailNormalized, expiresAt })
+  const resetToken = createSignedToken({ email: emailNormalized, type: 'PASSWORD_RESET', expiresAt })
 
   // The reset link points directly to our public web application
   const resetLink = `${origin}/reset-password?email=${encodeURIComponent(emailNormalized)}&token=${resetToken}`

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { resolveUserRole, type AppRole } from "@/lib/auth/roles";
 
-export type AllowedRole = "ADMIN" | "CASHIER" | "CUSTOMER";
+export type AllowedRole = AppRole;
 
 export interface AuthSuccess {
   authorized: true;
@@ -34,7 +35,7 @@ export async function requireAuth(allowedRoles: AllowedRole[] = ["ADMIN", "CASHI
     };
   }
 
-  const role = (user.user_metadata?.role as AllowedRole) || "CUSTOMER";
+  const role: AllowedRole = await resolveUserRole(supabase, user);
 
   if (!allowedRoles.includes(role)) {
     return {

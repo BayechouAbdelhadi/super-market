@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Card } from '@/components/ui/card'
 import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm'
-import { verifySignedToken, PendingResetPayload } from '@/lib/email/otp-security'
+import { verifyPasswordResetToken } from '@/lib/email/otp-security'
 import { ShieldCheck } from 'lucide-react'
 
 export default async function ResetPasswordPage({
@@ -18,7 +18,7 @@ export default async function ResetPasswordPage({
   const token = params?.token?.trim() || ''
 
   // Decode cryptographically signed email strictly from token (not from browser cookies/session)
-  const pendingData = token ? verifySignedToken<PendingResetPayload>(token) : null
+  const pendingData = token ? verifyPasswordResetToken(token) : null
   const targetEmail = pendingData?.email || params?.email?.trim() || ''
 
   return (

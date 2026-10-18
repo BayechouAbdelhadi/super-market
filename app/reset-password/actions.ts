@@ -5,9 +5,8 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
-  verifySignedToken,
+  verifyPasswordResetToken,
   PENDING_RESET_COOKIE,
-  PendingResetPayload,
 } from '@/lib/email/otp-security'
 import { PasswordSchema } from '@/lib/auth/password-rules'
 import { z } from 'zod'
@@ -44,7 +43,7 @@ export async function resetPassword(formData: FormData) {
   // MUST come strictly from the signed, HMAC-verified reset token.
   const cookieStore = await cookies()
   const rawToken = token || cookieStore.get(PENDING_RESET_COOKIE)?.value
-  const pendingData = rawToken ? verifySignedToken<PendingResetPayload>(rawToken) : null
+  const pendingData = rawToken ? verifyPasswordResetToken(rawToken) : null
 
   if (!pendingData) {
     redirect(

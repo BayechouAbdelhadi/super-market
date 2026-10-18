@@ -7,6 +7,16 @@ import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
+const SAFE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
+const EXTENSIONS_BY_MIME: Record<string, string[]> = {
+  "image/jpeg": ["jpg", "jpeg"],
+  "image/jpg": ["jpg", "jpeg"],
+  "image/png": ["png"],
+  "image/webp": ["webp"],
+  "image/gif": ["gif"],
+};
+
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(["ADMIN"]);
   if (!auth.authorized) return auth.response;
@@ -50,17 +60,21 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     // Campaign ID from form data or generated
-    const campaignId =
+    // SECURITY: campaignId becomes a path segment — restrict it to safe characters (no "../")
+    const rawCampaignId =
       (formData.get("campaignId") as string) ||
       (formData.get("compaignId") as string) ||
-      crypto.randomUUID();
+      "";
+    const campaignId = SAFE_ID_PATTERN.test(rawCampaignId) ? rawCampaignId : crypto.randomUUID();
 
     // Folder structure requested: compaigns/${compaignId}/img-timestamps...png
     const timestamp = Date.now();
-    const rawExt = path.extname(file.name) || ".png";
-    const ext = rawExt.startsWith(".") ? rawExt.slice(1) : rawExt;
+    // SECURITY: the extension must match the validated image type (never .html, .svg, ...)
+    const mimeType = file.type.toLowerCase();
+    const rawExt = path.extname(file.name).slice(1).toLowerCase();
+    const ext = EXTENSIONS_BY_MIME[mimeType].includes(rawExt) ? rawExt : EXTENSIONS_BY_MIME[mimeType][0];
     const sanitizedName = file.name
-      .replace(new RegExp(`\\.${ext}$`, "i"), "")
+      .replace(/\.[^.]*$/, "")
       .replace(/[^a-zA-Z0-9_-]/g, "_")
       .slice(0, 20);
     const fileName = `img-${timestamp}-${sanitizedName}.${ext}`;
