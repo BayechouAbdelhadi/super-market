@@ -6,10 +6,11 @@ import {
   isCustomerEmailUnsubscribed,
 } from "@/lib/marketing/service";
 import { verifySignedValue } from "@/lib/email/otp-security";
-import { RATE_LIMITS, checkRateLimit, getClientIp, rateLimitMessage } from "@/lib/security/rate-limit";
+import { RATE_LIMITS, getClientIp, rateLimitMessage } from "@/lib/security/rate-limit";
+import { enforceRateLimits } from "@/lib/security/enforce";
 
-function rateLimited(req: NextRequest): NextResponse | null {
-  const limit = checkRateLimit(`unsubscribe:ip:${getClientIp(req.headers)}`, RATE_LIMITS.unsubscribePerIp);
+async function rateLimited(req: NextRequest): Promise<NextResponse | null> {
+  const limit = await enforceRateLimits([[`unsubscribe:ip:${getClientIp(req.headers)}`, RATE_LIMITS.unsubscribePerIp]]);
   return limit.allowed ? null : NextResponse.json({ error: rateLimitMessage(limit) }, { status: 429 });
 }
 import { UNSUBSCRIBE_SIGNATURE_PURPOSE } from "@/lib/marketing/utils";
@@ -63,7 +64,7 @@ function extractEmailFromParams(searchParams: URLSearchParams): string | null {
  * Supports one-click browser links from emails or status checks
  */
 export async function GET(req: NextRequest) {
-  const blocked = rateLimited(req);
+  const blocked = await rateLimited(req);
   if (blocked) return blocked;
 
   const searchParams = req.nextUrl.searchParams;
@@ -126,7 +127,7 @@ export async function GET(req: NextRequest) {
  * Handles structured programmatic or client form unsubscribe / resubscribe requests
  */
 export async function POST(req: NextRequest) {
-  const blocked = rateLimited(req);
+  const blocked = await rateLimited(req);
   if (blocked) return blocked;
 
   try {

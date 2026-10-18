@@ -1,4 +1,5 @@
 import { LoyaltyTier } from "@/lib/loyalty/types";
+import { PRODUCTION_APP_URL } from "@/lib/utils/app-url";
 
 export interface DealEmailTemplateProps {
   customerName: string;
@@ -22,7 +23,7 @@ export function renderDealEmailHtml(props: DealEmailTemplateProps): string {
     content,
     imageUrl,
     ctaText = "Découvrir les offres en magasin",
-    ctaUrl = "https://supermarket-calais.fr",
+    ctaUrl = PRODUCTION_APP_URL,
     storeName,
     storeAddress,
     storePhone,
@@ -34,7 +35,7 @@ export function renderDealEmailHtml(props: DealEmailTemplateProps): string {
   if (resolvedImageUrl && resolvedImageUrl.startsWith("/")) {
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
-      "https://supermarket-calais.fr";
+      PRODUCTION_APP_URL;
     resolvedImageUrl = `${baseUrl}${resolvedImageUrl}`;
   }
 
@@ -292,7 +293,7 @@ export function renderDealEmailHtml(props: DealEmailTemplateProps): string {
               </div>
               <div style="margin-top: 10px; font-size: 10px; color: #94a3b8; line-height: 1.4;">
                 Vous ne souhaitez plus recevoir ces e-mails ? 
-                <a href="${escapeHtml(unsubscribeUrl || "https://supermarket-calais.fr/unsubscribe")}" target="_blank" style="color: #64748b; text-decoration: underline;">Se désinscrire</a>
+                <a href="${escapeHtml(unsubscribeUrl || `${PRODUCTION_APP_URL}/unsubscribe`)}" target="_blank" style="color: #64748b; text-decoration: underline;">Se désinscrire</a>
               </div>
             </td>
           </tr>

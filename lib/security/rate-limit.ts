@@ -1,9 +1,9 @@
 /**
- * In-memory fixed-window rate limiter for auth and public endpoints.
+ * Fixed-window rate limiting rules and the in-process counters.
  *
- * Scope: one Node.js process (the standalone Docker container). If the app is
- * ever scaled to several instances, move the buckets to a shared store
- * (Redis / Postgres) behind the same `checkRateLimit` signature.
+ * Callers use `enforceRateLimits` (lib/security/enforce.ts): counters live in
+ * Postgres (shared by all instances, survive restarts); the in-memory
+ * `checkRateLimit` below is the fallback when the database is unreachable.
  */
 
 export interface RateLimitRule {

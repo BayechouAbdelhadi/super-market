@@ -18,6 +18,7 @@ import { getParisDateString, getParisTimeString } from "@/lib/utils/timezone";
 
 import { deduplicateRecipients, UNSUBSCRIBE_SIGNATURE_PURPOSE } from "./utils";
 import { signValue } from "@/lib/email/otp-security";
+import { PRODUCTION_APP_URL } from "@/lib/utils/app-url";
 export { deduplicateRecipients };
 
 const defaultAudienceRepo: ICampaignAudienceRepository = new SupabaseCampaignAudienceRepository();
@@ -223,7 +224,7 @@ export async function createMarketingCampaign(
     content: input.content.trim(),
     imageUrl: input.imageUrl ? input.imageUrl.trim() : null,
     ctaText: input.ctaText?.trim() || "Découvrir les offres en magasin",
-    ctaUrl: input.ctaUrl?.trim() || "https://supermarket-calais.fr",
+    ctaUrl: input.ctaUrl?.trim() || PRODUCTION_APP_URL,
     stats,
     recipients,
     createdAt: existing?.createdAt || now,
@@ -356,7 +357,7 @@ export async function processCampaignBatch(
 
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
-    "https://supermarket-calais.fr";
+    PRODUCTION_APP_URL;
 
   for (const recipient of batch) {
     const emailKey = recipient.email.trim().toLowerCase();

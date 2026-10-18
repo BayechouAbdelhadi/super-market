@@ -16,7 +16,8 @@ import {
   PENDING_SIGNUP_COOKIE,
 } from '@/lib/email/otp-security'
 import { PasswordSchema } from '@/lib/auth/password-rules'
-import { RATE_LIMITS, checkRateLimits, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
+import { RATE_LIMITS, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
+import { enforceRateLimits } from '@/lib/security/enforce'
 import { z } from 'zod'
 
 export type SignUpActionResult = {
@@ -96,7 +97,7 @@ export async function signup(
   const lastNameClean = last_name.trim()
 
   const ip = getClientIp(await headers())
-  const limit = checkRateLimits([
+  const limit = await enforceRateLimits([
     [`signup:ip:${ip}`, RATE_LIMITS.signupPerIp],
     [`signup:email:${emailNormalized}`, RATE_LIMITS.signupPerEmail],
   ])
@@ -191,7 +192,7 @@ export async function confirmSignUpOtp(formData: FormData) {
 
   // Verify OTP hash
   // Caps online guessing of the 6-digit code
-  const verifyLimit = checkRateLimits([[`signup-otp:${pendingData.email}`, RATE_LIMITS.otpVerifyPerEmail]]);
+  const verifyLimit = await enforceRateLimits([[`signup-otp:${pendingData.email}`, RATE_LIMITS.otpVerifyPerEmail]]);
   if (!verifyLimit.allowed) {
     redirect(`/signup/verify?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent(rateLimitMessage(verifyLimit))}`)
   }
@@ -244,8 +245,7 @@ export async function confirmSignUpOtp(formData: FormData) {
 /**
  * Resends a fresh 6-digit confirmation OTP email
  */
-export async function resendSignUpOtp(formData: FormData) {
-  const emailParam = (formData.get('email') as string || '').trim();
+export async function resendSignUpOtp() {
   const cookieStore = await cookies();
   const rawToken = cookieStore.get(PENDING_SIGNUP_COOKIE)?.value;
 
@@ -258,7 +258,7 @@ export async function resendSignUpOtp(formData: FormData) {
     redirect(`/signup?message=${encodeURIComponent("Session invalide. Veuillez recommencer.")}`)
   }
 
-  const resendLimit = checkRateLimits([[`signup-resend:${pendingData.email}`, RATE_LIMITS.otpResendPerEmail]]);
+  const resendLimit = await enforceRateLimits([[`signup-resend:${pendingData.email}`, RATE_LIMITS.otpResendPerEmail]]);
   if (!resendLimit.allowed) {
     redirect(`/signup/verify?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent(rateLimitMessage(resendLimit))}`)
   }

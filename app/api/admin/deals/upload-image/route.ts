@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/loyalty/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAppOrigin } from "@/lib/utils/app-url";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
@@ -130,7 +131,8 @@ export async function POST(req: NextRequest) {
     fs.writeFileSync(localFilePath, buffer);
 
     const relativeUrl = `/uploads/deals/${campaignId}/${fileName}`;
-    const origin = req.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL || "https://supermarket-calais.fr";
+    // SECURITY: never derive emailed URLs from the request Host header
+    const origin = getAppOrigin(req.headers);
     const fullUrl = `${origin}${relativeUrl}`;
 
     return NextResponse.json({

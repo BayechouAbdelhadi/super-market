@@ -6,7 +6,8 @@ import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { resolveUserRole } from '@/lib/auth/roles'
-import { RATE_LIMITS, checkRateLimits, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
+import { RATE_LIMITS, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
+import { enforceRateLimits } from '@/lib/security/enforce'
 
 const LoginSchema = z.object({
   email: z.string().trim().toLowerCase().min(1, "L'adresse email est obligatoire."),
@@ -45,7 +46,7 @@ export async function login(
   const { email, password } = parsed.data
 
   const ip = getClientIp(await headers())
-  const limit = checkRateLimits([
+  const limit = await enforceRateLimits([
     [`login:account:${email}`, RATE_LIMITS.loginPerAccount],
     [`login:ip:${ip}`, RATE_LIMITS.loginPerIp],
   ])

@@ -3,14 +3,14 @@
 import { redirect } from 'next/navigation'
 import { cookies, headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { emailService } from '@/lib/email'
 import { PENDING_RESET_COOKIE } from '@/lib/email/otp-security'
 import { createPasswordResetToken } from '@/lib/auth/links'
 import { AUTH_CONFIG } from '@/lib/auth/config'
 import { z } from 'zod'
 import { getAppOrigin } from '@/lib/utils/app-url'
-import { RATE_LIMITS, checkRateLimits, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
+import { RATE_LIMITS, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
+import { enforceRateLimits } from '@/lib/security/enforce'
 
 const ForgotPasswordSchema = z.object({
   email: z.string().trim().email("Adresse email invalide."),
@@ -27,7 +27,7 @@ export async function requestPasswordReset(formData: FormData) {
 
   const emailNormalized = parseResult.data.email.toLowerCase().trim()
 
-  const limit = checkRateLimits([
+  const limit = await enforceRateLimits([
     [`reset:ip:${getClientIp(await headers())}`, RATE_LIMITS.passwordResetPerIp],
     [`reset:email:${emailNormalized}`, RATE_LIMITS.passwordResetPerEmail],
   ])
