@@ -27,7 +27,7 @@ export function LoyaltySection({ euroToPointsRatio }: LoyaltySectionProps) {
     <section
       id="fidelite"
       aria-labelledby="fidelite-title"
-      className="scroll-mt-6 grid gap-10 rounded-[var(--radius-dialog)] bg-surface-hover p-6 sm:p-10 lg:grid-cols-2 lg:gap-16 lg:p-12"
+      className="scroll-mt-24 grid gap-10 rounded-[var(--radius-dialog)] bg-surface-hover p-6 sm:p-10 lg:grid-cols-2 lg:gap-16 lg:p-12"
     >
       <div className="space-y-6">
         <div className="space-y-3">

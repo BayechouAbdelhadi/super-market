@@ -59,7 +59,7 @@ const DEPARTMENTS: DepartmentCardProps[] = [
  */
 export function DepartmentsSection() {
   return (
-    <section id="rayons" aria-labelledby="rayons-title" className="scroll-mt-6 space-y-8">
+    <section id="rayons" aria-labelledby="rayons-title" className="scroll-mt-24 space-y-8">
       <SectionHeading
         id="rayons-title"
         eyebrow="Nos rayons"

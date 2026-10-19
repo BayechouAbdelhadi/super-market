@@ -44,10 +44,11 @@ function ContactRow({ icon: Icon, children }: { icon: LucideIcon; children: Reac
 /**
  * Footer shared by every public page (app/(site)/layout.tsx). Always dark, whatever the color scheme:
  * text uses `on-color` tints over the `footer` token.
+ * `shrink-0` is required: a flex item with `overflow-hidden` may otherwise be squeezed to 0px in the column.
  */
 export function SiteFooter({ storeName, tagline, address, phone, email }: SiteFooterProps) {
   return (
-    <footer className="relative overflow-hidden bg-footer text-on-color">
+    <footer className="relative shrink-0 overflow-hidden bg-footer text-on-color">
       {/* Single soft brand glow, top right */}
       <div aria-hidden className="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full bg-primary/25 blur-3xl" />
 

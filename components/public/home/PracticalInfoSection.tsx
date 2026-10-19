@@ -52,7 +52,7 @@ export function PracticalInfoSection({ storeName, address, phone, email, status 
   ];
 
   return (
-    <section id="infos" aria-labelledby="infos-title" className="scroll-mt-6 space-y-8">
+    <section id="infos" aria-labelledby="infos-title" className="scroll-mt-24 space-y-8">
       <SectionHeading
         id="infos-title"
         eyebrow="Infos pratiques"
