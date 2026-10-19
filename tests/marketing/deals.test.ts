@@ -3,6 +3,8 @@ import { CreateCampaignSchema } from '@/lib/marketing/validation';
 import { renderDealEmailHtml } from '@/lib/marketing/templates/deal-email';
 import {
   processCampaignBatch,
+  triggerDueCampaigns,
+  CampaignBusyError,
   pauseCampaign,
   resumeCampaign,
   deleteCampaign,
@@ -46,6 +48,18 @@ class MockMarketingRepository implements IMarketingCampaignRepository {
     if (campaign) {
       campaign.recipients = recipients;
     }
+  }
+
+  readonly locks: Set<string> = new Set();
+
+  async tryLock(campaignId: string): Promise<boolean> {
+    if (!this.campaigns.has(campaignId) || this.locks.has(campaignId)) return false;
+    this.locks.add(campaignId);
+    return true;
+  }
+
+  async unlock(campaignId: string): Promise<void> {
+    this.locks.delete(campaignId);
   }
 
   private unsubscribes: Set<string> = new Set();
@@ -835,6 +849,66 @@ describe('Marketing Deals & Email Campaigns', () => {
       expect(html).toContain('font-size: 10px');
     });
   });
+
+  describe('Per-campaign send lock', () => {
+    function lockCampaign(id: string): MarketingCampaign {
+      return {
+        id,
+        title: 'Lock test',
+        status: 'RUNNING',
+        targetTiers: ['GOLD'],
+        dispatchMode: 'ALL_AT_ONCE',
+        dailyLimit: null,
+        startDate: '2026-01-01',
+        endDate: '2099-12-31',
+        scheduledTime: '00:00',
+        lastRunDate: null,
+        subject: 'Offre',
+        content: 'Contenu de la campagne de test.',
+        imageUrl: null,
+        stats: { totalTargets: 1, sentCount: 0, failedCount: 0, remainingCount: 1, progressPercentage: 0 },
+        recipients: [
+          { customerId: 'c1', email: 'one@example.com', fullName: 'Client Un', tier: 'GOLD', status: 'PENDING' },
+        ],
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+        completedAt: null,
+      };
+    }
+
+    it('refuses a second run while another one holds the campaign, and sends nothing', async () => {
+      await mockRepo.save(lockCampaign('busy-1'));
+      await mockRepo.tryLock('busy-1');
+      const send = vi.spyOn(emailService, 'sendEmail').mockResolvedValue({ success: true });
+
+      await expect(processCampaignBatch('busy-1', mockRepo)).rejects.toBeInstanceOf(CampaignBusyError);
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('releases the campaign after a run, even when the run fails', async () => {
+      await mockRepo.save(lockCampaign('release-1'));
+      vi.spyOn(emailService, 'sendEmail').mockResolvedValue({ success: true });
+      await processCampaignBatch('release-1', mockRepo);
+      expect(mockRepo.locks.has('release-1')).toBe(false);
+
+      await mockRepo.save(lockCampaign('release-2'));
+      vi.spyOn(mockRepo, 'getUnsubscribedEmails').mockRejectedValueOnce(new Error('db down'));
+      await expect(processCampaignBatch('release-2', mockRepo)).rejects.toThrow('db down');
+      expect(mockRepo.locks.has('release-2')).toBe(false);
+    });
+
+    it('returns null for an unknown campaign instead of reporting it busy', async () => {
+      await expect(processCampaignBatch('missing', mockRepo)).resolves.toBeNull();
+    });
+
+    it('skips a busy campaign in the scheduled run without failing the others', async () => {
+      await mockRepo.save(lockCampaign('busy-2'));
+      await mockRepo.save(lockCampaign('free-1'));
+      await mockRepo.tryLock('busy-2');
+      vi.spyOn(emailService, 'sendEmail').mockResolvedValue({ success: true });
+
+      const results = await triggerDueCampaigns(mockRepo);
+      expect(results.map((r) => r.campaignId)).toEqual(['free-1']);
+    });
+  });
 });
-
-

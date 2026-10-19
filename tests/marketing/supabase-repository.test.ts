@@ -23,7 +23,7 @@ function builder(table: string) {
       return chain;
     };
   }
-  for (const f of ["eq", "in", "order", "range", "limit"]) {
+  for (const f of ["eq", "in", "or", "order", "range", "limit"]) {
     chain[f] = (...args: unknown[]) => {
       call.filters.push(`${f}:${JSON.stringify(args)}`);
       return chain;
@@ -101,5 +101,19 @@ describe("SupabaseMarketingRepository", () => {
     respond = () => ({ data: [{ email: "A@x.fr " }, { email: "a@x.fr" }] });
     await expect(new SupabaseMarketingRepository().getUnsubscribedEmails()).resolves.toEqual(["a@x.fr"]);
     expect(calls.every((c) => c.table === "marketing_unsubscribes")).toBe(true);
+  });
+
+  it("claims a campaign with one conditional update, and reports a held claim as busy", async () => {
+    respond = () => ({ data: [{ id: "c1" }] });
+    const repo = new SupabaseMarketingRepository();
+    await expect(repo.tryLock("c1", 1800)).resolves.toBe(true);
+
+    const claim = calls[0];
+    expect(claim.op).toBe("update");
+    expect(claim.filters[0]).toBe('eq:["id","c1"]');
+    expect(claim.filters[1]).toMatch(/^or:\["processing_until\.is\.null,processing_until\.lt\./);
+
+    respond = () => ({ data: [] });
+    await expect(repo.tryLock("c1", 1800)).resolves.toBe(false);
   });
 });

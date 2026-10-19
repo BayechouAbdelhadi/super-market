@@ -8,6 +8,14 @@ export interface IMarketingCampaignRepository {
   getRecipients(campaignId: string): Promise<CampaignRecipient[]>;
   saveRecipients(campaignId: string, recipients: CampaignRecipient[]): Promise<void>;
 
+  /**
+   * Atomically claims the campaign for a batch run, for `leaseSeconds`.
+   * Returns false when another run holds an unexpired claim.
+   */
+  tryLock(campaignId: string, leaseSeconds: number): Promise<boolean>;
+  /** Releases the claim taken by tryLock. */
+  unlock(campaignId: string): Promise<void>;
+
   // Unsubscribe & Opt-Out operations
   getUnsubscribedEmails(): Promise<string[]>;
   isUnsubscribed(email: string): Promise<boolean>;

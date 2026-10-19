@@ -83,6 +83,7 @@ Keep the quotes in `<<'SQL'`. Without them, bash rewrites the `$$` in function b
 | `auth_token_uses.sql` | Single-use activation and reset links | Applied |
 | `rate_limits.sql` | Shared rate limiting | Applied |
 | `dashboard_analytics.sql` | Dashboard KPIs and 7-day trend computed in SQL | Applied |
+| `campaign_locks.sql` | Per-campaign send lock, so a campaign is never sent by two runs at once | **Before** deploying the code that uses it |
 | `storage_rls.sql` | Storage bucket policies | New database only |
 | `create_admin.sql` | First admin account (edit email and password first) | New database only |
 | `update_admin_password.sql` | Reset the admin password | When needed |

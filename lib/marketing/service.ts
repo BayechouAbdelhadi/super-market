@@ -21,6 +21,7 @@ import { getParisDateString, getParisTimeString } from "@/lib/utils/timezone";
 import { deduplicateRecipients, UNSUBSCRIBE_SIGNATURE_PURPOSE } from "./utils";
 import { signValue } from "@/lib/email/otp-security";
 import { PRODUCTION_APP_URL } from "@/lib/utils/app-url";
+import { MARKETING_CONFIG } from "./config";
 export { deduplicateRecipients };
 
 const defaultAudienceRepo: ICampaignAudienceRepository = new SupabaseCampaignAudienceRepository();
@@ -133,6 +134,11 @@ export async function triggerDueCampaigns(
         const res = await processCampaignBatch(campaign.id, repo);
         if (res) results.push(res);
       } catch (err) {
+        if (err instanceof CampaignBusyError) {
+          // A manual run is sending it right now; the next tick picks up what remains
+          console.log(`[MarketingService] Campaign ${campaign.id} skipped: already being sent.`);
+          continue;
+        }
         console.error(`[MarketingService] Error processing due campaign ${campaign.id}:`, err);
       }
     }
@@ -248,15 +254,46 @@ export async function createMarketingCampaign(
   return campaign;
 }
 
+/** Another run (manual or scheduled) is already sending this campaign. */
+export class CampaignBusyError extends Error {
+  constructor(public readonly campaignId: string) {
+    super(`Campaign ${campaignId} is already being sent by another run.`);
+    this.name = "CampaignBusyError";
+  }
+}
+
 /**
  * Processes a batch of emails for the given campaign.
  * Non-failing guarantee: If sending fails for an individual customer,
  * it records the error and continues processing remaining recipients.
- * Duplication prevention guarantee: Each customer receives at most ONE email.
+ * Duplication prevention guarantee: Each customer receives at most ONE email. Runs are serialized
+ * per campaign by a database claim, so a manual run and the scheduled job never send it together.
+ *
+ * Returns null when the campaign doesn't exist; throws CampaignBusyError when another run holds it.
  */
 export async function processCampaignBatch(
   campaignId: string,
   repo: IMarketingCampaignRepository = defaultMarketingRepo
+): Promise<ProcessBatchResult | null> {
+  if (!(await repo.tryLock(campaignId, MARKETING_CONFIG.batchLockSeconds))) {
+    if (!(await repo.getById(campaignId))) return null;
+    throw new CampaignBusyError(campaignId);
+  }
+
+  try {
+    // Read the campaign only once the claim is held, so recipients sent by a previous run are seen as SENT
+    return await sendCampaignBatch(campaignId, repo);
+  } finally {
+    await repo.unlock(campaignId).catch((err) => {
+      // The claim expires on its own after batchLockSeconds
+      console.error(`[MarketingService] Failed to release campaign ${campaignId}:`, err);
+    });
+  }
+}
+
+async function sendCampaignBatch(
+  campaignId: string,
+  repo: IMarketingCampaignRepository
 ): Promise<ProcessBatchResult | null> {
   const campaign = await repo.getById(campaignId);
   if (!campaign) return null;
@@ -345,7 +382,7 @@ export async function processCampaignBatch(
   let failedInBatch = 0;
   const processedBatchEmails = new Set<string>();
 
-  // No fallback on failure: an audience built without the opt-out list would email people who unsubscribed
+  // No fallback on failure: a batch sent without the opt-out list would email people who unsubscribed
   const unsubscribed = await repo.getUnsubscribedEmails();
   const unsubscribedSet = new Set(unsubscribed.map((e) => e.trim().toLowerCase()));
 

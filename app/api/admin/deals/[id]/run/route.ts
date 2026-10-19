@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/loyalty/api-auth";
-import { processCampaignBatch } from "@/lib/marketing/service";
+import { CampaignBusyError, processCampaignBatch } from "@/lib/marketing/service";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +30,12 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       message: `Lot traité : ${result.sentInBatch} envoyé(s), ${result.failedInBatch} échec(s).`,
     });
   } catch (err) {
+    if (err instanceof CampaignBusyError) {
+      return NextResponse.json(
+        { error: "CAMPAIGN_BUSY", message: "Un envoi est déjà en cours pour cette campagne. Réessayez dans un instant." },
+        { status: 409 }
+      );
+    }
     console.error("[POST /api/admin/deals/[id]/run] Error:", err);
     return NextResponse.json(
       { error: "EXECUTION_ERROR", message: "Erreur lors de l'exécution du lot." },

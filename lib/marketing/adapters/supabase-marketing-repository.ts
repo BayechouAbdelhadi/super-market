@@ -267,6 +267,30 @@ export class SupabaseMarketingRepository implements IMarketingCampaignRepository
     check(error, "saveRecipients (campaign copy)");
   }
 
+  async tryLock(campaignId: string, leaseSeconds: number): Promise<boolean> {
+    const now = new Date();
+    const until = new Date(now.getTime() + leaseSeconds * 1000);
+    const supabase = createAdminClient();
+    // One UPDATE: only matches when nobody holds an unexpired claim, so two runs can't both win
+    const { data, error } = await supabase
+      .from("marketing_campaigns")
+      .update({ processing_until: until.toISOString() })
+      .eq("id", campaignId)
+      .or(`processing_until.is.null,processing_until.lt.${now.toISOString()}`)
+      .select("id");
+    check(error, "tryLock");
+    return (data ?? []).length > 0;
+  }
+
+  async unlock(campaignId: string): Promise<void> {
+    const supabase = createAdminClient();
+    const { error } = await supabase
+      .from("marketing_campaigns")
+      .update({ processing_until: null })
+      .eq("id", campaignId);
+    check(error, "unlock");
+  }
+
   async getUnsubscribedEmails(): Promise<string[]> {
     const supabase = createAdminClient();
     const rows = await selectAllPages<{ email: string }>(
