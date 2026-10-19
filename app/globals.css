@@ -212,6 +212,7 @@
   --color-tier-silver-text: var(--on-light-tier-silver-text);
   --color-tier-gold-text: var(--on-light-tier-gold-text);
   --color-background: var(--on-light-background);
+  color-scheme: light;
 }
 
 /* Content that always sits on a dark background (photos, dark cards), whatever the page's mode */
@@ -221,6 +222,38 @@
   --color-danger-text: var(--on-dark-danger-text);
   --color-info-text: var(--on-dark-info-text);
   --color-highlight-text: var(--on-dark-highlight-text);
+  color-scheme: dark;
+}
+
+/* Browser-drawn parts (scrollbars, date pickers, select menus) follow the page's mode */
+:root {
+  color-scheme: light dark;
+}
+
+/* Scrollbars in the theme colors: thin, transparent track, thumb in the border tone */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-hover) transparent;
+}
+
+/* Safari does not support scrollbar-color yet */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-hover);
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-text-muted);
+  }
 }
 
 html {
