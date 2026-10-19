@@ -37,58 +37,9 @@ If the jobs don't run, the server logs `[jobs] not started: set DATABASE_URL …
 
 ## Production setup
 
-The app needs a direct connection to the Supabase Postgres container. That takes three steps.
+Production needs three things: the Supabase database on Coolify's network, a `pgboss_worker` database user, and `DATABASE_URL` set on the app. The steps are in [Deploying on Coolify](deployment-coolify.md), sections 1, 3 and 4.
 
-### 1. Put the database on the app's network
-
-The app runs on Coolify's `coolify` Docker network. The Supabase database is on its own stack network, so the app can't reach it yet.
-
-1. In Coolify, open the **Supabase service**.
-2. Enable **Connect To Predefined Network**, save, and redeploy the service. Supabase is briefly unavailable while it restarts.
-3. Check it on the server:
-
-   ```bash
-   docker inspect -f '{{range $n, $c := .NetworkSettings.Networks}}{{$n}} {{end}}' $(docker ps -qf name=supabase-db)
-   ```
-
-   The output must include `coolify`.
-
-From the `coolify` network, reach the database by its **full container name**, for example `supabase-db-favbqfgc12suknxxsmfowtza`. Get yours with:
-
-```bash
-docker ps --format '{{.Names}}' | grep supabase-db
-```
-
-### 2. Create the database user and get `DATABASE_URL`
-
-The jobs connect with a limited user, `pgboss_worker`. That user can create and own the `pgboss` schema, and has no access to the app's tables (`profiles`, `customers`, `transactions`, and so on).
-
-[`scripts/setup-worker-db.sh`](../scripts/setup-worker-db.sh) creates the user, gives it a new random password, checks that it can log in, and prints the full `DATABASE_URL`.
-
-Run it from your machine, in the project folder. Replace the container name with yours from step 1:
-
-```bash
-ssh root@<vps-ip> 'DB_CONTAINER_FILTER=supabase-db-favbqfgc12suknxxsmfowtza DB_HOST=supabase-db-favbqfgc12suknxxsmfowtza bash -s' < scripts/setup-worker-db.sh
-```
-
-Expected output:
-
-```
-[setup-worker-db] database container: supabase-db-favbqfgc12suknxxsmfowtza
-[setup-worker-db] creating/updating role 'pgboss_worker'...
-[setup-worker-db] checking login...
-[setup-worker-db] OK: 'pgboss_worker' can log in.
-DATABASE_URL=postgres://pgboss_worker:<48 hex characters>@supabase-db-favbqfgc12suknxxsmfowtza:5432/postgres
-[setup-worker-db] set this DATABASE_URL on the app, then redeploy it.
-```
-
-The `DATABASE_URL=…` line is the only line printed on standard output, so you can capture it with `> app-db.env`. Keep that file private, delete it once the value is set, and never commit it.
-
-**Every run sets a new password.** Postgres stores only a hash, so an existing password can't be read back. To get a `DATABASE_URL` again, run the script again, then update the app and redeploy.
-
-#### Script options
-
-Set these as environment variables before `bash`:
+The setup script, [`scripts/setup-worker-db.sh`](../scripts/setup-worker-db.sh), accepts these options as environment variables:
 
 | Variable | Default | Use |
 | --- | --- | --- |
@@ -97,28 +48,6 @@ Set these as environment variables before `bash`:
 | `DB_PORT` | `5432` | Postgres port |
 | `DB_NAME` | `postgres` | Database name |
 | `WORKER_ROLE` | `pgboss_worker` | Name of the database user |
-
-#### Doing it by hand
-
-If you can't run the script, these commands on the server do the same thing. Run them all in the same terminal session:
-
-```bash
-PGBOSS_PASSWORD=$(openssl rand -hex 24)
-DB=$(docker ps -qf name=supabase-db)
-
-docker exec -i $DB psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1 <<SQL
-CREATE ROLE pgboss_worker LOGIN PASSWORD '$PGBOSS_PASSWORD';
-GRANT CONNECT, CREATE ON DATABASE postgres TO pgboss_worker;
-SQL
-
-echo "DATABASE_URL=postgres://pgboss_worker:$PGBOSS_PASSWORD@$(docker inspect -f '{{.Name}}' $DB | tr -d /):5432/postgres"
-```
-
-If `$PGBOSS_PASSWORD` is empty, Postgres prints `empty string is not a valid password, clearing password` and the user is left without a password. If the user already exists, replace the `CREATE ROLE` line with `ALTER ROLE pgboss_worker PASSWORD '$PGBOSS_PASSWORD';`.
-
-### 3. Set `DATABASE_URL` on the app and redeploy
-
-In Coolify, add `DATABASE_URL` to the Next.js app's environment variables, with the value from step 2. Then redeploy.
 
 ## Check it runs
 
@@ -156,7 +85,7 @@ Only do this when your `.env` points at test data. With production Supabase keys
 | `[jobs] not started: set DATABASE_URL …` | `DATABASE_URL` is missing on the app. In development, `JOBS_IN_DEV=true` is also missing. |
 | `[jobs] not started: DATABASE_URL must start with "postgres://"` | The value in Coolify includes the `DATABASE_URL=` prefix, quotes or spaces. The value must start with `postgres://`. |
 | `[jobs] failed to start … EAI_AGAIN base` | Same cause, on a version without that check: the value doesn't start with `postgres://`. |
-| `[jobs] failed to start, retrying in 60s: … ENOTFOUND` | The app can't resolve the database host. Do step 1, and use the full container name as the host. |
+| `[jobs] failed to start … ENOTFOUND` or `EAI_AGAIN supabase-db-…` | The app can't reach the database host. Connect Supabase to the `coolify` network ([deployment guide](deployment-coolify.md), section 1), and use the full container name as the host. |
 | `[jobs] failed to start … password authentication failed` | The password doesn't match. Run the setup script again and update `DATABASE_URL`. |
 | `[jobs] failed to start … permission denied for database` | The `GRANT` is missing. Run the setup script again. |
 | Campaigns are not sent, but `[jobs] started` is logged | Check that the campaign is not `DRAFT` or `PAUSED`, its dates include today, recipients remain, and its send time has passed in Paris time. |
