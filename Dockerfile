@@ -35,7 +35,7 @@ ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-RUN npm run build
+RUN npm run build && npm run build:worker
 
 # -----------------------------------------------------------------------------
 # Stage 4: Production runner
@@ -59,6 +59,10 @@ COPY --from=builder /app/public ./public
 # Automatically leveraged by standalone mode output
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Background worker (scheduled campaign sending), a single bundled file.
+# Run it as a second container from this image: `node worker.mjs` (needs DATABASE_URL).
+COPY --from=builder --chown=nextjs:nodejs /app/dist/worker.mjs ./worker.mjs
 
 USER nextjs
 

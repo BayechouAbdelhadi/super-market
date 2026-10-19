@@ -44,3 +44,6 @@ scripts/change-admin-password.mjs
 
 # runtime fallback stores (contain personal data: never commit)
 /data/*.json
+
+# worker bundle
+/dist

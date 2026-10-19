@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/loyalty/api-auth";
 import { CreateCampaignSchema } from "@/lib/marketing/validation";
-import {
-  createMarketingCampaign,
-  triggerDueCampaigns,
-} from "@/lib/marketing/service";
+import { createMarketingCampaign } from "@/lib/marketing/service";
 import { defaultMarketingRepo } from "@/lib/marketing/adapters/supabase-marketing-repository";
 
 export const dynamic = "force-dynamic";
@@ -14,13 +11,7 @@ export async function GET() {
   if (!auth.authorized) return auth.response;
 
   try {
-    // Automatically trigger any campaigns due as of current Paris time
-    try {
-      await triggerDueCampaigns();
-    } catch (triggerErr) {
-      console.warn("[GET /api/admin/deals] Auto-trigger due campaigns warning:", triggerErr);
-    }
-
+    // Read-only: due campaigns are sent by the background worker (lib/jobs/worker.ts)
     const campaigns = await defaultMarketingRepo.getAll();
 
     // Summary statistics
