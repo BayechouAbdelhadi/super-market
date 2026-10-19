@@ -214,8 +214,8 @@ export function CashierDashboard({ standalone = false, settings: propSettings }:
             });
           }
         }
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
+      } catch (err) {
+        if (!(err instanceof Error && err.name === "AbortError")) {
           console.error("Erreur recherche clients :", err);
         }
       } finally {

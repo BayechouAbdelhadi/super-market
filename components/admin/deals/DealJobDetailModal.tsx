@@ -79,8 +79,8 @@ export function DealJobDetailModal({
       if (!res.ok) throw new Error(data.message || "Erreur lors du lancement du lot.");
       toast.success(data.message || "Lot traité avec succès !");
       onRefresh();
-    } catch (err: any) {
-      toast.error(err.message || "Erreur d'exécution.");
+    } catch (err) {
+      toast.error((err instanceof Error && err.message) || "Erreur d'exécution.");
     } finally {
       setLoadingAction(false);
     }
@@ -96,8 +96,8 @@ export function DealJobDetailModal({
       if (!res.ok) throw new Error(data.message || "Erreur lors de la mise en pause.");
       toast.success("Job mis en pause.");
       onRefresh();
-    } catch (err: any) {
-      toast.error(err.message || "Erreur d'action.");
+    } catch (err) {
+      toast.error((err instanceof Error && err.message) || "Erreur d'action.");
     } finally {
       setLoadingAction(false);
     }
@@ -113,8 +113,8 @@ export function DealJobDetailModal({
       if (!res.ok) throw new Error(data.message || "Erreur lors de la reprise.");
       toast.success("Job repris avec succès.");
       onRefresh();
-    } catch (err: any) {
-      toast.error(err.message || "Erreur d'action.");
+    } catch (err) {
+      toast.error((err instanceof Error && err.message) || "Erreur d'action.");
     } finally {
       setLoadingAction(false);
     }
@@ -132,8 +132,8 @@ export function DealJobDetailModal({
       toast.success("Campagne supprimée.");
       onRefresh();
       onClose();
-    } catch (err: any) {
-      toast.error(err.message || "Erreur de suppression.");
+    } catch (err) {
+      toast.error((err instanceof Error && err.message) || "Erreur de suppression.");
     } finally {
       setLoadingAction(false);
     }

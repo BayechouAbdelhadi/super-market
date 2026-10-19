@@ -6,9 +6,8 @@ import { revalidatePath } from 'next/cache'
 import { getSessionCaller } from '@/lib/auth/session'
 import { SupabaseUserAccountRepository } from '@/lib/auth/adapters/supabase-user-account-repository'
 import { getAppOrigin } from '@/lib/utils/app-url'
-import { emailService } from '@/lib/email'
-import { createActivationLink } from '@/lib/auth/links'
-import { AUTH_CONFIG } from '@/lib/auth/config'
+import { sendActivationEmail, shouldSendActivationEmail } from '@/lib/email/activation'
+import { authFailureMessage } from '@/lib/auth/auth-errors'
 import { normalizePhone } from '@/lib/loyalty/domain'
 import { PasswordSchema } from '@/lib/auth/password-rules'
 import { getAppSettings } from '@/lib/settings/service'
@@ -100,36 +99,17 @@ export async function createUser(formData: FormData) {
   if (!created.ok) {
     return {
       error: created.reason === 'AUTH_FAILED'
-        ? created.detail || "Erreur lors de la création du compte."
+        ? authFailureMessage(created.code)
         : "Impossible de créer le profil (conflit de données).",
     };
   }
 
   // Send activation/invitation email via Brevo
-  let activationLink: string | undefined;
   try {
-    activationLink = createActivationLink(getAppOrigin(await headers()), emailNormalized, role);
-
     const settings = await getAppSettings();
-    const shouldSendEmail =
-      role === 'CASHIER'
-        ? settings.notifications.sendCashierInviteEmail
-        : settings.notifications.sendWelcomeEmail;
-
-    if (shouldSendEmail) {
-      emailService.sendAccountActivation({
-        email: emailNormalized,
-        name: `${firstNameClean} ${lastNameClean}`,
-        activationLink,
-        role,
-        expiresInDays: AUTH_CONFIG.activationLinkTtlDays,
-        sender: settings.notifications.senderEmail
-          ? {
-              email: settings.notifications.senderEmail,
-              name: settings.notifications.senderName || settings.store.storeName,
-            }
-          : undefined,
-      }).catch((err) => {
+    if (shouldSendActivationEmail(role, settings)) {
+      const account = { email: emailNormalized, name: `${firstNameClean} ${lastNameClean}`, role };
+      sendActivationEmail(account, getAppOrigin(await headers()), settings).catch((err) => {
         console.error("[createUser] Brevo activation email failed:", err);
       });
     }
@@ -256,31 +236,17 @@ export async function inviteUser(formData: FormData) {
     return { error: "Accès refusé. Seul un administrateur peut réinviter un membre du personnel." };
   }
 
-  const activationLink = createActivationLink(
-    getAppOrigin(await headers()),
-    emailNormalized,
-    existingProfile?.role || role
-  );
-
   if (existingProfile) {
     // User already exists, resend invitation/activation email
     try {
       const settings = await getAppSettings();
       const displayName = `${existingProfile.first_name || first_name || ''} ${existingProfile.last_name || last_name || ''}`.trim() || emailNormalized;
-      
-      await emailService.sendAccountActivation({
-        email: emailNormalized,
-        name: displayName,
-        activationLink,
-        role: existingProfile.role,
-        expiresInDays: AUTH_CONFIG.activationLinkTtlDays,
-        sender: settings.notifications.senderEmail
-          ? {
-              email: settings.notifications.senderEmail,
-              name: settings.notifications.senderName || settings.store.storeName,
-            }
-          : undefined,
-      });
+
+      await sendActivationEmail(
+        { email: emailNormalized, name: displayName, role: existingProfile.role },
+        getAppOrigin(await headers()),
+        settings
+      );
 
       return {
         success: true,

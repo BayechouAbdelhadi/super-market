@@ -1,5 +1,5 @@
 import { IDirectoryRepository } from "../ports";
-import { ProfileWithCustomerRow, UserRole } from "../types";
+import { DirectoryUser, ProfileWithCustomerRow, UserRole } from "../types";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 
 /**
@@ -20,14 +20,14 @@ export class SupabaseDirectoryRepository implements IDirectoryRepository {
     return (data as ProfileWithCustomerRow[] | null) || [];
   }
 
-  async listRecentProfilesByRole(role: UserRole, limit: number): Promise<Record<string, unknown>[]> {
+  async listRecentProfilesByRole(role: UserRole, limit: number): Promise<DirectoryUser[]> {
     const sb = await createServerClient();
     const { data } = await sb
       .from("profiles")
-      .select("*")
+      .select("id, first_name, last_name, email, phone_number, role, created_at")
       .eq("role", role)
       .order("created_at", { ascending: false })
       .limit(limit);
-    return data || [];
+    return (data as DirectoryUser[] | null) || [];
   }
 }

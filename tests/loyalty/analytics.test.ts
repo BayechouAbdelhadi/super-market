@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
-  calculateRealKpis,
-  aggregateDailySales,
+  buildDailySalesTrend,
+  toLocalDateKey,
   buildLiveOperations,
   formatCurrency,
   formatNumber,
@@ -11,91 +11,33 @@ import {
 describe("Analytics Domain Logic (Zero Fake Data)", () => {
   const referenceDate = new Date("2026-10-08T14:30:00Z");
 
-  it("calculates real KPIs correctly for today and total", () => {
-    const rawTransactions = [
-      // Today transaction 1
-      {
-        id: "tx-1",
-        amount_total: 50.0,
-        points_earned: 50,
-        points_redeemed: 0,
-        created_at: "2026-10-08T10:00:00Z",
-      },
-      // Today transaction 2 (Redeem)
-      {
-        id: "tx-2",
-        amount_total: 0.0,
-        points_earned: 0,
-        points_redeemed: 100,
-        created_at: "2026-10-08T11:00:00Z",
-      },
-      // Yesterday transaction
-      {
-        id: "tx-3",
-        amount_total: 80.0,
-        points_earned: 80,
-        points_redeemed: 20,
-        created_at: "2026-10-07T15:00:00Z",
-      },
-    ];
+  it("lays database day totals onto the last 7 days", () => {
+    const today = new Date(referenceDate);
+    const yesterday = new Date(referenceDate);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-    const rawProfiles = [
-      { id: "p-1", role: "CUSTOMER", created_at: "2026-10-08T09:00:00Z" }, // new today
-      { id: "p-2", role: "CUSTOMER", created_at: "2026-10-07T12:00:00Z" }, // existing
-      { id: "p-3", role: "CASHIER", created_at: "2026-10-08T08:00:00Z" }, // not a customer
-    ];
-
-    const kpis = calculateRealKpis(rawTransactions, rawProfiles, referenceDate);
-
-    expect(kpis.caToday).toBe(50.0);
-    expect(kpis.caTotal).toBe(130.0);
-    expect(kpis.dailySalesCount).toBe(2);
-    expect(kpis.totalSalesCount).toBe(3);
-    expect(kpis.dailyPointsRedeemed).toBe(100);
-    expect(kpis.totalPointsRedeemed).toBe(120);
-    expect(kpis.dailyPointsEarned).toBe(50);
-    expect(kpis.totalPointsEarned).toBe(130);
-    expect(kpis.newClientsToday).toBe(1);
-    expect(kpis.totalClients).toBe(2);
-  });
-
-  it("aggregates daily sales accurately without fake data", () => {
-    const rawTransactions = [
-      {
-        amount_total: 100.0,
-        points_earned: 100,
-        points_redeemed: 0,
-        created_at: "2026-10-08T12:00:00Z",
-      },
-      {
-        amount_total: 50.0,
-        points_earned: 50,
-        points_redeemed: 0,
-        created_at: "2026-10-08T14:00:00Z",
-      },
-      {
-        amount_total: 30.0,
-        points_earned: 30,
-        points_redeemed: 10,
-        created_at: "2026-10-07T12:00:00Z",
-      },
-    ];
-
-    const daily = aggregateDailySales(rawTransactions, 7, referenceDate);
+    const daily = buildDailySalesTrend(
+      [
+        { date: toLocalDateKey(today), revenue: 150.004, salesCount: 2, pointsEarned: 150, pointsRedeemed: 0 },
+        { date: toLocalDateKey(yesterday), revenue: 30, salesCount: 1, pointsEarned: 30, pointsRedeemed: 10 },
+      ],
+      7,
+      referenceDate
+    );
 
     expect(daily.length).toBe(7);
     const todayRecord = daily[daily.length - 1];
+    expect(todayRecord.date).toBe(toLocalDateKey(today));
     expect(todayRecord.revenue).toBe(150.0);
     expect(todayRecord.salesCount).toBe(2);
 
     const yesterdayRecord = daily[daily.length - 2];
     expect(yesterdayRecord.revenue).toBe(30.0);
-    expect(yesterdayRecord.salesCount).toBe(1);
+    expect(yesterdayRecord.pointsRedeemed).toBe(10);
 
     // Days with no transactions should be 0
-    const olderRecord = daily[0];
-    expect(olderRecord.revenue).toBe(0);
-    expect(olderRecord.salesCount).toBe(0);
+    expect(daily[0].revenue).toBe(0);
+    expect(daily[0].salesCount).toBe(0);
   });
 
   it("builds live operations cleanly", () => {

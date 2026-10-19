@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { getAppSettings } from '@/lib/settings/service'
+import { SupabaseSelfProfileRepository } from '@/lib/account/adapters/supabase-self-profile-repository'
+import { resolveDisplayIdentity } from '@/lib/account/identity'
 import Link from 'next/link'
 import {
   Store,
@@ -10,7 +11,6 @@ import {
   ArrowRight,
   ShieldCheck,
   CreditCard,
-  MapPin,
 } from 'lucide-react'
 import { Metadata } from 'next'
 
@@ -26,15 +26,10 @@ export default async function CashierHubPage() {
     getAppSettings(),
   ])
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('first_name, last_name, email')
-    .eq('id', user?.id || '')
-    .single()
+  const profile = user ? await new SupabaseSelfProfileRepository(supabase).getProfile(user.id) : null
 
-  const firstName = profile?.first_name || user?.user_metadata?.first_name || ''
-  const lastName = profile?.last_name || user?.user_metadata?.last_name || ''
-  const displayName = `${firstName} ${lastName}`.trim() || user?.email || 'Caissier'
+  const identity = resolveDisplayIdentity(profile, user ?? {})
+  const displayName = identity.fullName || user?.email || 'Caissier'
 
   const euroRatio = settings.loyalty.euroToPointsRatio
 

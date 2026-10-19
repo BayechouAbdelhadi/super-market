@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { AccountProfile, CreateAccountResult, IUserAccountRepository, NewAccountInput } from "../ports";
+import { AccountProfile, AuthFailureCode, CreateAccountResult, IUserAccountRepository, NewAccountInput } from "../ports";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 
@@ -8,6 +8,17 @@ const AUTH_USERS_PAGE_SIZE = 1000;
 /** Random initial password for accounts activated later through an emailed link. */
 function generateInitialPassword(): string {
   return crypto.randomBytes(16).toString("hex") + "A1!";
+}
+
+/** Maps GoTrue error codes (and legacy messages) to provider-agnostic failure codes. */
+function toAuthFailureCode(error: { code?: string; message?: string } | null): AuthFailureCode {
+  const code = error?.code ?? "";
+  const message = error?.message?.toLowerCase() ?? "";
+  if (code === "email_exists" || code === "user_already_exists" || message.includes("already")) return "EMAIL_TAKEN";
+  if (code === "weak_password") return "WEAK_PASSWORD";
+  if (code === "email_address_invalid" || code === "validation_failed") return "INVALID_EMAIL";
+  if (code.startsWith("over_") || code === "too_many_requests") return "RATE_LIMITED";
+  return "UNKNOWN";
 }
 
 /**
@@ -47,7 +58,7 @@ export class SupabaseUserAccountRepository implements IUserAccountRepository {
 
     if (authError || !authData.user) {
       console.error(`[UserAccountRepository] auth.admin.createUser error (${input.email}):`, authError?.message);
-      return { ok: false, reason: "AUTH_FAILED", detail: authError?.message };
+      return { ok: false, reason: "AUTH_FAILED", code: toAuthFailureCode(authError) };
     }
 
     const userId = authData.user.id;

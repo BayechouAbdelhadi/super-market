@@ -1,10 +1,10 @@
 import {
-  DashboardKpis,
   DailySalesRecord,
   LiveOperationRecord,
   RealDashboardData,
 } from "./analytics-types";
 import { LoyaltyTier } from "./types";
+import type { DailySalesTotals } from "./ports";
 
 /**
  * Formats a currency amount in French format (e.g. "12 450,50")
@@ -32,132 +32,49 @@ export function getStartOfToday(referenceDate: Date = new Date()): Date {
   return start;
 }
 
-/**
- * Pure calculation of KPIs strictly from Supabase records (zero fake data)
- */
-export function calculateRealKpis(
-  rawTransactions: Array<{
-    id: string;
-    amount_total: number;
-    points_earned: number;
-    points_redeemed: number;
-    created_at: string;
-  }>,
-  rawProfiles: Array<{
-    id: string;
-    role?: string | null;
-    created_at: string;
-  }>,
-  now: Date = new Date()
-): DashboardKpis {
-  const todayStart = getStartOfToday(now);
+/** Local calendar date (YYYY-MM-DD) of a Date, in the server's timezone. */
+export function toLocalDateKey(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
 
-  let caToday = 0;
-  let caTotal = 0;
-  let dailySalesCount = 0;
-  let dailyPointsRedeemed = 0;
-  let totalPointsRedeemed = 0;
-  let dailyPointsEarned = 0;
-  let totalPointsEarned = 0;
-
-  for (const t of rawTransactions) {
-    const amount = Number(t.amount_total) || 0;
-    const earned = Number(t.points_earned) || 0;
-    const redeemed = Number(t.points_redeemed) || 0;
-    const txDate = new Date(t.created_at);
-
-    caTotal += amount;
-    totalPointsEarned += earned;
-    totalPointsRedeemed += redeemed;
-
-    if (txDate >= todayStart) {
-      caToday += amount;
-      dailySalesCount += 1;
-      dailyPointsRedeemed += redeemed;
-      dailyPointsEarned += earned;
-    }
-  }
-
-  // Clients stats from profiles table
-  const customerProfiles = rawProfiles.filter(
-    (p) => !p.role || p.role === "CUSTOMER"
-  );
-  const totalClients = customerProfiles.length;
-  const newClientsToday = customerProfiles.filter((p) => {
-    const createdAt = new Date(p.created_at);
-    return createdAt >= todayStart;
-  }).length;
-
-  return {
-    caToday: Math.round(caToday * 100) / 100,
-    caTotal: Math.round(caTotal * 100) / 100,
-    dailySalesCount,
-    totalSalesCount: rawTransactions.length,
-    dailyPointsRedeemed,
-    totalPointsRedeemed,
-    dailyPointsEarned,
-    totalPointsEarned,
-    newClientsToday,
-    totalClients,
-  };
+/** Start (local midnight) of the first day of an N-day window ending today. */
+export function getTrendWindowStart(daysCount: number, now: Date = new Date()): Date {
+  const start = getStartOfToday(now);
+  start.setDate(start.getDate() - (daysCount - 1));
+  return start;
 }
 
 /**
- * Aggregates real sales by day over the last N days (defaults to 7 days)
+ * Lays database-aggregated day totals onto the last N days (days without sales = 0).
  */
-export function aggregateDailySales(
-  rawTransactions: Array<{
-    amount_total: number;
-    points_earned: number;
-    points_redeemed: number;
-    created_at: string;
-  }>,
+export function buildDailySalesTrend(
+  dayTotals: DailySalesTotals[],
   daysCount = 7,
   now: Date = new Date()
 ): DailySalesRecord[] {
+  const totalsByDate = new Map(dayTotals.map((t) => [t.date, t]));
   const result: DailySalesRecord[] = [];
 
   for (let i = daysCount - 1; i >= 0; i--) {
-    const d = new Date(now);
+    const d = getStartOfToday(now);
     d.setDate(d.getDate() - i);
-    d.setHours(0, 0, 0, 0);
 
-    const nextDay = new Date(d);
-    nextDay.setDate(nextDay.getDate() + 1);
-
-    const dateKey = d.toISOString().split("T")[0];
+    const dateKey = toLocalDateKey(d);
     const rawLabel = d.toLocaleDateString("fr-FR", {
       weekday: "short",
       day: "numeric",
     });
-    const label = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
-
-    // Filter real transactions matching this day
-    const dayTxs = rawTransactions.filter((t) => {
-      const txTime = new Date(t.created_at);
-      return txTime >= d && txTime < nextDay;
-    });
-
-    const dayRevenue = dayTxs.reduce(
-      (sum, t) => sum + (Number(t.amount_total) || 0),
-      0
-    );
-    const dayPointsEarned = dayTxs.reduce(
-      (sum, t) => sum + (Number(t.points_earned) || 0),
-      0
-    );
-    const dayPointsRedeemed = dayTxs.reduce(
-      (sum, t) => sum + (Number(t.points_redeemed) || 0),
-      0
-    );
+    const totals = totalsByDate.get(dateKey);
 
     result.push({
       date: dateKey,
-      label,
-      revenue: Math.round(dayRevenue * 100) / 100,
-      salesCount: dayTxs.length,
-      pointsEarned: dayPointsEarned,
-      pointsRedeemed: dayPointsRedeemed,
+      label: rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1),
+      revenue: Math.round((totals?.revenue ?? 0) * 100) / 100,
+      salesCount: totals?.salesCount ?? 0,
+      pointsEarned: totals?.pointsEarned ?? 0,
+      pointsRedeemed: totals?.pointsRedeemed ?? 0,
     });
   }
 

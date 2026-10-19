@@ -10,13 +10,14 @@ import { NewCustomerModal } from '@/components/loyalty/NewCustomerModal'
 import { createUser, editUser } from '@/app/admin/actions'
 import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
 import { toast } from '@/components/ui/sonner'
+import type { DirectoryUser } from '@/lib/loyalty/types'
 
 interface UserManagerProps {
-  initialUsers: any[];
+  initialUsers: DirectoryUser[];
   roleToManage: 'CASHIER' | 'CUSTOMER';
   title: string;
   description: string;
-  onViewDetail?: (user: any) => void;
+  onViewDetail?: (user: { id: string }) => void;
   onAddCustomer?: () => void;
   defaultPageSize?: number;
   pageSizeOptions?: number[];
@@ -36,7 +37,7 @@ export function UserManager({
 }: UserManagerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<any>(null)
+  const [editingUser, setEditingUser] = useState<DirectoryUser | null>(null)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [loading, setLoading] = useState(false)
@@ -56,7 +57,7 @@ export function UserManager({
     setIsOpen(true)
   }
 
-  function openEdit(user: any) {
+  function openEdit(user: DirectoryUser) {
     setEditingUser(user)
     setError('')
     setSuccessMsg('')

@@ -4,9 +4,8 @@ import { parsePageParams } from "@/lib/loyalty/pagination";
 import { requireAuth } from "@/lib/loyalty/api-auth";
 import { CreateCustomerSchema } from "@/lib/loyalty/validation";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
-import { emailService } from "@/lib/email";
-import { createActivationLink } from "@/lib/auth/links";
-import { AUTH_CONFIG } from "@/lib/auth/config";
+import { sendActivationEmail, shouldSendActivationEmail } from "@/lib/email/activation";
+import { getAppSettings } from "@/lib/settings/service";
 import { getAppOrigin } from "@/lib/utils/app-url";
 
 export async function GET(req: NextRequest) {
@@ -97,27 +96,15 @@ export async function POST(req: NextRequest) {
     // Send account activation email to the customer
     if (customer.email) {
       try {
-        const activationLink = createActivationLink(getAppOrigin(req.headers), customer.email, "CUSTOMER");
-
-        emailService
-          .sendAccountActivation({
-            email: customer.email,
-            name: customer.full_name,
-            activationLink,
-            role: "CUSTOMER",
-            expiresInDays: AUTH_CONFIG.activationLinkTtlDays,
-          })
-          .catch((err) => {
-            console.error(
-              "[POST /api/loyalty/customers] Failed to send activation email:",
-              err
-            );
+        const settings = await getAppSettings();
+        if (shouldSendActivationEmail("CUSTOMER", settings)) {
+          const account = { email: customer.email, name: customer.full_name, role: "CUSTOMER" as const };
+          sendActivationEmail(account, getAppOrigin(req.headers), settings).catch((err) => {
+            console.error("[POST /api/loyalty/customers] Failed to send activation email:", err);
           });
+        }
       } catch (emailErr) {
-        console.error(
-          "[POST /api/loyalty/customers] Error preparing activation email:",
-          emailErr
-        );
+        console.error("[POST /api/loyalty/customers] Error preparing activation email:", emailErr);
       }
     }
 

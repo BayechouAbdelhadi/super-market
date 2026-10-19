@@ -344,8 +344,8 @@ export function CampaignEditorPage({
 
       setImageUrl(data.fullUrl || data.url);
       toast.success("Image importée avec succès !");
-    } catch (err: any) {
-      toast.error(err.message || "Erreur lors de l'envoi de l'image.");
+    } catch (err) {
+      toast.error((err instanceof Error && err.message) || "Erreur lors de l'envoi de l'image.");
     } finally {
       setIsUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -479,9 +479,9 @@ export function CampaignEditorPage({
 
       setLastSavedAt(new Date());
       toast.success("Brouillon sauvegardé avec succès dans vos campagnes !");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Impossible de sauvegarder le brouillon.");
-      toast.error(err.message || "Erreur de sauvegarde.");
+    } catch (err) {
+      setErrorMsg((err instanceof Error && err.message) || "Impossible de sauvegarder le brouillon.");
+      toast.error((err instanceof Error && err.message) || "Erreur de sauvegarde.");
     } finally {
       setLoadingDraft(false);
     }
@@ -567,9 +567,9 @@ export function CampaignEditorPage({
       toast.success("Campagne enregistrée et programmée avec succès !");
       router.push("/admin/deals");
       router.refresh();
-    } catch (err: any) {
-      setErrorMsg(err.message || "Impossible de programmer la campagne.");
-      toast.error(err.message || "Erreur de création.");
+    } catch (err) {
+      setErrorMsg((err instanceof Error && err.message) || "Impossible de programmer la campagne.");
+      toast.error((err instanceof Error && err.message) || "Erreur de création.");
     } finally {
       setLoadingSubmit(false);
     }

@@ -29,6 +29,8 @@ import {
   Edit3,
 } from "lucide-react";
 
+type StatusFilter = "ALL" | "ACTIVE" | "DRAFT" | "COMPLETED" | "PAUSED";
+
 interface DealsSummary {
   totalCampaigns: number;
   activeJobs: number;
@@ -59,7 +61,7 @@ export function DealsManager({
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [previewingCampaign, setPreviewingCampaign] = useState<MarketingCampaign | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "DRAFT" | "COMPLETED" | "PAUSED">("ALL");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
 
   const [runningActionId, setRunningActionId] = useState<string | null>(null);
 
@@ -106,8 +108,8 @@ export function DealsManager({
       if (!res.ok) throw new Error(data.message || "Erreur d'exécution du lot.");
       toast.success(data.message || "Lot traité avec succès !");
       await fetchCampaigns();
-    } catch (err: any) {
-      toast.error(err.message || "Erreur d'action.");
+    } catch (err) {
+      toast.error((err instanceof Error && err.message) || "Erreur d'action.");
     } finally {
       setRunningActionId(null);
     }
@@ -121,8 +123,8 @@ export function DealsManager({
       if (!res.ok) throw new Error(data.message || "Erreur de pause.");
       toast.success("Job mis en pause.");
       await fetchCampaigns();
-    } catch (err: any) {
-      toast.error(err.message || "Erreur d'action.");
+    } catch (err) {
+      toast.error((err instanceof Error && err.message) || "Erreur d'action.");
     } finally {
       setRunningActionId(null);
     }
@@ -136,8 +138,8 @@ export function DealsManager({
       if (!res.ok) throw new Error(data.message || "Erreur de reprise.");
       toast.success("Job repris.");
       await fetchCampaigns();
-    } catch (err: any) {
-      toast.error(err.message || "Erreur d'action.");
+    } catch (err) {
+      toast.error((err instanceof Error && err.message) || "Erreur d'action.");
     } finally {
       setRunningActionId(null);
     }
@@ -274,17 +276,17 @@ export function DealsManager({
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full text-xs">
-          {[
+          {([
             { id: "ALL", label: `Toutes (${campaigns.length})` },
             { id: "ACTIVE", label: `Actives (${summary.activeJobs})` },
             { id: "DRAFT", label: `Brouillons (${draftCount})` },
             { id: "PAUSED", label: "En pause" },
             { id: "COMPLETED", label: "Terminées" },
-          ].map((tab) => (
+          ] satisfies { id: StatusFilter; label: string }[]).map((tab) => (
             <button
               key={tab.id}
               type="button"
-              onClick={() => setStatusFilter(tab.id as any)}
+              onClick={() => setStatusFilter(tab.id)}
               className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === tab.id
                   ? "bg-[var(--color-text)] text-[var(--color-surface)] font-bold shadow-xs"

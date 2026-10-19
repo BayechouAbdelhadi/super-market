@@ -46,6 +46,8 @@ export const LOYALTY_CONFIG = {
     tablePageSize: 5,
     // Accounts preloaded in back-office lists (customers, cashiers)
     backOfficeListLimit: 100,
+    // Recent operations shown on the customer's own loyalty page
+    selfRecentTransactions: 10,
     pageSizeOptions: [5, 10, 20, 50] as unknown as number[],
   },
   defaults: {
@@ -57,5 +59,11 @@ export const LOYALTY_CONFIG = {
   search: {
     debounceMs: 300,
     minQueryLength: 1,
+  },
+  analytics: {
+    // Days shown in the dashboard sales trend (today included)
+    trendDays: 7,
+    // Latest operations shown on the dashboard live feed
+    dashboardLiveOperations: 25,
   },
 } as const;

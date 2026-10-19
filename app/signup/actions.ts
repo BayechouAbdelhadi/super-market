@@ -16,6 +16,7 @@ import {
   PENDING_SIGNUP_COOKIE,
 } from '@/lib/email/otp-security'
 import { PasswordSchema } from '@/lib/auth/password-rules'
+import { authFailureMessage } from '@/lib/auth/auth-errors'
 import { RATE_LIMITS, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
 import { enforceRateLimits } from '@/lib/security/enforce'
 import { z } from 'zod'
@@ -218,7 +219,7 @@ export async function confirmSignUpOtp(formData: FormData) {
   });
 
   if (!created.ok && created.reason === 'AUTH_FAILED') {
-    redirect(`/signup/verify?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent(created.detail || "Erreur lors de la création du compte.")}`)
+    redirect(`/signup/verify?email=${encodeURIComponent(pendingData.email)}&message=${encodeURIComponent(authFailureMessage(created.code))}`)
   }
 
   if (!created.ok) {

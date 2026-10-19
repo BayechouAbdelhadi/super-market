@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -8,6 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/login/actions";
 import { ChevronLeft, ExternalLink, LogOut, Loader2, Activity, Sliders, Sparkles, QrCode } from "lucide-react";
+
+interface NavLink {
+  name: string;
+  href: string;
+  icon: ReactNode;
+  isLive?: boolean;
+}
 
 interface SidebarProps {
   role: "ADMIN" | "CASHIER" | "CUSTOMER";
@@ -31,7 +38,7 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
 
 
   // Navigation Links
-  const navLinks = isAdmin
+  const navLinks: NavLink[] = isAdmin
     ? [
         {
           name: "Accueil",
@@ -137,7 +144,7 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
           const isActive =
             pathname === link.href ||
             (link.href !== "/admin" && link.href !== "/cashier" && pathname.startsWith(link.href));
-          const isLive = Boolean((link as any).isLive);
+          const isLive = Boolean(link.isLive);
           return (
             <Link
               key={idx}

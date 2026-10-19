@@ -10,13 +10,13 @@ import { CustomerDetailView } from '@/components/loyalty/CustomerDetailView'
 import { AddPurchaseModal } from '@/components/loyalty/AddPurchaseModal'
 import { RedeemPointsModal } from '@/components/loyalty/RedeemPointsModal'
 import { NewCustomerModal } from '@/components/loyalty/NewCustomerModal'
-import { CustomerDetail } from '@/lib/loyalty/types'
+import { CustomerDetail, DirectoryUser } from '@/lib/loyalty/types'
 import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
 import { AppSettings } from '@/lib/settings/types'
 import { toast } from '@/components/ui/sonner'
 
 interface CustomerWorkspaceProps {
-  initialCustomers?: any[]
+  initialCustomers?: DirectoryUser[]
   title?: string
   subtitle?: string
   initialPage?: number
@@ -67,7 +67,7 @@ export function CustomerWorkspace({
       }
     : undefined;
   const [searchQuery, setSearchQuery] = useState(initialQuery)
-  const [createdCustomers, setCreatedCustomers] = useState<any[]>([])
+  const [createdCustomers, setCreatedCustomers] = useState<DirectoryUser[]>([])
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
   const [selectedCustomerDetail, setSelectedCustomerDetail] = useState<CustomerDetail | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
@@ -125,7 +125,7 @@ export function CustomerWorkspace({
     setIsNewCustomerOpen(false)
     toast.success(`Client ${newCustomer.full_name} créé avec succès !`)
 
-    const newListItem = {
+    const newListItem: DirectoryUser = {
       id: newCustomer.id,
       first_name: newCustomer.first_name,
       last_name: newCustomer.last_name,
@@ -143,7 +143,7 @@ export function CustomerWorkspace({
     setSelectedCustomerDetail(newCustomer)
   }
 
-  async function handleViewDetail(user: any) {
+  async function handleViewDetail(user: { id: string }) {
     setSelectedCustomerId(user.id)
     setLoadingDetail(true)
     try {
@@ -170,7 +170,7 @@ export function CustomerWorkspace({
     return allCustomers.filter((c) =>
       [c.first_name, c.last_name, c.email, c.phone_number]
         .filter(Boolean)
-        .some((field: string) => field.toLowerCase().includes(q))
+        .some((field) => field!.toLowerCase().includes(q))
     )
   }, [allCustomers, searchQuery])
 

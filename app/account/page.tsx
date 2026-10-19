@@ -3,11 +3,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { resolveUserRole } from '@/lib/auth/roles'
+import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
 import { logout } from '@/app/login/actions'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { StatusBadge } from '@/components/loyalty/StatusBadge'
-import { getAllApps } from '@/lib/account/apps'
 import {
   Sparkles,
   LogOut,
@@ -23,6 +23,8 @@ import {
 } from 'lucide-react'
 
 import { getAppSettings } from '@/lib/settings/service'
+import { SupabaseSelfProfileRepository } from '@/lib/account/adapters/supabase-self-profile-repository'
+import { resolveDisplayIdentity } from '@/lib/account/identity'
 
 export default async function AccountHubPage() {
   const supabase = await createClient()
@@ -39,31 +41,21 @@ export default async function AccountHubPage() {
   if (role === 'CASHIER') redirect('/cashier')
 
   // Fetch customer profile, loyalty info, and app settings
-  const [{ data: profile }, { data: customer }, settings] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('first_name, last_name, email, phone_number')
-      .eq('id', user.id)
-      .single(),
-    supabase
-      .from('customers')
-      .select('loyalty_points, status')
-      .eq('id', user.id)
-      .single(),
+  const selfProfile = new SupabaseSelfProfileRepository(supabase)
+  const [profile, loyalty, settings] = await Promise.all([
+    selfProfile.getProfile(user.id),
+    selfProfile.getLoyalty(user.id),
     getAppSettings(),
   ])
 
-  const firstName = profile?.first_name || user.user_metadata?.first_name || ''
-  const lastName = profile?.last_name || user.user_metadata?.last_name || ''
-  const fullName = `${firstName} ${lastName}`.trim() || user.email || 'Client'
-  const email = profile?.email || user.email || ''
-  const phone = profile?.phone_number || user.user_metadata?.phone_number || ''
-  const points = customer?.loyalty_points ?? 0
-  const tier = (customer?.status as 'BRONZE' | 'SILVER' | 'GOLD' | 'VIP') || 'BRONZE'
+  const identity = resolveDisplayIdentity(profile, user)
+  const { firstName, email, phone } = identity
+  const fullName = identity.fullName || user.email || 'Client'
+  const points = loyalty?.points ?? 0
+  const tier = loyalty?.tier ?? LOYALTY_CONFIG.defaults.tier
   const pointValueInEuro = settings.loyalty.pointValueInEuro
   const euroDiscount = (points * pointValueInEuro).toFixed(2)
 
-  const apps = getAllApps()
 
   return (
     <div className="h-full w-full overflow-y-auto bg-[var(--color-background)] text-[var(--color-text)] font-sans flex flex-col">

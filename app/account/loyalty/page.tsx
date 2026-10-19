@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { resolveUserRole } from '@/lib/auth/roles'
@@ -22,6 +21,8 @@ import {
 } from 'lucide-react'
 
 import { getAppSettings } from '@/lib/settings/service'
+import { SupabaseSelfProfileRepository } from '@/lib/account/adapters/supabase-self-profile-repository'
+import { resolveDisplayIdentity } from '@/lib/account/identity'
 
 export default async function CustomerLoyaltyAppPage() {
   const supabase = await createClient()
@@ -38,34 +39,19 @@ export default async function CustomerLoyaltyAppPage() {
   if (role === 'CASHIER') redirect('/cashier')
 
   // Fetch profile, customer loyalty status, recent transactions, and app settings
-  const [{ data: profile }, { data: customer }, { data: transactions }, settings] =
-    await Promise.all([
-      supabase
-        .from('profiles')
-        .select('first_name, last_name, email, phone_number')
-        .eq('id', user.id)
-        .single(),
-      supabase
-        .from('customers')
-        .select('loyalty_points, status')
-        .eq('id', user.id)
-        .single(),
-      supabase
-        .from('transactions')
-        .select('id, amount_total, points_earned, points_redeemed, created_at, cashier_id')
-        .eq('customer_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10),
-      getAppSettings(),
-    ])
+  const selfProfile = new SupabaseSelfProfileRepository(supabase)
+  const [profile, loyalty, transactions, settings] = await Promise.all([
+    selfProfile.getProfile(user.id),
+    selfProfile.getLoyalty(user.id),
+    selfProfile.listRecentTransactions(user.id, LOYALTY_CONFIG.pagination.selfRecentTransactions),
+    getAppSettings(),
+  ])
 
-  const firstName = profile?.first_name || user.user_metadata?.first_name || ''
-  const lastName = profile?.last_name || user.user_metadata?.last_name || ''
-  const fullName = `${firstName} ${lastName}`.trim() || user.email || 'Client'
-  const phone = profile?.phone_number || user.user_metadata?.phone_number || ''
-  const email = profile?.email || user.email || ''
-  const points = customer?.loyalty_points ?? 0
-  const tier = (customer?.status as 'BRONZE' | 'SILVER' | 'GOLD' | 'VIP') || 'BRONZE'
+  const identity = resolveDisplayIdentity(profile, user)
+  const { phone, email } = identity
+  const fullName = identity.fullName || user.email || 'Client'
+  const points = loyalty?.points ?? 0
+  const tier = loyalty?.tier ?? LOYALTY_CONFIG.defaults.tier
 
   // Dynamic conversion based on admin configured point value
   const pointValueInEuro = settings.loyalty.pointValueInEuro

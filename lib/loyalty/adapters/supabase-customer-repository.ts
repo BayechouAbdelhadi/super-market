@@ -11,6 +11,7 @@ import {
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { IUserAccountRepository } from "@/lib/auth/ports";
 import { SupabaseUserAccountRepository } from "@/lib/auth/adapters/supabase-user-account-repository";
+import { authFailureMessage } from "@/lib/auth/auth-errors";
 import { normalizePhone, calculateTier, toPurchaseRecord } from "../domain";
 import { LOYALTY_CONFIG } from "../config";
 
@@ -218,11 +219,7 @@ export class SupabaseCustomerRepository implements ICustomerRepository {
     if (!created.ok) {
       // Never surface raw auth-server messages to clients (logged by the account adapter)
       if (created.reason === "AUTH_FAILED") {
-        throw new Error(
-          created.detail?.toLowerCase().includes("already")
-            ? "Un compte existe déjà avec cette adresse email."
-            : "Erreur de création du compte client."
-        );
+        throw new Error(authFailureMessage(created.code));
       }
       throw new Error("Impossible de créer le profil client (email ou téléphone en double).");
     }

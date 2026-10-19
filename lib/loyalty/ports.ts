@@ -1,6 +1,7 @@
 import {
   CustomerDetail,
   CustomerSummary,
+  DirectoryUser,
   LoyaltyTier,
   Transaction,
   CreateCustomerInput,
@@ -70,6 +71,27 @@ export interface AnalyticsCustomerRow {
   status: string;
 }
 
+/** Transaction sums computed by the database: today (from a local midnight) and all time. */
+export interface TransactionTotals {
+  revenueToday: number;
+  salesToday: number;
+  pointsEarnedToday: number;
+  pointsRedeemedToday: number;
+  revenueTotal: number;
+  salesTotal: number;
+  pointsEarnedTotal: number;
+  pointsRedeemedTotal: number;
+}
+
+/** Database-aggregated totals for one local calendar day. */
+export interface DailySalesTotals {
+  date: string; // "YYYY-MM-DD"
+  revenue: number;
+  salesCount: number;
+  pointsEarned: number;
+  pointsRedeemed: number;
+}
+
 /**
  * Domain Port (Interface) for analytics reads. All methods are bounded
  * (date window, limit or exact database-side count).
@@ -77,8 +99,10 @@ export interface AnalyticsCustomerRow {
 export interface IAnalyticsRepository {
   /** Transactions (newest first), optionally from `since`, at most `limit` rows. */
   getRecentTransactions(options: { since?: Date; limit: number }): Promise<AnalyticsTransactionRow[]>;
-  /** Exact database-side count of all transactions. */
-  countTransactions(): Promise<number | null>;
+  /** Today's and all-time transaction sums, aggregated by the database. */
+  getTransactionTotals(todayStart: Date): Promise<TransactionTotals>;
+  /** Per-day sums (days in `timeZone`) of transactions since `since`, aggregated by the database. */
+  getDailySales(since: Date, timeZone: string): Promise<DailySalesTotals[]>;
   /** Exact database-side count of profiles with a role, optionally created from `since`. */
   countProfiles(role: string, since?: Date): Promise<number | null>;
   /** Profiles and loyalty records of the given users (for the live feed). */
@@ -92,5 +116,5 @@ export interface IDirectoryRepository {
   /** Most recently created customers with their loyalty record. */
   listRecentCustomers(limit: number): Promise<ProfileWithCustomerRow[]>;
   /** Most recently created profiles with the given role. */
-  listRecentProfilesByRole(role: UserRole, limit: number): Promise<Record<string, unknown>[]>;
+  listRecentProfilesByRole(role: UserRole, limit: number): Promise<DirectoryUser[]>;
 }

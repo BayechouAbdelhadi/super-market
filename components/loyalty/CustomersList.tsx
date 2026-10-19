@@ -1,7 +1,7 @@
 import { SupabaseDirectoryRepository } from '@/lib/loyalty/adapters/supabase-directory-repository'
 import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
 import { CustomerWorkspace } from '@/components/loyalty/CustomerWorkspace'
-import { ProfileWithCustomerRow } from '@/lib/loyalty/types'
+import { DirectoryUser, LoyaltyTier, ProfileWithCustomerRow } from '@/lib/loyalty/types'
 import { getAppSettings } from '@/lib/settings/service'
 
 const directory = new SupabaseDirectoryRepository()
@@ -27,12 +27,18 @@ export async function CustomersList({
     getAppSettings(),
   ])
 
-  const customers = profiles.map((p: ProfileWithCustomerRow) => {
+  const customers = profiles.map((p: ProfileWithCustomerRow): DirectoryUser => {
     const cust = Array.isArray(p.customers) ? p.customers[0] : p.customers;
     return {
-      ...p,
+      id: p.id,
+      first_name: p.first_name ?? null,
+      last_name: p.last_name ?? null,
+      email: p.email ?? null,
+      phone_number: p.phone_number ?? null,
+      role: p.role ?? null,
+      created_at: p.created_at,
       loyalty_points: cust?.loyalty_points ?? 0,
-      status: cust?.status ?? LOYALTY_CONFIG.defaults.tier,
+      status: (cust?.status as LoyaltyTier | undefined) ?? LOYALTY_CONFIG.defaults.tier,
     };
   });
 

@@ -20,9 +20,12 @@ export interface AccountProfile {
   role: AppRole;
 }
 
+/** Provider-agnostic reasons an auth account could not be created. */
+export type AuthFailureCode = "EMAIL_TAKEN" | "WEAK_PASSWORD" | "INVALID_EMAIL" | "RATE_LIMITED" | "UNKNOWN";
+
 export type CreateAccountResult =
   | { ok: true; id: string }
-  | { ok: false; reason: "AUTH_FAILED"; detail?: string }
+  | { ok: false; reason: "AUTH_FAILED"; code: AuthFailureCode }
   | { ok: false; reason: "PROFILE_FAILED" | "LOYALTY_RECORD_FAILED" };
 
 /**

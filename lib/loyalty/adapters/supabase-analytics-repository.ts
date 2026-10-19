@@ -2,9 +2,33 @@ import {
   AnalyticsCustomerRow,
   AnalyticsProfileRow,
   AnalyticsTransactionRow,
+  DailySalesTotals,
   IAnalyticsRepository,
+  TransactionTotals,
 } from "../ports";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+
+// Numeric and bigint columns may arrive as strings from PostgREST
+type DbNumber = number | string;
+
+interface TransactionTotalsRow {
+  revenue_today: DbNumber;
+  sales_today: DbNumber;
+  points_earned_today: DbNumber;
+  points_redeemed_today: DbNumber;
+  revenue_total: DbNumber;
+  sales_total: DbNumber;
+  points_earned_total: DbNumber;
+  points_redeemed_total: DbNumber;
+}
+
+interface DailySalesRow {
+  day: string;
+  revenue: DbNumber;
+  sales_count: DbNumber;
+  points_earned: DbNumber;
+  points_redeemed: DbNumber;
+}
 
 /**
  * Infrastructure Adapter implementing IAnalyticsRepository via Supabase (caller's RLS session).
@@ -28,10 +52,40 @@ export class SupabaseAnalyticsRepository implements IAnalyticsRepository {
     return (data as AnalyticsTransactionRow[] | null) || [];
   }
 
-  async countTransactions(): Promise<number | null> {
+  async getTransactionTotals(todayStart: Date): Promise<TransactionTotals> {
     const sb = await createServerClient();
-    const { count } = await sb.from("transactions").select("*", { count: "exact", head: true });
-    return count;
+    const { data, error } = await sb
+      .rpc("dashboard_transaction_totals", { p_today_start: todayStart.toISOString() })
+      .single<TransactionTotalsRow>();
+    if (error || !data) {
+      throw new Error(`dashboard_transaction_totals failed: ${error?.message ?? "no row"}`);
+    }
+    return {
+      revenueToday: Number(data.revenue_today),
+      salesToday: Number(data.sales_today),
+      pointsEarnedToday: Number(data.points_earned_today),
+      pointsRedeemedToday: Number(data.points_redeemed_today),
+      revenueTotal: Number(data.revenue_total),
+      salesTotal: Number(data.sales_total),
+      pointsEarnedTotal: Number(data.points_earned_total),
+      pointsRedeemedTotal: Number(data.points_redeemed_total),
+    };
+  }
+
+  async getDailySales(since: Date, timeZone: string): Promise<DailySalesTotals[]> {
+    const sb = await createServerClient();
+    const { data, error } = await sb
+      .rpc("dashboard_daily_sales", { p_since: since.toISOString(), p_tz: timeZone });
+    if (error) {
+      throw new Error(`dashboard_daily_sales failed: ${error.message}`);
+    }
+    return ((data as DailySalesRow[] | null) ?? []).map((row) => ({
+      date: row.day,
+      revenue: Number(row.revenue),
+      salesCount: Number(row.sales_count),
+      pointsEarned: Number(row.points_earned),
+      pointsRedeemed: Number(row.points_redeemed),
+    }));
   }
 
   async countProfiles(role: string, since?: Date): Promise<number | null> {

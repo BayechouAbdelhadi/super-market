@@ -73,6 +73,19 @@ export interface ProfileWithCustomerRow {
   customers?: { loyalty_points: number; status: string; updated_at?: string } | Array<{ loyalty_points: number; status: string; updated_at?: string }> | null;
 }
 
+/** A row of the back-office user lists (cashiers, or customers with their loyalty record). */
+export interface DirectoryUser {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone_number: string | null;
+  role: UserRole | null;
+  created_at?: string;
+  loyalty_points?: number;
+  status?: LoyaltyTier;
+}
+
 export interface CustomerDetail extends CustomerSummary {
   created_at: string;
   updated_at: string;

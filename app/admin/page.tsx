@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { getDashboardAnalytics } from "@/lib/loyalty/analytics-service";
 import { getAppSettings } from "@/lib/settings/service";
+import { SupabaseSelfProfileRepository } from "@/lib/account/adapters/supabase-self-profile-repository";
+import { resolveDisplayIdentity } from "@/lib/account/identity";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import {
@@ -12,8 +14,6 @@ import {
   Package,
   ArrowRight,
   ShieldCheck,
-  TrendingUp,
-  Receipt,
   Sparkles,
   Sliders,
 } from "lucide-react";
@@ -35,19 +35,14 @@ export default async function AdminHubPage() {
   const email = user?.email || "";
 
   // Fetch profile, quick analytics overview, and store settings
-  const [{ data: profile }, analytics, settings] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("first_name, last_name")
-      .eq("id", user?.id || "")
-      .single(),
+  const [profile, analytics, settings] = await Promise.all([
+    user ? new SupabaseSelfProfileRepository(supabase).getProfile(user.id) : null,
     getDashboardAnalytics().catch(() => null),
     getAppSettings(),
   ]);
 
-  const firstName = profile?.first_name || user?.user_metadata?.first_name || "";
-  const lastName = profile?.last_name || user?.user_metadata?.last_name || "";
-  const displayName = `${firstName} ${lastName}`.trim() || email || "Administrateur";
+  const identity = resolveDisplayIdentity(profile, user ?? {});
+  const displayName = identity.fullName || email || "Administrateur";
 
   const todayRevenue = analytics?.kpis.caToday ?? 0;
   const todayTransactions = analytics?.kpis.dailySalesCount ?? 0;
