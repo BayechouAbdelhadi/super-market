@@ -7,18 +7,10 @@ import { logout } from "@/app/(site)/login/actions";
 import { formatPhone, phoneHref } from "@/lib/store/contact";
 import type { OpeningStatus } from "@/lib/store/opening-hours";
 import { OpenStatus } from "@/components/public/home/OpenStatus";
+import { SiteMobileMenu } from "./SiteMobileMenu";
+import { SITE_NAV_LINKS, type AccountLink } from "./site-nav";
 
-const NAV_LINKS = [
-  { href: "/#rayons", label: "Nos rayons" },
-  { href: "/#infos", label: "Infos pratiques" },
-  { href: "/#fidelite", label: "Fidélité" },
-];
-
-/** Where the signed-in visitor's own space is (customer account, cashier or admin dashboard). */
-export interface AccountLink {
-  href: string;
-  label: string;
-}
+export type { AccountLink };
 
 interface SiteHeaderProps {
   storeName: string;
@@ -28,7 +20,10 @@ interface SiteHeaderProps {
   account: AccountLink | null;
 }
 
-/** Top bar of every public page, sticky inside the scroll container of app/(site)/layout.tsx (§ 25.4). */
+/**
+ * Top bar of every public page, sticky inside the scroll container of app/(site)/layout.tsx (§ 25.4).
+ * Below `lg` the section links move into a hamburger menu; on phones the account actions do too.
+ */
 export function SiteHeader({ storeName, phone, status, account }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface">
@@ -42,7 +37,7 @@ export function SiteHeader({ storeName, phone, status, account }: SiteHeaderProp
         </Link>
 
         <nav aria-label="Sections" className="hidden lg:flex items-center gap-1">
-          {NAV_LINKS.map((link) => (
+          {SITE_NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
@@ -62,21 +57,22 @@ export function SiteHeader({ storeName, phone, status, account }: SiteHeaderProp
           )}
           {account ? (
             <>
-              <Link href={account.href} className={buttonVariants({ variant: "primary" })}>
+              <Link href={account.href} className={cn(buttonVariants({ variant: "primary" }), "hidden sm:inline-flex")}>
                 {account.label}
               </Link>
-              <form action={logout}>
+              <form action={logout} className="hidden sm:block">
                 <button type="submit" aria-label="Se déconnecter" className={buttonVariants({ variant: "ghost", size: "icon" })}>
                   <LogOut />
                 </button>
               </form>
             </>
           ) : (
-            <Link href="/login" className={buttonVariants({ variant: "primary" })}>
+            <Link href="/login" className={cn(buttonVariants({ variant: "primary" }), "hidden sm:inline-flex")}>
               <span>Mon compte</span>
               <ArrowRight className="hidden sm:block" />
             </Link>
           )}
+          <SiteMobileMenu storeName={storeName} phone={phone} status={status} account={account} />
         </div>
       </div>
     </header>

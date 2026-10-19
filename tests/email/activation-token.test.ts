@@ -3,7 +3,7 @@ import { createSignedToken, verifyActivationToken, type AccountActivationPayload
 
 const NOW = 1_800_000_000_000;
 
-function token(overrides: Partial<AccountActivationPayload> & { type?: string } = {}) {
+function token(overrides: Omit<Partial<AccountActivationPayload>, "type"> & { type?: string } = {}) {
   return createSignedToken({
     email: "client@example.com",
     role: "CUSTOMER",
