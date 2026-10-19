@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 
 export default async function AdminPosPage() {
   const settings = await getAppSettings();
-  return <CashierDashboard standalone={false} settings={settings} />;
+  return <CashierDashboard settings={settings} />;
 }

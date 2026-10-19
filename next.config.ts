@@ -45,6 +45,15 @@ const nextConfig: NextConfig = {
   // LAN origins allowed to reach `next dev` (comma-separated), e.g. ALLOWED_DEV_ORIGINS=192.168.1.69
   allowedDevOrigins: (process.env.ALLOWED_DEV_ORIGINS ?? "192.168.1.69").split(",").map((o) => o.trim()).filter(Boolean),
   poweredByHeader: false,
+  // One canonical URL per page; old paths keep working (query strings are passed through)
+  async redirects() {
+    return [
+      { source: "/privacy", destination: "/politique-de-confidentialite", permanent: true },
+      { source: "/confidentialite", destination: "/politique-de-confidentialite", permanent: true },
+      { source: "/loyalty", destination: "/cashier/pos", permanent: true },
+      { source: "/cashier/loyalty", destination: "/cashier/pos", permanent: true },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

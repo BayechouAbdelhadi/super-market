@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 
 export default async function CashierPosPage() {
   const settings = await getAppSettings();
-  return <CashierDashboard standalone={false} settings={settings} />;
+  return <CashierDashboard settings={settings} />;
 }

@@ -14,16 +14,24 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   if (!auth.authorized) return auth.response;
 
   const { id } = await params;
-  const campaign = await defaultMarketingRepo.getById(id);
+  try {
+    const campaign = await defaultMarketingRepo.getById(id);
 
-  if (!campaign) {
+    if (!campaign) {
+      return NextResponse.json(
+        { error: "NOT_FOUND", message: "Campagne introuvable." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ campaign });
+  } catch (err) {
+    console.error("[GET /api/admin/deals/[id]] Error:", err);
     return NextResponse.json(
-      { error: "NOT_FOUND", message: "Campagne introuvable." },
-      { status: 404 }
+      { error: "INTERNAL_ERROR", message: "Erreur lors de l'accès à la campagne." },
+      { status: 500 }
     );
   }
-
-  return NextResponse.json({ campaign });
 }
 
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
@@ -31,17 +39,25 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
   if (!auth.authorized) return auth.response;
 
   const { id } = await params;
-  const deleted = await deleteCampaign(id);
+  try {
+    const deleted = await deleteCampaign(id);
 
-  if (!deleted) {
+    if (!deleted) {
+      return NextResponse.json(
+        { error: "NOT_FOUND", message: "Campagne introuvable ou déjà supprimée." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Campagne supprimée avec succès.",
+    });
+  } catch (err) {
+    console.error("[DELETE /api/admin/deals/[id]] Error:", err);
     return NextResponse.json(
-      { error: "NOT_FOUND", message: "Campagne introuvable ou déjà supprimée." },
-      { status: 404 }
+      { error: "INTERNAL_ERROR", message: "Erreur lors de l'accès à la campagne." },
+      { status: 500 }
     );
   }
-
-  return NextResponse.json({
-    success: true,
-    message: "Campagne supprimée avec succès.",
-  });
 }

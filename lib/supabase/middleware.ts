@@ -49,7 +49,6 @@ export async function updateSession(request: NextRequest) {
   const isAccountRoute = request.nextUrl.pathname === '/account' || request.nextUrl.pathname.startsWith('/account/')
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
   const isCashierRoute = request.nextUrl.pathname.startsWith('/cashier')
-  const isLoyaltyRoute = request.nextUrl.pathname.startsWith('/loyalty')
   const isCustomersRoute = request.nextUrl.pathname.startsWith('/customers')
   const isApiAdminRoute = request.nextUrl.pathname.startsWith('/api/admin')
   const isApiLoyaltyRoute = request.nextUrl.pathname.startsWith('/api/loyalty')
@@ -62,7 +61,7 @@ export async function updateSession(request: NextRequest) {
     )
   }
 
-  const isStaffRoute = isAdminRoute || isCashierRoute || isLoyaltyRoute || isCustomersRoute
+  const isStaffRoute = isAdminRoute || isCashierRoute || isCustomersRoute
 
   if (!user && (isStaffRoute || isAccountRoute)) {
     console.log(`[Middleware] Blocked unauthenticated access to ${request.nextUrl.pathname} -> Redirecting to /login`)

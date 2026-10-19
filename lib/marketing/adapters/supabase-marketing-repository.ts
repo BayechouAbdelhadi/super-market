@@ -10,23 +10,40 @@ import {
 } from "../types";
 import { LoyaltyTier } from "@/lib/loyalty/types";
 import { deduplicateRecipients } from "../utils";
-import { defaultMarketingRepo as jsonFallbackRepo } from "./json-marketing-repository";
 
-/** PostgREST returns at most 1000 rows per request: read full sets page by page. */
+/** PostgREST returns at most 1000 rows per request: read and write large sets in chunks of this size. */
 const PAGE_SIZE = 1000;
 
+/** Postgres unique violation (e.g. an email that already unsubscribed). */
+const UNIQUE_VIOLATION = "23505";
+
+/** Throws a descriptive error for a failed Supabase call, so callers never mistake a failure for success. */
+function check(error: { message: string; code?: string } | null, operation: string): void {
+  if (error) {
+    throw new Error(`[SupabaseMarketingRepo] ${operation} failed: ${error.message}${error.code ? ` (${error.code})` : ""}`);
+  }
+}
+
+function chunks<T>(items: T[], size = PAGE_SIZE): T[][] {
+  const result: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    result.push(items.slice(i, i + size));
+  }
+  return result;
+}
+
 async function selectAllPages<T>(
-  fetchPage: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>
-): Promise<{ data: T[] | null; error: unknown }> {
+  fetchPage: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string; code?: string } | null }>,
+  operation: string
+): Promise<T[]> {
   const all: T[] = [];
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data, error } = await fetchPage(from, from + PAGE_SIZE - 1);
-    if (error || !data) {
-      return { data: null, error };
-    }
-    all.push(...data);
-    if (data.length < PAGE_SIZE) {
-      return { data: all, error: null };
+    check(error, operation);
+    const page = data ?? [];
+    all.push(...page);
+    if (page.length < PAGE_SIZE) {
+      return all;
     }
   }
 }
@@ -137,410 +154,176 @@ function mapRecipientToDomain(row: SupabaseRecipientRow): CampaignRecipient {
   };
 }
 
+/**
+ * Infrastructure Adapter implementing IMarketingCampaignRepository with Supabase (service role).
+ * Supabase is the only store: every failed call throws, nothing is silently written elsewhere.
+ */
 export class SupabaseMarketingRepository implements IMarketingCampaignRepository {
-  private hasDedicatedTable: boolean | null = null;
-
-  /**
-   * Detects whether dedicated `marketing_campaigns` table exists in Supabase.
-   */
-  private async isDedicatedTableAvailable(): Promise<boolean> {
-    if (this.hasDedicatedTable !== null) {
-      return this.hasDedicatedTable;
-    }
-
-    try {
-      const supabase = createAdminClient();
-      const { error } = await supabase
-        .from("marketing_campaigns")
-        .select("id")
-        .limit(1);
-
-      if (error && (error.code === "PGRST205" || error.code === "42P01")) {
-        this.hasDedicatedTable = false;
-      } else {
-        this.hasDedicatedTable = true;
-      }
-    } catch {
-      this.hasDedicatedTable = false;
-    }
-
-    return this.hasDedicatedTable;
-  }
-
-  // =========================================================================
-  // Fallback storage using Supabase app_settings table (id: 'marketing_campaigns')
-  // =========================================================================
-
-  private async getFromAppSettings(): Promise<MarketingCampaign[]> {
-    try {
-      const supabase = createAdminClient();
-      const { data, error } = await supabase
-        .from("app_settings")
-        .select("settings_json")
-        .eq("id", "marketing_campaigns")
-        .maybeSingle();
-
-      if (!error && data?.settings_json?.campaigns) {
-        return data.settings_json.campaigns as MarketingCampaign[];
-      }
-    } catch (err) {
-      console.warn("[SupabaseMarketingRepo] Failed reading from app_settings fallback:", err);
-    }
-
-    return await jsonFallbackRepo.getAll();
-  }
-
-  private async saveToAppSettings(campaigns: MarketingCampaign[]): Promise<void> {
-    try {
-      const supabase = createAdminClient();
-      await supabase.from("app_settings").upsert({
-        id: "marketing_campaigns",
-        settings_json: { campaigns },
-        updated_at: new Date().toISOString(),
-        updated_by: "system",
-      });
-    } catch (err) {
-      console.warn("[SupabaseMarketingRepo] Failed writing to app_settings fallback:", err);
-    }
-  }
-
-  // =========================================================================
-  // IMarketingCampaignRepository Implementation
-  // =========================================================================
-
   async getAll(): Promise<MarketingCampaign[]> {
-    const isAvailable = await this.isDedicatedTableAvailable();
-
-    if (isAvailable) {
-      try {
-        const supabase = createAdminClient();
-        const { data, error } = await selectAllPages<SupabaseCampaignRow>((from, to) =>
-          supabase
-            .from("marketing_campaigns")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .order("id", { ascending: true })
-            .range(from, to)
-        );
-
-        if (!error && data) {
-          return (data as SupabaseCampaignRow[]).map(mapToDomain);
-        }
-      } catch (err) {
-        console.error("[SupabaseMarketingRepo] Error in getAll():", err);
-      }
-    }
-
-    // Fallback via Supabase app_settings
-    return await this.getFromAppSettings();
+    const supabase = createAdminClient();
+    const rows = await selectAllPages<SupabaseCampaignRow>(
+      (from, to) =>
+        supabase
+          .from("marketing_campaigns")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to),
+      "getAll"
+    );
+    return rows.map(mapToDomain);
   }
 
   async getById(id: string): Promise<MarketingCampaign | null> {
-    const isAvailable = await this.isDedicatedTableAvailable();
+    const supabase = createAdminClient();
+    const { data, error } = await supabase.from("marketing_campaigns").select("*").eq("id", id).maybeSingle();
+    check(error, "getById");
+    if (!data) return null;
 
-    if (isAvailable) {
-      try {
-        const supabase = createAdminClient();
-        const { data, error } = await supabase
-          .from("marketing_campaigns")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle();
-
-        if (!error && data) {
-          const campaign = mapToDomain(data as SupabaseCampaignRow);
-
-          // Fetch relational recipients if available
-          try {
-            const { data: recData, error: recError } = await selectAllPages<SupabaseRecipientRow>((from, to) =>
-              supabase
-                .from("marketing_campaign_recipients")
-                .select("*")
-                .eq("campaign_id", id)
-                .order("id", { ascending: true })
-                .range(from, to)
-            );
-
-            if (!recError && recData && recData.length > 0) {
-              campaign.recipients = deduplicateRecipients(
-                (recData as SupabaseRecipientRow[]).map(mapRecipientToDomain)
-              );
-            } else {
-              campaign.recipients = deduplicateRecipients(campaign.recipients || []);
-            }
-          } catch {
-            campaign.recipients = deduplicateRecipients(campaign.recipients || []);
-          }
-
-          return campaign;
-        }
-      } catch (err) {
-        console.error("[SupabaseMarketingRepo] Error in getById():", err);
-      }
-    }
-
-    // Fallback
-    const fromJson = await jsonFallbackRepo.getById(id);
-    if (fromJson) return fromJson;
-    const all = await this.getFromAppSettings();
-    const found = all.find((c) => c.id === id);
-    if (found) {
-      return {
-        ...found,
-        recipients: deduplicateRecipients(found.recipients || []),
-      };
-    }
-    return null;
+    const campaign = mapToDomain(data as SupabaseCampaignRow);
+    const recipients = await this.getRecipientRows(id);
+    // The relational table is the source of truth; the JSON column covers campaigns saved before it existed
+    campaign.recipients = deduplicateRecipients(recipients.length > 0 ? recipients : campaign.recipients || []);
+    return campaign;
   }
 
   async save(campaign: MarketingCampaign): Promise<MarketingCampaign> {
-    const cleanRecipients = deduplicateRecipients(campaign.recipients || []);
-    campaign.recipients = cleanRecipients;
-    const isAvailable = await this.isDedicatedTableAvailable();
+    campaign.recipients = deduplicateRecipients(campaign.recipients || []);
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("marketing_campaigns").upsert(mapToDbRow(campaign));
+    check(error, "save");
 
-    if (isAvailable) {
-      try {
-        const supabase = createAdminClient();
-        const row = mapToDbRow(campaign);
-
-        const { error } = await supabase.from("marketing_campaigns").upsert(row);
-
-        if (!error) {
-          if (cleanRecipients.length > 0) {
-            await this.saveRecipients(campaign.id, cleanRecipients);
-          }
-          // Also sync to fallback store
-          const current = await this.getFromAppSettings();
-          const filtered = current.filter((c) => c.id !== campaign.id);
-          await this.saveToAppSettings([campaign, ...filtered]);
-          await jsonFallbackRepo.save(campaign);
-          return campaign;
-        }
-      } catch (err) {
-        console.error("[SupabaseMarketingRepo] Error in save():", err);
-      }
+    if (campaign.recipients.length > 0) {
+      await this.saveRecipients(campaign.id, campaign.recipients);
     }
-
-    // Fallback: save to Supabase app_settings and local JSON
-    const current = await this.getFromAppSettings();
-    const filtered = current.filter((c) => c.id !== campaign.id);
-    const updatedList = [campaign, ...filtered];
-
-    await this.saveToAppSettings(updatedList);
-    await jsonFallbackRepo.save(campaign);
-
     return campaign;
   }
 
   async delete(id: string): Promise<boolean> {
-    const isAvailable = await this.isDedicatedTableAvailable();
-
-    if (isAvailable) {
-      try {
-        const supabase = createAdminClient();
-        await supabase.from("marketing_campaign_recipients").delete().eq("campaign_id", id);
-        const { error } = await supabase.from("marketing_campaigns").delete().eq("id", id);
-        if (!error) {
-          const current = await this.getFromAppSettings();
-          await this.saveToAppSettings(current.filter((c) => c.id !== id));
-          await jsonFallbackRepo.delete(id);
-          return true;
-        }
-      } catch (err) {
-        console.error("[SupabaseMarketingRepo] Error in delete():", err);
-      }
-    }
-
-    // Fallback
-    const current = await this.getFromAppSettings();
-    const updatedList = current.filter((c) => c.id !== id);
-    await this.saveToAppSettings(updatedList);
-    await jsonFallbackRepo.delete(id);
+    const supabase = createAdminClient();
+    // Recipients are removed by ON DELETE CASCADE
+    const { error } = await supabase.from("marketing_campaigns").delete().eq("id", id);
+    check(error, "delete");
     return true;
   }
 
   async getRecipients(campaignId: string): Promise<CampaignRecipient[]> {
-    const isAvailable = await this.isDedicatedTableAvailable();
-
-    if (isAvailable) {
-      try {
-        const supabase = createAdminClient();
-        const { data, error } = await selectAllPages<SupabaseRecipientRow>((from, to) =>
-          supabase
-            .from("marketing_campaign_recipients")
-            .select("*")
-            .eq("campaign_id", campaignId)
-            .order("id", { ascending: true })
-            .range(from, to)
-        );
-
-        if (!error && data && data.length > 0) {
-          return deduplicateRecipients(
-            (data as SupabaseRecipientRow[]).map(mapRecipientToDomain)
-          );
-        }
-      } catch (err) {
-        console.warn("[SupabaseMarketingRepo] Recipient fetch fallback to campaign json:", err);
-      }
+    const recipients = await this.getRecipientRows(campaignId);
+    if (recipients.length > 0) {
+      return deduplicateRecipients(recipients);
     }
-
-    const fromJsonRecs = await jsonFallbackRepo.getRecipients(campaignId);
-    if (fromJsonRecs && fromJsonRecs.length > 0) {
-      return deduplicateRecipients(fromJsonRecs);
-    }
-
     const campaign = await this.getById(campaignId);
     return deduplicateRecipients(campaign?.recipients || []);
   }
 
+  /**
+   * Upserts the recipient rows, then removes customers no longer targeted. Never deletes first,
+   * so a failure part-way leaves the previous recipients (and their SENT statuses) in place.
+   */
   async saveRecipients(campaignId: string, recipients: CampaignRecipient[]): Promise<void> {
     const uniqueRecipients = deduplicateRecipients(recipients);
-    const isAvailable = await this.isDedicatedTableAvailable();
+    const supabase = createAdminClient();
 
-    if (isAvailable) {
-      try {
-        const supabase = createAdminClient();
-        const rows: SupabaseRecipientRow[] = uniqueRecipients.map((r) => ({
-          campaign_id: campaignId,
-          customer_id: r.customerId,
-          email: r.email,
-          full_name: r.fullName,
-          tier: r.tier,
-          status: r.status,
-          sent_at: r.sentAt || null,
-          error: r.error || null,
-        }));
+    const rows: SupabaseRecipientRow[] = uniqueRecipients.map((r) => ({
+      campaign_id: campaignId,
+      customer_id: r.customerId,
+      email: r.email,
+      full_name: r.fullName,
+      tier: r.tier,
+      status: r.status,
+      sent_at: r.sentAt || null,
+      error: r.error || null,
+    }));
 
-        // Clean any existing records for this campaign before inserting, guaranteeing zero duplicates
-        await supabase
+    for (const chunk of chunks(rows)) {
+      const { error } = await supabase
+        .from("marketing_campaign_recipients")
+        .upsert(chunk, { onConflict: "campaign_id,customer_id" });
+      check(error, "saveRecipients (upsert)");
+    }
+
+    const kept = new Set(uniqueRecipients.map((r) => r.customerId));
+    const existing = await selectAllPages<{ id: string; customer_id: string }>(
+      (from, to) =>
+        supabase
           .from("marketing_campaign_recipients")
-          .delete()
-          .eq("campaign_id", campaignId);
-
-        if (rows.length > 0) {
-          await supabase.from("marketing_campaign_recipients").insert(rows);
-        }
-
-        // Also update JSON on the parent campaign
-        await supabase
-          .from("marketing_campaigns")
-          .update({
-            recipients: uniqueRecipients,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", campaignId);
-        return;
-      } catch (err) {
-        console.warn("[SupabaseMarketingRepo] Error in saveRecipients, fallback to app_settings:", err);
-      }
+          .select("id, customer_id")
+          .eq("campaign_id", campaignId)
+          .order("id", { ascending: true })
+          .range(from, to),
+      "saveRecipients (list)"
+    );
+    const staleIds = existing.filter((r) => !kept.has(r.customer_id)).map((r) => r.id);
+    for (const chunk of chunks(staleIds)) {
+      const { error } = await supabase.from("marketing_campaign_recipients").delete().in("id", chunk);
+      check(error, "saveRecipients (remove stale)");
     }
 
-    // Fallback: save without recursive this.save()!
-    await jsonFallbackRepo.saveRecipients(campaignId, uniqueRecipients);
-    const current = await this.getFromAppSettings();
-    const updated = current.map((c) => (c.id === campaignId ? { ...c, recipients: uniqueRecipients } : c));
-    await this.saveToAppSettings(updated);
-  }
-
-  private hasUnsubscribesTable: boolean | null = null;
-
-  private async isUnsubscribesTableAvailable(): Promise<boolean> {
-    if (this.hasUnsubscribesTable !== null) {
-      return this.hasUnsubscribesTable;
-    }
-    try {
-      const supabase = createAdminClient();
-      const { error } = await supabase.from("marketing_unsubscribes").select("id").limit(1);
-      if (error && (error.code === "PGRST205" || error.code === "42P01")) {
-        this.hasUnsubscribesTable = false;
-      } else {
-        this.hasUnsubscribesTable = true;
-      }
-    } catch {
-      this.hasUnsubscribesTable = false;
-    }
-    return this.hasUnsubscribesTable;
+    // Keep the campaign's JSON copy in sync (read by campaigns saved before the relational table)
+    const { error } = await supabase
+      .from("marketing_campaigns")
+      .update({ recipients: uniqueRecipients, updated_at: new Date().toISOString() })
+      .eq("id", campaignId);
+    check(error, "saveRecipients (campaign copy)");
   }
 
   async getUnsubscribedEmails(): Promise<string[]> {
-    const isAvailable = await this.isUnsubscribesTableAvailable();
-    if (isAvailable) {
-      try {
-        const supabase = createAdminClient();
-        const { data, error } = await selectAllPages<{ email: string }>((from, to) =>
-          supabase
-            .from("marketing_unsubscribes")
-            .select("email")
-            .order("email", { ascending: true })
-            .range(from, to)
-        );
-        if (!error && data) {
-          const tableEmails = data.map((r) => r.email.toLowerCase().trim());
-          const jsonEmails = await jsonFallbackRepo.getUnsubscribedEmails();
-          return Array.from(new Set([...tableEmails, ...jsonEmails]));
-        }
-      } catch (err) {
-        console.warn("[SupabaseMarketingRepo] Error fetching unsubscribes from table:", err);
-      }
-    }
-    return await jsonFallbackRepo.getUnsubscribedEmails();
+    const supabase = createAdminClient();
+    const rows = await selectAllPages<{ email: string }>(
+      (from, to) =>
+        supabase.from("marketing_unsubscribes").select("email").order("email", { ascending: true }).range(from, to),
+      "getUnsubscribedEmails"
+    );
+    return Array.from(new Set(rows.map((r) => r.email.toLowerCase().trim())));
   }
 
   async isUnsubscribed(email: string): Promise<boolean> {
     if (!email) return false;
-    const cleanEmail = email.toLowerCase().trim();
-    const isAvailable = await this.isUnsubscribesTableAvailable();
-    if (isAvailable) {
-      try {
-        const supabase = createAdminClient();
-        const { data, error } = await supabase
-          .from("marketing_unsubscribes")
-          .select("id")
-          .eq("email", cleanEmail)
-          .maybeSingle();
-        if (!error && data) {
-          return true;
-        }
-      } catch (err) {
-        console.warn("[SupabaseMarketingRepo] Error checking unsubscribe in table:", err);
-      }
-    }
-    return await jsonFallbackRepo.isUnsubscribed(cleanEmail);
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("marketing_unsubscribes")
+      .select("id")
+      .eq("email", email.toLowerCase().trim())
+      .limit(1);
+    check(error, "isUnsubscribed");
+    return (data ?? []).length > 0;
   }
 
   async unsubscribe(email: string, reason?: string, customerId?: string): Promise<boolean> {
     if (!email) return false;
-    const cleanEmail = email.toLowerCase().trim();
-    const isAvailable = await this.isUnsubscribesTableAvailable();
-    if (isAvailable) {
-      try {
-        const supabase = createAdminClient();
-        await supabase.from("marketing_unsubscribes").upsert({
-          email: cleanEmail,
-          reason: reason || null,
-          customer_id: customerId || null,
-          created_at: new Date().toISOString(),
-        });
-      } catch (err) {
-        console.warn("[SupabaseMarketingRepo] Error saving unsubscribe to table:", err);
-      }
-    }
-    return await jsonFallbackRepo.unsubscribe(cleanEmail, reason, customerId);
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("marketing_unsubscribes").insert({
+      email: email.toLowerCase().trim(),
+      reason: reason || null,
+      customer_id: customerId || null,
+    });
+    // Already unsubscribed: the unique index on lower(email) rejects the duplicate
+    if (error?.code === UNIQUE_VIOLATION) return true;
+    check(error, "unsubscribe");
+    return true;
   }
 
   async resubscribe(email: string): Promise<boolean> {
     if (!email) return false;
-    const cleanEmail = email.toLowerCase().trim();
-    const isAvailable = await this.isUnsubscribesTableAvailable();
-    if (isAvailable) {
-      try {
-        const supabase = createAdminClient();
-        await supabase.from("marketing_unsubscribes").delete().eq("email", cleanEmail);
-      } catch (err) {
-        console.warn("[SupabaseMarketingRepo] Error deleting unsubscribe:", err);
-      }
-    }
-    return await jsonFallbackRepo.resubscribe(cleanEmail);
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("marketing_unsubscribes").delete().eq("email", email.toLowerCase().trim());
+    check(error, "resubscribe");
+    return true;
+  }
+
+  private async getRecipientRows(campaignId: string): Promise<CampaignRecipient[]> {
+    const supabase = createAdminClient();
+    const rows = await selectAllPages<SupabaseRecipientRow>(
+      (from, to) =>
+        supabase
+          .from("marketing_campaign_recipients")
+          .select("*")
+          .eq("campaign_id", campaignId)
+          .order("id", { ascending: true })
+          .range(from, to),
+      "getRecipients"
+    );
+    return rows.map(mapRecipientToDomain);
   }
 }
 

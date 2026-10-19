@@ -34,13 +34,9 @@ export async function getTargetCustomersByTiers(
   repo: IMarketingCampaignRepository = defaultMarketingRepo,
   audienceRepo: ICampaignAudienceRepository = defaultAudienceRepo
 ): Promise<CampaignRecipient[]> {
-  let unsubscribedSet = new Set<string>();
-  try {
-    const unsubscribed = await repo.getUnsubscribedEmails();
-    unsubscribedSet = new Set(unsubscribed.map((e) => e.trim().toLowerCase()));
-  } catch {
-    // Keep empty set on error
-  }
+  // No fallback on failure: an audience built without the opt-out list would email people who unsubscribed
+  const unsubscribed = await repo.getUnsubscribedEmails();
+  const unsubscribedSet = new Set(unsubscribed.map((e) => e.trim().toLowerCase()));
 
   const data = await audienceRepo.listCustomersWithEmail();
   const recipients: CampaignRecipient[] = [];
@@ -349,13 +345,9 @@ export async function processCampaignBatch(
   let failedInBatch = 0;
   const processedBatchEmails = new Set<string>();
 
-  let unsubscribedSet = new Set<string>();
-  try {
-    const unsubscribed = await repo.getUnsubscribedEmails();
-    unsubscribedSet = new Set(unsubscribed.map((e) => e.trim().toLowerCase()));
-  } catch {
-    // Keep empty set on error
-  }
+  // No fallback on failure: an audience built without the opt-out list would email people who unsubscribed
+  const unsubscribed = await repo.getUnsubscribedEmails();
+  const unsubscribedSet = new Set(unsubscribed.map((e) => e.trim().toLowerCase()));
 
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||

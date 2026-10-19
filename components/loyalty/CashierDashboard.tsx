@@ -2,8 +2,7 @@
 
 import React, { useEffect, useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { CustomerDetail, CustomerSummary, User } from "@/lib/loyalty/types";
-import { CashierHeader } from "./CashierHeader";
+import { CustomerDetail, CustomerSummary } from "@/lib/loyalty/types";
 import { SearchBar } from "./SearchBar";
 import { CustomerCard } from "./CustomerCard";
 import { CustomerDetailView } from "./CustomerDetailView";
@@ -20,11 +19,10 @@ import { AppSettings } from "@/lib/settings/types";
 import { toast } from "@/components/ui/sonner";
 
 export interface CashierDashboardProps {
-  standalone?: boolean;
   settings?: AppSettings;
 }
 
-export function CashierDashboard({ standalone = false, settings: propSettings }: CashierDashboardProps) {
+export function CashierDashboard({ settings: propSettings }: CashierDashboardProps) {
   const [currentSettings, setCurrentSettings] = useState<AppSettings | undefined>(propSettings);
 
   // Sync state if propSettings changes
@@ -61,7 +59,6 @@ export function CashierDashboard({ standalone = false, settings: propSettings }:
         vip: currentSettings.loyalty.tierVipMinPoints,
       }
     : undefined;
-  const [cashier, setCashier] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, LOYALTY_CONFIG.search.debounceMs);
   const [customers, setCustomers] = useState<CustomerSummary[]>([]);
@@ -170,22 +167,6 @@ export function CashierDashboard({ standalone = false, settings: propSettings }:
       clearRedirectTimers();
       if (completedTxAlertTimerRef.current) clearTimeout(completedTxAlertTimerRef.current);
     };
-  }, []);
-
-  // Load cashier info on mount
-  useEffect(() => {
-    async function loadCashier() {
-      try {
-        const res = await fetch("/api/loyalty/cashier/me");
-        const data = await res.json();
-        if (data.cashier) {
-          setCashier(data.cashier);
-        }
-      } catch (err) {
-        console.error("Erreur chargement caissier :", err);
-      }
-    }
-    loadCashier();
   }, []);
 
   // Search effect: executes ONLY when debouncedSearchQuery changes with AbortController
@@ -505,20 +486,5 @@ export function CashierDashboard({ standalone = false, settings: propSettings }:
     </div>
   );
 
-  if (!standalone) {
-    return content;
-  }
-
-  return (
-    <div className="flex flex-col h-full bg-[var(--color-background)]">
-      <CashierHeader
-        cashier={cashier}
-        euroToPointsRatio={euroRatio}
-        storeName={currentSettings?.store?.storeName}
-      />
-      <main className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
-        {content}
-      </main>
-    </div>
-  );
+  return content;
 }

@@ -25,7 +25,9 @@ function UnsubscribeContent() {
   const [error, setError] = useState<string | null>(
     linkError === "invalid_link"
       ? "Ce lien n'est pas valide. Saisissez votre adresse ci-dessous pour recevoir un lien de confirmation."
-      : null
+      : linkError === "unavailable"
+        ? "Service temporairement indisponible. Réessayez dans quelques minutes."
+        : null
   );
 
   // Signed link from an email: confirm the unsubscribe on mount

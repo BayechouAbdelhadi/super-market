@@ -54,6 +54,8 @@ function preferencesPageUrl(req: NextRequest, email: string, status: string, sig
   );
 }
 
+const UNAVAILABLE_MESSAGE = "Service temporairement indisponible. Réessayez dans quelques minutes.";
+
 /**
  * GET /api/marketing/unsubscribe?email=...&sig=...
  * One-click links from emails (signed), and signed status checks.
@@ -88,26 +90,34 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/unsubscribe?error=invalid_link", req.url));
   }
 
-  if (action === "status") {
-    const unsubscribed = await isCustomerEmailUnsubscribed(email);
-    return NextResponse.json({ success: true, unsubscribed, email });
-  }
-
-  if (action === "resubscribe") {
-    await resubscribeCustomerEmail(email);
-    if (wantsJson) {
-      return NextResponse.json({ success: true, resubscribed: true, email });
+  try {
+    if (action === "status") {
+      const unsubscribed = await isCustomerEmailUnsubscribed(email);
+      return NextResponse.json({ success: true, unsubscribed, email });
     }
-    return NextResponse.redirect(preferencesPageUrl(req, email, "resubscribed", sig));
-  }
 
-  // Default: unsubscribe
-  await unsubscribeCustomerEmail(email, "Lien e-mail en pied de page");
+    if (action === "resubscribe") {
+      await resubscribeCustomerEmail(email);
+      if (wantsJson) {
+        return NextResponse.json({ success: true, resubscribed: true, email });
+      }
+      return NextResponse.redirect(preferencesPageUrl(req, email, "resubscribed", sig));
+    }
 
-  if (wantsJson) {
-    return NextResponse.json({ success: true, unsubscribed: true, email });
+    // Default: unsubscribe
+    await unsubscribeCustomerEmail(email, "Lien e-mail en pied de page");
+
+    if (wantsJson) {
+      return NextResponse.json({ success: true, unsubscribed: true, email });
+    }
+    return NextResponse.redirect(preferencesPageUrl(req, email, "unsubscribed", sig));
+  } catch (err) {
+    console.error("[GET /api/marketing/unsubscribe] Error:", err);
+    if (wantsJson) {
+      return NextResponse.json({ error: UNAVAILABLE_MESSAGE }, { status: 503 });
+    }
+    return NextResponse.redirect(new URL("/unsubscribe?error=unavailable", req.url));
   }
-  return NextResponse.redirect(preferencesPageUrl(req, email, "unsubscribed", sig));
 }
 
 /**

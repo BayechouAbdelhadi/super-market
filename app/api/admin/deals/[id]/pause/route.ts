@@ -13,18 +13,26 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   if (!auth.authorized) return auth.response;
 
   const { id } = await params;
-  const campaign = await pauseCampaign(id);
+  try {
+    const campaign = await pauseCampaign(id);
 
-  if (!campaign) {
+    if (!campaign) {
+      return NextResponse.json(
+        { error: "NOT_FOUND", message: "Campagne introuvable." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      campaign,
+      message: "Campagne mise en pause avec succès.",
+    });
+  } catch (err) {
+    console.error("[POST /api/admin/deals/[id]/pause] Error:", err);
     return NextResponse.json(
-      { error: "NOT_FOUND", message: "Campagne introuvable." },
-      { status: 404 }
+      { error: "INTERNAL_ERROR", message: "Erreur lors de l'accès à la campagne." },
+      { status: 500 }
     );
   }
-
-  return NextResponse.json({
-    success: true,
-    campaign,
-    message: "Campagne mise en pause avec succès.",
-  });
 }

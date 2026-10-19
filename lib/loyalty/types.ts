@@ -1,15 +1,5 @@
 export type UserRole = "ADMIN" | "CASHIER" | "CUSTOMER";
 
-export interface User {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string | null;
-  role: UserRole;
-  created_at: string;
-}
-
 export type LoyaltyTier = "BRONZE" | "SILVER" | "GOLD" | "VIP";
 
 export interface CustomerSummary {
