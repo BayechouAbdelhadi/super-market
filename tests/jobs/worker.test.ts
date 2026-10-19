@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { runDueCampaigns } from "@/lib/jobs/worker";
-import { shouldRunJobs } from "@/lib/jobs/start";
+import { isPostgresUrl, shouldRunJobs } from "@/lib/jobs/start";
 import { JOBS_CONFIG } from "@/lib/jobs/config";
 import type { ProcessBatchResult } from "@/lib/marketing/types";
 
@@ -42,5 +42,18 @@ describe("shouldRunJobs", () => {
   it("does not run in development unless JOBS_IN_DEV=true", () => {
     expect(shouldRunJobs({ NODE_ENV: "development", DATABASE_URL: url })).toBe(false);
     expect(shouldRunJobs({ NODE_ENV: "development", DATABASE_URL: url, JOBS_IN_DEV: "true" })).toBe(true);
+  });
+});
+
+describe("isPostgresUrl", () => {
+  it("accepts postgres URLs", () => {
+    expect(isPostgresUrl("postgres://pgboss_worker:abc123@supabase-db-x:5432/postgres")).toBe(true);
+    expect(isPostgresUrl("postgresql://u:p@db/postgres")).toBe(true);
+  });
+
+  it("rejects values pasted with a name prefix, quotes or spaces", () => {
+    expect(isPostgresUrl("DATABASE_URL=postgres://u:p@db:5432/postgres")).toBe(false);
+    expect(isPostgresUrl('"postgres://u:p@db:5432/postgres"')).toBe(false);
+    expect(isPostgresUrl("postgres://u:p@db:5432/postgres extra")).toBe(false);
   });
 });

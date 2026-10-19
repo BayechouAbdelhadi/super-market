@@ -154,6 +154,8 @@ Only do this when your `.env` points at test data. With production Supabase keys
 | Log line or symptom | Cause and fix |
 | --- | --- |
 | `[jobs] not started: set DATABASE_URL …` | `DATABASE_URL` is missing on the app. In development, `JOBS_IN_DEV=true` is also missing. |
+| `[jobs] not started: DATABASE_URL must start with "postgres://"` | The value in Coolify includes the `DATABASE_URL=` prefix, quotes or spaces. The value must start with `postgres://`. |
+| `[jobs] failed to start … EAI_AGAIN base` | Same cause, on a version without that check: the value doesn't start with `postgres://`. |
 | `[jobs] failed to start, retrying in 60s: … ENOTFOUND` | The app can't resolve the database host. Do step 1, and use the full container name as the host. |
 | `[jobs] failed to start … password authentication failed` | The password doesn't match. Run the setup script again and update `DATABASE_URL`. |
 | `[jobs] failed to start … permission denied for database` | The `GRANT` is missing. Run the setup script again. |

@@ -27,7 +27,21 @@ export function startBackgroundJobs(): void {
     return;
   }
 
-  void bootWithRetry(process.env.DATABASE_URL as string);
+  const connectionString = (process.env.DATABASE_URL as string).trim();
+  if (!isPostgresUrl(connectionString)) {
+    console.error(
+      '[jobs] not started: DATABASE_URL must start with "postgres://". ' +
+        'Check the value has no "DATABASE_URL=" prefix, quotes or spaces.'
+    );
+    return;
+  }
+
+  void bootWithRetry(connectionString);
+}
+
+/** A Postgres connection URL (anything else makes the driver connect to a host named "base"). */
+export function isPostgresUrl(value: string): boolean {
+  return /^postgres(ql)?:\/\/[^\s"']+$/.test(value);
 }
 
 async function bootWithRetry(connectionString: string): Promise<void> {
