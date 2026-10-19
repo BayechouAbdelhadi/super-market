@@ -53,7 +53,7 @@ export default async function InvitePage({
             </div>
           </Link>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-danger-subtle border border-danger-border text-danger-text text-xs font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
             {isCashier ? "Invitation Équipe Caisse" : "Programme Fidélité Magasin"}
           </div>
@@ -87,7 +87,7 @@ export default async function InvitePage({
                 />
               ) : (
                 <div className="space-y-5 text-center py-2">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center border border-rose-500/20">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-danger-subtle text-danger-text flex items-center justify-center border border-danger-border">
                     <AlertCircle className="w-6 h-6" />
                   </div>
 
@@ -103,7 +103,7 @@ export default async function InvitePage({
                   <div className="pt-3 border-t border-[var(--color-border)] space-y-2">
                     <Link
                       href="/signup"
-                      className="w-full inline-flex items-center justify-center h-10 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors"
+                      className="w-full inline-flex items-center justify-center h-10 rounded-xl bg-danger text-on-color text-xs font-bold hover:bg-danger/90 transition-colors"
                     >
                       Créer mon compte
                     </Link>
@@ -124,47 +124,47 @@ export default async function InvitePage({
           <div className="w-full max-w-lg space-y-6">
             <Card className="p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-[var(--color-border)] text-center space-y-6">
               <div className="space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-danger-subtle border border-danger-border text-danger-text text-xs font-bold uppercase tracking-wider">
                   <Sparkles className="w-3.5 h-3.5" />
                   Vos avantages fidélité
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h2 className="text-xl sm:text-2xl font-black text-text tracking-tight">
                   Fidélité Super Market Calais
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-600 max-w-sm mx-auto">
+                <p className="text-xs sm:text-sm text-text-muted max-w-sm mx-auto">
                   Cumulez des points sur tous vos achats et bénéficiez de réductions directes.
                 </p>
               </div>
 
               {/* 3 Key Benefits */}
               <div className="grid grid-cols-1 gap-3 text-left">
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-rose-100/70 text-rose-600 shrink-0">
+                <div className="p-3.5 rounded-xl bg-surface-hover border border-border flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-danger-subtle text-danger-text shrink-0">
                     <Coins className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs sm:text-sm font-bold text-slate-900">1 € dépensé = 1 point</div>
-                    <div className="text-[11px] text-slate-500">À chaque passage en caisse, sur tout le magasin</div>
+                    <div className="text-xs sm:text-sm font-bold text-text">1 € dépensé = 1 point</div>
+                    <div className="text-[11px] text-text-muted">À chaque passage en caisse, sur tout le magasin</div>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-emerald-100/70 text-emerald-600 shrink-0">
+                <div className="p-3.5 rounded-xl bg-surface-hover border border-border flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-success-subtle text-success-text shrink-0">
                     <Gift className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs sm:text-sm font-bold text-slate-900">Remises immédiates en caisse</div>
-                    <div className="text-[11px] text-slate-500">Déduisez directement vos points lors de vos achats</div>
+                    <div className="text-xs sm:text-sm font-bold text-text">Remises immédiates en caisse</div>
+                    <div className="text-[11px] text-text-muted">Déduisez directement vos points lors de vos achats</div>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-indigo-100/70 text-indigo-600 shrink-0">
+                <div className="p-3.5 rounded-xl bg-surface-hover border border-border flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-info-subtle text-info-text shrink-0">
                     <Tag className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs sm:text-sm font-bold text-slate-900">Promotions &amp; bons plans exclusifs</div>
-                    <div className="text-[11px] text-slate-500">Offres réservées aux adhérents toute l&apos;année</div>
+                    <div className="text-xs sm:text-sm font-bold text-text">Promotions &amp; bons plans exclusifs</div>
+                    <div className="text-[11px] text-text-muted">Offres réservées aux adhérents toute l&apos;année</div>
                   </div>
                 </div>
               </div>
@@ -173,15 +173,15 @@ export default async function InvitePage({
               <div className="space-y-3 pt-2">
                 <Link
                   href="/signup"
-                  className="w-full h-12 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99]"
+                  className="w-full h-12 rounded-xl bg-text hover:bg-text/90 text-background font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99]"
                 >
                   <span>Créer mon compte fidélité (30 secondes)</span>
-                  <ArrowRight className="w-4 h-4 text-rose-400" />
+                  <ArrowRight className="w-4 h-4 text-primary" />
                 </Link>
 
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-text-muted">
                   Vous possédez déjà un compte fidélité ?{" "}
-                  <Link href="/login" className="font-bold text-rose-600 hover:underline">
+                  <Link href="/login" className="font-bold text-danger-text hover:underline">
                     Connectez-vous
                   </Link>
                 </p>

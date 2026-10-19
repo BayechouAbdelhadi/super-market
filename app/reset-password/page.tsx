@@ -57,8 +57,8 @@ export default async function ResetPasswordPage({
         {/* Form Card */}
         <Card className="p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-[var(--color-border)]">
           {targetEmail && (
-            <div className="mb-4 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-[var(--radius-button,12px)] flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <div className="mb-4 text-xs font-medium text-success-text bg-success-subtle border border-success-border p-3 rounded-[var(--radius-button,12px)] flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 shrink-0 text-success-text" />
               <span>
                 Lien vérifié pour <strong>{targetEmail}</strong>
               </span>

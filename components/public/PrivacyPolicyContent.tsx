@@ -27,20 +27,20 @@ export function PrivacyPolicyContent() {
       {/* Scrollable Container (§ 25.1 AGENTS.md) */}
       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
         {/* Top Minimal Navigation Bar */}
-        <header className="sticky top-0 z-20 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md border-b border-[var(--color-border)] px-4 sm:px-8 h-16 flex items-center justify-between shrink-0">
+        <header className="sticky top-0 z-20 w-full bg-surface/95 backdrop-blur-md border-b border-[var(--color-border)] px-4 sm:px-8 h-16 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors py-1.5 px-3 -ml-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-900"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors py-1.5 px-3 -ml-2 rounded-xl hover:bg-surface-hover"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Accueil</span>
             </Link>
 
-            <span className="text-neutral-300 dark:text-neutral-700">|</span>
+            <span className="text-border-hover">|</span>
 
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="h-8 w-8 rounded-full bg-white border border-[var(--color-border)] flex items-center justify-center p-0.5 overflow-hidden shrink-0 shadow-xs">
+              <div className="h-8 w-8 rounded-full bg-surface border border-[var(--color-border)] flex items-center justify-center p-0.5 overflow-hidden shrink-0 shadow-xs">
                 <Image
                   src="/logo-hq.png"
                   alt="Super Market Calais"
@@ -56,8 +56,8 @@ export function PrivacyPolicyContent() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/50">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-success-subtle text-success-text border border-success-border">
+              <ShieldCheck className="w-3.5 h-3.5 text-success-text" />
               <span>Conforme RGPD &amp; Meta</span>
             </span>
           </div>
@@ -88,7 +88,7 @@ export function PrivacyPolicyContent() {
           {/* Quick Summary Highlights */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
             <div className="p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1.5 shadow-xs">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 flex items-center justify-center mb-2">
+              <div className="w-8 h-8 rounded-xl bg-info-subtle text-info-text flex items-center justify-center mb-2">
                 <Lock className="w-4 h-4" />
               </div>
               <h3 className="font-bold text-sm text-[var(--color-text)]">Sécurité Maximale</h3>
@@ -98,7 +98,7 @@ export function PrivacyPolicyContent() {
             </div>
 
             <div className="p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1.5 shadow-xs">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 flex items-center justify-center mb-2">
+              <div className="w-8 h-8 rounded-xl bg-success-subtle text-success-text flex items-center justify-center mb-2">
                 <UserCheck className="w-4 h-4" />
               </div>
               <h3 className="font-bold text-sm text-[var(--color-text)]">Zéro Revente</h3>
@@ -108,7 +108,7 @@ export function PrivacyPolicyContent() {
             </div>
 
             <div className="p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1.5 shadow-xs">
-              <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 flex items-center justify-center mb-2">
+              <div className="w-8 h-8 rounded-xl bg-danger-subtle text-danger-text flex items-center justify-center mb-2">
                 <Trash2 className="w-4 h-4" />
               </div>
               <h3 className="font-bold text-sm text-[var(--color-text)]">Suppression Simple</h3>
@@ -131,7 +131,7 @@ export function PrivacyPolicyContent() {
               <p className="text-[var(--color-text-muted)]">
                 Le responsable du traitement des données personnelles collectées dans le cadre de l'utilisation du site internet, du programme de fidélité et des applications associées est :
               </p>
-              <div className="p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-[var(--color-border)] space-y-1.5 text-xs">
+              <div className="p-4 rounded-xl bg-surface-hover border border-[var(--color-border)] space-y-1.5 text-xs">
                 <p><strong>Raison sociale :</strong> Super Market Calais</p>
                 <p><strong>Adresse de l'établissement :</strong> 205 Avenue Antoine de Saint-Exupéry, 62100 Calais, France</p>
                 <p><strong>Téléphone :</strong> 06 71 54 05 28</p>
@@ -152,25 +152,25 @@ export function PrivacyPolicyContent() {
               </p>
               <ul className="space-y-2.5 pl-1">
                 <li className="flex items-start gap-2.5 text-xs sm:text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-success-text shrink-0 mt-0.5" />
                   <div>
                     <strong>Données d'identification et de contact :</strong> Nom, prénom, numéro de téléphone portable (utilisé comme identifiant de fidélité en caisse), adresse e-mail.
                   </div>
                 </li>
                 <li className="flex items-start gap-2.5 text-xs sm:text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-success-text shrink-0 mt-0.5" />
                   <div>
                     <strong>Données du programme de fidélité :</strong> Solde de points cumulés, historique des passages en caisse, dates des achats, montants éligibles aux remises, et statuts associés (Bronze, Silver, Gold, VIP).
                   </div>
                 </li>
                 <li className="flex items-start gap-2.5 text-xs sm:text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-success-text shrink-0 mt-0.5" />
                   <div>
                     <strong>Données techniques de connexion :</strong> Adresse IP, type et version de navigateur, horodatage de connexion à des fins strictes de journalisation de sécurité et prévention des abus.
                   </div>
                 </li>
                 <li className="flex items-start gap-2.5 text-xs sm:text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-success-text shrink-0 mt-0.5" />
                   <div>
                     <strong>Données provenant des plateformes Meta / Facebook (le cas échéant) :</strong> Si vous choisissez d'interagir avec notre application via les fonctionnalités de connexion Facebook (Meta Login) ou les widgets associés, nous ne recevons que l'identifiant utilisateur Facebook public (Facebook User ID) et l'adresse e-mail autorisée par vos soins. Aucune publication sur votre profil n'est effectuée sans votre accord explicite.
                   </div>
@@ -266,27 +266,27 @@ export function PrivacyPolicyContent() {
                 Conformément aux articles 15 à 22 du Règlement Général sur la Protection des Données (RGPD), vous disposez à tout moment des droits suivants :
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
-                <div className="p-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-[var(--color-border)]">
+                <div className="p-3 rounded-xl bg-surface-hover border border-[var(--color-border)]">
                   <strong className="block text-[var(--color-text)] mb-1">Droit d'accès (Art. 15)</strong>
                   Obtenir la confirmation que des données vous concernant sont traitées et en obtenir une copie intégrale.
                 </div>
-                <div className="p-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-[var(--color-border)]">
+                <div className="p-3 rounded-xl bg-surface-hover border border-[var(--color-border)]">
                   <strong className="block text-[var(--color-text)] mb-1">Droit de rectification (Art. 16)</strong>
                   Demander la correction immédiate de données inexactes ou incomplètes.
                 </div>
-                <div className="p-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-[var(--color-border)]">
+                <div className="p-3 rounded-xl bg-surface-hover border border-[var(--color-border)]">
                   <strong className="block text-[var(--color-text)] mb-1">Droit à l'effacement (Art. 17)</strong>
                   Obtenir l'effacement définitif de vos données (« droit à l'oubli »).
                 </div>
-                <div className="p-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-[var(--color-border)]">
+                <div className="p-3 rounded-xl bg-surface-hover border border-[var(--color-border)]">
                   <strong className="block text-[var(--color-text)] mb-1">Droit à la portabilité (Art. 20)</strong>
                   Recevoir vos données dans un format structuré, couramment utilisé et lisible par machine.
                 </div>
-                <div className="p-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-[var(--color-border)]">
+                <div className="p-3 rounded-xl bg-surface-hover border border-[var(--color-border)]">
                   <strong className="block text-[var(--color-text)] mb-1">Droit d'opposition (Art. 21)</strong>
                   Vous opposer à tout moment au traitement de vos données à des fins de prospection commerciale.
                 </div>
-                <div className="p-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-[var(--color-border)]">
+                <div className="p-3 rounded-xl bg-surface-hover border border-[var(--color-border)]">
                   <strong className="block text-[var(--color-text)] mb-1">Droit à la limitation (Art. 18)</strong>
                   Geler temporairement l'utilisation de certaines données en cas de contestation.
                 </div>
@@ -296,21 +296,21 @@ export function PrivacyPolicyContent() {
             {/* 7. INSTRUCTIONS DE SUPPRESSION DES DONNÉES (Exigence Meta / Facebook & RGPD) */}
             <section
               id="suppression-donnees"
-              className="p-6 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border-2 border-amber-300/80 dark:border-amber-700/60 space-y-4"
+              className="p-6 rounded-2xl bg-warning-subtle border-2 border-warning/50 space-y-4"
             >
               <div className="flex items-center gap-2.5">
-                <Trash2 className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                <h2 className="text-lg font-bold text-amber-950 dark:text-amber-200">
+                <Trash2 className="w-5 h-5 text-warning-text" />
+                <h2 className="text-lg font-bold text-warning-text">
                   7. Instructions de Suppression des Données (Data Deletion Instructions)
                 </h2>
               </div>
-              <p className="text-xs sm:text-sm text-amber-900/90 dark:text-amber-200/90 leading-relaxed">
+              <p className="text-xs sm:text-sm text-warning-text/90 leading-relaxed">
                 Conformément aux exigences de la plateforme pour développeurs <strong>Meta (Facebook Platform Terms)</strong> et aux règles du <strong>RGPD</strong>, 
                 vous avez le plein pouvoir de supprimer à tout moment l'ensemble des données personnelles associées à votre compte ou transmises via Facebook.
               </p>
 
               <div className="space-y-3 pt-1">
-                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-900/50 space-y-2 text-xs">
+                <div className="p-4 rounded-xl bg-surface border border-warning-border space-y-2 text-xs">
                   <h4 className="font-bold text-sm text-[var(--color-text)] flex items-center gap-1.5">
                     <span>Option A : Suppression directe depuis votre compte client</span>
                   </h4>
@@ -321,14 +321,14 @@ export function PrivacyPolicyContent() {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-900/50 space-y-2 text-xs">
+                <div className="p-4 rounded-xl bg-surface border border-warning-border space-y-2 text-xs">
                   <h4 className="font-bold text-sm text-[var(--color-text)] flex items-center gap-1.5">
                     <span>Option B : Demande par e-mail ou courrier postal</span>
                   </h4>
                   <p className="text-[var(--color-text-muted)]">
                     Vous pouvez simplement nous envoyer un e-mail à :
                   </p>
-                  <p className="font-mono font-bold text-xs text-[var(--color-primary)] bg-neutral-100 dark:bg-neutral-800 p-2 rounded-lg inline-block">
+                  <p className="font-mono font-bold text-xs text-[var(--color-primary)] bg-surface-hover p-2 rounded-lg inline-block">
                     contact@supermarket-calais.fr
                   </p>
                   <p className="text-[var(--color-text-muted)]">
@@ -362,7 +362,7 @@ export function PrivacyPolicyContent() {
                 Pour toute question relative à la présente politique de confidentialité ou pour faire valoir vos droits, vous pouvez contacter notre référent à la protection des données :
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-[var(--color-border)] space-y-1">
+                <div className="p-4 rounded-xl bg-surface-hover border border-[var(--color-border)] space-y-1">
                   <div className="flex items-center gap-2 font-bold text-[var(--color-text)]">
                     <Mail className="w-4 h-4 text-[var(--color-primary)]" />
                     <span>Contact électronique</span>
@@ -373,7 +373,7 @@ export function PrivacyPolicyContent() {
                   <p className="text-[var(--color-text-muted)]">Délai de réponse moyen : 48 à 72 heures ouvrées.</p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-[var(--color-border)] space-y-1">
+                <div className="p-4 rounded-xl bg-surface-hover border border-[var(--color-border)] space-y-1">
                   <div className="flex items-center gap-2 font-bold text-[var(--color-text)]">
                     <MapPin className="w-4 h-4 text-[var(--color-primary)]" />
                     <span>Courrier postal</span>
@@ -385,7 +385,7 @@ export function PrivacyPolicyContent() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-[var(--color-border)] text-xs text-[var(--color-text-muted)] flex items-start gap-2.5">
+              <div className="p-4 rounded-xl bg-surface-hover border border-[var(--color-border)] text-xs text-[var(--color-text-muted)] flex items-start gap-2.5">
                 <HelpCircle className="w-4 h-4 text-[var(--color-text-muted)] shrink-0 mt-0.5" />
                 <div>
                   Si vous estimez, après nous avoir contactés, que vos droits Informatique et Libertés ne sont pas respectés, 
@@ -405,7 +405,7 @@ export function PrivacyPolicyContent() {
           <div className="mt-12 pt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--color-text-muted)]">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 py-2 px-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-neutral-100 dark:hover:bg-neutral-900 font-semibold transition-colors"
+              className="inline-flex items-center gap-2 py-2 px-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-surface-hover font-semibold transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Retour à l'accueil du magasin</span>

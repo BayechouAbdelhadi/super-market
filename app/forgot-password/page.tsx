@@ -48,7 +48,7 @@ export default async function ForgotPasswordPage({
           {isSent ? (
             /* Confirmation State: Show confirmation and nothing else */
             <div className="space-y-5 text-center py-2">
-              <div className="mx-auto w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+              <div className="mx-auto w-14 h-14 rounded-full bg-success-subtle text-success-text flex items-center justify-center border border-success-border">
                 <MailCheck className="w-7 h-7" />
               </div>
 
@@ -95,7 +95,7 @@ export default async function ForgotPasswordPage({
               />
 
               {params?.message && (
-                <div className="text-xs font-semibold text-rose-700 dark:text-rose-300 text-center bg-rose-500/10 border border-rose-500/20 p-3 rounded-[var(--radius-button,12px)]">
+                <div className="text-xs font-semibold text-danger-text text-center bg-danger-subtle border border-danger-border p-3 rounded-[var(--radius-button,12px)]">
                   {params.message}
                 </div>
               )}

@@ -72,13 +72,13 @@ export default async function SignUpVerifyPage({
               </div>
 
               {params?.success && (
-                <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 text-center bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-[var(--radius-button,12px)]">
+                <div className="text-xs font-semibold text-success-text text-center bg-success-subtle border border-success-border p-3 rounded-[var(--radius-button,12px)]">
                   {params.success}
                 </div>
               )}
 
               {params?.message && (
-                <div className="text-xs font-semibold text-rose-700 dark:text-rose-300 text-center bg-rose-500/10 border border-rose-500/20 p-3 rounded-[var(--radius-button,12px)]">
+                <div className="text-xs font-semibold text-danger-text text-center bg-danger-subtle border border-danger-border p-3 rounded-[var(--radius-button,12px)]">
                   {params.message}
                 </div>
               )}

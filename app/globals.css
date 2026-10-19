@@ -39,11 +39,31 @@
   --color-danger-border: color-mix(in srgb, var(--color-danger) 20%, transparent);
   --color-info-subtle: color-mix(in srgb, var(--color-info) 10%, transparent);
   --color-info-border: color-mix(in srgb, var(--color-info) 20%, transparent);
+  /* Status text shades for dark backgrounds: used by dark mode and by .scheme-dark */
+  --on-dark-success-text: #6ee7b7;
+  --on-dark-warning-text: #fcd34d;
+  --on-dark-danger-text: #fda4af;
+  --on-dark-info-text: #a5b4fc;
 
   /* Text and icons on any solid colored fill (primary, status, tier) */
   --color-on-color: #ffffff;
   /* Dimmed backdrop behind dialogs and drawers */
   --color-overlay: rgb(0 0 0 / 0.4);
+  /* Primary-tinted text for brand subtitles */
+  --color-primary-ink: color-mix(in srgb, var(--color-primary) 55%, var(--color-text));
+
+  /* Brand gradients of the public pages (primary tinted into the surface) */
+  --gradient-header: linear-gradient(105deg, var(--color-surface) 0%, color-mix(in srgb, var(--color-primary) 3%, var(--color-surface)) 25%, color-mix(in srgb, var(--color-primary) 7%, var(--color-surface)) 50%, color-mix(in srgb, var(--color-primary) 3%, var(--color-surface)) 75%, var(--color-surface) 100%);
+  --gradient-notice: linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 1%, var(--color-surface)) 0%, color-mix(in srgb, var(--color-primary) 5%, var(--color-surface)) 50%, color-mix(in srgb, var(--color-primary) 1%, var(--color-surface)) 100%);
+  --gradient-brand-text: linear-gradient(to right, var(--color-primary), #f43f5e, #f59e0b);
+  /* Soft ambient glows behind the home page content */
+  --glow-hero: radial-gradient(ellipse at center, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, rgb(251 146 60 / 0.12) 35%, transparent 70%);
+  --glow-warm: radial-gradient(circle at center, rgb(245 158 11 / 0.16) 0%, rgb(251 113 133 / 0.08) 40%, transparent 70%);
+  --glow-fresh: radial-gradient(circle at center, rgb(16 185 129 / 0.12) 0%, rgb(56 189 248 / 0.08) 40%, transparent 70%);
+  --glow-footer: radial-gradient(ellipse at center, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, rgb(245 158 11 / 0.06) 45%, transparent 75%);
+
+  /* Fixed near-black for scrims over photos and dark text on photo chips (same in dark mode) */
+  --color-scrim: #171717;
 
   /* Status Colors (§ 15) */
   --color-tier-bronze: #a86326;
@@ -169,6 +189,8 @@
   --color-info-border: var(--color-info-border);
   --color-on-color: var(--color-on-color);
   --color-overlay: var(--color-overlay);
+  --color-scrim: var(--color-scrim);
+  --color-primary-ink: var(--color-primary-ink);
   --color-tier-bronze: var(--color-tier-bronze);
   --color-tier-silver: var(--color-tier-silver);
   --color-tier-gold: var(--color-tier-gold);
@@ -236,10 +258,10 @@
     --color-tier-silver-text: #cbd5e1;
     --color-tier-gold-text: #fde68a;
 
-    --color-success-text: #6ee7b7;
-    --color-warning-text: #fcd34d;
-    --color-danger-text: #fda4af;
-    --color-info-text: #a5b4fc;
+    --color-success-text: var(--on-dark-success-text);
+    --color-warning-text: var(--on-dark-warning-text);
+    --color-danger-text: var(--on-dark-danger-text);
+    --color-info-text: var(--on-dark-info-text);
     --color-success-subtle: color-mix(in srgb, var(--color-success) 16%, transparent);
     --color-warning-subtle: color-mix(in srgb, var(--color-warning) 16%, transparent);
     --color-danger-subtle: color-mix(in srgb, var(--color-danger) 16%, transparent);
@@ -250,6 +272,14 @@
     --color-info-border: color-mix(in srgb, var(--color-info) 36%, transparent);
     --color-overlay: rgb(0 0 0 / 0.65);
   }
+}
+
+/* Content that always sits on a dark background (photos, dark cards), whatever the page's mode */
+.scheme-dark {
+  --color-success-text: var(--on-dark-success-text);
+  --color-warning-text: var(--on-dark-warning-text);
+  --color-danger-text: var(--on-dark-danger-text);
+  --color-info-text: var(--on-dark-info-text);
 }
 
 html {

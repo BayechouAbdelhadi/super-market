@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DepartmentCard, type DepartmentCardProps } from "@/components/public/DepartmentCard";
 import {
   MapPin,
   Phone,
@@ -16,14 +17,10 @@ import {
   Package,
   CreditCard,
   CheckCircle2,
-  Calendar,
   Sparkles,
-  ShoppingBag,
   Gift,
   ArrowRight,
-  ShieldCheck,
   Truck,
-  HeartHandshake,
 } from "lucide-react";
 
 const GOOGLE_MAPS_URL =
@@ -48,6 +45,90 @@ const STORE_DETAILS = {
     { day: "Dimanche", hours: "09:00 – 19:30 (Non-stop)", isWeekend: true, dayIndex: 0 },
   ],
 };
+
+/** Store departments shown on the home page, in display order. */
+const DEPARTMENTS: DepartmentCardProps[] = [
+  {
+    title: "Poulet Frais & Charcuterie",
+    description:
+      "Poulet frais disponible en barquette : filet de poulet, cuisses, ailes et pilons de qualité supérieure, accompagnés de notre sélection de charcuterie traditionnelle.",
+    image: { src: "/categories/poulet-frais-sample.jpg", alt: "Poulet Frais en barquette & Charcuterie à Calais" },
+    badge: "Fraîcheur",
+    emoji: "🍗",
+    caption: "Découpes fraîches",
+    highlight: "Arrivage quotidien",
+    tag: "100% Halal",
+    accent: "primary",
+    highlightAccent: "success",
+  },
+  {
+    title: "Boissons en Pack",
+    description:
+      "Le numéro 1 de la boisson en pack sur Calais ! Plus de 60 références en stock permanent : sodas, jus, eaux minérales et boissons rafraîchissantes aux meilleurs prix.",
+    image: { src: "/categories/fanta-pack-sample.jpg", alt: "Pack de Fanta Orange en canettes à Calais" },
+    badge: "N°1 à Calais",
+    emoji: "🥤",
+    caption: "Packs en gros",
+    highlight: "+60 références",
+    tag: "Prix de gros",
+    accent: "warning",
+  },
+  {
+    title: "Rayon Surgelés",
+    description: (
+      <>
+        Plus de 100 références à découvrir, avec en exclusivité les marques <strong>Hunkar</strong> et{" "}
+        <strong>Idéal Délices</strong> pour vos plats, viandes et spécialités.
+      </>
+    ),
+    image: {
+      src: "/categories/surgeles-assortiment.jpg",
+      alt: "Assortiment de spécialités surgelées böreks, köftes, lahmacun et légumes à Calais",
+    },
+    badge: "+100 réf.",
+    emoji: "❄️",
+    caption: "Viandes, böreks & plats",
+    highlight: "Exclusivité marques",
+    tag: "Chaîne du froid",
+    accent: "info",
+  },
+  {
+    title: "Pâtisserie Orientale",
+    description:
+      "Un assortiment raffiné de douceurs et pâtisseries orientales traditionnelles : baklawas croustillants au miel et pistaches, cornes de gazelle et makrouts.",
+    image: { src: "/categories/baklava-sample.jpg", alt: "Baklava oriental traditionnel aux pistaches et miel à Calais" },
+    badge: "Gourmandise",
+    emoji: "🍯",
+    caption: "Baklava au miel",
+    highlight: "Baklavas pur miel",
+    tag: "Artisanal",
+    accent: "warning",
+  },
+  {
+    title: "Fruits & Légumes Frais",
+    description:
+      "Arrivages réguliers de fruits savoureux et légumes de saison pour vous garantir fraîcheur, goût et vitamines au quotidien.",
+    image: { src: "/categories/fruits-legumes-sample.jpg", alt: "Fruits et Légumes Frais primeur marché à Calais" },
+    badge: "Primeur",
+    emoji: "🥦",
+    caption: "Marché de saison",
+    highlight: "Fraîcheur garantie",
+    tag: "Vitamines",
+    accent: "success",
+  },
+  {
+    title: "Épicerie & Produits Frais",
+    description:
+      "Produits laitiers, conserves fines, épices du monde, riz, sauces, condiments et toutes vos marques indispensables du quotidien.",
+    image: { src: "/categories/epicerie-sample.jpg", alt: "Épicerie fine condiments épices huiles du terroir à Calais" },
+    badge: "Du terroir",
+    emoji: "🥖",
+    caption: "Épicerie & saveurs",
+    highlight: "Large choix",
+    tag: "Essentiels",
+    accent: "warning",
+  },
+];
 
 function getIsOpenNow(): { isOpen: boolean; statusText: string } {
   const now = new Date();
@@ -139,20 +220,20 @@ export default function Home() {
         {/* Rich Radial Gradient Atmospheric Background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
           {/* Top Center Main Radial Aura */}
-          <div className="absolute -top-[10%] left-1/2 -translate-x-1/2 w-[1100px] h-[750px] bg-[radial-gradient(ellipse_at_center,rgba(255,56,92,0.18)_0%,rgba(251,146,60,0.12)_35%,rgba(255,255,255,0)_70%)] blur-2xl" />
+          <div className="absolute -top-[10%] left-1/2 -translate-x-1/2 w-[1100px] h-[750px] bg-[image:var(--glow-hero)] blur-2xl" />
 
           {/* Right Floating Warm Amber Radial Halo */}
-          <div className="absolute top-[280px] -right-[10%] w-[800px] h-[800px] bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.16)_0%,rgba(251,113,133,0.08)_40%,rgba(255,255,255,0)_70%)] blur-3xl animate-pulse-glow" style={{ animationDuration: "8s" }} />
+          <div className="absolute top-[280px] -right-[10%] w-[800px] h-[800px] bg-[image:var(--glow-warm)] blur-3xl animate-pulse-glow" style={{ animationDuration: "8s" }} />
 
           {/* Left Mid-page Fresh Mint & Sky Radial Halo */}
-          <div className="absolute top-[750px] -left-[15%] w-[850px] h-[850px] bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12)_0%,rgba(56,189,248,0.08)_40%,rgba(255,255,255,0)_70%)] blur-3xl animate-pulse-glow" style={{ animationDelay: "4s", animationDuration: "9s" }} />
+          <div className="absolute top-[750px] -left-[15%] w-[850px] h-[850px] bg-[image:var(--glow-fresh)] blur-3xl animate-pulse-glow" style={{ animationDelay: "4s", animationDuration: "9s" }} />
 
           {/* Bottom Warm Coral Radial Anchor */}
-          <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(255,56,92,0.1)_0%,rgba(245,158,11,0.06)_45%,rgba(255,255,255,0)_75%)] blur-3xl" />
+          <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-[image:var(--glow-footer)] blur-3xl" />
         </div>
 
         {/* Full-width 100% Super Market Calais Storefront Banner with Transparent Floating Header */}
-        <section className="w-full relative shrink-0 aspect-[16/8] sm:aspect-[21/9] md:aspect-[24/9] max-h-[520px] min-h-[300px] bg-neutral-900 border-b border-[var(--color-border)] overflow-hidden group z-10 flex flex-col justify-between">
+        <section className="w-full relative shrink-0 aspect-[16/8] sm:aspect-[21/9] md:aspect-[24/9] max-h-[520px] min-h-[300px] bg-scrim border-b border-[var(--color-border)] overflow-hidden group z-10 flex flex-col justify-between">
           <Image
             src="/super-market-calais-storefront.webp"
             alt="Super Market Calais — Magasin & Devanture au 205 Avenue Antoine de Saint-Exupéry"
@@ -163,17 +244,17 @@ export default function Home() {
           />
 
           {/* Transparent Gradient Protection: Soft at bottom for text contrast, clear at top for white transparent header */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-scrim/80 pointer-events-none" />
 
           {/* Light Pink-White Linear Gradient Top Navigation Header (No Transparency) */}
-          <div className="relative z-20 w-full bg-[linear-gradient(105deg,#ffffff_0%,#fff9fa_25%,#fff1f4_50%,#fff9fa_75%,#ffffff_100%)] border-b border-[rgba(255,56,92,0.12)] shadow-xs">
+          <div className="relative z-20 w-full bg-[image:var(--gradient-header)] border-b border-primary/12 shadow-xs">
             {/* Top Micro Notice Bar with Light Rose-White Solid Gradient */}
-            <div className="bg-[linear-gradient(90deg,#fffdfd_0%,#fff5f7_50%,#fffdfd_100%)] text-neutral-900 text-[11px] py-1.5 px-4 text-center font-medium border-b border-[rgba(255,56,92,0.08)]">
+            <div className="bg-[image:var(--gradient-notice)] text-text text-[11px] py-1.5 px-4 text-center font-medium border-b border-primary/8">
               <div className="max-w-6xl mx-auto flex items-center justify-center gap-2 flex-wrap">
-                <span className="font-extrabold uppercase tracking-wider bg-[var(--color-primary)] text-white px-2.5 py-0.5 rounded-full text-[10px] shadow-[0_2px_8px_rgba(255,56,92,0.35)]">
+                <span className="font-extrabold uppercase tracking-wider bg-[var(--color-primary)] text-on-color px-2.5 py-0.5 rounded-full text-[10px] shadow-[var(--shadow-primary)]">
                   Calais Saint-Exupéry
                 </span>
-                <span className="text-neutral-800 font-medium">Votre supermarché de quartier ouvert 7j/7 avec primeur frais et point relais Pickup !</span>
+                <span className="text-text font-medium">Votre supermarché de quartier ouvert 7j/7 avec primeur frais et point relais Pickup !</span>
                 <a
                   href={GOOGLE_MAPS_URL}
                   target="_blank"
@@ -190,7 +271,7 @@ export default function Home() {
             <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4">
               {/* Logo & Brand */}
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 sm:h-13 sm:w-13 rounded-full bg-white border border-[rgba(255,56,92,0.25)] shadow-xs flex items-center justify-center p-0.5 overflow-hidden shrink-0">
+                <div className="h-12 w-12 sm:h-13 sm:w-13 rounded-full bg-surface border border-primary/25 shadow-xs flex items-center justify-center p-0.5 overflow-hidden shrink-0">
                   <Image
                     src="/logo-hq.png"
                     alt="SuperMarket Calais Logo"
@@ -202,25 +283,25 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-black text-xl tracking-tight text-neutral-950">
+                    <span className="font-black text-xl tracking-tight text-text">
                       {appSettings.store.storeName}
                     </span>
                     <span
                       className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                         openStatus.isOpen
-                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                          : "bg-amber-50 text-amber-800 border-amber-200"
+                          ? "bg-success-subtle text-success-text border-success-border"
+                          : "bg-warning-subtle text-warning-text border-warning-border"
                       }`}
                     >
                       <span
                         className={`h-1.5 w-1.5 rounded-full ${
-                          openStatus.isOpen ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                          openStatus.isOpen ? "bg-success animate-pulse" : "bg-warning"
                         }`}
                       />
                       <span>{openStatus.isOpen ? "Ouvert" : "Fermé"}</span>
                     </span>
                   </div>
-                  <p className="text-[11px] text-[#8e293f] font-semibold hidden sm:block">
+                  <p className="text-[11px] text-primary-ink font-semibold hidden sm:block">
                     Saint-Exupéry, Calais • Primeur &amp; Relais Pickup
                   </p>
                 </div>
@@ -231,7 +312,7 @@ export default function Home() {
                 {appSettings.store.phone && (
                   <a
                     href={`tel:${appSettings.store.phone.replace(/\s+/g, "")}`}
-                    className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[rgba(255,56,92,0.22)] bg-white hover:bg-rose-50/60 text-xs font-semibold text-neutral-900 hover:border-[var(--color-primary)] transition-all shadow-xs"
+                    className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/22 bg-surface hover:bg-primary/5 text-xs font-semibold text-text hover:border-[var(--color-primary)] transition-all shadow-xs"
                   >
                     <Phone className="w-3.5 h-3.5 text-[var(--color-primary)]" />
                     <span>{appSettings.store.phone}</span>
@@ -242,7 +323,7 @@ export default function Home() {
                   <Button
                     variant="primary"
                     size="sm"
-                    className="text-xs font-bold shadow-[0_2px_12px_rgba(255,56,92,0.35)] h-9 gap-1.5"
+                    className="text-xs font-bold shadow-[var(--shadow-primary)] h-9 gap-1.5"
                   >
                     <span>Votre compte</span>
                     <ArrowRight className="w-3.5 h-3.5 opacity-80" />
@@ -253,30 +334,30 @@ export default function Home() {
           </div>
 
           {/* Bottom Info & Tagline on top of Image */}
-          <div className="relative z-20 p-5 sm:p-8 md:p-12 text-white mt-auto">
+          <div className="relative z-20 p-5 sm:p-8 md:p-12 text-on-color mt-auto">
             <div className="max-w-6xl mx-auto w-full space-y-3">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900/80 backdrop-blur-md border border-white/20 text-xs font-bold text-white w-fit shadow-lg shadow-black/40">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-scrim/80 backdrop-blur-md border border-on-color/20 text-xs font-bold text-on-color w-fit shadow-lg shadow-scrim/40">
                 <Store className="w-3.5 h-3.5 text-[var(--color-primary)]" />
                 <span>{appSettings.store.storeName} • Calais</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-white tracking-tight drop-shadow-md leading-tight max-w-3xl">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-on-color tracking-tight drop-shadow-md leading-tight max-w-3xl">
                 {appSettings.store.tagline}
               </h2>
-              <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 text-xs sm:text-sm text-neutral-200 font-medium pt-1">
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="scheme-dark flex flex-wrap items-center gap-2.5 sm:gap-4 text-xs sm:text-sm text-on-color/85 font-medium pt-1">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-on-color/10 backdrop-blur-xs border border-on-color/15">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-success-text" />
                   <span>Ouvert 7j/7</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-on-color/10 backdrop-blur-xs border border-on-color/15">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-success-text" />
                   <span>Surface +300 m²</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-on-color/10 backdrop-blur-xs border border-on-color/15">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-success-text" />
                   <span>Primeur &amp; Surgelés</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-on-color/10 backdrop-blur-xs border border-on-color/15">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-success-text" />
                   <span>Relais Pickup La Poste</span>
                 </div>
               </div>
@@ -291,7 +372,7 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-semibold text-[var(--color-text-muted)] shadow-[0_2px_12px_rgba(0,0,0,0.06)] hover:border-[var(--color-border-hover)] transition-all">
             <span
               className={`h-2.5 w-2.5 rounded-full ${
-                openStatus.isOpen ? "bg-emerald-500 animate-pulse ring-4 ring-emerald-500/20" : "bg-amber-500 ring-4 ring-amber-500/20"
+                openStatus.isOpen ? "bg-success animate-pulse ring-4 ring-success/20" : "bg-warning ring-4 ring-warning/20"
               }`}
             />
             <span className="text-[var(--color-text)] font-bold">{openStatus.statusText}</span>
@@ -301,7 +382,7 @@ export default function Home() {
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[var(--color-text)] tracking-tight leading-[1.12]">
             Votre supermarché de quartier à{" "}
-            <span className="bg-gradient-to-r from-[var(--color-primary)] via-rose-500 to-amber-500 bg-clip-text text-transparent">
+            <span className="bg-[image:var(--gradient-brand-text)] bg-clip-text text-transparent">
               Calais Saint-Exupéry.
             </span>
           </h1>
@@ -320,7 +401,7 @@ export default function Home() {
               <Button
                 variant="primary"
                 size="lg"
-                className="font-bold gap-2 shadow-[0_4px_16px_rgba(255,56,92,0.35)] hover:shadow-[0_6px_22px_rgba(255,56,92,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                className="font-bold gap-2 shadow-[var(--shadow-primary-glow)] hover:shadow-[var(--shadow-primary-hover)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
               >
                 <Navigation className="w-4 h-4" />
                 <span>Itinéraire Google Maps</span>
@@ -334,7 +415,7 @@ export default function Home() {
                 size="lg"
                 className="font-semibold gap-2 border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] shadow-xs transition-all cursor-pointer"
               >
-                <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <Phone className="w-4 h-4 text-success-text" />
                 <span>Appeler le {STORE_DETAILS.phone}</span>
               </Button>
             </a>
@@ -355,7 +436,7 @@ export default function Home() {
         {/* 2. Nos Rayons & Produits Frais (Products First) */}
         <section className="w-full space-y-6">
           <div className="text-left space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success-subtle text-success-text border border-success-border text-xs font-bold uppercase tracking-wider">
               <span>Arrivages &amp; Sélections</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
@@ -367,287 +448,9 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-            {/* 1. Poulet Frais & Charcuterie */}
-            <Card
-              padded={false}
-              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-rose-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-rose-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
-            >
-              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
-                <Image
-                  src="/categories/poulet-frais-sample.jpg"
-                  alt="Poulet Frais en barquette & Charcuterie à Calais"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                <div className="absolute top-3 right-3 z-10">
-                  <Badge variant="brand" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
-                    Fraîcheur
-                  </Badge>
-                </div>
-                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
-                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
-                    🍗
-                  </span>
-                  <span className="text-white text-xs font-bold drop-shadow-md">
-                    Découpes fraîches
-                  </span>
-                </div>
-              </div>
-              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-[var(--color-primary)] transition-colors">
-                    Poulet Frais &amp; Charcuterie
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                    Poulet frais disponible en barquette : filet de poulet, cuisses, ailes et pilons de qualité supérieure, accompagnés de notre sélection de charcuterie traditionnelle.
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
-                  <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Arrivage quotidien
-                  </span>
-                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">100% Halal</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* 2. Boissons en pack */}
-            <Card
-              padded={false}
-              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-orange-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
-            >
-              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
-                <Image
-                  src="/categories/fanta-pack-sample.jpg"
-                  alt="Pack de Fanta Orange en canettes à Calais"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                <div className="absolute top-3 right-3 z-10">
-                  <Badge variant="brand" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
-                    N°1 à Calais
-                  </Badge>
-                </div>
-                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
-                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
-                    🥤
-                  </span>
-                  <span className="text-white text-xs font-bold drop-shadow-md">
-                    Packs en gros
-                  </span>
-                </div>
-              </div>
-              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-orange-600 transition-colors">
-                    Boissons en Pack
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                    Le numéro 1 de la boisson en pack sur Calais ! Plus de 60 références en stock permanent : sodas, jus, eaux minérales et boissons rafraîchissantes aux meilleurs prix.
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
-                  <span className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 font-bold">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    +60 références
-                  </span>
-                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">Prix de gros</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* 3. Surgelés */}
-            <Card
-              padded={false}
-              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-sky-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-sky-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
-            >
-              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
-                <Image
-                  src="/categories/surgeles-assortiment.jpg"
-                  alt="Assortiment de spécialités surgelées böreks, köftes, lahmacun et légumes à Calais"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                <div className="absolute top-3 right-3 z-10">
-                  <Badge variant="neutral" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
-                    +100 réf.
-                  </Badge>
-                </div>
-                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
-                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
-                    ❄️
-                  </span>
-                  <span className="text-white text-xs font-bold drop-shadow-md">
-                    Viandes, böreks &amp; plats
-                  </span>
-                </div>
-              </div>
-              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-sky-600 transition-colors">
-                    Rayon Surgelés
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                    Plus de 100 références à découvrir, avec en exclusivité les marques <strong>Hunkar</strong> et <strong>Idéal Délices</strong> pour vos plats, viandes et spécialités.
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
-                  <span className="flex items-center gap-1.5 text-sky-600 dark:text-sky-400 font-bold">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Exclusivité marques
-                  </span>
-                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">Chaîne du froid</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* 4. Pâtisserie Orientale */}
-            <Card
-              padded={false}
-              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-amber-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
-            >
-              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
-                <Image
-                  src="/categories/baklava-sample.jpg"
-                  alt="Baklava oriental traditionnel aux pistaches et miel à Calais"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                <div className="absolute top-3 right-3 z-10">
-                  <Badge variant="brand" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
-                    Gourmandise
-                  </Badge>
-                </div>
-                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
-                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
-                    🍯
-                  </span>
-                  <span className="text-white text-xs font-bold drop-shadow-md">
-                    Baklava au miel
-                  </span>
-                </div>
-              </div>
-              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-amber-600 transition-colors">
-                    Pâtisserie Orientale
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                    Un assortiment raffiné de douceurs et pâtisseries orientales traditionnelles : baklawas croustillants au miel et pistaches, cornes de gazelle et makrouts.
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
-                  <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Baklavas pur miel
-                  </span>
-                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">Artisanal</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* 5. Fruits & Légumes Frais */}
-            <Card
-              padded={false}
-              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-emerald-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
-            >
-              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
-                <Image
-                  src="/categories/fruits-legumes-sample.jpg"
-                  alt="Fruits et Légumes Frais primeur marché à Calais"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                <div className="absolute top-3 right-3 z-10">
-                  <Badge variant="neutral" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
-                    Primeur
-                  </Badge>
-                </div>
-                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
-                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
-                    🥦
-                  </span>
-                  <span className="text-white text-xs font-bold drop-shadow-md">
-                    Marché de saison
-                  </span>
-                </div>
-              </div>
-              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-emerald-600 transition-colors">
-                    Fruits &amp; Légumes Frais
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                    Arrivages réguliers de fruits savoureux et légumes de saison pour vous garantir fraîcheur, goût et vitamines au quotidien.
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
-                  <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Fraîcheur garantie
-                  </span>
-                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">Vitamines</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* 6. Épicerie & Saveurs du Monde */}
-            <Card
-              padded={false}
-              className="flex flex-col hover:-translate-y-1.5 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 border-[var(--color-border)] hover:border-orange-400/50 group bg-[var(--color-surface)] overflow-hidden rounded-2xl"
-            >
-              <div className="relative w-full aspect-[16/10] overflow-hidden bg-neutral-100">
-                <Image
-                  src="/categories/epicerie-sample.jpg"
-                  alt="Épicerie fine condiments épices huiles du terroir à Calais"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                <div className="absolute top-3 right-3 z-10">
-                  <Badge variant="neutral" size="sm" className="shadow-md backdrop-blur-md bg-white/95 text-neutral-900 border-white/60 font-bold">
-                    Du terroir
-                  </Badge>
-                </div>
-                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2">
-                  <span className="h-9 w-9 rounded-xl bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-xl">
-                    🥖
-                  </span>
-                  <span className="text-white text-xs font-bold drop-shadow-md">
-                    Épicerie &amp; saveurs
-                  </span>
-                </div>
-              </div>
-              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight group-hover:text-orange-600 transition-colors">
-                    Épicerie &amp; Produits Frais
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                    Produits laitiers, conserves fines, épices du monde, riz, sauces, condiments et toutes vos marques indispensables du quotidien.
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-muted)]">
-                  <span className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 font-bold">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Large choix
-                  </span>
-                  <span className="text-[11px] bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">Essentiels</span>
-                </div>
-              </div>
-            </Card>
+            {DEPARTMENTS.map((department) => (
+              <DepartmentCard key={department.title} {...department} />
+            ))}
           </div>
         </section>
 
@@ -668,9 +471,9 @@ export default function Home() {
               padded="lg"
               className="flex flex-col justify-between space-y-4 border-[var(--color-border)] hover:border-[var(--color-primary)]/40 hover:shadow-lg hover:shadow-[var(--color-primary)]/5 transition-all duration-300 group bg-[var(--color-surface)] relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-xl group-hover:bg-rose-500/10 transition-colors pointer-events-none" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors pointer-events-none" />
               <div className="space-y-3 relative z-10">
-                <div className="h-12 w-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-[var(--color-primary)] flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 text-[var(--color-primary)] flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
@@ -708,11 +511,11 @@ export default function Home() {
             {/* Hours Card */}
             <Card
               padded="lg"
-              className="flex flex-col justify-between space-y-4 border-[var(--color-border)] hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 group bg-[var(--color-surface)] relative overflow-hidden"
+              className="flex flex-col justify-between space-y-4 border-[var(--color-border)] hover:border-success-border hover:shadow-lg hover:shadow-success/5 transition-all duration-300 group bg-[var(--color-surface)] relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-success-subtle rounded-full blur-xl group-hover:bg-success-subtle transition-colors pointer-events-none" />
               <div className="space-y-3 relative z-10">
-                <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                <div className="h-12 w-12 rounded-2xl bg-success-subtle border border-success-border text-success-text flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                   <Clock className="w-5 h-5" />
                 </div>
                 <div className="flex items-center justify-between">
@@ -761,11 +564,11 @@ export default function Home() {
             {/* Services & Contact Card */}
             <Card
               padded="lg"
-              className="flex flex-col justify-between space-y-4 border-[var(--color-border)] hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 group bg-[var(--color-surface)] relative overflow-hidden"
+              className="flex flex-col justify-between space-y-4 border-[var(--color-border)] hover:border-info-border hover:shadow-lg hover:shadow-info/5 transition-all duration-300 group bg-[var(--color-surface)] relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl group-hover:bg-blue-500/10 transition-colors pointer-events-none" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-info-subtle rounded-full blur-xl group-hover:bg-info-subtle transition-colors pointer-events-none" />
               <div className="space-y-3 relative z-10">
-                <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                <div className="h-12 w-12 rounded-2xl bg-info-subtle border border-info-border text-info-text flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                   <Package className="w-5 h-5" />
                 </div>
                 <div>
@@ -779,7 +582,7 @@ export default function Home() {
 
                 <div className="space-y-2 text-xs text-[var(--color-text)]">
                   <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)]/60">
-                    <Truck className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <Truck className="w-4 h-4 text-warning-text shrink-0 mt-0.5" />
                     <div>
                       <strong className="block text-[var(--color-text)]">Point Relais Pickup &amp; Lockers</strong>
                       <span className="text-[11px] text-[var(--color-text-muted)]">
@@ -789,7 +592,7 @@ export default function Home() {
                   </div>
 
                   <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)]/60">
-                    <CreditCard className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <CreditCard className="w-4 h-4 text-success-text shrink-0 mt-0.5" />
                     <div>
                       <strong className="block text-[var(--color-text)]">Paiements multiples</strong>
                       <span className="text-[11px] text-[var(--color-text-muted)]">
@@ -812,8 +615,8 @@ export default function Home() {
 
               <div className="pt-2 border-t border-[var(--color-border)] relative z-10">
                 <a href={appSettings.store.phone ? `tel:${appSettings.store.phone.replace(/\s+/g, "")}` : STORE_DETAILS.phoneRaw} className="w-full block">
-                  <Button variant="secondary" size="sm" fullWidth className="font-semibold gap-1.5 hover:border-emerald-500/30 transition-colors">
-                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                  <Button variant="secondary" size="sm" fullWidth className="font-semibold gap-1.5 hover:border-success-border transition-colors">
+                    <Phone className="w-3.5 h-3.5 text-success-text" />
                     <span>Appeler le magasin {appSettings.store.phone ? `(${appSettings.store.phone})` : ""}</span>
                   </Button>
                 </a>
@@ -960,7 +763,7 @@ export default function Home() {
 
             <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto relative z-10">
               <Link href="/login" className="w-full sm:w-auto">
-                <Button variant="primary" size="lg" className="w-full sm:w-auto font-bold gap-2 shadow-[0_4px_16px_rgba(255,56,92,0.35)] hover:shadow-[0_6px_22px_rgba(255,56,92,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer">
+                <Button variant="primary" size="lg" className="w-full sm:w-auto font-bold gap-2 shadow-[var(--shadow-primary-glow)] hover:shadow-[var(--shadow-primary-hover)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer">
                   <span>Accéder à mon compte</span>
                   <ArrowRight className="w-4 h-4" />
                 </Button>

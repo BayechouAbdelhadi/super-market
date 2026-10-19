@@ -80,7 +80,7 @@ export default async function CustomerLoyaltyAppPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/account"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1.5 rounded-lg hover:bg-[var(--color-surface-hover,#f7f7f7)]"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1.5 rounded-lg hover:bg-[var(--color-surface-hover)]"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Mon Espace Client</span>
@@ -150,7 +150,7 @@ export default async function CustomerLoyaltyAppPage() {
                   Solde de Points Disponibles
                 </h2>
               </div>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-success-subtle text-success-text border border-success-border">
                 Prêt à être utilisé en caisse
               </span>
             </div>
@@ -180,7 +180,7 @@ export default async function CustomerLoyaltyAppPage() {
 
             {/* Next Tier Progression */}
             {nextTier ? (
-              <div className="space-y-2 p-4 rounded-xl bg-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)]">
+              <div className="space-y-2 p-4 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)]">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-[var(--color-text)] flex items-center gap-1.5">
                     <TrendingUp className="w-3.5 h-3.5 text-[var(--color-primary)]" />
@@ -198,15 +198,15 @@ export default async function CustomerLoyaltyAppPage() {
                 </div>
               </div>
             ) : (
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-800 dark:text-amber-200 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+              <div className="p-3 rounded-xl bg-warning-subtle border border-warning-border text-xs font-semibold text-warning-text flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-warning-text shrink-0" />
                 <span>Félicitations ! Vous avez atteint le statut VIP maximum.</span>
               </div>
             )}
 
             {/* In-Store Usage Notice */}
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 flex items-start gap-3">
-              <Store className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+            <div className="p-4 rounded-xl bg-success-subtle border border-success-border text-xs text-success-text flex items-start gap-3">
+              <Store className="w-4 h-4 shrink-0 mt-0.5 text-success-text" />
               <div>
                 <span className="font-bold">Comment utiliser vos points ?</span> Lors de votre passage
                 en caisse au {settings.store.storeName}, indiquez simplement votre nom ou votre numéro de
@@ -285,12 +285,12 @@ export default async function CustomerLoyaltyAppPage() {
 
                     <div className="flex items-center gap-3">
                       {isEarn && (
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold bg-success-subtle text-success-text">
                           +{tx.points_earned} pts
                         </span>
                       )}
                       {isRedeem && (
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-500/10 text-rose-700 dark:text-rose-300">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold bg-danger-subtle text-danger-text">
                           -{tx.points_redeemed} pts (-{((Number(tx.points_redeemed) || 0) * pointValueInEuro).toFixed(2)} €)
                         </span>
                       )}

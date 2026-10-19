@@ -117,31 +117,31 @@ function UnsubscribeContent() {
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+    <div className="w-full max-w-lg mx-auto bg-surface rounded-2xl border border-border/80 shadow-sm p-6 sm:p-8">
       {/* Brand Header */}
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-rose-50 text-rose-600 mb-3 border border-rose-100">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-danger-subtle text-danger-text mb-3 border border-danger-border">
           <span className="text-xl">🛒</span>
         </div>
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+        <h1 className="text-xl sm:text-2xl font-bold text-text tracking-tight">
           Super Market Calais
         </h1>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mt-1">
+        <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mt-1">
           Gestion des préférences e-mail
         </p>
       </div>
 
       {/* Messages */}
       {error && (
-        <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200/80 text-red-700 text-xs sm:text-sm flex items-start gap-2.5">
+        <div className="mb-5 p-3.5 rounded-xl bg-danger-subtle border border-danger-border text-danger-text text-xs sm:text-sm flex items-start gap-2.5">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
 
       {message && (
-        <div className="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs sm:text-sm flex items-start gap-2.5">
-          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
+        <div className="mb-5 p-3.5 rounded-xl bg-success-subtle border border-success-border text-success-text text-xs sm:text-sm flex items-start gap-2.5">
+          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-success-text" />
           <span>{message}</span>
         </div>
       )}
@@ -150,22 +150,22 @@ function UnsubscribeContent() {
         /* Confirmed Unsubscribed State */
         <div className="space-y-5">
           <div className="text-center py-2">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 mb-3 border border-emerald-200">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-success-subtle text-success-text mb-3 border border-success-border">
               <MailCheck className="w-7 h-7" />
             </div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-text">
               Désabonnement confirmé
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-              L'adresse <strong className="text-slate-900 font-semibold">{email || "renseignée"}</strong> a été retirée de nos listes de diffusion. Vous ne recevrez plus nos e-mails d'offres promotionnelles.
+            <p className="text-xs sm:text-sm text-text-muted mt-2 leading-relaxed">
+              L'adresse <strong className="text-text font-semibold">{email || "renseignée"}</strong> a été retirée de nos listes de diffusion. Vous ne recevrez plus nos e-mails d'offres promotionnelles.
             </p>
           </div>
 
           {/* Loyalty Preservation Reassurance Box */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-xs text-slate-600 leading-relaxed flex items-start gap-3">
-            <ShieldCheck className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-surface-hover border border-border/70 text-xs text-text-muted leading-relaxed flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-info-text shrink-0 mt-0.5" />
             <div>
-              <strong className="text-slate-900 font-semibold block mb-0.5">
+              <strong className="text-text font-semibold block mb-0.5">
                 Vos points fidélité restent 100% actifs
               </strong>
               Ce désabonnement concerne uniquement les e-mails publicitaires. Votre compte fidélité en magasin et vos remises en caisse continuent de fonctionner normalement.
@@ -174,13 +174,13 @@ function UnsubscribeContent() {
 
           {/* Misclick recovery */}
           <div className="pt-2 text-center">
-            <p className="text-xs text-slate-500 mb-3">
+            <p className="text-xs text-text-muted mb-3">
               Vous avez cliqué par mégarde ou vous changez d'avis ?
             </p>
             <button
               onClick={handleResubscribe}
               disabled={loading}
-              className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium text-xs sm:text-sm bg-slate-900 hover:bg-slate-800 text-white transition-colors disabled:opacity-50"
+              className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium text-xs sm:text-sm bg-text hover:bg-text/90 text-background transition-colors disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -197,7 +197,7 @@ function UnsubscribeContent() {
         /* Unsubscribe Input Form */
         <form onSubmit={handleUnsubscribe} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-text uppercase tracking-wider mb-1.5">
               Adresse e-mail à désabonner
             </label>
             <input
@@ -206,9 +206,9 @@ function UnsubscribeContent() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre.email@exemple.com"
               required
-              className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+              className="w-full h-11 px-3.5 rounded-xl border border-border-hover text-sm focus:outline-none focus:ring-2 focus:ring-danger/20 focus:border-danger"
             />
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-text-muted mt-1">
               Vous ne recevrez plus les e-mails d'offres et bons plans hebdomadaires.
             </p>
           </div>
@@ -216,7 +216,7 @@ function UnsubscribeContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-xs sm:text-sm bg-rose-600 hover:bg-rose-700 text-white transition-colors disabled:opacity-50 shadow-sm"
+            className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-xs sm:text-sm bg-danger hover:bg-danger/90 text-on-color transition-colors disabled:opacity-50 shadow-sm"
           >
             {loading ? (
               <>
@@ -231,10 +231,10 @@ function UnsubscribeContent() {
       )}
 
       {/* Return home link */}
-      <div className="mt-8 pt-4 border-t border-slate-100 text-center">
+      <div className="mt-8 pt-4 border-t border-border text-center">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Retour au site Super Market Calais
@@ -246,10 +246,10 @@ function UnsubscribeContent() {
 
 export default function UnsubscribePage() {
   return (
-    <div className="h-full w-full overflow-y-auto bg-slate-50 flex flex-col justify-center items-center py-10 px-4 sm:px-6">
+    <div className="h-full w-full overflow-y-auto bg-surface-hover flex flex-col justify-center items-center py-10 px-4 sm:px-6">
       <Suspense
         fallback={
-          <div className="p-8 text-center text-slate-500 text-sm">
+          <div className="p-8 text-center text-text-muted text-sm">
             Chargement de la page de désabonnement...
           </div>
         }

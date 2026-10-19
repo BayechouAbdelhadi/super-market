@@ -92,7 +92,7 @@ export default async function AccountHubPage() {
                 type="submit"
                 variant="outline"
                 size="sm"
-                className="gap-1.5 text-xs font-semibold hover:text-[var(--color-danger)] hover:border-rose-300"
+                className="gap-1.5 text-xs font-semibold hover:text-[var(--color-danger)] hover:border-danger-border"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Se déconnecter</span>
@@ -105,9 +105,9 @@ export default async function AccountHubPage() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-10 space-y-8">
         {/* Welcome Banner */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-success-subtle text-success-text border border-success-border">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Espace Personnel Sécurisé</span>
             </div>
@@ -164,7 +164,7 @@ export default async function AccountHubPage() {
                       <Sparkles className="w-6 h-6" />
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-success-subtle text-success-text border border-success-border">
                         Actif
                       </span>
                       <StatusBadge status={tier} size="sm" />
@@ -211,10 +211,10 @@ export default async function AccountHubPage() {
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-warning-subtle text-warning-text flex items-center justify-center">
                     <Tag className="w-6 h-6" />
                   </div>
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-warning-subtle text-warning-text border border-warning-border">
                     Bientôt disponible
                   </span>
                 </div>
@@ -246,29 +246,29 @@ export default async function AccountHubPage() {
           >
             <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <UserCheck className="w-4 h-4 text-success-text" />
                 <h3 className="text-sm font-bold text-[var(--color-text)]">Vos Coordonnées de Compte</h3>
               </div>
               <span className="text-[11px] text-[var(--color-text-muted)]">Identifiants pour la caisse</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-              <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)]">
+              <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)]">
                 <span className="text-[var(--color-text-muted)] block text-[11px]">Nom &amp; Prénom</span>
                 <span className="font-bold text-[var(--color-text)] text-sm mt-0.5 block truncate">
                   {fullName}
                 </span>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)]">
+              <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)]">
                 <span className="text-[var(--color-text-muted)] block text-[11px]">Téléphone</span>
                 <span className="font-bold text-[var(--color-text)] text-sm mt-0.5 flex items-center gap-1.5 truncate">
-                  <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <Phone className="w-3.5 h-3.5 text-success-text shrink-0" />
                   <span>{phone || 'Non renseigné'}</span>
                 </span>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)]">
+              <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)]">
                 <span className="text-[var(--color-text-muted)] block text-[11px]">Adresse email</span>
                 <span className="font-bold text-[var(--color-text)] text-sm mt-0.5 flex items-center gap-1.5 truncate">
                   <Mail className="w-3.5 h-3.5 text-[var(--color-primary)] shrink-0" />
@@ -303,7 +303,7 @@ export default async function AccountHubPage() {
                 </div>
 
                 <div className="flex items-start gap-2 pt-2 border-t border-[var(--color-border)]">
-                  <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                  <Clock className="w-3.5 h-3.5 text-success-text shrink-0 mt-0.5" />
                   <div>
                     <span className="font-semibold block text-[11px]">Horaires d&apos;ouverture</span>
                     <span className="text-[var(--color-text-muted)]">Lundi – Samedi : 08h30 – 20h00</span>

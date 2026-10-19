@@ -69,7 +69,7 @@ export default async function ConfirmAccountPage({
             />
           ) : (
             <div className="space-y-5 text-center py-2">
-              <div className="mx-auto w-12 h-12 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-500/20">
+              <div className="mx-auto w-12 h-12 rounded-full bg-danger-subtle text-danger-text flex items-center justify-center border border-danger-border">
                 <AlertCircle className="w-6 h-6" />
               </div>
 
@@ -85,7 +85,7 @@ export default async function ConfirmAccountPage({
               <div className="pt-3 border-t border-[var(--color-border)] space-y-2">
                 <Link
                   href="/forgot-password"
-                  className="w-full inline-flex items-center justify-center h-10 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover,#f7f7f7)] text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-border)] transition-colors"
+                  className="w-full inline-flex items-center justify-center h-10 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-border)] transition-colors"
                 >
                   Demander un nouveau lien de connexion
                 </Link>
