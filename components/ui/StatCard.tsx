@@ -24,7 +24,7 @@ export function StatCard({
 }: StatCardProps) {
   const accentClasses = {
     brand:
-      "bg-gradient-to-br from-[var(--color-primary)]/[0.05] via-[var(--color-surface)] to-[var(--color-surface)] border-[var(--color-primary)]/25 shadow-[0_2px_8px_rgba(255,56,92,0.06)]",
+      "bg-gradient-to-br from-[var(--color-primary)]/[0.05] via-[var(--color-surface)] to-[var(--color-surface)] border-[var(--color-primary)]/25 shadow-[var(--shadow-subtle)]",
     default:
       "bg-[var(--color-surface)] border-[var(--color-border)] shadow-[0_1px_3px_rgba(0,0,0,0.04)]",
     neutral:
@@ -32,8 +32,8 @@ export function StatCard({
   }[accent];
 
   const trendColor = {
-    up: "text-emerald-700 bg-emerald-500/10 border-emerald-500/20 dark:text-emerald-300",
-    down: "text-rose-700 bg-rose-500/10 border-rose-500/20 dark:text-rose-300",
+    up: "text-success-text bg-success-subtle border-success-border",
+    down: "text-danger-text bg-danger-subtle border-danger-border",
     neutral: "text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] border-[var(--color-border)]",
   }[trendDirection];
 

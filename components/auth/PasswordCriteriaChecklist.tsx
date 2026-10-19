@@ -33,10 +33,10 @@ export function PasswordCriteriaChecklist({
   const progressPercent = Math.round((metCount / totalCount) * 100)
   const strengthColor =
     metCount <= 2
-      ? 'bg-rose-500'
+      ? 'bg-danger'
       : metCount < 5
-      ? 'bg-amber-500'
-      : 'bg-emerald-500'
+      ? 'bg-warning'
+      : 'bg-success'
 
   const strengthLabel =
     metCount === 0
@@ -48,7 +48,7 @@ export function PasswordCriteriaChecklist({
       : 'Robuste'
 
   return (
-    <div className="space-y-2 p-2.5 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] text-xs animate-in fade-in duration-200">
+    <div className="space-y-2 p-2.5 rounded-[var(--radius-button,12px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs animate-in fade-in duration-200">
       {/* Strength Bar */}
       <div className="space-y-1">
         <div className="flex justify-between items-center text-[11px] font-medium text-[var(--color-text-muted)]">
@@ -56,10 +56,10 @@ export function PasswordCriteriaChecklist({
           <span
             className={
               isComplete
-                ? 'font-bold text-emerald-600 dark:text-emerald-400'
+                ? 'font-bold text-success-text'
                 : metCount >= 3
-                ? 'font-semibold text-amber-600 dark:text-amber-400'
-                : 'font-semibold text-rose-600 dark:text-rose-400'
+                ? 'font-semibold text-warning-text'
+                : 'font-semibold text-danger-text'
             }
           >
             {strengthLabel} ({metCount}/{totalCount})
@@ -82,14 +82,14 @@ export function PasswordCriteriaChecklist({
               key={criterion.id}
               className={`flex items-center gap-1.5 transition-colors duration-200 ${
                 satisfied
-                  ? 'text-emerald-700 dark:text-emerald-300 font-medium'
+                  ? 'text-success-text font-medium'
                   : 'text-[var(--color-text-muted)]'
               }`}
             >
               <span
                 className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 transition-all ${
                   satisfied
-                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                    ? 'bg-success-subtle text-success-text'
                     : 'text-[var(--color-text-muted)]/40'
                 }`}
               >

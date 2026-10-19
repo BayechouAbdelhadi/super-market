@@ -20,25 +20,25 @@ export function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
       label: "Bronze",
       icon: "🥉",
       classes:
-        "bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-600/20 shadow-[0_1px_2px_rgba(217,119,6,0.06)]",
+        "bg-tier-bronze/10 text-tier-bronze-text border-tier-bronze/25 shadow-[var(--shadow-subtle)]",
     },
     silver: {
       label: "Silver",
       icon: "🥈",
       classes:
-        "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-400/25 shadow-[0_1px_2px_rgba(100,116,139,0.06)]",
+        "bg-tier-silver/10 text-tier-silver-text border-tier-silver/25 shadow-[var(--shadow-subtle)]",
     },
     gold: {
       label: "Gold",
       icon: "🥇",
       classes:
-        "bg-amber-500/15 text-amber-900 dark:text-amber-200 border-amber-500/35 shadow-[0_1px_3px_rgba(245,158,11,0.12)] font-bold",
+        "bg-tier-gold/15 text-tier-gold-text border-tier-gold/35 shadow-[var(--shadow-subtle)] font-bold",
     },
     vip: {
       label: "VIP Privilège",
       icon: "👑",
       classes:
-        "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-zinc-950 dark:border-zinc-200 shadow-[0_2px_6px_rgba(0,0,0,0.15)] font-bold",
+        "bg-tier-vip text-background border-tier-vip shadow-[var(--shadow-card)] font-bold",
     },
   }[normalized] || {
     label: status.toUpperCase(),

@@ -8,23 +8,23 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[var(--color-primary)] text-white border-transparent",
+          "bg-[var(--color-primary)] text-on-color border-transparent",
         secondary:
           "bg-[var(--color-surface-hover)] text-[var(--color-text)] border-[var(--color-border)]",
         destructive:
-          "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800",
+          "bg-danger-subtle text-danger-text border-danger-border",
         danger:
-          "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800",
+          "bg-danger-subtle text-danger-text border-danger-border",
         outline:
           "border-[var(--color-border)] text-[var(--color-text)]",
         success:
-          "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
+          "bg-success-subtle text-success-text border-success-border",
         warning:
-          "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+          "bg-warning-subtle text-warning-text border-warning-border",
         brand:
-          "bg-[var(--color-primary)] text-white border-transparent",
+          "bg-[var(--color-primary)] text-on-color border-transparent",
         neutral:
-          "bg-zinc-100 dark:bg-zinc-800 text-[var(--color-text)] border-[var(--color-border)]",
+          "bg-surface-hover text-[var(--color-text)] border-[var(--color-border)]",
       },
       size: {
         sm: "px-2 py-0.5 text-[11px]",

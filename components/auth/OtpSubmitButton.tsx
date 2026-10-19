@@ -12,7 +12,7 @@ export function OtpSubmitButton({ label = "Confirmer mon compte" }: { label?: st
       variant="primary"
       size="lg"
       loading={pending}
-      className="w-full font-bold shadow-[0_4px_14px_rgba(255,56,92,0.3)]"
+      className="w-full font-bold shadow-[var(--shadow-primary-glow)]"
     >
       {pending ? "Vérification en cours..." : label}
     </Button>

@@ -42,8 +42,8 @@ export function ConfirmAccountForm({ email, token, role }: ConfirmAccountFormPro
       <input type="hidden" name="token" value={token} />
 
       {/* Verified Account Notice */}
-      <div className="text-xs font-medium text-emerald-800 dark:text-emerald-200 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-[var(--radius-button,12px)] flex items-center gap-2">
-        <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+      <div className="text-xs font-medium text-success-text bg-success-subtle border border-success-border px-3 py-2 rounded-[var(--radius-button,12px)] flex items-center gap-2">
+        <ShieldCheck className="w-4 h-4 shrink-0 text-success-text" />
         <span>
           Compte <strong>{roleLabel}</strong> vérifié
         </span>
@@ -59,7 +59,7 @@ export function ConfirmAccountForm({ email, token, role }: ConfirmAccountFormPro
           value={email}
           readOnly
           tabIndex={-1}
-          className="h-10 bg-[var(--color-surface-hover,#f7f7f7)] cursor-not-allowed font-medium text-[var(--color-text)] opacity-90 select-none"
+          className="h-10 bg-[var(--color-surface-hover)] cursor-not-allowed font-medium text-[var(--color-text)] opacity-90 select-none"
           helperText="Rattachée à votre compte (non modifiable)"
           rightElement={<Lock className="w-4 h-4 text-[var(--color-text-muted)]" />}
         />
@@ -119,7 +119,7 @@ export function ConfirmAccountForm({ email, token, role }: ConfirmAccountFormPro
       />
 
       {errorMessage && (
-        <div className="text-xs font-semibold text-rose-700 dark:text-rose-300 text-center bg-rose-500/10 border border-rose-500/20 p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
+        <div className="text-xs font-semibold text-danger-text text-center bg-danger-subtle border border-danger-border p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
           {errorMessage}
         </div>
       )}
@@ -129,7 +129,7 @@ export function ConfirmAccountForm({ email, token, role }: ConfirmAccountFormPro
         variant="primary"
         size="lg"
         loading={isPending}
-        className="w-full font-bold shadow-[0_4px_14px_rgba(255,56,92,0.3)] mt-2"
+        className="w-full font-bold shadow-[var(--shadow-primary-glow)] mt-2"
       >
         {isPending ? 'Activation en cours...' : 'Confirmer et activer mon compte'}
       </Button>

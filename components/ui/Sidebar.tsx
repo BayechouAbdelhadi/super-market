@@ -161,8 +161,8 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
                 {link.icon}
                 {isLive && isCollapsed && (
                   <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
                   </span>
                 )}
               </div>
@@ -170,10 +170,10 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
                 <>
                   <span className="whitespace-nowrap flex-1">{link.name}</span>
                   {isLive && (
-                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase shadow-2xs">
+                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-success-subtle text-success-text border border-success-border uppercase shadow-2xs">
                       <span className="flex h-1.5 w-1.5 relative">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
                       </span>
                       <span>Live</span>
                     </span>
@@ -239,7 +239,7 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
                 size="sm"
                 loading={isLoggingOut}
                 onClick={handleLogout}
-                className="w-full justify-center gap-2 cursor-pointer font-medium hover:text-[var(--color-danger)] hover:bg-rose-50 hover:border-rose-200 transition-colors disabled:opacity-50"
+                className="w-full justify-center gap-2 cursor-pointer font-medium hover:text-[var(--color-danger)] hover:bg-danger-subtle hover:border-danger-border transition-colors disabled:opacity-50"
               >
                 {!isLoggingOut && <LogOut className="w-4 h-4 shrink-0" />}
                 <span>{isLoggingOut ? "Déconnexion..." : "Déconnexion"}</span>
@@ -260,7 +260,7 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
               title="Déconnexion"
               disabled={isLoggingOut}
               onClick={handleLogout}
-              className="p-2 rounded-lg bg-[var(--color-surface-hover)] text-[var(--color-danger)] hover:bg-rose-50 transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center"
+              className="p-2 rounded-lg bg-[var(--color-surface-hover)] text-[var(--color-danger)] hover:bg-danger-subtle transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center"
               aria-label="Déconnexion"
             >
               {isLoggingOut ? (

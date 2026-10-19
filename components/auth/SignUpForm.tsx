@@ -123,7 +123,7 @@ export function SignUpForm({ initialMessage, initialData }: SignUpFormProps) {
       <PasswordCriteriaChecklist password={password} />
 
       {errorMessage && (
-        <div className="text-xs font-semibold text-rose-700 dark:text-rose-300 text-center bg-rose-500/10 border border-rose-500/20 p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
+        <div className="text-xs font-semibold text-danger-text text-center bg-danger-subtle border border-danger-border p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
           {errorMessage}
         </div>
       )}
@@ -133,7 +133,7 @@ export function SignUpForm({ initialMessage, initialData }: SignUpFormProps) {
         variant="primary"
         size="lg"
         loading={isPending}
-        className="w-full font-bold shadow-[0_4px_14px_rgba(255,56,92,0.3)]"
+        className="w-full font-bold shadow-[var(--shadow-primary-glow)]"
       >
         {isPending ? 'Création en cours...' : 'Créer mon compte'}
       </Button>

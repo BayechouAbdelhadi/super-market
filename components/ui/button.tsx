@@ -10,13 +10,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-text)] shadow-[0_2px_8px_0_rgba(255,56,92,0.25)] hover:shadow-[0_4px_16px_0_rgba(255,56,92,0.35)] hover:-translate-y-[0.5px] active:translate-y-0 active:scale-[0.98]",
+          "bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-text)] shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary-hover)] hover:-translate-y-[0.5px] active:translate-y-0 active:scale-[0.98]",
         primary:
-          "bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-text)] shadow-[0_2px_8px_0_rgba(255,56,92,0.25)] hover:shadow-[0_4px_16px_0_rgba(255,56,92,0.35)] hover:-translate-y-[0.5px] active:translate-y-0 active:scale-[0.98]",
+          "bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-text)] shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary-hover)] hover:-translate-y-[0.5px] active:translate-y-0 active:scale-[0.98]",
         secondary:
           "bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text)] border border-[var(--color-border)] hover:border-[var(--color-border-hover)] shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] hover:shadow-[0_2px_6px_0_rgba(0,0,0,0.06)] active:scale-[0.98]",
         destructive:
-          "bg-[var(--color-danger)] hover:opacity-95 text-white shadow-[0_2px_8px_rgba(193,53,21,0.25)] active:scale-[0.98]",
+          "bg-[var(--color-danger)] hover:opacity-95 text-on-color shadow-[var(--shadow-danger)] active:scale-[0.98]",
         ghost:
           "bg-transparent hover:bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] active:scale-[0.98]",
         outline:

@@ -17,10 +17,10 @@ export function CustomerCard({ customer, onSelect }: CustomerCardProps) {
     .join("") || "CL";
 
   const tierGradients: Record<string, string> = {
-    bronze: "from-amber-600/20 to-amber-700/10 text-amber-900 border-amber-300",
-    silver: "from-slate-400/20 to-slate-500/10 text-slate-800 border-slate-300",
-    gold: "from-amber-400/30 to-yellow-500/15 text-amber-950 border-amber-400",
-    vip: "from-zinc-900 to-zinc-800 text-white border-zinc-900",
+    bronze: "from-tier-bronze/20 to-tier-bronze/10 text-tier-bronze-text border-tier-bronze/40",
+    silver: "from-tier-silver/20 to-tier-silver/10 text-tier-silver-text border-tier-silver/40",
+    gold: "from-tier-gold/30 to-tier-gold/15 text-tier-gold-text border-tier-gold",
+    vip: "from-tier-vip to-tier-vip/85 text-background border-tier-vip",
   };
 
   const avatarStyle =

@@ -219,13 +219,13 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
                   className="flex items-center justify-between px-3 py-3 rounded-xl text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors min-h-[44px]"
                 >
                   <div className="flex items-center gap-3">
-                    <Activity className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    <Activity className="w-5 h-5 text-success-text" />
                     <span>Flux en direct</span>
                   </div>
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase shadow-2xs">
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-success-subtle text-success-text border border-success-border uppercase shadow-2xs">
                     <span className="flex h-1.5 w-1.5 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
                     </span>
                     <span>Live</span>
                   </span>
@@ -237,7 +237,7 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
                   onClick={() => setSheetOpen(false)}
                   className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors min-h-[44px]"
                 >
-                  <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <Sparkles className="w-5 h-5 text-info-text" />
                   <span>Bons Plans &amp; Campagnes</span>
                 </Link>
               )}
@@ -247,7 +247,7 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
                   onClick={() => setSheetOpen(false)}
                   className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors min-h-[44px]"
                 >
-                  <Sliders className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  <Sliders className="w-5 h-5 text-warning-text" />
                   <span>Configuration de l&apos;App</span>
                 </Link>
               )}
@@ -277,7 +277,7 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
                   size="lg"
                   loading={isLoggingOut}
                   onClick={handleLogout}
-                  className="w-full justify-center gap-2 font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:border-rose-200 border border-[var(--color-border)] min-h-[48px] cursor-pointer disabled:opacity-50"
+                  className="w-full justify-center gap-2 font-semibold text-danger-text hover:bg-danger-subtle hover:border-danger-border border border-[var(--color-border)] min-h-[48px] cursor-pointer disabled:opacity-50"
                 >
                   {!isLoggingOut && <LogOut className="w-5 h-5 shrink-0" />}
                   <span>{isLoggingOut ? "Déconnexion..." : "Déconnexion"}</span>

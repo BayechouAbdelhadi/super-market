@@ -90,7 +90,7 @@ export function ResetPasswordForm({
       />
 
       {errorMessage && (
-        <div className="text-xs font-semibold text-rose-700 dark:text-rose-300 text-center bg-rose-500/10 border border-rose-500/20 p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
+        <div className="text-xs font-semibold text-danger-text text-center bg-danger-subtle border border-danger-border p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
           {errorMessage}
         </div>
       )}
@@ -100,7 +100,7 @@ export function ResetPasswordForm({
         variant="primary"
         size="lg"
         loading={isSubmitting}
-        className="w-full font-bold shadow-[0_4px_14px_rgba(255,56,92,0.3)] mt-2"
+        className="w-full font-bold shadow-[var(--shadow-primary-glow)] mt-2"
       >
         {isSubmitting ? 'Enregistrement...' : 'Enregistrer mon nouveau mot de passe'}
       </Button>

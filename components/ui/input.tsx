@@ -63,7 +63,7 @@ function Input({
           <span>{label}</span>
           {props.required && !label.trim().endsWith('*') && (
             <span
-              className="text-[var(--color-danger,#e11d48)] font-bold text-sm leading-none"
+              className="text-[var(--color-danger)] font-bold text-sm leading-none"
               title="Champ obligatoire"
               aria-hidden="true"
             >
