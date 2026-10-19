@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { resetPassword } from '@/app/(site)/reset-password/actions'
 import { Input } from '@/components/ui/input'
+import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { PasswordCriteriaChecklist } from '@/components/auth/PasswordCriteriaChecklist'
 
@@ -90,9 +91,7 @@ export function ResetPasswordForm({
       />
 
       {errorMessage && (
-        <div className="text-xs font-semibold text-danger-text text-center bg-danger-subtle border border-danger-border p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
-          {errorMessage}
-        </div>
+        <Alert variant="danger">{errorMessage}</Alert>
       )}
 
       <Button
@@ -100,17 +99,17 @@ export function ResetPasswordForm({
         variant="primary"
         size="lg"
         loading={isSubmitting}
-        className="w-full font-bold shadow-[var(--shadow-primary-glow)] mt-2"
+        className="w-full font-bold mt-2"
       >
         {isSubmitting ? 'Enregistrement...' : 'Enregistrer mon nouveau mot de passe'}
       </Button>
 
-      <div className="pt-2 text-center border-t border-[var(--color-border)]">
+      <div className="pt-3 text-center border-t border-[var(--color-border)]">
         <Link
           href="/login"
-          className="text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors inline-flex items-center gap-1.5"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-4 h-4" />
           <span>Retour à la connexion</span>
         </Link>
       </div>

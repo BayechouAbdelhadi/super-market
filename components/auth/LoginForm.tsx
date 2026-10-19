@@ -6,6 +6,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { login } from '@/app/(site)/login/actions'
 import type { AuthActionResult } from '@/app/(site)/login/actions'
 import { Input } from '@/components/ui/input'
+import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/sonner'
 
@@ -80,22 +81,18 @@ export function LoginForm({ initialMessage, initialSuccess }: LoginFormProps) {
       <div className="flex justify-end -mt-2">
         <Link
           href="/forgot-password"
-          className="text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+          className="text-sm font-medium text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-text)] hover:underline transition-colors"
         >
           Mot de passe oublié ?
         </Link>
       </div>
 
       {initialSuccess && !errorMessage && (
-        <div className="text-xs font-semibold text-success-text text-center bg-success-subtle border border-success-border p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
-          {initialSuccess}
-        </div>
+        <Alert variant="success">{initialSuccess}</Alert>
       )}
 
       {errorMessage && (
-        <div className="text-xs font-semibold text-danger-text text-center bg-danger-subtle border border-danger-border p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
-          {errorMessage}
-        </div>
+        <Alert variant="danger">{errorMessage}</Alert>
       )}
 
       <Button
@@ -103,17 +100,17 @@ export function LoginForm({ initialMessage, initialSuccess }: LoginFormProps) {
         variant="primary"
         size="lg"
         loading={isPending}
-        className="w-full font-bold shadow-[var(--shadow-primary-glow)]"
+        className="w-full font-bold"
       >
         {isPending ? 'Connexion en cours...' : 'Se connecter'}
       </Button>
 
-      <div className="pt-2 text-center border-t border-[var(--color-border)]">
-        <p className="text-xs text-[var(--color-text-muted)]">
+      <div className="pt-5 text-center border-t border-[var(--color-border)]">
+        <p className="text-sm text-[var(--color-text-muted)]">
           Pas encore de compte client ?{' '}
           <Link
             href="/signup"
-            className="font-bold text-[var(--color-primary)] hover:underline ml-1"
+            className="font-semibold text-primary-ink underline-offset-4 hover:underline ml-1"
           >
             Créer un compte
           </Link>

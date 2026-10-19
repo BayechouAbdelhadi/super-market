@@ -215,3 +215,15 @@ export function verifyPasswordResetToken(token: string): PendingResetPayload | n
   }
   return payload;
 }
+
+/**
+ * Verifies an account-activation token: valid signature, activation type and not expired.
+ * Pages call this instead of reading `Date.now()` during render.
+ */
+export function verifyActivationToken(token: string, now: number = Date.now()): AccountActivationPayload | null {
+  const payload = verifySignedToken<AccountActivationPayload>(token);
+  if (!payload || payload.type !== "ACCOUNT_ACTIVATION" || now > payload.expiresAt) {
+    return null;
+  }
+  return payload;
+}

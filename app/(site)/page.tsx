@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getAppSettings } from "@/lib/settings/service";
 import { OPENING_HOURS, STORE_LOCATION, STORE_TIME_ZONE } from "@/lib/store/config";
 import { DAY_NAMES, getOpeningStatus, type DayIndex } from "@/lib/store/opening-hours";
-import { SiteHeader } from "@/components/public/home/SiteHeader";
 import { HeroSection } from "@/components/public/home/HeroSection";
 import { DepartmentsSection } from "@/components/public/home/DepartmentsSection";
 import { PracticalInfoSection } from "@/components/public/home/PracticalInfoSection";
@@ -69,7 +68,6 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd(store)).replace(/</g, "\\u003c") }}
       />
-      <SiteHeader storeName={store.storeName} phone={store.phone} status={status} />
       <HeroSection storeName={store.storeName} tagline={store.tagline} phone={store.phone} status={status} />
       <main className="mx-auto w-full max-w-6xl space-y-16 px-4 pt-16 pb-12 sm:space-y-24 sm:px-6 sm:pt-24 md:pb-16">
         <DepartmentsSection />

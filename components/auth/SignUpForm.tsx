@@ -7,6 +7,7 @@ import { signup } from '@/app/(site)/signup/actions'
 import type { SignUpActionResult } from '@/app/(site)/signup/actions'
 import { PasswordCriteriaChecklist } from '@/components/auth/PasswordCriteriaChecklist'
 import { Input } from '@/components/ui/input'
+import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/sonner'
 
@@ -123,9 +124,7 @@ export function SignUpForm({ initialMessage, initialData }: SignUpFormProps) {
       <PasswordCriteriaChecklist password={password} />
 
       {errorMessage && (
-        <div className="text-xs font-semibold text-danger-text text-center bg-danger-subtle border border-danger-border p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
-          {errorMessage}
-        </div>
+        <Alert variant="danger">{errorMessage}</Alert>
       )}
 
       <Button
@@ -133,17 +132,17 @@ export function SignUpForm({ initialMessage, initialData }: SignUpFormProps) {
         variant="primary"
         size="lg"
         loading={isPending}
-        className="w-full font-bold shadow-[var(--shadow-primary-glow)]"
+        className="w-full font-bold"
       >
         {isPending ? 'Création en cours...' : 'Créer mon compte'}
       </Button>
 
-      <div className="pt-2 text-center border-t border-[var(--color-border)]">
-        <p className="text-xs text-[var(--color-text-muted)]">
+      <div className="pt-5 text-center border-t border-[var(--color-border)]">
+        <p className="text-sm text-[var(--color-text-muted)]">
           Déjà un compte ?{' '}
           <Link
             href="/login"
-            className="font-bold text-[var(--color-primary)] hover:underline ml-1"
+            className="font-semibold text-primary-ink underline-offset-4 hover:underline ml-1"
           >
             Se connecter
           </Link>

@@ -2,10 +2,11 @@
 
 import { useActionState, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff, Lock, ArrowLeft, ShieldCheck } from 'lucide-react'
+import { Eye, EyeOff, Lock, ArrowLeft } from 'lucide-react'
 import { confirmAccount } from '@/app/(site)/confirm-account/actions'
 import type { ConfirmAccountResult } from '@/app/(site)/confirm-account/actions'
 import { Input } from '@/components/ui/input'
+import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/sonner'
 import { PasswordCriteriaChecklist } from '@/components/auth/PasswordCriteriaChecklist'
@@ -38,16 +39,13 @@ export function ConfirmAccountForm({ email, token, role }: ConfirmAccountFormPro
   const roleLabel = role === 'CASHIER' ? 'Caissier' : 'Client Fidélité'
 
   return (
-    <form action={formAction} className="space-y-3.5">
+    <form action={formAction} className="space-y-5">
       <input type="hidden" name="token" value={token} />
 
       {/* Verified Account Notice */}
-      <div className="text-xs font-medium text-success-text bg-success-subtle border border-success-border px-3 py-2 rounded-[var(--radius-button,12px)] flex items-center gap-2">
-        <ShieldCheck className="w-4 h-4 shrink-0 text-success-text" />
-        <span>
-          Compte <strong>{roleLabel}</strong> vérifié
-        </span>
-      </div>
+      <Alert variant="success">
+        Compte <strong>{roleLabel}</strong> vérifié
+      </Alert>
 
       {/* Pre-filled and Read-Only Email Field */}
       <div>
@@ -119,9 +117,7 @@ export function ConfirmAccountForm({ email, token, role }: ConfirmAccountFormPro
       />
 
       {errorMessage && (
-        <div className="text-xs font-semibold text-danger-text text-center bg-danger-subtle border border-danger-border p-3 rounded-[var(--radius-button,12px)] animate-in fade-in">
-          {errorMessage}
-        </div>
+        <Alert variant="danger">{errorMessage}</Alert>
       )}
 
       <Button
@@ -129,17 +125,17 @@ export function ConfirmAccountForm({ email, token, role }: ConfirmAccountFormPro
         variant="primary"
         size="lg"
         loading={isPending}
-        className="w-full font-bold shadow-[var(--shadow-primary-glow)] mt-2"
+        className="w-full font-bold mt-2"
       >
         {isPending ? 'Activation en cours...' : 'Confirmer et activer mon compte'}
       </Button>
 
-      <div className="pt-2 text-center border-t border-[var(--color-border)]">
+      <div className="pt-3 text-center border-t border-[var(--color-border)]">
         <Link
           href="/login"
-          className="text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors inline-flex items-center gap-1.5"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-4 h-4" />
           <span>Retour à la connexion</span>
         </Link>
       </div>

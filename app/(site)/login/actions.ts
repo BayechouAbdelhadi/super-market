@@ -97,5 +97,7 @@ export async function login(
 export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()
+  // The shared site header shows the signed-in state: refresh it
+  revalidatePath('/', 'layout')
   redirect('/login')
 }

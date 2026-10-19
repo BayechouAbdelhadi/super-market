@@ -36,7 +36,6 @@
   --shadow-pill-hover: 0 4px 10px 0 rgba(0, 0, 0, 0.06), 0 14px 28px 0 rgba(0, 0, 0, 0.08);
   --shadow-primary: 0 2px 8px 0 color-mix(in srgb, var(--color-primary) 25%, transparent);
   --shadow-primary-hover: 0 4px 16px 0 color-mix(in srgb, var(--color-primary) 35%, transparent);
-  --shadow-primary-glow: 0 4px 16px 0 color-mix(in srgb, var(--color-primary) 32%, transparent);
   --shadow-danger: 0 2px 8px 0 color-mix(in srgb, var(--color-danger) 25%, transparent);
 
   /* Base Next.js variables */

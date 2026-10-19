@@ -1,26 +1,35 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Phone } from "lucide-react";
+import { ArrowRight, LogOut, Phone } from "lucide-react";
 import { cn } from "cn";
 import { buttonVariants } from "@/components/ui/button";
+import { logout } from "@/app/(site)/login/actions";
 import { formatPhone, phoneHref } from "@/lib/store/contact";
 import type { OpeningStatus } from "@/lib/store/opening-hours";
-import { OpenStatus } from "./OpenStatus";
+import { OpenStatus } from "@/components/public/home/OpenStatus";
 
 const NAV_LINKS = [
-  { href: "#rayons", label: "Nos rayons" },
-  { href: "#infos", label: "Infos pratiques" },
-  { href: "#fidelite", label: "Fidélité" },
+  { href: "/#rayons", label: "Nos rayons" },
+  { href: "/#infos", label: "Infos pratiques" },
+  { href: "/#fidelite", label: "Fidélité" },
 ];
+
+/** Where the signed-in visitor's own space is (customer account, cashier or admin dashboard). */
+export interface AccountLink {
+  href: string;
+  label: string;
+}
 
 interface SiteHeaderProps {
   storeName: string;
   phone: string;
   status: OpeningStatus;
+  /** Signed-in visitor's space; null shows the login button */
+  account: AccountLink | null;
 }
 
-/** Home page top bar, sticky inside the scroll container of app/(site)/layout.tsx (§ 25.4). */
-export function SiteHeader({ storeName, phone, status }: SiteHeaderProps) {
+/** Top bar of every public page, sticky inside the scroll container of app/(site)/layout.tsx (§ 25.4). */
+export function SiteHeader({ storeName, phone, status, account }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 md:h-18">
@@ -45,16 +54,29 @@ export function SiteHeader({ storeName, phone, status }: SiteHeaderProps) {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2">
-          {phone && (
+          {phone && !account && (
             <a href={phoneHref(phone)} className={cn(buttonVariants({ variant: "ghost" }), "hidden md:inline-flex")}>
               <Phone />
               <span>{formatPhone(phone)}</span>
             </a>
           )}
-          <Link href="/login" className={buttonVariants({ variant: "primary" })}>
-            <span>Mon compte</span>
-            <ArrowRight className="hidden sm:block" />
-          </Link>
+          {account ? (
+            <>
+              <Link href={account.href} className={buttonVariants({ variant: "primary" })}>
+                {account.label}
+              </Link>
+              <form action={logout}>
+                <button type="submit" aria-label="Se déconnecter" className={buttonVariants({ variant: "ghost", size: "icon" })}>
+                  <LogOut />
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link href="/login" className={buttonVariants({ variant: "primary" })}>
+              <span>Mon compte</span>
+              <ArrowRight className="hidden sm:block" />
+            </Link>
+          )}
         </div>
       </div>
     </header>
