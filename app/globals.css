@@ -5,35 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Semantic Design Tokens (AGENTS.md § 10) — Airbnb-Inspired Template */
-  --color-background: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-hover: #f7f7f7;
-  --color-text: #222222;
-  --color-text-muted: #717171;
-  --color-border: #ebebeb;
-  --color-border-hover: #b0b0b0;
+  /* Semantic Design Tokens (AGENTS.md § 10).
+     Base colors and radii come from lib/theme (written by the root layout, light and dark).
+     This block only derives tokens from them. */
 
-  /* Airbnb Signature Rausch Coral */
-  --color-primary: #ff385c;
-  --color-primary-hover: #e00b41;
-  --color-primary-text: #ffffff;
-
-  /* Status colors (§ 10). Each status has:
-     - base: solid fills, icons, accents (the same in light and dark)
-     - -text: readable text on surfaces and on the -subtle tint (light/dark specific)
-     - -subtle / -border: tinted backgrounds and borders, derived from the base */
-  --color-success: #059669;
-  --color-success-text: #047857;
-  --color-warning: #d97706;
-  --color-warning-text: #b45309;
-  --color-danger: #e11d48;
-  --color-danger-text: #be123c;
-  --color-info: #4f46e5;
-  --color-info-text: #4338ca;
-  /* Highlight: a secondary accent for special items (premium features, team, VIP-style labels) */
-  --color-highlight: #9333ea;
-  --color-highlight-text: #7e22ce;
+  /* Status tints and borders, derived from each status base color */
   --color-success-subtle: color-mix(in srgb, var(--color-success) 10%, transparent);
   --color-success-border: color-mix(in srgb, var(--color-success) 20%, transparent);
   --color-warning-subtle: color-mix(in srgb, var(--color-warning) 10%, transparent);
@@ -44,17 +20,7 @@
   --color-info-border: color-mix(in srgb, var(--color-info) 20%, transparent);
   --color-highlight-subtle: color-mix(in srgb, var(--color-highlight) 10%, transparent);
   --color-highlight-border: color-mix(in srgb, var(--color-highlight) 20%, transparent);
-  /* Status text shades for dark backgrounds: used by dark mode and by .scheme-dark */
-  --on-dark-success-text: #6ee7b7;
-  --on-dark-warning-text: #fcd34d;
-  --on-dark-danger-text: #fda4af;
-  --on-dark-info-text: #a5b4fc;
-  --on-dark-highlight-text: #d8b4fe;
 
-  /* Text and icons on any solid colored fill (primary, status, tier) */
-  --color-on-color: #ffffff;
-  /* Dimmed backdrop behind dialogs and drawers */
-  --color-overlay: rgb(0 0 0 / 0.4);
   /* Primary-tinted text for brand subtitles */
   --color-primary-ink: color-mix(in srgb, var(--color-primary) 55%, var(--color-text));
 
@@ -67,31 +33,6 @@
   --glow-warm: radial-gradient(circle at center, rgb(245 158 11 / 0.16) 0%, rgb(251 113 133 / 0.08) 40%, transparent 70%);
   --glow-fresh: radial-gradient(circle at center, rgb(16 185 129 / 0.12) 0%, rgb(56 189 248 / 0.08) 40%, transparent 70%);
   --glow-footer: radial-gradient(ellipse at center, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, rgb(245 158 11 / 0.06) 45%, transparent 75%);
-
-  /* Fixed near-black for scrims over photos and dark text on photo chips (same in dark mode) */
-  --color-scrim: #171717;
-
-  /* Status Colors (§ 15) */
-  --color-tier-bronze: #a86326;
-  --color-tier-silver: #717171;
-  --color-tier-gold: #c28b1e;
-  --color-tier-vip: var(--on-light-tier-vip);
-  /* Tier text on the tier tint (the tier base colors are too light for small text) */
-  --color-tier-bronze-text: var(--on-light-tier-bronze-text);
-  --color-tier-silver-text: var(--on-light-tier-silver-text);
-  --color-tier-gold-text: var(--on-light-tier-gold-text);
-  /* Light-mode tier values: used by light mode and by .scheme-light */
-  --on-light-tier-vip: #222222;
-  --on-light-tier-bronze-text: #92400e;
-  --on-light-tier-silver-text: #334155;
-  --on-light-tier-gold-text: #78350f;
-  --on-light-background: #ffffff;
-
-  /* Border Radius System (AGENTS.md § 4) */
-  --radius-button: 12px;
-  --radius-input: 12px;
-  --radius-card: 16px;
-  --radius-dialog: 20px;
 
   /* Airbnb Elevation & Shadow Tokens */
   --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -257,39 +198,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: #141414;
-    --color-surface: #1e1e1e;
-    --color-surface-hover: #2b2b2b;
-    --color-text: #f7f7f7;
-    --color-text-muted: #b0b0b0;
-    --color-border: #2c2c2c;
-    --color-border-hover: #484848;
-
-    --color-primary: #ff385c;
-    --color-primary-hover: #e00b41;
-    --color-primary-text: #ffffff;
-
-    --color-tier-vip: #f7f7f7;
-    --color-tier-bronze-text: #fcd34d;
-    --color-tier-silver-text: #cbd5e1;
-    --color-tier-gold-text: #fde68a;
-
-    --color-success-text: var(--on-dark-success-text);
-    --color-warning-text: var(--on-dark-warning-text);
-    --color-danger-text: var(--on-dark-danger-text);
-    --color-info-text: var(--on-dark-info-text);
-    --color-highlight-text: var(--on-dark-highlight-text);
-    --color-highlight-subtle: color-mix(in srgb, var(--color-highlight) 18%, transparent);
-    --color-highlight-border: color-mix(in srgb, var(--color-highlight) 36%, transparent);
+    /* Stronger tints on dark surfaces (base colors switch via lib/theme) */
     --color-success-subtle: color-mix(in srgb, var(--color-success) 16%, transparent);
     --color-warning-subtle: color-mix(in srgb, var(--color-warning) 16%, transparent);
     --color-danger-subtle: color-mix(in srgb, var(--color-danger) 16%, transparent);
     --color-info-subtle: color-mix(in srgb, var(--color-info) 18%, transparent);
+    --color-highlight-subtle: color-mix(in srgb, var(--color-highlight) 18%, transparent);
     --color-success-border: color-mix(in srgb, var(--color-success) 32%, transparent);
     --color-warning-border: color-mix(in srgb, var(--color-warning) 32%, transparent);
     --color-danger-border: color-mix(in srgb, var(--color-danger) 32%, transparent);
     --color-info-border: color-mix(in srgb, var(--color-info) 36%, transparent);
-    --color-overlay: rgb(0 0 0 / 0.65);
+    --color-highlight-border: color-mix(in srgb, var(--color-highlight) 36%, transparent);
   }
 }
 

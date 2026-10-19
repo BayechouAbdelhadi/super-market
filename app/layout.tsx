@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { activeTheme, themeToCss } from "@/lib/theme";
 import "./globals.css";
 
 const inter = Inter({
@@ -33,6 +34,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={`${inter.variable} ${inter.className} font-sans antialiased`}>
+      <head>
+        {/* Theme colors and radii (lib/theme): one place to restyle the whole app */}
+        <style id="theme-tokens" dangerouslySetInnerHTML={{ __html: themeToCss(activeTheme) }} />
+      </head>
       <body className="h-full overflow-hidden font-sans">
         {children}
         <Toaster />
