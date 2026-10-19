@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Creates (or updates) the limited Postgres user of the background worker and
-# prints the full DATABASE_URL to set on the worker container.
+# Creates (or updates) the limited Postgres user of the background jobs (pg-boss,
+# running inside the Next.js app) and prints the full DATABASE_URL to set on the app.
 #
 # Run on the VPS, where the Supabase containers run:
 #   bash scripts/setup-worker-db.sh
@@ -9,12 +9,12 @@
 #   ssh root@<vps> 'bash -s' < scripts/setup-worker-db.sh
 #
 # Every run sets a NEW password (Postgres only stores a hash, it cannot be read
-# back). A worker already running keeps working until it reconnects, so update
-# its DATABASE_URL and restart it right after.
+# back). A running app keeps working until it reconnects, so update its
+# DATABASE_URL and redeploy it right after.
 #
 # Options (environment variables):
 #   DB_CONTAINER_FILTER  docker name filter of the database container (default: supabase-db)
-#   DB_HOST              host the worker uses to reach Postgres (default: supabase-db)
+#   DB_HOST              host the app uses to reach Postgres (default: supabase-db)
 #   DB_PORT              (default: 5432)
 #   DB_NAME              (default: postgres)
 #   WORKER_ROLE          (default: pgboss_worker)
@@ -64,7 +64,7 @@ ALTER ROLE :"role" WITH LOGIN PASSWORD :'pw';
 GRANT CONNECT, CREATE ON DATABASE :"db" TO :"role";
 SQL
 
-# --- Check the password works over TCP, like the worker connects -------------
+# --- Check the password works over TCP, like the app connects ----------------
 log "checking login..."
 current_user="$(PGPASSWORD="$PASSWORD" docker exec -i -e PGPASSWORD "$DB_CONTAINER" \
   psql -h 127.0.0.1 -p "$DB_PORT" -U "$WORKER_ROLE" -d "$DB_NAME" -tAc "SELECT current_user;")" \
@@ -74,4 +74,4 @@ log "OK: '${WORKER_ROLE}' can log in."
 
 # --- Output: the only line on stdout, so it can be captured -------------------
 echo "DATABASE_URL=postgres://${WORKER_ROLE}:${PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-log "set this DATABASE_URL on the worker container, then restart the worker."
+log "set this DATABASE_URL on the app, then redeploy it."
