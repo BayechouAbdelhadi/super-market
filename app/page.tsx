@@ -75,8 +75,8 @@ export default async function Home() {
 
       {/* The one scroll container (§ 25.1) */}
       <div className="min-h-0 flex-1 overflow-y-auto motion-safe:scroll-smooth">
-        <main className="mx-auto w-full max-w-6xl space-y-16 px-4 py-8 sm:space-y-24 sm:px-6 md:py-12">
-          <HeroSection tagline={store.tagline} address={store.address} phone={store.phone} status={status} />
+        <HeroSection storeName={store.storeName} tagline={store.tagline} phone={store.phone} status={status} />
+        <main className="mx-auto w-full max-w-6xl space-y-16 px-4 pt-16 pb-12 sm:space-y-24 sm:px-6 sm:pt-24 md:pb-16">
           <DepartmentsSection />
           <PracticalInfoSection
             storeName={store.storeName}

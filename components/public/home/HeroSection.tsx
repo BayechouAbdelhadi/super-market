@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Clock, Gift, MapPin, Navigation, Package, Phone, Store } from "lucide-react";
+import { Clock, Gift, Navigation, Package, Phone, Store } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { formatPhone, phoneHref } from "@/lib/store/contact";
 import { STORE_LOCATION } from "@/lib/store/config";
@@ -14,30 +14,61 @@ const FACTS = [
 ];
 
 interface HeroSectionProps {
+  storeName: string;
   tagline: string;
-  address: string;
   phone: string;
   status: OpeningStatus;
 }
 
-export function HeroSection({ tagline, address, phone, status }: HeroSectionProps) {
+/**
+ * Full-width storefront banner carrying the page title, then the intro and main actions.
+ * Text on the photo keeps fixed light-on-dark contrast: it sits on an image, not on a theme surface.
+ */
+export function HeroSection({ storeName, tagline, phone, status }: HeroSectionProps) {
   return (
-    <section aria-labelledby="hero-title" className="grid items-center gap-8 md:grid-cols-2 lg:gap-12">
-      <div className="space-y-6">
-        <OpenStatus initial={status} />
+    <section aria-labelledby="hero-title">
+      <div className="relative flex aspect-[4/3] max-h-[520px] min-h-[320px] w-full flex-col justify-end overflow-hidden bg-scrim sm:aspect-[21/9] md:aspect-[24/9]">
+        <Image
+          src="/super-market-calais-storefront.webp"
+          alt={`Devanture du ${storeName}, 205 avenue Antoine de Saint-Exupéry à Calais`}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        {/* Darken bottom and left, where the title sits, for contrast on any photo */}
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-transparent via-scrim/10 to-scrim/80" />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-scrim/60 via-scrim/20 to-transparent" />
 
-        <div className="space-y-4">
-          <h1 id="hero-title" className="text-4xl font-bold tracking-tight text-text sm:text-5xl lg:leading-[1.1]">
+        <div className="relative mx-auto w-full max-w-6xl space-y-4 px-4 pb-6 sm:px-6 sm:pb-10 md:pb-12">
+          <OpenStatus initial={status} className="bg-surface shadow-md" />
+          <h1
+            id="hero-title"
+            className="max-w-3xl text-3xl font-bold tracking-tight text-on-color drop-shadow-md sm:text-4xl md:text-5xl md:leading-[1.1]"
+          >
             {tagline}
           </h1>
-          <p className="max-w-xl text-lg leading-relaxed text-text-muted">
+        </div>
+      </div>
+
+      <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 pt-8 sm:px-6 md:grid-cols-[1fr_auto] md:items-start md:gap-12 md:pt-10">
+        <div className="space-y-6">
+          <p className="max-w-2xl text-lg leading-relaxed text-text-muted">
             Volailles fraîches, primeur, surgelés, pâtisserie orientale et boissons en pack au meilleur prix, au cœur
             du quartier Saint-Exupéry.
           </p>
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
+            {FACTS.map(({ icon: Icon, label }) => (
+              <li key={label} className="flex items-center gap-2 text-sm font-medium text-text">
+                <Icon aria-hidden className="h-4 w-4 shrink-0 text-text-muted" />
+                <span>{label}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* Phones get the same two actions in the bottom bar (MobileActionBar) */}
-        <div className="hidden gap-3 md:flex md:flex-wrap">
+        <div className="hidden gap-3 md:flex md:flex-col">
           <a
             href={STORE_LOCATION.googleMapsUrl}
             target="_blank"
@@ -53,37 +84,6 @@ export function HeroSection({ tagline, address, phone, status }: HeroSectionProp
               <span>Appeler le {formatPhone(phone)}</span>
             </a>
           )}
-        </div>
-
-        <ul className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-6">
-          {FACTS.map(({ icon: Icon, label }) => (
-            <li key={label} className="flex items-center gap-2 text-sm font-medium text-text">
-              <Icon aria-hidden className="h-4 w-4 shrink-0 text-text-muted" />
-              <span>{label}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="relative">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-dialog)] border border-border bg-surface-hover">
-          <Image
-            src="/super-market-calais-storefront.webp"
-            alt="Devanture du Super Market, 205 avenue Antoine de Saint-Exupéry à Calais"
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
-          />
-        </div>
-        <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-3 shadow-lg sm:right-auto sm:max-w-sm">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-surface-hover text-text">
-            <MapPin aria-hidden className="h-5 w-5" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-text">Votre magasin à Calais</p>
-            <p className="truncate text-sm text-text-muted">{address}</p>
-          </div>
         </div>
       </div>
     </section>
