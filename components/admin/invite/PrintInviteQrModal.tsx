@@ -25,6 +25,7 @@ import {
   downloadCanvasAsPng,
   printFidelityFlyer,
 } from "./exportFlyerCanvas";
+import { QR_COLORS } from "./qr-colors";
 
 interface PrintInviteQrModalProps {
   isOpen: boolean;
@@ -53,10 +54,7 @@ export function PrintInviteQrModal({
       QRCode.toDataURL(finalUrl, {
         width: 800,
         margin: 2,
-        color: {
-          dark: "#0f172a",
-          light: "#ffffff",
-        },
+        color: QR_COLORS,
         errorCorrectionLevel: "H",
       })
         .then((url) => setQrDataUrl(url))
@@ -76,10 +74,7 @@ export function PrintInviteQrModal({
         activeQr = await QRCode.toDataURL(finalUrl, {
           width: 800,
           margin: 2,
-          color: {
-            dark: "#0f172a",
-            light: "#ffffff",
-          },
+          color: QR_COLORS,
           errorCorrectionLevel: "H",
         });
         setQrDataUrl(activeQr);
@@ -103,10 +98,7 @@ export function PrintInviteQrModal({
         activeQr = await QRCode.toDataURL(finalUrl, {
           width: 800,
           margin: 2,
-          color: {
-            dark: "#0f172a",
-            light: "#ffffff",
-          },
+          color: QR_COLORS,
           errorCorrectionLevel: "H",
         });
         setQrDataUrl(activeQr);
@@ -136,10 +128,7 @@ export function PrintInviteQrModal({
         activeQr = await QRCode.toDataURL(finalUrl, {
           width: 800,
           margin: 2,
-          color: {
-            dark: "#0f172a",
-            light: "#ffffff",
-          },
+          color: QR_COLORS,
           errorCorrectionLevel: "H",
         });
         setQrDataUrl(activeQr);
@@ -234,7 +223,7 @@ export function PrintInviteQrModal({
       >
         <div className="p-4 sm:p-6 space-y-5">
           {/* Top helper text */}
-          <p className="text-xs text-slate-500 text-center no-print -mt-1">
+          <p className="text-xs text-text-muted text-center no-print -mt-1">
             Imprimez cette affiche pour vos comptoirs de caisse ou téléchargez l&apos;image pour vos communications.
           </p>
 
@@ -253,9 +242,9 @@ export function PrintInviteQrModal({
             <Button
               type="button"
               onClick={handlePrint}
-              className="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.99]"
+              className="w-full h-11 rounded-xl bg-text hover:bg-text/90 text-background font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.99]"
             >
-              <Printer className="w-4 h-4 text-rose-400" />
+              <Printer className="w-4 h-4 text-primary" />
               <span>Imprimer l&apos;affiche (Format A4 / A5)</span>
             </Button>
 
@@ -265,9 +254,9 @@ export function PrintInviteQrModal({
                 variant="outline"
                 disabled={isExporting}
                 onClick={handleDownloadWholeFlyer}
-                className="h-10 px-2 rounded-xl border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-700 hover:text-slate-900"
+                className="h-10 px-2 rounded-xl border-border hover:border-border-hover hover:bg-surface-hover font-semibold text-xs flex items-center justify-center gap-1.5 transition-all text-text hover:text-text"
               >
-                <FileImage className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                <FileImage className="w-3.5 h-3.5 text-danger-text shrink-0" />
                 <span className="truncate">Affiche PNG HD</span>
               </Button>
 
@@ -275,9 +264,9 @@ export function PrintInviteQrModal({
                 type="button"
                 variant="outline"
                 onClick={handleDownloadQrOnly}
-                className="h-10 px-2 rounded-xl border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-700 hover:text-slate-900"
+                className="h-10 px-2 rounded-xl border-border hover:border-border-hover hover:bg-surface-hover font-semibold text-xs flex items-center justify-center gap-1.5 transition-all text-text hover:text-text"
               >
-                <QrCode className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                <QrCode className="w-3.5 h-3.5 text-text-muted shrink-0" />
                 <span className="truncate">QR Code seul</span>
               </Button>
 
@@ -285,9 +274,9 @@ export function PrintInviteQrModal({
                 type="button"
                 variant="outline"
                 onClick={handleCopyLink}
-                className="h-10 px-2 rounded-xl border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all text-slate-700 hover:text-slate-900"
+                className="h-10 px-2 rounded-xl border-border hover:border-border-hover hover:bg-surface-hover font-semibold text-xs flex items-center justify-center gap-1.5 transition-all text-text hover:text-text"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <Copy className="w-3.5 h-3.5 text-slate-600 shrink-0" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-success-text shrink-0" /> : <Copy className="w-3.5 h-3.5 text-text-muted shrink-0" />}
                 <span className="truncate">{copied ? "Copié !" : "Copier le lien"}</span>
               </Button>
             </div>

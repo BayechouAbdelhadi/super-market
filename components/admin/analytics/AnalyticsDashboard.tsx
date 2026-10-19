@@ -40,8 +40,8 @@ export function AnalyticsDashboard({ initialData, euroToPointsRatio }: Analytics
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
               Tableau de Bord
             </h1>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-success-subtle text-success-text border border-success-border">
+              <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
               <span>Base Supabase • Synchronisée</span>
             </div>
           </div>
@@ -67,7 +67,7 @@ export function AnalyticsDashboard({ initialData, euroToPointsRatio }: Analytics
             <Button
               variant="primary"
               size="sm"
-              className="gap-1.5 text-xs font-bold h-9 rounded-full shadow-[0_2px_8px_rgba(255,56,92,0.25)]"
+              className="gap-1.5 text-xs font-bold h-9 rounded-full shadow-[var(--shadow-primary)]"
             >
               <Store className="w-3.5 h-3.5" />
               <span>Ouvrir la caisse</span>
@@ -94,7 +94,7 @@ export function AnalyticsDashboard({ initialData, euroToPointsRatio }: Analytics
         <div className="flex items-center gap-4 flex-wrap">
           <Link
             href="/admin/live"
-            className="hover:text-[var(--color-primary)] transition-colors flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400"
+            className="hover:text-[var(--color-primary)] transition-colors flex items-center gap-1.5 font-semibold text-success-text"
           >
             <Activity className="w-3.5 h-3.5" />
             <span>Flux en direct</span>

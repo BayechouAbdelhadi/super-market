@@ -243,9 +243,9 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] via-[var(--color-surface)] to-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] via-[var(--color-surface)] to-[var(--color-surface-hover)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20">
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-warning-subtle text-warning-text border border-warning-border">
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Console Administrateur · Configuration Globale</span>
           </div>
@@ -274,7 +274,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
             type="submit"
             form="settings-form"
             disabled={saving || resetting}
-            className="text-xs h-10 px-5 gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover,#e0314f)] text-white shadow-xs"
+            className="text-xs h-10 px-5 gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-on-color shadow-xs"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'Enregistrement...' : 'Enregistrer'}</span>
@@ -283,14 +283,14 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       </div>
 
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-semibold text-rose-700 dark:text-rose-300 flex items-center gap-2.5">
+        <div className="p-4 rounded-xl bg-danger-subtle border border-danger-border text-xs font-semibold text-danger-text flex items-center gap-2.5">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {/* Tabs Navigation */}
-      <div className="flex overflow-x-auto no-scrollbar gap-2 p-1.5 rounded-xl bg-[var(--color-surface-hover,#f3f4f6)] border border-[var(--color-border)]">
+      <div className="flex overflow-x-auto no-scrollbar gap-2 p-1.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)]">
         <button
           type="button"
           onClick={() => setActiveTab('loyalty')}
@@ -391,7 +391,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   </div>
 
                   {/* Realtime Live Simulator */}
-                  <div className="p-4 rounded-xl bg-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] space-y-2.5">
+                  <div className="p-4 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-2.5">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-text)]">
                       <Calculator className="w-3.5 h-3.5 text-[var(--color-primary)]" />
                       <span>Simulateur de conversion en direct</span>
@@ -492,8 +492,8 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="space-y-1.5 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-[var(--color-surface-hover,#f9fafb)]">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                <div className="space-y-1.5 p-3.5 rounded-xl border border-border bg-[var(--color-surface-hover)]">
+                  <span className="text-xs font-bold text-text block">
                     🥈 Seuil Silver (pts)
                   </span>
                   <input
@@ -507,8 +507,8 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   <span className="text-[10px] text-[var(--color-text-muted)] block">Bronze : 0 à {parseInt(tierSilverStr, 10) - 1 || 499} pts</span>
                 </div>
 
-                <div className="space-y-1.5 p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-500/5">
-                  <span className="text-xs font-bold text-amber-800 dark:text-amber-300 block">
+                <div className="space-y-1.5 p-3.5 rounded-xl border border-warning-border bg-warning-subtle">
+                  <span className="text-xs font-bold text-warning-text block">
                     🥇 Seuil Gold (pts)
                   </span>
                   <input
@@ -522,8 +522,8 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   <span className="text-[10px] text-[var(--color-text-muted)] block">Silver : {tierSilverStr} à {parseInt(tierGoldStr, 10) - 1 || 1999} pts</span>
                 </div>
 
-                <div className="space-y-1.5 p-3.5 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-500/5">
-                  <span className="text-xs font-bold text-purple-800 dark:text-purple-300 block">
+                <div className="space-y-1.5 p-3.5 rounded-xl border border-highlight-border bg-highlight-subtle">
+                  <span className="text-xs font-bold text-highlight-text block">
                     👑 Seuil VIP (pts)
                   </span>
                   <input
@@ -546,7 +546,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
           <div className="space-y-6">
             <Card padded="lg" className="border-[var(--color-border)] bg-[var(--color-surface)] space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-highlight-subtle text-highlight-text flex items-center justify-center shrink-0">
                   <CreditCard className="w-5 h-5" />
                 </div>
                 <div>
@@ -651,7 +651,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
           <div className="space-y-6">
             <Card padded="lg" className="border-[var(--color-border)] bg-[var(--color-surface)] space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-success-subtle text-success-text flex items-center justify-center shrink-0">
                   <Store className="w-5 h-5" />
                 </div>
                 <div>
@@ -776,7 +776,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
           <div className="space-y-6">
             <Card padded="lg" className="border-[var(--color-border)] bg-[var(--color-surface)] space-y-5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-info-subtle text-info-text flex items-center justify-center shrink-0">
                   <Bell className="w-5 h-5" />
                 </div>
                 <div>
@@ -852,7 +852,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 </div>
 
                 {/* Toggles d'envoi automatique */}
-                <label className="flex items-start gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-hover,#f9fafb)] cursor-pointer hover:border-[var(--color-primary)]/40 transition-colors">
+                <label className="flex items-start gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-hover)] cursor-pointer hover:border-[var(--color-primary)]/40 transition-colors">
                   <input
                     type="checkbox"
                     checked={settings.notifications.sendWelcomeEmail}
@@ -877,7 +877,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-hover,#f9fafb)] cursor-pointer hover:border-[var(--color-primary)]/40 transition-colors">
+                <label className="flex items-start gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-hover)] cursor-pointer hover:border-[var(--color-primary)]/40 transition-colors">
                   <input
                     type="checkbox"
                     checked={settings.notifications.sendCashierInviteEmail}
@@ -909,7 +909,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
         {/* Footer info & Save bar */}
         <div className="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="text-xs text-[var(--color-text-muted)] flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-success-text shrink-0" />
             <span>
               {settings.updatedAt ? (
                 <>Dernière mise à jour le <strong>{new Date(settings.updatedAt).toLocaleString('fr-FR')}</strong>{settings.updatedBy ? ` par ${settings.updatedBy}` : ''}</>
@@ -923,7 +923,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
             <Button
               type="submit"
               disabled={saving || resetting}
-              className="text-xs h-10 px-5 gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover,#e0314f)] text-white shadow-xs"
+              className="text-xs h-10 px-5 gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-on-color shadow-xs"
             >
               <Save className="w-4 h-4" />
               <span>{saving ? 'Enregistrement en cours...' : 'Enregistrer les modifications'}</span>
@@ -934,9 +934,9 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
 
       {/* Reset Confirmation Modal */}
       {showResetConfirm && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-overlay backdrop-blur-xs flex items-center justify-center p-4">
           <div className="w-full max-w-md rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] p-6 space-y-4 shadow-xl">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-warning-subtle text-warning-text flex items-center justify-center">
               <RotateCcw className="w-6 h-6" />
             </div>
 
@@ -963,7 +963,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 type="button"
                 onClick={handleReset}
                 disabled={resetting}
-                className="text-xs h-9 px-4 bg-amber-600 hover:bg-amber-700 text-white"
+                className="text-xs h-9 px-4 bg-warning hover:bg-warning/90 text-on-color"
               >
                 {resetting ? 'Rétablissement...' : 'Confirmer la réinitialisation'}
               </Button>

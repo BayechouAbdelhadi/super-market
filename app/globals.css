@@ -31,6 +31,9 @@
   --color-danger-text: #be123c;
   --color-info: #4f46e5;
   --color-info-text: #4338ca;
+  /* Highlight: a secondary accent for special items (premium features, team, VIP-style labels) */
+  --color-highlight: #9333ea;
+  --color-highlight-text: #7e22ce;
   --color-success-subtle: color-mix(in srgb, var(--color-success) 10%, transparent);
   --color-success-border: color-mix(in srgb, var(--color-success) 20%, transparent);
   --color-warning-subtle: color-mix(in srgb, var(--color-warning) 10%, transparent);
@@ -39,11 +42,14 @@
   --color-danger-border: color-mix(in srgb, var(--color-danger) 20%, transparent);
   --color-info-subtle: color-mix(in srgb, var(--color-info) 10%, transparent);
   --color-info-border: color-mix(in srgb, var(--color-info) 20%, transparent);
+  --color-highlight-subtle: color-mix(in srgb, var(--color-highlight) 10%, transparent);
+  --color-highlight-border: color-mix(in srgb, var(--color-highlight) 20%, transparent);
   /* Status text shades for dark backgrounds: used by dark mode and by .scheme-dark */
   --on-dark-success-text: #6ee7b7;
   --on-dark-warning-text: #fcd34d;
   --on-dark-danger-text: #fda4af;
   --on-dark-info-text: #a5b4fc;
+  --on-dark-highlight-text: #d8b4fe;
 
   /* Text and icons on any solid colored fill (primary, status, tier) */
   --color-on-color: #ffffff;
@@ -193,6 +199,10 @@
   --color-info-text: var(--color-info-text);
   --color-info-subtle: var(--color-info-subtle);
   --color-info-border: var(--color-info-border);
+  --color-highlight: var(--color-highlight);
+  --color-highlight-text: var(--color-highlight-text);
+  --color-highlight-subtle: var(--color-highlight-subtle);
+  --color-highlight-border: var(--color-highlight-border);
   --color-on-color: var(--color-on-color);
   --color-overlay: var(--color-overlay);
   --color-scrim: var(--color-scrim);
@@ -268,6 +278,9 @@
     --color-warning-text: var(--on-dark-warning-text);
     --color-danger-text: var(--on-dark-danger-text);
     --color-info-text: var(--on-dark-info-text);
+    --color-highlight-text: var(--on-dark-highlight-text);
+    --color-highlight-subtle: color-mix(in srgb, var(--color-highlight) 18%, transparent);
+    --color-highlight-border: color-mix(in srgb, var(--color-highlight) 36%, transparent);
     --color-success-subtle: color-mix(in srgb, var(--color-success) 16%, transparent);
     --color-warning-subtle: color-mix(in srgb, var(--color-warning) 16%, transparent);
     --color-danger-subtle: color-mix(in srgb, var(--color-danger) 16%, transparent);
@@ -295,6 +308,7 @@
   --color-warning-text: var(--on-dark-warning-text);
   --color-danger-text: var(--on-dark-danger-text);
   --color-info-text: var(--on-dark-info-text);
+  --color-highlight-text: var(--on-dark-highlight-text);
 }
 
 html {

@@ -174,31 +174,31 @@ export function DealsManager({
     switch (status) {
       case "COMPLETED":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-success-subtle text-success-text border border-success-border">
             Terminé
           </span>
         );
       case "RUNNING":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 animate-pulse">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-info-subtle text-info-text border border-info-border animate-pulse">
             En cours
           </span>
         );
       case "PAUSED":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-warning-subtle text-warning-text border border-warning-border">
             En pause
           </span>
         );
       case "SCHEDULED":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-highlight-subtle text-highlight-text border border-highlight-border">
             Programmé
           </span>
         );
       default:
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/20">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-surface-hover text-text border border-border">
             Brouillon
           </span>
         );
@@ -208,7 +208,7 @@ export function DealsManager({
   return (
     <div className="space-y-6">
       {/* Top Header Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover)] border border-[var(--color-border)] shadow-xs">
         <div className="space-y-1.5">
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20">
             <Sparkles className="w-3.5 h-3.5" />
@@ -246,19 +246,19 @@ export function DealsManager({
         </Card>
 
         <Card padded="sm" className="space-y-1">
-          <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider block">
+          <span className="text-[11px] font-semibold text-info-text uppercase tracking-wider block">
             Jobs Actifs
           </span>
-          <strong className="text-lg sm:text-2xl font-bold font-mono text-blue-600 dark:text-blue-400 block">
+          <strong className="text-lg sm:text-2xl font-bold font-mono text-info-text block">
             {summary.activeJobs}
           </strong>
         </Card>
 
         <Card padded="sm" className="space-y-1">
-          <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider block">
+          <span className="text-[11px] font-semibold text-success-text uppercase tracking-wider block">
             Emails Délivrés
           </span>
-          <strong className="text-lg sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 block">
+          <strong className="text-lg sm:text-2xl font-bold font-mono text-success-text block">
             {summary.totalEmailsSent}
           </strong>
         </Card>
@@ -267,7 +267,7 @@ export function DealsManager({
           <span className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block">
             Échecs Non-bloquants
           </span>
-          <strong className="text-lg sm:text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 block">
+          <strong className="text-lg sm:text-2xl font-bold font-mono text-danger-text block">
             {summary.totalFailed}
           </strong>
         </Card>
@@ -407,13 +407,13 @@ export function DealsManager({
 
                   <div className="w-full h-2 rounded-full bg-[var(--color-border)]/60 overflow-hidden flex">
                     <div
-                      className="bg-emerald-500 h-full transition-all duration-500"
+                      className="bg-success h-full transition-all duration-500"
                       style={{
                         width: `${stats.totalTargets > 0 ? (stats.sentCount / stats.totalTargets) * 100 : 0}%`,
                       }}
                     />
                     <div
-                      className="bg-rose-500 h-full transition-all duration-500"
+                      className="bg-danger h-full transition-all duration-500"
                       style={{
                         width: `${stats.totalTargets > 0 ? (stats.failedCount / stats.totalTargets) * 100 : 0}%`,
                       }}
@@ -422,11 +422,11 @@ export function DealsManager({
 
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-[var(--color-text-muted)] pt-0.5 font-medium">
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
+                      <span className="text-success-text font-semibold">
                         ✅ {stats.sentCount} envoyé{stats.sentCount > 1 ? "s" : ""}
                       </span>
                       {stats.failedCount > 0 && (
-                        <span className="text-rose-700 dark:text-rose-400 font-semibold">
+                        <span className="text-danger-text font-semibold">
                           ⚠️ {stats.failedCount} échec{stats.failedCount > 1 ? "s" : ""}
                         </span>
                       )}
@@ -476,7 +476,7 @@ export function DealsManager({
                         size="sm"
                         onClick={() => handlePause(camp)}
                         loading={isActionRunning}
-                        className="w-full sm:w-auto justify-center gap-1.5 text-xs text-amber-700 dark:text-amber-300 font-semibold"
+                        className="w-full sm:w-auto justify-center gap-1.5 text-xs text-warning-text font-semibold"
                       >
                         <Pause className="w-3.5 h-3.5" />
                         <span>Pause</span>
@@ -489,7 +489,7 @@ export function DealsManager({
                         size="sm"
                         onClick={() => handleResume(camp)}
                         loading={isActionRunning}
-                        className="w-full sm:w-auto justify-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-300 font-semibold"
+                        className="w-full sm:w-auto justify-center gap-1.5 text-xs text-success-text font-semibold"
                       >
                         <Play className="w-3.5 h-3.5" />
                         <span>Reprendre</span>
@@ -502,9 +502,9 @@ export function DealsManager({
                       variant="outline"
                       size="sm"
                       onClick={() => setPreviewingCampaign(camp)}
-                      className="w-full sm:w-auto justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/40 hover:bg-indigo-100/50"
+                      className="w-full sm:w-auto justify-center gap-1.5 text-xs font-bold text-info-text border-info-border bg-info-subtle hover:bg-info-subtle"
                     >
-                      <Eye className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                      <Eye className="w-3.5 h-3.5 text-info-text shrink-0" />
                       <span>Visualiser l&apos;email</span>
                     </Button>
 

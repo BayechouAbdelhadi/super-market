@@ -127,10 +127,10 @@ export function LiveFeedHub({ initialData }: LiveFeedHubProps) {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
               Flux des Opérations en Direct
             </h1>
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold tracking-wider bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 uppercase shadow-2xs">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold tracking-wider bg-success-subtle text-success-text border border-success-border uppercase shadow-2xs">
               <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
               </span>
               <span>En direct</span>
             </span>
@@ -177,7 +177,7 @@ export function LiveFeedHub({ initialData }: LiveFeedHubProps) {
         <Card className="p-4 rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
           <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
             <span className="font-semibold uppercase tracking-wider text-[10px]">Chiffre d&apos;Affaires</span>
-            <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <TrendingUp className="w-4 h-4 text-success-text" />
           </div>
           <div className="mt-2 text-xl sm:text-2xl font-extrabold text-[var(--color-text)]">
             {formatCurrency(data.stats.caToday)} €
@@ -190,7 +190,7 @@ export function LiveFeedHub({ initialData }: LiveFeedHubProps) {
         <Card className="p-4 rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
           <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
             <span className="font-semibold uppercase tracking-wider text-[10px]">Transactions</span>
-            <CreditCard className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <CreditCard className="w-4 h-4 text-info-text" />
           </div>
           <div className="mt-2 text-xl sm:text-2xl font-extrabold text-[var(--color-text)]">
             {data.stats.operationsToday}
@@ -203,9 +203,9 @@ export function LiveFeedHub({ initialData }: LiveFeedHubProps) {
         <Card className="p-4 rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
           <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
             <span className="font-semibold uppercase tracking-wider text-[10px]">Points Distribués</span>
-            <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <ArrowUpRight className="w-4 h-4 text-success-text" />
           </div>
-          <div className="mt-2 text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+          <div className="mt-2 text-xl sm:text-2xl font-extrabold text-success-text">
             +{data.stats.pointsEarnedToday.toLocaleString("fr-FR")} pts
           </div>
           <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
@@ -248,7 +248,7 @@ export function LiveFeedHub({ initialData }: LiveFeedHubProps) {
               onClick={() => setTypeFilter("ALL")}
               className={`px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${
                 typeFilter === "ALL"
-                  ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-2xs"
+                  ? "bg-[var(--color-primary)] text-on-color border-[var(--color-primary)] shadow-2xs"
                   : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
               }`}
             >
@@ -259,7 +259,7 @@ export function LiveFeedHub({ initialData }: LiveFeedHubProps) {
               onClick={() => setTypeFilter("PURCHASE")}
               className={`px-3 py-1.5 rounded-full border transition-colors cursor-pointer flex items-center gap-1.5 ${
                 typeFilter === "PURCHASE"
-                  ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs"
+                  ? "bg-success text-on-color border-success shadow-2xs"
                   : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
               }`}
             >
@@ -271,7 +271,7 @@ export function LiveFeedHub({ initialData }: LiveFeedHubProps) {
               onClick={() => setTypeFilter("REDEEM")}
               className={`px-3 py-1.5 rounded-full border transition-colors cursor-pointer flex items-center gap-1.5 ${
                 typeFilter === "REDEEM"
-                  ? "bg-rose-600 text-white border-rose-600 shadow-2xs"
+                  ? "bg-danger text-on-color border-danger shadow-2xs"
                   : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
               }`}
             >
@@ -327,7 +327,7 @@ export function LiveFeedHub({ initialData }: LiveFeedHubProps) {
                       <div
                         className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 border ${
                           isPurchase
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                            ? "bg-success-subtle text-success-text border-success-border"
                             : "bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/20"
                         }`}
                       >
@@ -371,7 +371,7 @@ export function LiveFeedHub({ initialData }: LiveFeedHubProps) {
                       <div
                         className={`text-xs font-bold inline-flex items-center gap-1 mt-0.5 ${
                           isEarn
-                            ? "text-emerald-600 dark:text-emerald-400"
+                            ? "text-success-text"
                             : "text-[var(--color-primary)]"
                         }`}
                       >

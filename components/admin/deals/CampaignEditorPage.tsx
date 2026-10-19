@@ -598,7 +598,7 @@ export function CampaignEditorPage({
           <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
             {lastSavedAt && (
               <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] px-2.5 py-1 rounded-lg border border-[var(--color-border)]">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 <span>
                   Brouillon auto : {lastSavedAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                 </span>
@@ -623,7 +623,7 @@ export function CampaignEditorPage({
               variant="ghost"
               size="sm"
               onClick={handleResetDraft}
-              className="gap-1 text-xs text-[var(--color-text-muted)] hover:text-rose-600"
+              className="gap-1 text-xs text-[var(--color-text-muted)] hover:text-danger-text"
               title="Réinitialiser le formulaire"
             >
               <RotateCcw className="w-3 h-3" />
@@ -675,16 +675,16 @@ export function CampaignEditorPage({
                 isCurrent
                   ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)] font-bold shadow-xs ring-2 ring-[var(--color-primary)]/20"
                   : isDone
-                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-semibold hover:border-emerald-500"
+                  ? "bg-success-subtle border-success-border text-success-text font-semibold hover:border-success"
                   : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-primary)]/50"
               }`}
             >
               <div
                 className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                   isDone
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-success text-on-color"
                     : isCurrent
-                    ? "bg-[var(--color-primary)] text-white"
+                    ? "bg-[var(--color-primary)] text-on-color"
                     : "bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]"
                 }`}
               >
@@ -702,8 +702,8 @@ export function CampaignEditorPage({
       </div>
 
       {errorMsg && (
-        <div className="p-3.5 sm:p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 font-medium flex items-center gap-2.5 shadow-2xs">
-          <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+        <div className="p-3.5 sm:p-4 rounded-xl bg-danger-subtle border border-danger-border text-xs text-danger-text font-medium flex items-center gap-2.5 shadow-2xs">
+          <AlertCircle className="w-4 h-4 shrink-0 text-danger-text" />
           <span>{errorMsg}</span>
         </div>
       )}
@@ -759,7 +759,7 @@ export function CampaignEditorPage({
                   <div
                     className={`w-5 h-5 rounded-md border mt-0.5 flex items-center justify-center transition-colors shrink-0 ${
                       isChecked
-                        ? "bg-[var(--color-primary)] border-[var(--color-primary)] text-white"
+                        ? "bg-[var(--color-primary)] border-[var(--color-primary)] text-on-color"
                         : "border-[var(--color-border)] bg-[var(--color-surface)]"
                     }`}
                   >
@@ -871,7 +871,7 @@ export function CampaignEditorPage({
                   L&apos;ensemble des {targetCount || 0} clients ciblés reçoivent l&apos;email dès le démarrage de la campagne en un seul passage.
                 </p>
               </div>
-              <div className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <div className="text-[11px] font-semibold text-success-text">
                 Idéal pour : Promotions flash &amp; arrivages du jour
               </div>
             </button>
@@ -897,7 +897,7 @@ export function CampaignEditorPage({
                   Le job s&apos;exécute chaque jour en envoyant une limite définie de clients jusqu&apos;à la date de fin ou épuisement de l&apos;audience.
                 </p>
               </div>
-              <div className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+              <div className="text-[11px] font-semibold text-info-text">
                 Idéal pour : Éviter l&apos;engorgement en caisse
               </div>
             </button>
@@ -994,10 +994,10 @@ export function CampaignEditorPage({
               <button
                 type="button"
                 onClick={() => applyPreset(CAMPAIGN_PRESETS[0])}
-                className="flex-1 sm:flex-initial justify-center px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="flex-1 sm:flex-initial justify-center px-3 py-2 rounded-xl bg-warning-subtle hover:bg-warning-subtle text-warning-text border border-warning-border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 title="Remplir instantanément avec un modèle de promotion prêt à l'envoi"
               >
-                <Wand2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <Wand2 className="w-3.5 h-3.5 text-warning-text" />
                 <span>⚡ Modèle prêt</span>
               </button>
 
@@ -1005,7 +1005,7 @@ export function CampaignEditorPage({
                 type="button"
                 variant="outline"
                 onClick={() => setIsVisualizerOpen(true)}
-                className="flex-1 sm:flex-initial justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50 whitespace-nowrap"
+                className="flex-1 sm:flex-initial justify-center gap-1.5 text-xs font-bold text-info-text border-info-border bg-info-subtle hover:bg-info-subtle whitespace-nowrap"
               >
                 <Eye className="w-3.5 h-3.5" />
                 <span>Visualiser l&apos;email</span>
@@ -1061,11 +1061,11 @@ export function CampaignEditorPage({
                   alt="Bannière campagne"
                   className="w-full h-44 object-cover object-center"
                 />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                <div className="absolute inset-0 bg-scrim/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-3 py-1.5 rounded-xl bg-white text-slate-900 text-xs font-bold hover:bg-slate-100 shadow-md cursor-pointer flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-xl bg-surface text-text text-xs font-bold hover:bg-surface-hover shadow-md cursor-pointer flex items-center gap-1.5"
                   >
                     <Upload className="w-3.5 h-3.5" />
                     <span>Remplacer</span>
@@ -1073,7 +1073,7 @@ export function CampaignEditorPage({
                   <button
                     type="button"
                     onClick={() => setImageUrl(null)}
-                    className="px-3 py-1.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-md cursor-pointer flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-xl bg-danger text-on-color text-xs font-bold hover:bg-danger/90 shadow-md cursor-pointer flex items-center gap-1.5"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Supprimer</span>
@@ -1187,7 +1187,7 @@ export function CampaignEditorPage({
                 type="button"
                 variant="outline"
                 onClick={() => setIsVisualizerOpen(true)}
-                className="w-full sm:w-auto justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
+                className="w-full sm:w-auto justify-center gap-1.5 text-xs font-bold text-info-text border-info-border bg-info-subtle hover:bg-info-subtle"
               >
                 <Eye className="w-3.5 h-3.5" />
                 <span>Visualiser l&apos;email</span>
@@ -1260,7 +1260,7 @@ export function CampaignEditorPage({
                   variant="outline"
                   size="sm"
                   onClick={() => setIsVisualizerOpen(true)}
-                  className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50 ml-2"
+                  className="gap-1.5 text-xs font-bold text-info-text border-info-border bg-info-subtle hover:bg-info-subtle ml-2"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   <span>Aperçu</span>
@@ -1304,14 +1304,14 @@ export function CampaignEditorPage({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
                   <label htmlFor="deal-scheduled-time" className="flex items-center gap-2 text-xs font-bold text-[var(--color-text)] cursor-pointer">
-                    <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <Clock className="w-4 h-4 text-info-text" />
                     <span>Heure d&apos;exécution du job *</span>
                   </label>
                   <p className="text-xs text-[var(--color-text-muted)]">
                     Heure précise d&apos;envoi des emails (format 24h, heure de Paris).
                   </p>
-                  <div className="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1.5">
-                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <div className="text-[11px] font-mono text-info-text font-semibold flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full bg-success animate-pulse" />
                     <span>Heure actuelle à Paris : <strong>{currentParisTime}</strong></span>
                   </div>
                 </div>
@@ -1326,7 +1326,7 @@ export function CampaignEditorPage({
                       }}
                       className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                         isMorning
-                          ? "bg-amber-500 text-white shadow-2xs"
+                          ? "bg-warning text-on-color shadow-2xs"
                           : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                       }`}
                     >
@@ -1339,7 +1339,7 @@ export function CampaignEditorPage({
                       }}
                       className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                         !isMorning
-                          ? "bg-indigo-600 text-white shadow-2xs"
+                          ? "bg-info text-on-color shadow-2xs"
                           : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                       }`}
                     >
@@ -1354,10 +1354,10 @@ export function CampaignEditorPage({
                       required
                       value={scheduledTime}
                       onChange={(e) => setScheduledTime(e.target.value)}
-                      className="h-11 px-3 text-sm font-bold font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs w-full sm:w-auto"
+                      className="h-11 px-3 text-sm font-bold font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-info shadow-2xs w-full sm:w-auto"
                     />
                     {scheduledTime === "00:00" && (
-                      <span className="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold border border-indigo-500/20 whitespace-nowrap">
+                      <span className="px-2 py-1 rounded-lg bg-info-subtle text-info-text text-[11px] font-bold border border-info-border whitespace-nowrap">
                         🌙 Minuit
                       </span>
                     )}
@@ -1367,9 +1367,9 @@ export function CampaignEditorPage({
 
               {/* Warning for Suspicious Morning Time */}
               {isSuspiciousMorningTime && (
-                <div className="p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-950 dark:text-amber-200 space-y-2 animate-in fade-in">
+                <div className="p-3.5 rounded-xl bg-warning-subtle border border-warning-border text-xs text-warning-text space-y-2 animate-in fade-in">
                   <div className="flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <AlertCircle className="w-4 h-4 text-warning-text shrink-0 mt-0.5" />
                     <div className="space-y-0.5 min-w-0">
                       <strong className="block font-bold break-words">
                         Attention au format 24h : vous avez saisi « {scheduledTime} » ({schedH}h{String(schedM).padStart(2, "0")} du matin)
@@ -1384,7 +1384,7 @@ export function CampaignEditorPage({
                     <button
                       type="button"
                       onClick={() => setScheduledTime(pmEquivalent)}
-                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all"
+                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-warning hover:bg-warning/90 text-on-color font-bold text-xs shadow-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all"
                     >
                       <Clock className="w-3.5 h-3.5" />
                       <span>Passer à {pmEquivalent} ({pmEquivalent.replace(":", "h")} après-midi)</span>
@@ -1399,19 +1399,19 @@ export function CampaignEditorPage({
                 <div className="break-words min-w-0">
                   {isStartDateToday ? (
                     scheduledTime > currentParisTime ? (
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                      <span className="text-success-text font-bold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-success shrink-0" />
                         <span>🟢 Prévu aujourd&apos;hui à {scheduledTime} — En attente</span>
                       </span>
                     ) : (
-                      <span className="text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                      <span className="text-info-text font-bold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-info shrink-0" />
                         <span>⚡ Heure passée ({scheduledTime}) : lancement immédiat</span>
                       </span>
                     )
                   ) : (
-                    <span className="text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
+                    <span className="text-highlight-text font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-highlight shrink-0" />
                       <span>📅 Programmé pour le {startDate} à {scheduledTime}</span>
                     </span>
                   )}
@@ -1437,8 +1437,8 @@ export function CampaignEditorPage({
                     onClick={() => setScheduledTime(preset.val)}
                     className={`px-2.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
                       scheduledTime === preset.val
-                        ? "bg-indigo-600 text-white font-bold shadow-2xs"
-                        : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:border-indigo-400"
+                        ? "bg-info text-on-color font-bold shadow-2xs"
+                        : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:border-info"
                     }`}
                   >
                     {preset.label}
@@ -1466,7 +1466,7 @@ export function CampaignEditorPage({
                   type="button"
                   variant="outline"
                   onClick={() => setIsVisualizerOpen(true)}
-                  className="w-full sm:w-auto justify-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50"
+                  className="w-full sm:w-auto justify-center gap-1.5 text-xs font-bold text-info-text border-info-border bg-info-subtle hover:bg-info-subtle"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   <span>Visualiser l&apos;email</span>

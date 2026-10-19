@@ -51,9 +51,9 @@ export default async function AdminHubPage() {
   return (
     <div className="space-y-8">
         {/* Admin Welcome Banner */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-success-subtle text-success-text border border-success-border">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Console Administrateur</span>
             </div>
@@ -81,7 +81,7 @@ export default async function AdminHubPage() {
             </div>
             <div className="p-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs shadow-xs min-w-[120px]">
               <span className="text-[var(--color-text-muted)] block text-[11px]">Clients fidélité</span>
-              <strong className="text-sm sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400 block mt-0.5">
+              <strong className="text-sm sm:text-base font-extrabold text-success-text block mt-0.5">
                 {totalCustomers}
               </strong>
             </div>
@@ -116,7 +116,7 @@ export default async function AdminHubPage() {
                     <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center group-hover:scale-105 transition-transform">
                       <Store className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-success-subtle text-success-text border border-success-border">
                       Opérationnel
                     </span>
                   </div>
@@ -141,26 +141,26 @@ export default async function AdminHubPage() {
             {/* App 2: Analytics & Indicateurs Financiers */}
             <Link
               href="/admin/analytics"
-              className="group block focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-2xl"
+              className="group block focus:outline-none focus:ring-2 focus:ring-info rounded-2xl"
             >
               <Card
                 padded="lg"
-                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-blue-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
+                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-info/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-info" />
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <div className="w-12 h-12 rounded-xl bg-info-subtle text-info-text flex items-center justify-center group-hover:scale-105 transition-transform">
                       <BarChart3 className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-info-subtle text-info-text border border-info-border">
                       En direct
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-info-text transition-colors">
                       Analytics &amp; Ventes
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
@@ -169,7 +169,7 @@ export default async function AdminHubPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
+                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-info-text group-hover:translate-x-1 transition-transform">
                   <span>Voir les statistiques</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -179,26 +179,26 @@ export default async function AdminHubPage() {
             {/* App 3: Gestion des Clients */}
             <Link
               href="/admin/customers"
-              className="group block focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-2xl"
+              className="group block focus:outline-none focus:ring-2 focus:ring-success rounded-2xl"
             >
               <Card
                 padded="lg"
-                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-emerald-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
+                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-success/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-success" />
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <div className="w-12 h-12 rounded-xl bg-success-subtle text-success-text flex items-center justify-center group-hover:scale-105 transition-transform">
                       <Users className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-success-subtle text-success-text border border-success-border">
                       Base active
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-emerald-600 transition-colors">
+                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-success-text transition-colors">
                       Gestion des Clients
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
@@ -207,7 +207,7 @@ export default async function AdminHubPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-emerald-600 group-hover:translate-x-1 transition-transform">
+                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-success-text group-hover:translate-x-1 transition-transform">
                   <span>Gérer les clients</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -217,26 +217,26 @@ export default async function AdminHubPage() {
             {/* App 4: Gestion des Caissiers */}
             <Link
               href="/admin/cashiers"
-              className="group block focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-2xl"
+              className="group block focus:outline-none focus:ring-2 focus:ring-highlight rounded-2xl"
             >
               <Card
                 padded="lg"
-                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-purple-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
+                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-highlight/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-purple-500" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-highlight" />
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <div className="w-12 h-12 rounded-xl bg-highlight-subtle text-highlight-text flex items-center justify-center group-hover:scale-105 transition-transform">
                       <UserCog className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-highlight-subtle text-highlight-text border border-highlight-border">
                       Équipe
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-purple-600 transition-colors">
+                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-highlight-text transition-colors">
                       Gestion des Caissiers
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
@@ -245,7 +245,7 @@ export default async function AdminHubPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-purple-600 group-hover:translate-x-1 transition-transform">
+                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-highlight-text group-hover:translate-x-1 transition-transform">
                   <span>Gérer les caissiers</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -255,26 +255,26 @@ export default async function AdminHubPage() {
             {/* App 5: Flux d'Activité en Direct */}
             <Link
               href="/admin/live"
-              className="group block focus:outline-none focus:ring-2 focus:ring-pink-500 rounded-2xl"
+              className="group block focus:outline-none focus:ring-2 focus:ring-primary rounded-2xl"
             >
               <Card
                 padded="lg"
-                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-pink-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
+                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-primary/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-pink-500" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-pink-500/10 text-pink-600 dark:text-pink-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
                       <Activity className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-700 dark:text-pink-300 border border-pink-500/20">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                       Temps réel
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-pink-600 transition-colors">
+                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-primary transition-colors">
                       Flux en Direct
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
@@ -283,7 +283,7 @@ export default async function AdminHubPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-pink-600 group-hover:translate-x-1 transition-transform">
+                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-primary group-hover:translate-x-1 transition-transform">
                   <span>Voir le flux live</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -293,26 +293,26 @@ export default async function AdminHubPage() {
             {/* App 6: Bons Plans & Campagnes E-mails */}
             <Link
               href="/admin/deals"
-              className="group block focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-2xl"
+              className="group block focus:outline-none focus:ring-2 focus:ring-info rounded-2xl"
             >
               <Card
                 padded="lg"
-                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-indigo-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
+                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-info/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-500" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-info" />
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <div className="w-12 h-12 rounded-xl bg-info-subtle text-info-text flex items-center justify-center group-hover:scale-105 transition-transform">
                       <Sparkles className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-info-subtle text-info-text border border-info-border">
                       Marketing
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-indigo-600 transition-colors">
+                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-info-text transition-colors">
                       Bons Plans &amp; Campagnes E-mails
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
@@ -321,7 +321,7 @@ export default async function AdminHubPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-indigo-600 group-hover:translate-x-1 transition-transform">
+                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-info-text group-hover:translate-x-1 transition-transform">
                   <span>Créer une campagne</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -331,26 +331,26 @@ export default async function AdminHubPage() {
             {/* App 7: Configuration & Paramètres du Magasin */}
             <Link
               href="/admin/settings"
-              className="group block focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-2xl"
+              className="group block focus:outline-none focus:ring-2 focus:ring-warning rounded-2xl"
             >
               <Card
                 padded="lg"
-                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-amber-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
+                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-warning/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-warning" />
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <div className="w-12 h-12 rounded-xl bg-warning-subtle text-warning-text flex items-center justify-center group-hover:scale-105 transition-transform">
                       <Sliders className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-warning-subtle text-warning-text border border-warning-border">
                       Admin Only
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-amber-600 transition-colors">
+                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-warning-text transition-colors">
                       Configuration de l&apos;App
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
@@ -359,7 +359,7 @@ export default async function AdminHubPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-amber-600 group-hover:translate-x-1 transition-transform">
+                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-warning-text group-hover:translate-x-1 transition-transform">
                   <span>Configurer l&apos;application</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -373,10 +373,10 @@ export default async function AdminHubPage() {
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-warning-subtle text-warning-text flex items-center justify-center">
                     <Package className="w-6 h-6" />
                   </div>
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-warning-subtle text-warning-text border border-warning-border">
                     Bientôt disponible
                   </span>
                 </div>

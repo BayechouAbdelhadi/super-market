@@ -142,15 +142,15 @@ export function DealJobDetailModal({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "COMPLETED":
-        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">Terminé</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-success-subtle text-success-text border border-success-border">Terminé</span>;
       case "RUNNING":
-        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 animate-pulse">En cours</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-info-subtle text-info-text border border-info-border animate-pulse">En cours</span>;
       case "PAUSED":
-        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">En pause</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-warning-subtle text-warning-text border border-warning-border">En pause</span>;
       case "SCHEDULED":
-        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20">Programmé</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-highlight-subtle text-highlight-text border border-highlight-border">Programmé</span>;
       default:
-        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/20">Brouillon</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-surface-hover text-text border border-border">Brouillon</span>;
     }
   };
 
@@ -210,7 +210,7 @@ export function DealJobDetailModal({
               variant="outline"
               size="sm"
               onClick={() => setIsVisualizerOpen(true)}
-              className="gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 hover:bg-indigo-100/50 w-full sm:w-auto justify-center"
+              className="gap-1.5 text-xs font-bold text-info-text border-info-border bg-info-subtle hover:bg-info-subtle w-full sm:w-auto justify-center"
             >
               <Eye className="w-3.5 h-3.5" />
               <span>Vue smartphone</span>
@@ -233,7 +233,7 @@ export function DealJobDetailModal({
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden bg-slate-100 dark:bg-slate-900 shadow-inner flex justify-center p-3 sm:p-5">
+            <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden bg-surface-hover shadow-inner flex justify-center p-3 sm:p-5">
               <iframe
                 title="Aperçu de la newsletter"
                 // Email preview: no scripts, links open in a new tab
@@ -250,7 +250,7 @@ export function DealJobDetailModal({
                   storeAddress: "205 Avenue Antoine de Saint-Exupéry, 62100 Calais",
                   storePhone: "06 71 54 05 28",
                 })}
-                className="w-full max-w-[620px] h-[550px] rounded-xl border border-[var(--color-border)] shadow-lg bg-white"
+                className="w-full max-w-[620px] h-[550px] rounded-xl border border-[var(--color-border)] shadow-lg bg-surface"
               />
             </div>
           </div>
@@ -268,20 +268,20 @@ export function DealJobDetailModal({
             </strong>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-xs">
-            <span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block">
+          <div className="p-3.5 rounded-xl bg-success-subtle border border-success-border shadow-xs">
+            <span className="text-[11px] font-semibold text-success-text uppercase tracking-wider block">
               Envoyés avec succès
             </span>
-            <strong className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 block mt-0.5">
+            <strong className="text-xl font-bold font-mono text-success-text block mt-0.5">
               {stats.sentCount}
             </strong>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 shadow-xs">
-            <span className="text-[11px] font-semibold text-rose-800 dark:text-rose-300 uppercase tracking-wider block">
+          <div className="p-3.5 rounded-xl bg-danger-subtle border border-danger-border shadow-xs">
+            <span className="text-[11px] font-semibold text-danger-text uppercase tracking-wider block">
               Échecs d&apos;envoi
             </span>
-            <strong className="text-xl font-bold font-mono text-rose-600 dark:text-rose-400 block mt-0.5">
+            <strong className="text-xl font-bold font-mono text-danger-text block mt-0.5">
               {stats.failedCount}
             </strong>
           </div>
@@ -306,12 +306,12 @@ export function DealJobDetailModal({
           </div>
           <div className="w-full h-3 rounded-full bg-[var(--color-border)]/60 overflow-hidden flex">
             <div
-              className="bg-emerald-500 h-full transition-all duration-500"
+              className="bg-success h-full transition-all duration-500"
               style={{ width: `${stats.totalTargets > 0 ? (stats.sentCount / stats.totalTargets) * 100 : 0}%` }}
               title={`Envoyés: ${stats.sentCount}`}
             />
             <div
-              className="bg-rose-500 h-full transition-all duration-500"
+              className="bg-danger h-full transition-all duration-500"
               style={{ width: `${stats.totalTargets > 0 ? (stats.failedCount / stats.totalTargets) * 100 : 0}%` }}
               title={`Échecs: ${stats.failedCount}`}
             />
@@ -319,11 +319,11 @@ export function DealJobDetailModal({
           <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted)] pt-0.5">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="w-2 h-2 rounded-full bg-success" />
                 <span>Succès : {stats.sentCount}</span>
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                <span className="w-2 h-2 rounded-full bg-danger" />
                 <span>Échecs : {stats.failedCount}</span>
               </span>
             </div>
@@ -358,7 +358,7 @@ export function DealJobDetailModal({
                 size="sm"
                 onClick={handlePause}
                 loading={loadingAction}
-                className="gap-1.5 font-semibold text-amber-700 dark:text-amber-300 w-full sm:w-auto justify-center"
+                className="gap-1.5 font-semibold text-warning-text w-full sm:w-auto justify-center"
               >
                 <Pause className="w-3.5 h-3.5" />
                 <span>Mettre en pause</span>
@@ -371,7 +371,7 @@ export function DealJobDetailModal({
                 size="sm"
                 onClick={handleResume}
                 loading={loadingAction}
-                className="gap-1.5 font-semibold text-emerald-700 dark:text-emerald-300 w-full sm:w-auto justify-center"
+                className="gap-1.5 font-semibold text-success-text w-full sm:w-auto justify-center"
               >
                 <Play className="w-3.5 h-3.5" />
                 <span>Reprendre le job</span>
@@ -385,7 +385,7 @@ export function DealJobDetailModal({
               size="sm"
               onClick={handleDelete}
               loading={loadingAction}
-              className="gap-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-semibold w-full sm:w-auto justify-center"
+              className="gap-1.5 text-danger-text hover:text-danger-text hover:bg-danger-subtle text-xs font-semibold w-full sm:w-auto justify-center"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Supprimer le job</span>
@@ -394,8 +394,8 @@ export function DealJobDetailModal({
         </div>
 
         {/* Resilience Banner Note */}
-        <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="p-3 rounded-lg bg-success-subtle border border-success-border text-xs text-success-text flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 text-success-text shrink-0 mt-0.5" />
           <span>
             <strong>Règle de résilience active :</strong> Si l&apos;envoi échoue pour un client (email invalide, rejet serveur), le système enregistre l&apos;erreur et continue immédiatement le reste de la liste sans jamais planter le job.
           </span>
@@ -419,7 +419,7 @@ export function DealJobDetailModal({
                   onClick={() => setRecipientFilter(tab.id)}
                   className={`px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer whitespace-nowrap ${
                     recipientFilter === tab.id
-                      ? "bg-[var(--color-primary)] text-white shadow-xs font-bold"
+                      ? "bg-[var(--color-primary)] text-on-color shadow-xs font-bold"
                       : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                   }`}
                 >
@@ -470,12 +470,12 @@ export function DealJobDetailModal({
                       </td>
                       <td className="p-3">
                         {r.status === "SENT" ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-success-text font-semibold">
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             <span>Envoyé</span>
                           </span>
                         ) : r.status === "FAILED" ? (
-                          <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-semibold" title={r.error}>
+                          <span className="inline-flex items-center gap-1 text-danger-text font-semibold" title={r.error}>
                             <AlertCircle className="w-3.5 h-3.5" />
                             <span>Échec</span>
                           </span>
@@ -490,7 +490,7 @@ export function DealJobDetailModal({
                         {r.status === "SENT" && r.sentAt
                           ? new Date(r.sentAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })
                           : r.status === "FAILED"
-                          ? <span className="text-rose-600 font-medium truncate max-w-[150px] inline-block">{r.error || "Erreur"}</span>
+                          ? <span className="text-danger-text font-medium truncate max-w-[150px] inline-block">{r.error || "Erreur"}</span>
                           : "Non traité"}
                       </td>
                     </tr>
