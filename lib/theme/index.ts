@@ -1,60 +1,85 @@
 /**
- * Single source of the visual theme (AGENTS.md § 11–13).
+ * Theme loader (AGENTS.md § 11–13). The theme itself is configured in config/theme.json.
  *
- * The active theme's base colors and radii are written as CSS variables by the root layout
- * (`themeToCss`). Everything derived from them (tinted backgrounds, borders, shadows, gradients)
- * lives in app/globals.css and follows automatically.
- *
- * To restyle the app, edit a preset or switch ACTIVE_THEME. Never put colors in components.
+ * The JSON is validated at build time: a typo in a key, a missing color or an invalid value
+ * fails the build with a clear message. The active theme is written as CSS variables by the
+ * root layout (`themeToCss`); app/globals.css derives tints, borders, shadows and gradients.
  */
+import { z } from "zod";
+import themeConfig from "@/config/theme.json";
 
-/** Base colors of one mode (light or dark). */
-export interface ThemeColors {
-  background: string;
-  surface: string;
-  surfaceHover: string;
-  text: string;
-  textMuted: string;
-  border: string;
-  borderHover: string;
-  primary: string;
-  primaryHover: string;
-  /** Text on the primary color */
-  primaryText: string;
-  /** Status colors: base for fills and icons, -Text for readable text on surfaces and tints */
-  success: string;
-  successText: string;
-  warning: string;
-  warningText: string;
-  danger: string;
-  dangerText: string;
-  info: string;
-  infoText: string;
-  /** Secondary accent for special items (premium features, team, VIP-style labels) */
-  highlight: string;
-  highlightText: string;
-  /** Text and icons on any solid colored fill */
-  onColor: string;
-  /** Backdrop behind dialogs and drawers */
-  overlay: string;
-  /** Fixed near-black for scrims over photos */
-  scrim: string;
-  /** Loyalty tiers (AGENTS.md § 15): base tone, and readable text on the tier tint */
-  tierBronze: string;
-  tierSilver: string;
-  tierGold: string;
-  tierVip: string;
-  tierBronzeText: string;
-  tierSilverText: string;
-  tierGoldText: string;
+const color = z
+  .string()
+  .regex(/^(#[0-9a-fA-F]{6}|rgba?\([^)]+\))$/, 'expected "#rrggbb" or "rgb(…)"');
+const length = z.string().regex(/^\d+(\.\d+)?(px|rem)$/, 'expected a length like "12px"');
+
+const c = (description: string) => color.describe(description);
+
+const ThemeColorsSchema = z.strictObject({
+  background: c("Page background"),
+  surface: c("Cards, panels, inputs"),
+  surfaceHover: c("Hovered or secondary surfaces"),
+  text: c("Main text"),
+  textMuted: c("Secondary text, hints, labels"),
+  border: c("Hairline borders and dividers"),
+  borderHover: c("Hovered or stronger borders"),
+  primary: c("Brand color: main buttons, links, accents"),
+  primaryHover: c("Primary on hover"),
+  primaryText: c("Text on the primary color"),
+  success: c("Success fills and icons"),
+  successText: c("Readable success text on surfaces and success tints"),
+  warning: c("Warning fills and icons"),
+  warningText: c("Readable warning text on surfaces and warning tints"),
+  danger: c("Error and destructive fills and icons"),
+  dangerText: c("Readable error text on surfaces and danger tints"),
+  info: c("Informational fills and icons"),
+  infoText: c("Readable info text on surfaces and info tints"),
+  highlight: c("Secondary accent for special items (premium features, team, VIP-style labels)"),
+  highlightText: c("Readable highlight text on surfaces and highlight tints"),
+  onColor: c("Text and icons on any solid colored fill"),
+  overlay: c('Backdrop behind dialogs and drawers, usually "rgb(0 0 0 / 0.4)"'),
+  scrim: c("Fixed near-black for scrims over photos"),
+  tierBronze: c("Bronze tier tone"),
+  tierSilver: c("Silver tier tone"),
+  tierGold: c("Gold tier tone"),
+  tierVip: c("VIP tier tone (solid badge background)"),
+  tierBronzeText: c("Readable text on the bronze tint"),
+  tierSilverText: c("Readable text on the silver tint"),
+  tierGoldText: c("Readable text on the gold tint"),
+});
+
+const ThemeRadiusSchema = z.strictObject({
+  button: length.describe("Corner radius of buttons"),
+  input: length.describe("Corner radius of inputs"),
+  card: length.describe("Corner radius of cards"),
+  dialog: length.describe("Corner radius of dialogs and large containers"),
+});
+
+/** A preset lists only what it changes from the preset it extends; a root preset lists everything. */
+const PresetSchema = z.strictObject({
+  label: z.string().min(1).describe("Human-readable name of the preset"),
+  extends: z.string().optional().describe("Preset to start from; list only the values that change"),
+  light: ThemeColorsSchema.partial().optional().describe("Colors in light mode"),
+  dark: ThemeColorsSchema.partial().optional().describe("Colors when the device is in dark mode"),
+  radius: ThemeRadiusSchema.partial().optional().describe("Corner radii"),
+});
+
+const ThemeFileSchema = z.strictObject({
+  $schema: z.string().optional(),
+  active: z.string().describe("Name of the preset the app renders with"),
+  presets: z.record(z.string(), PresetSchema).describe("Theme presets, by name"),
+});
+
+/** JSON Schema of config/theme.json, for editor autocomplete (written by `npm run theme:schema`). */
+export function themeJsonSchema(): Record<string, unknown> {
+  return {
+    title: "Super Market theme (config/theme.json)",
+    ...z.toJSONSchema(ThemeFileSchema, { target: "draft-07" }),
+  };
 }
 
-export interface ThemeRadius {
-  button: string;
-  input: string;
-  card: string;
-  dialog: string;
-}
+export type ThemeColors = z.infer<typeof ThemeColorsSchema>;
+export type ThemeRadius = z.infer<typeof ThemeRadiusSchema>;
 
 export interface ThemeConfig {
   name: string;
@@ -65,134 +90,54 @@ export interface ThemeConfig {
   radius: ThemeRadius;
 }
 
-const defaultLight: ThemeColors = {
-  background: "#ffffff",
-  surface: "#ffffff",
-  surfaceHover: "#f7f7f7",
-  text: "#222222",
-  textMuted: "#717171",
-  border: "#ebebeb",
-  borderHover: "#b0b0b0",
-  primary: "#ff385c",
-  primaryHover: "#e00b41",
-  primaryText: "#ffffff",
-  success: "#059669",
-  successText: "#047857",
-  warning: "#d97706",
-  warningText: "#b45309",
-  danger: "#e11d48",
-  dangerText: "#be123c",
-  info: "#4f46e5",
-  infoText: "#4338ca",
-  highlight: "#9333ea",
-  highlightText: "#7e22ce",
-  onColor: "#ffffff",
-  overlay: "rgb(0 0 0 / 0.4)",
-  scrim: "#171717",
-  tierBronze: "#a86326",
-  tierSilver: "#717171",
-  tierGold: "#c28b1e",
-  tierVip: "#222222",
-  tierBronzeText: "#92400e",
-  tierSilverText: "#334155",
-  tierGoldText: "#78350f",
-};
+type ThemeFile = z.infer<typeof ThemeFileSchema>;
 
-const defaultDark: ThemeColors = {
-  ...defaultLight,
-  background: "#141414",
-  surface: "#1e1e1e",
-  surfaceHover: "#2b2b2b",
-  text: "#f7f7f7",
-  textMuted: "#b0b0b0",
-  border: "#2c2c2c",
-  borderHover: "#484848",
-  successText: "#6ee7b7",
-  warningText: "#fcd34d",
-  dangerText: "#fda4af",
-  infoText: "#a5b4fc",
-  highlightText: "#d8b4fe",
-  overlay: "rgb(0 0 0 / 0.65)",
-  tierVip: "#f7f7f7",
-  tierBronzeText: "#fcd34d",
-  tierSilverText: "#cbd5e1",
-  tierGoldText: "#fde68a",
-};
-
-const defaultRadius: ThemeRadius = {
-  button: "12px",
-  input: "12px",
-  card: "16px",
-  dialog: "20px",
-};
-
-/** A preset = the default theme with a few overrides. */
-function preset(
-  name: string,
-  label: string,
-  overrides: { light?: Partial<ThemeColors>; dark?: Partial<ThemeColors>; radius?: Partial<ThemeRadius> } = {}
-): ThemeConfig {
-  return {
-    name,
-    label,
-    light: { ...defaultLight, ...overrides.light },
-    dark: { ...defaultDark, ...overrides.light, ...overrides.dark },
-    radius: { ...defaultRadius, ...overrides.radius },
-  };
+function fail(message: string): never {
+  throw new Error(`[theme] config/theme.json: ${message}`);
 }
 
-// Neutral overrides of the light presets must not leak into dark mode
-const darkNeutrals = (({ background, surface, surfaceHover, text, textMuted, border, borderHover }) => ({
-  background,
-  surface,
-  surfaceHover,
-  text,
-  textMuted,
-  border,
-  borderHover,
-}))(defaultDark);
+/** Resolves every preset (following `extends`) into a complete, validated theme. */
+export function loadThemes(input: unknown): { themes: Record<string, ThemeConfig>; active: ThemeConfig } {
+  const parsed = ThemeFileSchema.safeParse(input);
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    fail(`${issue.path.join(".") || "(root)"}: ${issue.message}`);
+  }
+  const file: ThemeFile = parsed.data;
 
-export const themes = {
-  /** Airbnb-inspired: coral primary, white surfaces, charcoal text */
-  default: preset("default", "Airbnb-inspired"),
+  const resolved: Record<string, ThemeConfig> = {};
+  const resolve = (name: string, chain: string[] = []): ThemeConfig => {
+    if (resolved[name]) return resolved[name];
+    const preset = file.presets[name];
+    if (!preset) fail(`preset "${name}" is not defined`);
+    if (chain.includes(name)) fail(`"extends" loop: ${[...chain, name].join(" → ")}`);
 
-  /** Terracotta and cream, slightly rounder */
-  warm: preset("warm", "Warm Terracotta", {
-    light: {
-      primary: "#c2410c",
-      primaryHover: "#9a3412",
-      background: "#fdfbf7",
-      surfaceHover: "#fcf8f2",
-      text: "#292524",
-      textMuted: "#78716c",
-      border: "#ede8e1",
-      borderHover: "#dcd4c7",
-    },
-    dark: darkNeutrals,
-    radius: { button: "14px", input: "14px", card: "18px", dialog: "24px" },
-  }),
+    const parent = preset.extends ? resolve(preset.extends, [...chain, name]) : null;
+    const complete = (mode: "light" | "dark") => {
+      const result = ThemeColorsSchema.safeParse({ ...parent?.[mode], ...preset[mode] });
+      if (!result.success) {
+        fail(`presets.${name}.${mode}.${result.error.issues[0].path.join(".")}: missing or invalid`);
+      }
+      return result.data;
+    };
+    const radius = ThemeRadiusSchema.safeParse({ ...parent?.radius, ...preset.radius });
+    if (!radius.success) fail(`presets.${name}.radius.${radius.error.issues[0].path.join(".")}: missing or invalid`);
 
-  /** Fresh supermarket green */
-  emerald: preset("emerald", "Fresh Emerald", {
-    light: {
-      primary: "#059669",
-      primaryHover: "#047857",
-      background: "#fafaf9",
-      surfaceHover: "#f5f5f4",
-      text: "#1c1917",
-      textMuted: "#78716c",
-      border: "#e7e5e4",
-      borderHover: "#d6d3d1",
-    },
-    dark: darkNeutrals,
-  }),
-} satisfies Record<string, ThemeConfig>;
+    resolved[name] = { name, label: preset.label, light: complete("light"), dark: complete("dark"), radius: radius.data };
+    return resolved[name];
+  };
 
-export type ThemeName = keyof typeof themes;
+  for (const name of Object.keys(file.presets)) resolve(name);
+  const active = resolved[file.active] ?? fail(`"active" is "${file.active}", which is not a preset`);
+  return { themes: resolved, active };
+}
 
-/** The theme the app renders with. */
-export const ACTIVE_THEME: ThemeName = "default";
-export const activeTheme: ThemeConfig = themes[ACTIVE_THEME];
+const loaded = loadThemes(themeConfig);
+
+/** Every preset of config/theme.json, resolved. */
+export const themes = loaded.themes;
+/** The theme the app renders with (`active` in config/theme.json). */
+export const activeTheme: ThemeConfig = loaded.active;
 
 const COLOR_VARS: Record<keyof ThemeColors, string> = {
   background: "--color-background",

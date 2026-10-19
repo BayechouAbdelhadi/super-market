@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { themes, themeToCss, activeTheme, type ThemeColors } from "@/lib/theme";
+import { themes, themeToCss, activeTheme, loadThemes, themeJsonSchema, type ThemeColors } from "@/lib/theme";
+import themeSchema from "@/config/theme.schema.json";
+import themeConfig from "@/config/theme.json";
+
+/** A copy of config/theme.json to break in each test. */
+function configCopy() {
+  return JSON.parse(JSON.stringify(themeConfig));
+}
 
 describe("theme", () => {
   it("defines every base color for both modes in every preset", () => {
@@ -22,12 +29,56 @@ describe("theme", () => {
     expect(dark).toContain("--color-surface:#1e1e1e");
   });
 
-  it("keeps a preset's brand color in dark mode but not its light neutrals", () => {
-    expect(themes.warm.dark.primary).toBe(themes.warm.light.primary);
+  it("merges a preset over the one it extends", () => {
+    expect(themes.warm.light.primary).toBe("#c2410c");
+    expect(themes.warm.dark.primary).toBe("#c2410c");
     expect(themes.warm.dark.background).toBe(themes.default.dark.background);
+    expect(themes.warm.light.success).toBe(themes.default.light.success);
+    expect(themes.warm.radius.card).toBe("18px");
+    expect(themes.emerald.radius).toEqual(themes.default.radius);
   });
 
-  it("renders the default theme", () => {
-    expect(activeTheme.name).toBe("default");
+  it("renders the preset named by `active`", () => {
+    expect(activeTheme.name).toBe(themeConfig.active);
+  });
+
+  describe("rejects a broken config/theme.json", () => {
+    it("a misspelled color key", () => {
+      const config = configCopy();
+      config.presets.warm.light.primaryy = "#000000";
+      expect(() => loadThemes(config)).toThrow(/presets\.warm\.light/);
+    });
+
+    it("an invalid color value", () => {
+      const config = configCopy();
+      config.presets.default.light.text = "red";
+      expect(() => loadThemes(config)).toThrow(/presets\.default\.light\.text/);
+    });
+
+    it("a missing color in a preset that extends nothing", () => {
+      const config = configCopy();
+      delete config.presets.default.dark.scrim;
+      expect(() => loadThemes(config)).toThrow(/presets\.default\.dark\.scrim/);
+    });
+
+    it("an unknown preset in `extends` or `active`", () => {
+      const config = configCopy();
+      config.presets.warm.extends = "nope";
+      expect(() => loadThemes(config)).toThrow(/preset "nope" is not defined/);
+
+      const other = configCopy();
+      other.active = "nope";
+      expect(() => loadThemes(other)).toThrow(/"active" is "nope"/);
+    });
+
+    it("an `extends` loop", () => {
+      const config = configCopy();
+      config.presets.default.extends = "warm";
+      expect(() => loadThemes(config)).toThrow(/loop/);
+    });
+  });
+
+  it("ships an up-to-date JSON Schema for editors (run `npm run theme:schema` if this fails)", () => {
+    expect(themeSchema).toEqual(themeJsonSchema());
   });
 });

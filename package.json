@@ -9,7 +9,8 @@
         "lint": "eslint",
         "test": "vitest run",
         "create-vps-key": "bash ./create-vps-key.sh super-market",
-        "fb:posts": "node scripts/get-facebook-posts.mjs"
+        "fb:posts": "node scripts/get-facebook-posts.mjs",
+        "theme:schema": "tsx scripts/generate-theme-schema.ts"
     },
     "dependencies": {
         "@base-ui/react": "^1.8.0",

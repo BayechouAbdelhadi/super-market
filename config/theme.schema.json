@@ -1,0 +1,385 @@
+{
+  "title": "Super Market theme (config/theme.json)",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "active": {
+      "type": "string",
+      "description": "Name of the preset the app renders with"
+    },
+    "presets": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable name of the preset"
+          },
+          "extends": {
+            "description": "Preset to start from; list only the values that change",
+            "type": "string"
+          },
+          "light": {
+            "description": "Colors in light mode",
+            "type": "object",
+            "properties": {
+              "background": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Page background"
+              },
+              "surface": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Cards, panels, inputs"
+              },
+              "surfaceHover": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Hovered or secondary surfaces"
+              },
+              "text": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Main text"
+              },
+              "textMuted": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Secondary text, hints, labels"
+              },
+              "border": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Hairline borders and dividers"
+              },
+              "borderHover": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Hovered or stronger borders"
+              },
+              "primary": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Brand color: main buttons, links, accents"
+              },
+              "primaryHover": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Primary on hover"
+              },
+              "primaryText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Text on the primary color"
+              },
+              "success": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Success fills and icons"
+              },
+              "successText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable success text on surfaces and success tints"
+              },
+              "warning": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Warning fills and icons"
+              },
+              "warningText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable warning text on surfaces and warning tints"
+              },
+              "danger": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Error and destructive fills and icons"
+              },
+              "dangerText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable error text on surfaces and danger tints"
+              },
+              "info": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Informational fills and icons"
+              },
+              "infoText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable info text on surfaces and info tints"
+              },
+              "highlight": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Secondary accent for special items (premium features, team, VIP-style labels)"
+              },
+              "highlightText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable highlight text on surfaces and highlight tints"
+              },
+              "onColor": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Text and icons on any solid colored fill"
+              },
+              "overlay": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Backdrop behind dialogs and drawers, usually \"rgb(0 0 0 / 0.4)\""
+              },
+              "scrim": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Fixed near-black for scrims over photos"
+              },
+              "tierBronze": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Bronze tier tone"
+              },
+              "tierSilver": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Silver tier tone"
+              },
+              "tierGold": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Gold tier tone"
+              },
+              "tierVip": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "VIP tier tone (solid badge background)"
+              },
+              "tierBronzeText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable text on the bronze tint"
+              },
+              "tierSilverText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable text on the silver tint"
+              },
+              "tierGoldText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable text on the gold tint"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dark": {
+            "description": "Colors when the device is in dark mode",
+            "type": "object",
+            "properties": {
+              "background": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Page background"
+              },
+              "surface": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Cards, panels, inputs"
+              },
+              "surfaceHover": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Hovered or secondary surfaces"
+              },
+              "text": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Main text"
+              },
+              "textMuted": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Secondary text, hints, labels"
+              },
+              "border": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Hairline borders and dividers"
+              },
+              "borderHover": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Hovered or stronger borders"
+              },
+              "primary": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Brand color: main buttons, links, accents"
+              },
+              "primaryHover": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Primary on hover"
+              },
+              "primaryText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Text on the primary color"
+              },
+              "success": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Success fills and icons"
+              },
+              "successText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable success text on surfaces and success tints"
+              },
+              "warning": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Warning fills and icons"
+              },
+              "warningText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable warning text on surfaces and warning tints"
+              },
+              "danger": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Error and destructive fills and icons"
+              },
+              "dangerText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable error text on surfaces and danger tints"
+              },
+              "info": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Informational fills and icons"
+              },
+              "infoText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable info text on surfaces and info tints"
+              },
+              "highlight": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Secondary accent for special items (premium features, team, VIP-style labels)"
+              },
+              "highlightText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable highlight text on surfaces and highlight tints"
+              },
+              "onColor": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Text and icons on any solid colored fill"
+              },
+              "overlay": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Backdrop behind dialogs and drawers, usually \"rgb(0 0 0 / 0.4)\""
+              },
+              "scrim": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Fixed near-black for scrims over photos"
+              },
+              "tierBronze": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Bronze tier tone"
+              },
+              "tierSilver": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Silver tier tone"
+              },
+              "tierGold": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Gold tier tone"
+              },
+              "tierVip": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "VIP tier tone (solid badge background)"
+              },
+              "tierBronzeText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable text on the bronze tint"
+              },
+              "tierSilverText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable text on the silver tint"
+              },
+              "tierGoldText": {
+                "type": "string",
+                "pattern": "^(#[0-9a-fA-F]{6}|rgba?\\([^)]+\\))$",
+                "description": "Readable text on the gold tint"
+              }
+            },
+            "additionalProperties": false
+          },
+          "radius": {
+            "description": "Corner radii",
+            "type": "object",
+            "properties": {
+              "button": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d+)?(px|rem)$",
+                "description": "Corner radius of buttons"
+              },
+              "input": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d+)?(px|rem)$",
+                "description": "Corner radius of inputs"
+              },
+              "card": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d+)?(px|rem)$",
+                "description": "Corner radius of cards"
+              },
+              "dialog": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d+)?(px|rem)$",
+                "description": "Corner radius of dialogs and large containers"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Theme presets, by name"
+    }
+  },
+  "required": [
+    "active",
+    "presets"
+  ],
+  "additionalProperties": false
+}

@@ -988,7 +988,8 @@ If any answer is "no", fix it before submitting.
 
 | File | Owns |
 |---|---|
-| `lib/theme/index.ts` | Theme presets: base colors (light and dark) and radii; `ACTIVE_THEME` picks the one the app renders |
+| `config/theme.json` | The theme: presets with base colors (light and dark) and radii; `active` picks the one the app renders. A preset can `extends` another and list only what changes. `config/theme.schema.json` gives editor autocomplete; regenerate it with `npm run theme:schema` after changing the rules in `lib/theme` |
+| `lib/theme/index.ts` | Loads and validates `config/theme.json` at build time, writes the active theme as CSS variables |
 | `app/globals.css` | Viewport height (`100svh`), overflow on html/body, tokens derived from the theme (tints, borders, shadows, gradients), `.scheme-light` / `.scheme-dark` |
 | `eslint.config.mjs` | Blocks raw Tailwind palette classes and hex colors in components (fixed-color exceptions listed there) |
 | `components/ui/DashboardLayout.tsx` | Admin/cashier shell: `h-full flex-col md:flex-row` |

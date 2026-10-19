@@ -1,0 +1,121 @@
+{
+  "$schema": "./theme.schema.json",
+  "active": "default",
+  "presets": {
+    "default": {
+      "label": "Airbnb-inspired",
+      "light": {
+        "background": "#ffffff",
+        "surface": "#ffffff",
+        "surfaceHover": "#f7f7f7",
+        "text": "#222222",
+        "textMuted": "#717171",
+        "border": "#ebebeb",
+        "borderHover": "#b0b0b0",
+        "primary": "#ff385c",
+        "primaryHover": "#e00b41",
+        "primaryText": "#ffffff",
+        "success": "#059669",
+        "successText": "#047857",
+        "warning": "#d97706",
+        "warningText": "#b45309",
+        "danger": "#e11d48",
+        "dangerText": "#be123c",
+        "info": "#4f46e5",
+        "infoText": "#4338ca",
+        "highlight": "#9333ea",
+        "highlightText": "#7e22ce",
+        "onColor": "#ffffff",
+        "overlay": "rgb(0 0 0 / 0.4)",
+        "scrim": "#171717",
+        "tierBronze": "#a86326",
+        "tierSilver": "#717171",
+        "tierGold": "#c28b1e",
+        "tierVip": "#222222",
+        "tierBronzeText": "#92400e",
+        "tierSilverText": "#334155",
+        "tierGoldText": "#78350f"
+      },
+      "dark": {
+        "background": "#141414",
+        "surface": "#1e1e1e",
+        "surfaceHover": "#2b2b2b",
+        "text": "#f7f7f7",
+        "textMuted": "#b0b0b0",
+        "border": "#2c2c2c",
+        "borderHover": "#484848",
+        "primary": "#ff385c",
+        "primaryHover": "#e00b41",
+        "primaryText": "#ffffff",
+        "success": "#059669",
+        "successText": "#6ee7b7",
+        "warning": "#d97706",
+        "warningText": "#fcd34d",
+        "danger": "#e11d48",
+        "dangerText": "#fda4af",
+        "info": "#4f46e5",
+        "infoText": "#a5b4fc",
+        "highlight": "#9333ea",
+        "highlightText": "#d8b4fe",
+        "onColor": "#ffffff",
+        "overlay": "rgb(0 0 0 / 0.65)",
+        "scrim": "#171717",
+        "tierBronze": "#a86326",
+        "tierSilver": "#717171",
+        "tierGold": "#c28b1e",
+        "tierVip": "#f7f7f7",
+        "tierBronzeText": "#fcd34d",
+        "tierSilverText": "#cbd5e1",
+        "tierGoldText": "#fde68a"
+      },
+      "radius": {
+        "button": "12px",
+        "input": "12px",
+        "card": "16px",
+        "dialog": "20px"
+      }
+    },
+    "warm": {
+      "label": "Warm Terracotta",
+      "extends": "default",
+      "light": {
+        "primary": "#c2410c",
+        "primaryHover": "#9a3412",
+        "background": "#fdfbf7",
+        "surfaceHover": "#fcf8f2",
+        "text": "#292524",
+        "textMuted": "#78716c",
+        "border": "#ede8e1",
+        "borderHover": "#dcd4c7"
+      },
+      "dark": {
+        "primary": "#c2410c",
+        "primaryHover": "#9a3412"
+      },
+      "radius": {
+        "button": "14px",
+        "input": "14px",
+        "card": "18px",
+        "dialog": "24px"
+      }
+    },
+    "emerald": {
+      "label": "Fresh Emerald",
+      "extends": "default",
+      "light": {
+        "primary": "#059669",
+        "primaryHover": "#047857",
+        "background": "#fafaf9",
+        "surfaceHover": "#f5f5f4",
+        "text": "#1c1917",
+        "textMuted": "#78716c",
+        "border": "#e7e5e4",
+        "borderHover": "#d6d3d1"
+      },
+      "dark": {
+        "primary": "#059669",
+        "primaryHover": "#047857"
+      }
+    }
+  }
+}
