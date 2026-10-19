@@ -24,6 +24,9 @@
   /* Primary-tinted text for brand subtitles */
   --color-primary-ink: color-mix(in srgb, var(--color-primary) 55%, var(--color-text));
 
+  /* Site footer: deep charcoal warmed by the primary color, light text on top (text-on-color) */
+  --color-footer: color-mix(in srgb, var(--color-primary) 14%, var(--color-scrim));
+
   /* Airbnb Elevation & Shadow Tokens */
   --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 4px 14px 0 rgba(0, 0, 0, 0.03);
@@ -138,6 +141,7 @@
   --color-overlay: var(--color-overlay);
   --color-scrim: var(--color-scrim);
   --color-primary-ink: var(--color-primary-ink);
+  --color-footer: var(--color-footer);
   --color-tier-bronze: var(--color-tier-bronze);
   --color-tier-silver: var(--color-tier-silver);
   --color-tier-gold: var(--color-tier-gold);

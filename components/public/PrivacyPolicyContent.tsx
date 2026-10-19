@@ -23,9 +23,9 @@ import {
 
 export function PrivacyPolicyContent() {
   return (
-    <div className="h-full w-full overflow-hidden flex flex-col bg-[var(--color-background)] text-[var(--color-text)] font-sans">
-      {/* Scrollable Container (§ 25.1 AGENTS.md) */}
-      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+    <div className="w-full flex-1 flex flex-col bg-[var(--color-background)] text-[var(--color-text)] font-sans">
+      {/* Scrolling is owned by app/(site)/layout.tsx */}
+      <div className="flex-1 flex flex-col">
         {/* Top Minimal Navigation Bar */}
         <header className="sticky top-0 z-20 w-full bg-surface/95 backdrop-blur-md border-b border-[var(--color-border)] px-4 sm:px-8 h-16 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
-import { resetPassword } from '@/app/reset-password/actions'
+import { resetPassword } from '@/app/(site)/reset-password/actions'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { PasswordCriteriaChecklist } from '@/components/auth/PasswordCriteriaChecklist'

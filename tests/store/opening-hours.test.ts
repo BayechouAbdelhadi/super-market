@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDayHours, formatTime, getOpeningStatus, type WeeklySchedule } from "@/lib/store/opening-hours";
+import { formatDayHours, formatTime, getOpeningStatus, groupWeek, type WeeklySchedule } from "@/lib/store/opening-hours";
 
 const SPLIT = [{ open: "09:00", close: "12:30" }, { open: "14:00", close: "19:30" }];
 const SCHEDULE: WeeklySchedule = {
@@ -56,5 +56,15 @@ describe("formatting", () => {
   it("joins ranges and marks closed days", () => {
     expect(formatDayHours(SPLIT)).toBe("9h – 12h30 · 14h – 19h30");
     expect(formatDayHours([])).toBe("Fermé");
+  });
+});
+
+describe("groupWeek", () => {
+  it("merges consecutive days with the same hours", () => {
+    expect(groupWeek(SCHEDULE)).toEqual([
+      { days: "Lun – Ven", hours: "9h – 12h30 · 14h – 19h30" },
+      { days: "Sam", hours: "9h – 19h30" },
+      { days: "Dim", hours: "Fermé" },
+    ]);
   });
 });

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { logout } from "@/app/login/actions";
+import { logout } from "@/app/(site)/login/actions";
 import { ChevronLeft, ExternalLink, LogOut, Loader2, Activity, Sliders, Sparkles, QrCode } from "lucide-react";
 
 interface NavLink {

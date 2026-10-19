@@ -19,10 +19,10 @@ interface SiteHeaderProps {
   status: OpeningStatus;
 }
 
-/** Public site top bar. Sits above the scroll container, so it stays visible without `sticky` (§ 25.4). */
+/** Home page top bar, sticky inside the scroll container of app/(site)/layout.tsx (§ 25.4). */
 export function SiteHeader({ storeName, phone, status }: SiteHeaderProps) {
   return (
-    <header className="shrink-0 z-40 border-b border-border bg-surface">
+    <header className="sticky top-0 z-40 border-b border-border bg-surface">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 md:h-18">
         <Link href="/" className="flex min-w-0 items-center gap-3 rounded-[var(--radius-button)]">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-surface p-0.5">

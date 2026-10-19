@@ -992,6 +992,7 @@ If any answer is "no", fix it before submitting.
 | `lib/theme/index.ts` | Loads and validates `config/theme.json` at build time, writes the active theme as CSS variables |
 | `app/globals.css` | Viewport height (`100svh`), overflow on html/body, tokens derived from the theme (tints, borders, shadows, gradients), `.scheme-light` / `.scheme-dark` |
 | `eslint.config.mjs` | Blocks raw Tailwind palette classes and hex colors in components (fixed-color exceptions listed there) |
+| `app/(site)/layout.tsx` | Public / customer shell (home, auth, account, legal): the one scroll container + the shared `SiteFooter`. Pages inside render as `flex-1` content with no scroll container of their own; their headers use `sticky top-0` |
 | `components/ui/DashboardLayout.tsx` | Admin/cashier shell: `h-full flex-col md:flex-row` |
 | `components/ui/Sidebar.tsx` | Mobile drawer + desktop static sidebar |
 | `components/loyalty/CashierDashboard.tsx` | Loyalty cashier shell: `h-full flex-col` |

@@ -97,3 +97,28 @@ export function getOpeningStatus(date: Date, schedule: WeeklySchedule, timeZone:
 
   return { isOpen: false, label: "Fermé", detail: "Horaires non communiqués", dayIndex: day };
 }
+
+export interface DayGroup {
+  /** "Lun – Ven", or a single day "Sam" */
+  days: string;
+  hours: string;
+}
+
+/** Consecutive days (Monday first) sharing the same hours, merged into one line. */
+export function groupWeek(schedule: WeeklySchedule): DayGroup[] {
+  const groups: { first: DayIndex; last: DayIndex; hours: string }[] = [];
+  for (const day of WEEK_ORDER) {
+    const hours = formatDayHours(schedule[day]);
+    const previous = groups[groups.length - 1];
+    if (previous && previous.hours === hours) {
+      previous.last = day;
+    } else {
+      groups.push({ first: day, last: day, hours });
+    }
+  }
+  const short = (day: DayIndex) => DAY_NAMES[day].slice(0, 3);
+  return groups.map(({ first, last, hours }) => ({
+    days: first === last ? short(first) : `${short(first)} – ${short(last)}`,
+    hours,
+  }));
+}
