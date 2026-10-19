@@ -52,12 +52,12 @@ export const CAMPAIGN_PRESETS = [
     ctaUrl: "https://supermarket-calais.fr",
   },
   {
-    name: "🥩 Boucherie Halal & Volailles",
-    title: "Arrivages Boucherie Halal & Volailles Fraîches",
-    subject: "🥩 Boucherie Halal : -15% sur nos viandes fraîches et volailles ce week-end !",
-    content: `Profitez de notre arrivage exceptionnel de viandes fraîches certifiées 100% Halal dans votre magasin Super Market Calais :\n\n- 15% de remise immédiate sur l'agneau, le veau et le boeuf de première qualité\n- Offres spéciales sur nos volailles fraîches et préparations bouchères maison\n- Points fidélité doublés sur l'ensemble du rayon boucherie dès 30€ d'achat\n\nNos artisans bouchers sont à votre disposition pour vos découpes personnalisées. Indiquez simplement votre numéro de téléphone en caisse pour activer vos réductions fidélité !`,
-    imageUrl: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=80",
-    ctaText: "Découvrir la boucherie en magasin",
+    name: "🍗 Poulet Frais & Charcuterie",
+    title: "Poulet Frais en Barquette & Charcuterie",
+    subject: "🍗 Poulet frais 100% Halal : arrivage du jour et points doublés ce week-end !",
+    content: `Profitez de notre arrivage quotidien de poulet frais en barquette dans votre magasin Super Market Calais :\n\n- Filets, cuisses, ailes et pilons de poulet frais 100% Halal, prêts à cuisiner\n- Notre sélection de charcuterie traditionnelle\n- Points fidélité doublés sur le rayon poulet frais & charcuterie dès 30€ d'achat\n\nIndiquez simplement votre numéro de téléphone en caisse pour activer vos réductions fidélité !`,
+    imageUrl: "https://supermarket-calais.fr/categories/poulet-frais-sample.jpg",
+    ctaText: "Découvrir le rayon poulet frais",
     ctaUrl: "https://supermarket-calais.fr",
   },
   {

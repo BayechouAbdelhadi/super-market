@@ -54,8 +54,8 @@ export function HeroSection({ storeName, tagline, phone, status }: HeroSectionPr
       <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 pt-8 sm:px-6 md:grid-cols-[1fr_auto] md:items-start md:gap-12 md:pt-10">
         <div className="space-y-6">
           <p className="max-w-2xl text-lg leading-relaxed text-text-muted">
-            Volailles fraîches, primeur, surgelés, pâtisserie orientale et boissons en pack au meilleur prix, au cœur
-            du quartier Saint-Exupéry.
+            Produits méditerranéens, poulet frais, primeur, surgelés, pâtisserie orientale et boissons en pack au
+            meilleur prix, au cœur du quartier Saint-Exupéry.
           </p>
           <ul className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
             {FACTS.map(({ icon: Icon, label }) => (

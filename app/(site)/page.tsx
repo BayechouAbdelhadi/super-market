@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: { absolute: "Super Market Calais — Supermarché de quartier ouvert 7j/7" },
   description:
-    "Supermarché de proximité à Calais Saint-Exupéry : volailles fraîches halal, primeur, surgelés, pâtisserie orientale, boissons en pack, relais Pickup et fidélité sans carte.",
+    "Supermarché de proximité à Calais Saint-Exupéry : produits méditerranéens (Turquie, Maroc), volailles fraîches halal, primeur, surgelés, pâtisserie orientale, boissons en pack, relais Pickup et fidélité sans carte.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Super Market Calais",

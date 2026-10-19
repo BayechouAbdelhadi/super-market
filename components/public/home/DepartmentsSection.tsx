@@ -4,6 +4,15 @@ import { SectionHeading } from "./SectionHeading";
 /** Store departments, in display order. */
 const DEPARTMENTS: DepartmentCardProps[] = [
   {
+    title: "Alimentation & produits méditerranéens",
+    description:
+      "Les saveurs de Turquie, du Maroc et de tout le bassin méditerranéen : huiles d'olive, olives, épices, semoule, thés, conserves et spécialités du quotidien.",
+    // Photo: Joanna Stołowicz on Unsplash (Unsplash License), rotated and cropped to landscape
+    image: { src: "/categories/produits-mediterraneens.jpg", alt: "Bols d'olives vertes et noires sur un plan de travail clair" },
+    badge: "Turquie · Maroc",
+    highlights: ["Produits de Turquie", "Produits du Maroc", "Large choix"],
+  },
+  {
     title: "Poulet frais & charcuterie",
     description:
       "Filets, cuisses, ailes et pilons en barquette, accompagnés de notre sélection de charcuterie traditionnelle.",
@@ -55,7 +64,7 @@ const DEPARTMENTS: DepartmentCardProps[] = [
 
 /**
  * Departments grid. On phones it is a horizontal swipe row (the next card peeks out to show there is more)
- * instead of six full-width cards stacked.
+ * instead of full-width cards stacked.
  */
 export function DepartmentsSection() {
   return (
@@ -68,7 +77,10 @@ export function DepartmentsSection() {
       />
       <ul className="scrollbar-none -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
         {DEPARTMENTS.map((department) => (
-          <li key={department.title} className="w-[82%] shrink-0 snap-start sm:w-auto">
+          <li
+            key={department.title}
+            className="w-[82%] shrink-0 snap-start sm:w-auto"
+          >
             <DepartmentCard {...department} />
           </li>
         ))}
