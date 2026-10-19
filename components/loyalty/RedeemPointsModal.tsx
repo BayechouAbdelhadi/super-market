@@ -287,7 +287,7 @@ export function RedeemPointsModal({
     >
       <form onSubmit={handleSubmit} className="p-6 space-y-5">
         {errorMsg && (
-          <div className="p-3 rounded-[var(--radius-button,12px)] bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 font-medium">
+          <div className="p-3 rounded-[var(--radius-button,12px)] bg-danger-subtle border border-danger-border text-xs text-danger-text font-medium">
             {errorMsg}
           </div>
         )}
@@ -379,7 +379,7 @@ export function RedeemPointsModal({
           </div>
 
           {cannotRedeem && (
-            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1.5 pt-1">
+            <p className="text-xs text-warning-text font-medium flex items-center gap-1.5 pt-1">
               <span>🔒</span>
               <span>
                 {customer.available_points <= 0
@@ -448,7 +448,7 @@ export function RedeemPointsModal({
 
         {/* Warning if exceeding balance */}
         {isExceedingBalance && (
-          <div className="p-3 rounded-[var(--radius-button,12px)] bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 font-bold flex items-center gap-2">
+          <div className="p-3 rounded-[var(--radius-button,12px)] bg-danger-subtle border border-danger-border text-xs text-danger-text font-bold flex items-center gap-2">
             <span>⚠️</span>
             <span>
               Solde insuffisant ! Le client ne dispose que de {customer.available_points} points.
@@ -458,7 +458,7 @@ export function RedeemPointsModal({
 
         {/* Warning if exceeding purchase amount (no money given) */}
         {isExceedingAmount && (
-          <div className="p-3 rounded-[var(--radius-button,12px)] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-200 font-medium flex items-start gap-2">
+          <div className="p-3 rounded-[var(--radius-button,12px)] bg-warning-subtle border border-warning-border text-xs text-warning-text font-medium flex items-start gap-2">
             <span className="shrink-0 text-sm">⚠️</span>
             <div>
               <strong className="block font-semibold">Aucun rendu de monnaie autorisé</strong>
@@ -474,7 +474,7 @@ export function RedeemPointsModal({
             <>
               <div className="text-left sm:text-center">
                 <span className="text-[11px] font-medium text-[var(--color-text-muted)] block">Points gagnés</span>
-                <span className="text-xs sm:text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="text-xs sm:text-sm font-mono font-bold text-success-text">
                   +{normalPointsEarned} pts
                 </span>
               </div>
@@ -500,7 +500,7 @@ export function RedeemPointsModal({
               <div className="text-left sm:text-center">
                 <span className="text-[11px] font-medium text-[var(--color-text-muted)] block">Remise</span>
                 <div className="flex flex-col sm:items-center">
-                  <span className={`text-xs sm:text-sm font-mono font-bold ${isValidPoints ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--color-text-muted)]"}`}>
+                  <span className={`text-xs sm:text-sm font-mono font-bold ${isValidPoints ? "text-success-text" : "text-[var(--color-text-muted)]"}`}>
                     {isValidPoints ? `-${discountEuro.toFixed(2)} €` : "0,00 €"}
                   </span>
                   {isValidPoints && (
@@ -515,7 +515,7 @@ export function RedeemPointsModal({
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">
                   Reste à payer
                 </span>
-                <span className={`text-sm sm:text-base font-mono font-black ${isExceedingAmount ? "text-rose-600 dark:text-rose-400 line-through" : "text-[var(--color-text)]"}`}>
+                <span className={`text-sm sm:text-base font-mono font-black ${isExceedingAmount ? "text-danger-text line-through" : "text-[var(--color-text)]"}`}>
                   {isPurchaseAmountEntered ? `${netPayable.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "0,00 €"}
                 </span>
               </div>

@@ -2,6 +2,7 @@ import React from "react";
 import { CustomerSummary } from "@/lib/loyalty/types";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "./StatusBadge";
+import { tierAvatarClasses } from "./tier-styles";
 
 interface CustomerCardProps {
   customer: CustomerSummary;
@@ -16,16 +17,7 @@ export function CustomerCard({ customer, onSelect }: CustomerCardProps) {
     .map((w) => w[0]?.toUpperCase())
     .join("") || "CL";
 
-  const tierGradients: Record<string, string> = {
-    bronze: "from-tier-bronze/20 to-tier-bronze/10 text-tier-bronze-text border-tier-bronze/40",
-    silver: "from-tier-silver/20 to-tier-silver/10 text-tier-silver-text border-tier-silver/40",
-    gold: "from-tier-gold/30 to-tier-gold/15 text-tier-gold-text border-tier-gold",
-    vip: "from-tier-vip to-tier-vip/85 text-background border-tier-vip",
-  };
-
-  const avatarStyle =
-    tierGradients[(customer.tier || "").toLowerCase()] ||
-    "from-[var(--color-surface-hover)] to-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)]";
+  const avatarStyle = tierAvatarClasses(customer.tier);
 
   return (
     <Card

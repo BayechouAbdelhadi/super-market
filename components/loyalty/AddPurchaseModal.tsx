@@ -93,7 +93,7 @@ export function AddPurchaseModal({
     >
       <form onSubmit={handleSubmit} className="p-6 space-y-5">
         {errorMsg && (
-          <div className="p-3 rounded-[var(--radius-button,12px)] bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 font-medium">
+          <div className="p-3 rounded-[var(--radius-button,12px)] bg-danger-subtle border border-danger-border text-xs text-danger-text font-medium">
             {errorMsg}
           </div>
         )}

@@ -10,6 +10,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 import { toast } from "@/components/ui/sonner";
+import { tierAvatarClasses } from "./tier-styles";
 
 interface CustomerDetailViewProps {
   customer: CustomerDetail;
@@ -111,16 +112,7 @@ export function CustomerDetailView({
     .map((w) => w[0]?.toUpperCase())
     .join("") || "CL";
 
-  const tierGradients: Record<string, string> = {
-    bronze: "from-amber-600/20 to-amber-700/10 text-amber-900 border-amber-300",
-    silver: "from-slate-400/20 to-slate-500/10 text-slate-800 border-slate-300",
-    gold: "from-amber-400/30 to-yellow-500/15 text-amber-950 border-amber-400",
-    vip: "from-zinc-900 to-zinc-800 text-white border-zinc-900",
-  };
-
-  const avatarStyle =
-    tierGradients[(customer.tier || "").toLowerCase()] ||
-    "from-[var(--color-surface-hover)] to-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)]";
+  const avatarStyle = tierAvatarClasses(customer.tier);
 
   return (
     <div className="w-full space-y-6">
@@ -329,7 +321,7 @@ export function CustomerDetailView({
                                   +{p.points_earned} points
                                 </span>
                               ) : isRedeem ? (
-                                <span className="inline-flex items-center gap-1 font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 px-2.5 py-0.5 rounded-full text-xs">
+                                <span className="inline-flex items-center gap-1 font-semibold text-danger-text bg-danger-subtle border border-danger-border px-2.5 py-0.5 rounded-full text-xs">
                                   -{p.points_redeemed} points (-{((p.points_redeemed || 0) * pointValueInEuro).toFixed(2)} €)
                                 </span>
                               ) : (
@@ -403,10 +395,10 @@ export function CustomerDetailView({
                               <span
                                 className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                                   isEarn
-                                    ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                    ? "bg-success-subtle text-success-text"
                                     : isRedeem
-                                      ? "bg-rose-50 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
-                                      : "bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                                      ? "bg-danger-subtle text-danger-text"
+                                      : "bg-info-subtle text-info-text"
                                 }`}
                               >
                                 {m.type}

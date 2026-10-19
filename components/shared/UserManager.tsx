@@ -135,7 +135,7 @@ export function UserManager({
                     {roleToManage === 'CUSTOMER' && (
                       <StatusBadge status={tier} size="sm" />
                     )}
-                    <span className="text-[10px] px-2 py-0.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 rounded-full font-semibold">
+                    <span className="text-[10px] px-2 py-0.5 bg-success-subtle text-success-text border border-success-border rounded-full font-semibold">
                       Actif
                     </span>
                   </div>
@@ -193,7 +193,7 @@ export function UserManager({
           <div className="p-6">
             {successMsg ? (
               <div className="space-y-6">
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 rounded-[var(--radius-button,12px)] text-sm font-medium">
+                <div className="p-4 bg-success-subtle border border-success-border text-success-text rounded-[var(--radius-button,12px)] text-sm font-medium">
                   {successMsg}
                 </div>
                 <Button onClick={close} className="w-full">Fermer</Button>
@@ -225,13 +225,13 @@ export function UserManager({
                 />
                 
                 {!editingUser && (
-                  <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 rounded-[var(--radius-button,12px)] text-xs text-blue-800 dark:text-blue-200 leading-relaxed">
+                  <div className="p-3 bg-info-subtle border border-info-border rounded-[var(--radius-button,12px)] text-xs text-info-text leading-relaxed">
                     ✉️ Un email de confirmation sera automatiquement envoyé pour inviter l&apos;utilisateur à définir son mot de passe et activer son accès.
                   </div>
                 )}
                 
                 {error && (
-                  <p className="text-xs text-rose-700 dark:text-rose-300 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-[var(--radius-button,12px)]">
+                  <p className="text-xs text-danger-text p-3 bg-danger-subtle border border-danger-border rounded-[var(--radius-button,12px)]">
                     {error}
                   </p>
                 )}

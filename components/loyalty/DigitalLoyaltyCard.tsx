@@ -153,7 +153,9 @@ export function DigitalLoyaltyCard({
                 <path d="M12 12h.01" />
               </svg>
             </div>
-            <StatusBadge status={tier} size="sm" />
+            <span className="scheme-light">
+              <StatusBadge status={tier} size="sm" />
+            </span>
           </div>
         </div>
 

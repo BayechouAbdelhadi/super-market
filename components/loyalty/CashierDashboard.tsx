@@ -236,15 +236,15 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
       {selectedCustomerId && selectedCustomerDetail ? (
         <div className="space-y-4">
           {redirectCountdown !== null && (
-            <div className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 shadow-xs">
+            <div className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-success-subtle border border-success-border text-success-text flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 shadow-xs">
               <div className="flex items-center gap-3">
                 <span className="text-2xl select-none">🎉</span>
                 <div>
-                  <strong className="block text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                  <strong className="block text-sm font-bold text-success-text">
                     Transaction confirmée avec succès !
                   </strong>
-                  <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                    Redirection vers l&apos;accueil caisse dans <span className="font-extrabold font-mono text-sm px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-900 dark:text-emerald-100">{redirectCountdown}s</span> pour le prochain client...
+                  <p className="text-xs text-success-text">
+                    Redirection vers l&apos;accueil caisse dans <span className="font-extrabold font-mono text-sm px-1.5 py-0.5 rounded bg-success-subtle text-success-text">{redirectCountdown}s</span> pour le prochain client...
                   </p>
                 </div>
               </div>
@@ -252,7 +252,7 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
                 variant="primary"
                 size="sm"
                 onClick={() => handleImmediateRedirect()}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0"
+                className="bg-success hover:bg-success/90 text-on-color shrink-0"
               >
                 Passer au client suivant
               </Button>
@@ -285,14 +285,14 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
         <div className="space-y-6">
           {/* Confirmed Transaction Alert (Displayed when redirected with no customer selected) */}
           {completedTxAlert && (
-            <div className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-100 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 shadow-xs">
+            <div className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-success-subtle border border-success-border text-success-text flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 shadow-xs">
               <div className="flex items-center gap-3">
                 <span className="text-xl select-none">✅</span>
                 <div>
-                  <strong className="block text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                  <strong className="block text-sm font-bold text-success-text">
                     {completedTxAlert}
                   </strong>
-                  <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                  <p className="text-xs text-success-text">
                     Caisse prête pour le client suivant (aucun client sélectionné).
                   </p>
                 </div>
@@ -300,7 +300,7 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
               <button
                 type="button"
                 onClick={() => setCompletedTxAlert(null)}
-                className="text-emerald-700 hover:text-emerald-900 dark:text-emerald-300 hover:bg-emerald-500/20 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                className="text-success-text hover:text-success-text hover:bg-success-subtle text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
               >
                 ✕ Fermer
               </button>

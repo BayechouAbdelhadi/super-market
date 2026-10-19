@@ -69,11 +69,17 @@
   --color-tier-bronze: #a86326;
   --color-tier-silver: #717171;
   --color-tier-gold: #c28b1e;
-  --color-tier-vip: #222222;
+  --color-tier-vip: var(--on-light-tier-vip);
   /* Tier text on the tier tint (the tier base colors are too light for small text) */
-  --color-tier-bronze-text: #92400e;
-  --color-tier-silver-text: #334155;
-  --color-tier-gold-text: #78350f;
+  --color-tier-bronze-text: var(--on-light-tier-bronze-text);
+  --color-tier-silver-text: var(--on-light-tier-silver-text);
+  --color-tier-gold-text: var(--on-light-tier-gold-text);
+  /* Light-mode tier values: used by light mode and by .scheme-light */
+  --on-light-tier-vip: #222222;
+  --on-light-tier-bronze-text: #92400e;
+  --on-light-tier-silver-text: #334155;
+  --on-light-tier-gold-text: #78350f;
+  --on-light-background: #ffffff;
 
   /* Border Radius System (AGENTS.md § 4) */
   --radius-button: 12px;
@@ -272,6 +278,15 @@
     --color-info-border: color-mix(in srgb, var(--color-info) 36%, transparent);
     --color-overlay: rgb(0 0 0 / 0.65);
   }
+}
+
+/* Content that always sits on a light surface (the loyalty card artwork), whatever the page's mode */
+.scheme-light {
+  --color-tier-vip: var(--on-light-tier-vip);
+  --color-tier-bronze-text: var(--on-light-tier-bronze-text);
+  --color-tier-silver-text: var(--on-light-tier-silver-text);
+  --color-tier-gold-text: var(--on-light-tier-gold-text);
+  --color-background: var(--on-light-background);
 }
 
 /* Content that always sits on a dark background (photos, dark cards), whatever the page's mode */

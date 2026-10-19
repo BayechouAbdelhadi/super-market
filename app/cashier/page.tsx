@@ -36,9 +36,9 @@ export default async function CashierHubPage() {
   return (
     <div className="space-y-8">
         {/* Cashier Welcome Banner */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover,#f9fafb)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-hover)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-success-subtle text-success-text border border-success-border">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Session Caisse Active</span>
             </div>
@@ -52,7 +52,7 @@ export default async function CashierHubPage() {
 
           <div className="px-5 py-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs space-y-1.5 shadow-xs shrink-0">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
               <span className="font-bold text-[var(--color-text)]">{settings.store.storeName} — {settings.pos.defaultCashierStation}</span>
             </div>
             <p className="text-[11px] text-[var(--color-text-muted)]">
@@ -89,7 +89,7 @@ export default async function CashierHubPage() {
                     <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center group-hover:scale-105 transition-transform">
                       <Store className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-success-subtle text-success-text border border-success-border">
                       Opérationnel
                     </span>
                   </div>
@@ -114,26 +114,26 @@ export default async function CashierHubPage() {
             {/* App 2: Annuaire des Clients */}
             <Link
               href="/cashier/customers"
-              className="group block focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-2xl"
+              className="group block focus:outline-none focus:ring-2 focus:ring-success rounded-2xl"
             >
               <Card
                 padded="lg"
-                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-emerald-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
+                className="h-full border-[var(--color-border)] bg-[var(--color-surface)] hover:border-success/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-success" />
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <div className="w-12 h-12 rounded-xl bg-success-subtle text-success-text flex items-center justify-center group-hover:scale-105 transition-transform">
                       <Users className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-success-subtle text-success-text border border-success-border">
                       Disponible
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-emerald-600 transition-colors">
+                    <h3 className="text-base font-bold text-[var(--color-text)] group-hover:text-success-text transition-colors">
                       Annuaire des Clients
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
@@ -142,7 +142,7 @@ export default async function CashierHubPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-emerald-600 group-hover:translate-x-1 transition-transform">
+                <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-success-text group-hover:translate-x-1 transition-transform">
                   <span>Consulter les clients</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -156,10 +156,10 @@ export default async function CashierHubPage() {
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-info-subtle text-info-text flex items-center justify-center">
                     <Clock className="w-6 h-6" />
                   </div>
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-info-subtle text-info-text border border-info-border">
                     Bientôt disponible
                   </span>
                 </div>

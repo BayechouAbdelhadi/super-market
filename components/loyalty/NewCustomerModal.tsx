@@ -111,14 +111,14 @@ export function NewCustomerModal({
     >
       {/* Duplicate Warning Banner */}
       {duplicateInfo && (
-        <div className="p-5 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/60 space-y-3">
+        <div className="p-5 bg-warning-subtle border-b border-warning-border space-y-3">
           <div className="flex items-start gap-3">
             <span className="text-xl">⚠️</span>
             <div className="space-y-1">
-              <h4 className="text-xs font-bold text-amber-900 dark:text-amber-200">
+              <h4 className="text-xs font-bold text-warning-text">
                 {duplicateInfo.message}
               </h4>
-              <div className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+              <div className="text-xs text-warning-text font-medium">
                 <div>{duplicateInfo.existingCustomer.full_name}</div>
                 <div className="font-mono">{duplicateInfo.existingCustomer.phone}</div>
               </div>
@@ -143,7 +143,7 @@ export function NewCustomerModal({
       {/* Form */}
       <form onSubmit={handleSubmit} className="p-6 space-y-4">
         {errorMsg && !duplicateInfo && (
-          <div className="p-3 rounded-[var(--radius-button,12px)] bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 font-medium">
+          <div className="p-3 rounded-[var(--radius-button,12px)] bg-danger-subtle border border-danger-border text-xs text-danger-text font-medium">
             {errorMsg}
           </div>
         )}

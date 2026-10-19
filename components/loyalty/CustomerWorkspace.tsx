@@ -193,15 +193,15 @@ export function CustomerWorkspace({
           </Button>
 
           {redirectCountdown !== null && (
-            <div className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 shadow-xs">
+            <div className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-success-subtle border border-success-border text-success-text flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 shadow-xs">
               <div className="flex items-center gap-3">
                 <span className="text-2xl select-none">🎉</span>
                 <div>
-                  <strong className="block text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                  <strong className="block text-sm font-bold text-success-text">
                     Transaction confirmée avec succès !
                   </strong>
-                  <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                    Redirection vers l&apos;accueil caisse dans <span className="font-extrabold font-mono text-sm px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-900 dark:text-emerald-100">{redirectCountdown}s</span>...
+                  <p className="text-xs text-success-text">
+                    Redirection vers l&apos;accueil caisse dans <span className="font-extrabold font-mono text-sm px-1.5 py-0.5 rounded bg-success-subtle text-success-text">{redirectCountdown}s</span>...
                   </p>
                 </div>
               </div>
@@ -209,7 +209,7 @@ export function CustomerWorkspace({
                 variant="primary"
                 size="sm"
                 onClick={handleImmediateRedirect}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0"
+                className="bg-success hover:bg-success/90 text-on-color shrink-0"
               >
                 Aller à la caisse maintenant
               </Button>
