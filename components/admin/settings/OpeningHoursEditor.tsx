@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { CalendarX, Clock, Copy, Plus, Trash2 } from 'lucide-react';
 import { cn } from 'cn';
 import { Card } from '@/components/ui/card';
@@ -34,10 +34,6 @@ function newClosureId(): string {
  */
 export function OpeningHoursEditor({ value, onChange }: OpeningHoursEditorProps) {
   const today = getZonedDayTime(new Date(), STORE_TIME_ZONE).date;
-  const [draftStart, setDraftStart] = useState('');
-  const [draftEnd, setDraftEnd] = useState('');
-  const [draftReason, setDraftReason] = useState('');
-  const [draftError, setDraftError] = useState<string | null>(null);
 
   const setDay = (day: DayIndex, ranges: TimeRange[]) =>
     onChange({ ...value, weekly: { ...value.weekly, [day]: ranges } });
@@ -62,31 +58,24 @@ export function OpeningHoursEditor({ value, onChange }: OpeningHoursEditorProps)
     onChange({ ...value, weekly });
   };
 
-  const addClosure = () => {
-    const startDate = draftStart;
-    const endDate = draftEnd || draftStart;
-    if (!startDate) {
-      setDraftError('Choisissez la date de début de la fermeture.');
-      return;
-    }
-    if (endDate < startDate) {
-      setDraftError('La date de fin doit être égale ou postérieure à la date de début.');
-      return;
-    }
-    if (value.closures.length >= OPENING_HOURS_LIMITS.maxClosures) {
-      setDraftError(`Au maximum ${OPENING_HOURS_LIMITS.maxClosures} fermetures exceptionnelles. Supprimez les plus anciennes.`);
-      return;
-    }
-    const closure: ExceptionalClosure = { id: newClosureId(), startDate, endDate, reason: draftReason.trim() };
+  // Closures are edited in place in the settings value: what is on screen is exactly what "Enregistrer" saves
+  const addClosure = () =>
     onChange({
       ...value,
-      closures: [...value.closures, closure].sort((a, b) => a.startDate.localeCompare(b.startDate)),
+      closures: [...value.closures, { id: newClosureId(), startDate: today, endDate: today, reason: '' }],
     });
-    setDraftStart('');
-    setDraftEnd('');
-    setDraftReason('');
-    setDraftError(null);
-  };
+
+  const updateClosure = (id: string, patch: Partial<ExceptionalClosure>) =>
+    onChange({
+      ...value,
+      closures: value.closures.map((closure) => {
+        if (closure.id !== id) return closure;
+        const next = { ...closure, ...patch };
+        // Moving the start past the end drags the end along (one-day closure by default)
+        if (patch.startDate && next.endDate < next.startDate) next.endDate = next.startDate;
+        return next;
+      }),
+    });
 
   const removeClosures = (keep: (closure: ExceptionalClosure) => boolean) =>
     onChange({ ...value, closures: value.closures.filter(keep) });
@@ -209,53 +198,36 @@ export function OpeningHoursEditor({ value, onChange }: OpeningHoursEditorProps)
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-hover)] p-4 md:grid-cols-[1fr_1fr_2fr_auto] md:items-end">
-          <Input
-            type="date"
-            label="Du"
-            value={draftStart}
-            min={today}
-            onChange={(e) => setDraftStart(e.target.value)}
-          />
-          <Input
-            type="date"
-            label="Au (inclus)"
-            value={draftEnd}
-            min={draftStart || today}
-            onChange={(e) => setDraftEnd(e.target.value)}
-          />
-          <Input
-            type="text"
-            label="Motif (optionnel)"
-            value={draftReason}
-            maxLength={OPENING_HOURS_LIMITS.maxClosureReasonLength}
-            placeholder="Noël, inventaire…"
-            onChange={(e) => setDraftReason(e.target.value)}
-          />
-          <Button type="button" variant="secondary" onClick={addClosure}>
-            <Plus />
-            <span>Ajouter</span>
-          </Button>
-          {draftError ? (
-            <p role="alert" className="text-xs font-medium text-[var(--color-danger)] md:col-span-4">
-              {draftError}
-            </p>
-          ) : (
-            <p className="text-xs text-[var(--color-text-muted)] md:col-span-4">
-              Laissez « Au » vide pour une fermeture d&apos;un seul jour. Pensez à enregistrer après vos modifications.
-            </p>
-          )}
-        </div>
-
         {upcoming.length === 0 ? (
           <p className="text-sm text-[var(--color-text-muted)]">Aucune fermeture exceptionnelle prévue.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {upcoming.map((closure) => (
-              <ClosureRow key={closure.id} closure={closure} onRemove={() => removeClosures((c) => c.id !== closure.id)} />
+              <EditableClosureRow
+                key={closure.id}
+                closure={closure}
+                today={today}
+                onChange={(patch) => updateClosure(closure.id, patch)}
+                onRemove={() => removeClosures((c) => c.id !== closure.id)}
+              />
             ))}
           </ul>
         )}
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={addClosure}
+            disabled={value.closures.length >= OPENING_HOURS_LIMITS.maxClosures}
+          >
+            <Plus />
+            <span>Ajouter une fermeture</span>
+          </Button>
+          <p className="text-xs text-[var(--color-text-muted)]">
+            Mettez la même date de début et de fin pour un seul jour. Pensez à enregistrer.
+          </p>
+        </div>
 
         {past.length > 0 && (
           <div className="space-y-2 border-t border-[var(--color-border)] pt-4">
@@ -281,6 +253,59 @@ export function OpeningHoursEditor({ value, onChange }: OpeningHoursEditorProps)
         )}
       </Card>
     </div>
+  );
+}
+
+function EditableClosureRow({
+  closure,
+  today,
+  onChange,
+  onRemove,
+}: {
+  closure: ExceptionalClosure;
+  today: string;
+  onChange: (patch: Partial<ExceptionalClosure>) => void;
+  onRemove: () => void;
+}) {
+  const invalidRange = closure.endDate < closure.startDate;
+  return (
+    <li className="grid grid-cols-1 gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-hover)] p-4 sm:grid-cols-2 md:grid-cols-[1fr_1fr_2fr_auto] md:items-end">
+      <Input
+        type="date"
+        label="Du"
+        value={closure.startDate}
+        min={today}
+        onChange={(e) => e.target.value && onChange({ startDate: e.target.value })}
+      />
+      <Input
+        type="date"
+        label="Au (inclus)"
+        value={closure.endDate}
+        min={closure.startDate}
+        error={invalidRange ? 'Doit être après la date de début.' : undefined}
+        onChange={(e) => e.target.value && onChange({ endDate: e.target.value })}
+      />
+      <Input
+        type="text"
+        label="Motif (optionnel)"
+        value={closure.reason}
+        maxLength={OPENING_HOURS_LIMITS.maxClosureReasonLength}
+        placeholder="Noël, inventaire…"
+        onChange={(e) => onChange({ reason: e.target.value })}
+        // Enter would submit the whole settings form
+        onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={`Supprimer la fermeture du ${formatClosureDates(closure)}`}
+        onClick={onRemove}
+        className="justify-self-end text-[var(--color-danger)] hover:text-[var(--color-danger)]"
+      >
+        <Trash2 />
+      </Button>
+    </li>
   );
 }
 

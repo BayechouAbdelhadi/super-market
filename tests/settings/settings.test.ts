@@ -4,6 +4,8 @@ import path from 'path';
 import { AppSettingsSchema } from '@/lib/settings/validation';
 import { DEFAULT_APP_SETTINGS } from '@/lib/settings/types';
 import { getAppSettings, updateAppSettings, resetAppSettings } from '@/lib/settings/service';
+import type { ISettingsStore, StoredSettings } from '@/lib/settings/ports';
+import type { AppSettings } from '@/lib/settings/types';
 
 describe('Application Settings & Configuration', () => {
   const testFilePath = path.join(process.cwd(), 'data', 'test-app-settings.json');
@@ -211,6 +213,34 @@ describe('Application Settings & Configuration', () => {
 
       const current = await getAppSettings();
       expect(current.loyalty.pointValueInEuro).toBe(0.05);
+    });
+  });
+
+  describe('Opening hours persistence', () => {
+    class MemoryStore implements ISettingsStore {
+      stored: StoredSettings | null = null;
+      async load() {
+        return this.stored;
+      }
+      async save(settings: AppSettings) {
+        // JSON round-trip, as Supabase JSONB and the backup file do (numeric day keys become strings)
+        this.stored = { settings: JSON.parse(JSON.stringify(settings)), updatedAt: settings.updatedAt };
+      }
+    }
+
+    it('saves exceptional closures and reads them back', async () => {
+      const stores = { primary: new MemoryStore(), backup: new MemoryStore() };
+      const closure = { id: 'a1b2', startDate: '2026-12-24', endDate: '2026-12-26', reason: 'Noël' };
+      const result = await updateAppSettings(
+        { ...DEFAULT_APP_SETTINGS, hours: { ...DEFAULT_APP_SETTINGS.hours, closures: [closure] } },
+        'test',
+        stores
+      );
+      expect(result.success).toBe(true);
+
+      const reloaded = await getAppSettings(stores);
+      expect(reloaded.hours.closures).toEqual([closure]);
+      expect(reloaded.hours.weekly[1]).toEqual(DEFAULT_APP_SETTINGS.hours.weekly[1]);
     });
   });
 });
