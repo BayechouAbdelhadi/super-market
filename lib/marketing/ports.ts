@@ -1,4 +1,12 @@
 import { MarketingCampaign, CampaignRecipient } from "./types";
+import { LoyaltyTier } from "@/lib/loyalty/types";
+
+/** Minimum loyalty points for each tier above BRONZE (used when a customer has no stored status). */
+export interface AudienceTierThresholds {
+  silver: number;
+  gold: number;
+  vip: number;
+}
 
 export interface IMarketingCampaignRepository {
   getAll(): Promise<MarketingCampaign[]>;
@@ -38,4 +46,9 @@ export interface AudienceCustomerRow {
 export interface ICampaignAudienceRepository {
   /** All customers that have an email address (read page by page, bounded queries). */
   listCustomersWithEmail(): Promise<AudienceCustomerRow[]>;
+  /**
+   * Counts, in the database, the customers a campaign would email in each tier: valid email,
+   * not unsubscribed, one per email. Tiers with nobody are 0.
+   */
+  countByTier(thresholds: AudienceTierThresholds): Promise<Record<LoyaltyTier, number>>;
 }

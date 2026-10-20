@@ -12,8 +12,10 @@ import {
   unsubscribeCustomerEmail,
   resubscribeCustomerEmail,
   isCustomerEmailUnsubscribed,
+  countAudienceByTier,
 } from '@/lib/marketing/service';
-import { IMarketingCampaignRepository } from '@/lib/marketing/ports';
+import { IMarketingCampaignRepository, ICampaignAudienceRepository } from '@/lib/marketing/ports';
+import { LOYALTY_CONFIG } from '@/lib/loyalty/config';
 import { MarketingCampaign, CampaignRecipient } from '@/lib/marketing/types';
 import { emailService } from '@/lib/email';
 
@@ -910,5 +912,23 @@ describe('Marketing Deals & Email Campaigns', () => {
       const results = await triggerDueCampaigns(mockRepo);
       expect(results.map((r) => r.campaignId)).toEqual(['free-1']);
     });
+  });
+});
+
+describe('countAudienceByTier', () => {
+  it('asks the database for the counts with the tier thresholds from LOYALTY_CONFIG', async () => {
+    const counts = { BRONZE: 12, SILVER: 5, GOLD: 3, VIP: 1 };
+    const audience: ICampaignAudienceRepository = {
+      listCustomersWithEmail: vi.fn(),
+      countByTier: vi.fn().mockResolvedValue(counts),
+    };
+
+    await expect(countAudienceByTier(audience)).resolves.toEqual(counts);
+    expect(audience.countByTier).toHaveBeenCalledWith({
+      silver: LOYALTY_CONFIG.tiers.SILVER.minHistoricalPoints,
+      gold: LOYALTY_CONFIG.tiers.GOLD.minHistoricalPoints,
+      vip: LOYALTY_CONFIG.tiers.VIP.minHistoricalPoints,
+    });
+    expect(audience.listCustomersWithEmail).not.toHaveBeenCalled();
   });
 });

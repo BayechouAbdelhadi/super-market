@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoyaltyTier } from "@/lib/loyalty/types";
@@ -100,6 +100,13 @@ export const CAMPAIGN_PRESETS = [
 
 const DRAFT_STORAGE_KEY = "supermarket_deal_campaign_draft_v2";
 
+/** "0 client", "1 client", "1 250 clients" */
+function formatClients(count: number): string {
+  return `${count.toLocaleString("fr-FR")} client${count > 1 ? "s" : ""}`;
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function CampaignEditorPage({
   storeName = "Super Market Calais",
   storeAddress = "205 Avenue Antoine de Saint-Exupéry, 62100 Calais",
@@ -116,8 +123,13 @@ export function CampaignEditorPage({
 
   // Audience State (Step 1)
   const [selectedTiers, setSelectedTiers] = useState<LoyaltyTier[]>(["GOLD", "VIP"]);
-  const [targetCount, setTargetCount] = useState<number | null>(null);
-  const [loadingCount, setLoadingCount] = useState(false);
+  // Recipients per tier (null while loading or if the count failed); the total is derived from the selection
+  const [audienceByTier, setAudienceByTier] = useState<Record<LoyaltyTier, number> | null>(null);
+  const [loadingCount, setLoadingCount] = useState(true);
+  const targetCount = useMemo(
+    () => (audienceByTier ? selectedTiers.reduce((sum, tier) => sum + audienceByTier[tier], 0) : null),
+    [audienceByTier, selectedTiers]
+  );
 
   // Dispatch Mode State (Step 2)
   const [dispatchMode, setDispatchMode] = useState<"ALL_AT_ONCE" | "DAILY_LIMIT">("ALL_AT_ONCE");
@@ -185,9 +197,7 @@ export function CampaignEditorPage({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Campaign UUID ref for grouping uploads and draft updates
-  const campaignIdRef = useRef<string>(
-    typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `camp_${Date.now()}`
-  );
+  const campaignIdRef = useRef<string>(crypto.randomUUID());
 
   // 1. Restore draft on mount (from URL draftId or localStorage)
   useEffect(() => {
@@ -228,7 +238,10 @@ export function CampaignEditorPage({
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed) {
-          if (parsed.campaignId) campaignIdRef.current = parsed.campaignId;
+          // Older drafts used "camp_<timestamp>" ids, which the database rejects: keep the fresh UUID instead
+          if (typeof parsed.campaignId === "string" && UUID_PATTERN.test(parsed.campaignId)) {
+            campaignIdRef.current = parsed.campaignId;
+          }
           if (parsed.selectedTiers) setSelectedTiers(parsed.selectedTiers);
           if (parsed.dispatchMode) setDispatchMode(parsed.dispatchMode);
           if (parsed.dailyLimitStr) setDailyLimitStr(parsed.dailyLimitStr);
@@ -296,24 +309,17 @@ export function CampaignEditorPage({
     step,
   ]);
 
-  // Live audience calculation
+  // Audience size per tier, loaded once: toggling tiers then updates the total instantly
   useEffect(() => {
-    if (selectedTiers.length === 0) {
-      setTargetCount(0);
-      return;
-    }
-
     let isMounted = true;
-    setLoadingCount(true);
 
-    const query = selectedTiers.join(",");
-    fetch(`/api/admin/deals/audience?tiers=${encodeURIComponent(query)}`)
+    fetch("/api/admin/deals/audience")
       .then((res) => (res.ok ? res.json() : Promise.reject("Fetch error")))
-      .then((data) => {
-        if (isMounted) setTargetCount(data.totalTargets ?? null);
+      .then((data: { byTier?: Record<LoyaltyTier, number> }) => {
+        if (isMounted) setAudienceByTier(data.byTier ?? null);
       })
       .catch(() => {
-        if (isMounted) setTargetCount(null);
+        if (isMounted) setAudienceByTier(null);
       })
       .finally(() => {
         if (isMounted) setLoadingCount(false);
@@ -322,7 +328,7 @@ export function CampaignEditorPage({
     return () => {
       isMounted = false;
     };
-  }, [selectedTiers]);
+  }, []);
 
   // Handle Image Upload
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -494,8 +500,7 @@ export function CampaignEditorPage({
       window.confirm("Voulez-vous réinitialiser le formulaire et effacer le brouillon actuel ?")
     ) {
       localStorage.removeItem(DRAFT_STORAGE_KEY);
-      campaignIdRef.current =
-        typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `camp_${Date.now()}`;
+      campaignIdRef.current = crypto.randomUUID();
       setSelectedTiers(["GOLD", "VIP"]);
       setDispatchMode("ALL_AT_ONCE");
       setDailyLimitStr("50");
@@ -765,7 +770,7 @@ export function CampaignEditorPage({
                   >
                     {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                   </div>
-                  <div className="space-y-1 min-w-0">
+                  <div className="space-y-1 min-w-0 flex-1">
                     <strong className="text-sm font-bold text-[var(--color-text)] block">
                       Palier {t.label}
                     </strong>
@@ -773,6 +778,15 @@ export function CampaignEditorPage({
                       {t.desc}
                     </p>
                   </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums ${
+                      isChecked
+                        ? "bg-[var(--color-primary)] text-on-color"
+                        : "bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    {loadingCount ? "…" : audienceByTier ? formatClients(audienceByTier[t.id]) : "—"}
+                  </span>
                 </button>
               );
             })}
@@ -796,7 +810,7 @@ export function CampaignEditorPage({
                 <span className="text-xs text-[var(--color-text-muted)] animate-pulse">Calcul...</span>
               ) : (
                 <strong className="text-xl sm:text-2xl font-mono font-black text-[var(--color-primary)]">
-                  {targetCount !== null ? `${targetCount} client${targetCount > 1 ? "s" : ""}` : "—"}
+                  {targetCount !== null ? formatClients(targetCount) : "—"}
                 </strong>
               )}
             </div>
@@ -868,7 +882,7 @@ export function CampaignEditorPage({
                   Envoi groupé (One-shot)
                 </strong>
                 <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-                  L&apos;ensemble des {targetCount || 0} clients ciblés reçoivent l&apos;email dès le démarrage de la campagne en un seul passage.
+                  L&apos;ensemble des {formatClients(targetCount ?? 0)} ciblés reçoivent l&apos;email dès le démarrage de la campagne en un seul passage.
                 </p>
               </div>
               <div className="text-[11px] font-semibold text-success-text">
@@ -1252,7 +1266,7 @@ export function CampaignEditorPage({
                     Audience ciblée
                   </span>
                   <span className="text-xs font-mono font-bold text-[var(--color-primary)]">
-                    {targetCount !== null ? `${targetCount} client(s)` : "Calcul..."} ({selectedTiers.join(", ")})
+                    {loadingCount ? "Calcul..." : targetCount !== null ? formatClients(targetCount) : "—"} ({selectedTiers.join(", ")})
                   </span>
                 </div>
                 <Button

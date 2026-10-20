@@ -10,6 +10,7 @@ import { IMarketingCampaignRepository, ICampaignAudienceRepository } from "./por
 import { defaultMarketingRepo } from "./adapters/supabase-marketing-repository";
 import { SupabaseCampaignAudienceRepository } from "./adapters/supabase-audience-repository";
 import { calculateTier } from "@/lib/loyalty/domain";
+import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 import { LoyaltyTier } from "@/lib/loyalty/types";
 import { emailService, IEmailService } from "@/lib/email";
 import { IUserAccountRepository } from "@/lib/auth/ports";
@@ -69,6 +70,21 @@ export async function getTargetCustomersByTiers(
   }
 
   return deduplicateRecipients(recipients);
+}
+
+/**
+ * Counts the customers a campaign would email in each loyalty tier (same filters as the real audience:
+ * valid email, not unsubscribed, deduplicated). Counted by the database; each customer has one tier,
+ * so tier counts add up exactly.
+ */
+export async function countAudienceByTier(
+  audienceRepo: ICampaignAudienceRepository = defaultAudienceRepo
+): Promise<Record<LoyaltyTier, number>> {
+  return audienceRepo.countByTier({
+    silver: LOYALTY_CONFIG.tiers.SILVER.minHistoricalPoints,
+    gold: LOYALTY_CONFIG.tiers.GOLD.minHistoricalPoints,
+    vip: LOYALTY_CONFIG.tiers.VIP.minHistoricalPoints,
+  });
 }
 
 /**

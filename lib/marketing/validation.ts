@@ -5,7 +5,8 @@ const isHttpUrl = (value: string) => /^https?:\/\//i.test(value);
 
 export const CreateCampaignSchema = z
   .object({
-    id: z.string().optional(),
+    // marketing_campaigns.id is a Postgres UUID: anything else would fail in the database
+    id: z.string().uuid("Identifiant de campagne invalide.").optional(),
     title: z
       .string()
       .trim()

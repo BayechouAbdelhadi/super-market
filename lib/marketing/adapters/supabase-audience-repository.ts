@@ -1,4 +1,5 @@
-import { AudienceCustomerRow, ICampaignAudienceRepository } from "../ports";
+import { AudienceCustomerRow, AudienceTierThresholds, ICampaignAudienceRepository } from "../ports";
+import { LoyaltyTier } from "@/lib/loyalty/types";
 import { createClient } from "@/lib/supabase/server";
 
 /** PostgREST returns at most 1000 rows per request: read the audience in pages of that size. */
@@ -35,5 +36,26 @@ export class SupabaseCampaignAudienceRepository implements ICampaignAudienceRepo
         return rows;
       }
     }
+  }
+
+  async countByTier(thresholds: AudienceTierThresholds): Promise<Record<LoyaltyTier, number>> {
+    const sb = await createClient();
+    // Aggregated in PostgreSQL (supabase/marketing_audience_counts.sql): returns one row per tier, never the customers
+    const { data, error } = await sb.rpc("marketing_audience_counts", {
+      p_silver_min: thresholds.silver,
+      p_gold_min: thresholds.gold,
+      p_vip_min: thresholds.vip,
+    });
+    if (error) {
+      throw new Error(`[CampaignAudienceRepository] countByTier failed: ${error.message}`);
+    }
+
+    const counts: Record<LoyaltyTier, number> = { BRONZE: 0, SILVER: 0, GOLD: 0, VIP: 0 };
+    for (const row of (data ?? []) as { tier: string; recipients: number | string }[]) {
+      if (row.tier in counts) {
+        counts[row.tier as LoyaltyTier] = Number(row.recipients);
+      }
+    }
+    return counts;
   }
 }
