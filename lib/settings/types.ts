@@ -1,4 +1,6 @@
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
+import { DEFAULT_OPENING_HOURS } from "@/lib/store/config";
+import type { OpeningHours } from "@/lib/store/opening-hours";
 
 export interface LoyaltySettings {
   /** Value of 1 loyalty point in Euros. Default is 0.05 (100 points = 5 €) */
@@ -57,6 +59,8 @@ export interface AppSettings {
   pos: PosSettings;
   store: StoreSettings;
   notifications: NotificationSettings;
+  /** Weekly opening hours and exceptional closures shown on the public site */
+  hours: OpeningHours;
   updatedAt?: string;
   updatedBy?: string;
 }
@@ -89,5 +93,9 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     senderName: process.env.BREVO_SENDER_NAME || "Super Market Calais",
     sendWelcomeEmail: true,
     sendCashierInviteEmail: true,
+  },
+  hours: {
+    weekly: DEFAULT_OPENING_HOURS,
+    closures: [],
   },
 };

@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolveUserRole, type AppRole } from "@/lib/auth/roles";
 import { getAppSettings } from "@/lib/settings/service";
-import { OPENING_HOURS, STORE_TIME_ZONE } from "@/lib/store/config";
+import { STORE_TIME_ZONE } from "@/lib/store/config";
 import { getOpeningStatus } from "@/lib/store/opening-hours";
 import { SiteHeader, type AccountLink } from "@/components/public/SiteHeader";
 import { SiteFooter } from "@/components/public/SiteFooter";
+import { OpeningHoursProvider } from "@/components/public/OpeningHoursProvider";
 
 const ACCOUNT_LINKS: Record<AppRole, AccountLink> = {
   CUSTOMER: { href: "/account", label: "Mon espace" },
@@ -30,24 +31,27 @@ async function getAccountLink(): Promise<AccountLink | null> {
  * jumps (#fidelite), which pushed the whole page up and hid the header; a clipped box cannot.
  */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [{ store }, account] = await Promise.all([getAppSettings(), getAccountLink()]);
-  const status = getOpeningStatus(new Date(), OPENING_HOURS, STORE_TIME_ZONE);
+  const [{ store, hours }, account] = await Promise.all([getAppSettings(), getAccountLink()]);
+  const status = getOpeningStatus(new Date(), hours.weekly, STORE_TIME_ZONE, hours.closures);
 
   return (
-    <div className="flex h-full w-full flex-col overflow-clip bg-background text-text">
-      {/* Header, page parts and footer are direct children, so the sticky header stays pinned over the footer too.
-          `*:shrink-0` keeps any child (footer included) from being squeezed by the column. */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto motion-safe:scroll-smooth *:shrink-0">
-        <SiteHeader storeName={store.storeName} phone={store.phone} status={status} account={account} />
-        {children}
-        <SiteFooter
-          storeName={store.storeName}
-          tagline={store.tagline}
-          address={store.address}
-          phone={store.phone}
-          email={store.email}
-        />
+    <OpeningHoursProvider hours={hours}>
+      <div className="flex h-full w-full flex-col overflow-clip bg-background text-text">
+        {/* Header, page parts and footer are direct children, so the sticky header stays pinned over the footer too.
+            `*:shrink-0` keeps any child (footer included) from being squeezed by the column. */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto motion-safe:scroll-smooth *:shrink-0">
+          <SiteHeader storeName={store.storeName} phone={store.phone} status={status} account={account} />
+          {children}
+          <SiteFooter
+            storeName={store.storeName}
+            tagline={store.tagline}
+            address={store.address}
+            phone={store.phone}
+            email={store.email}
+            weekly={hours.weekly}
+          />
+        </div>
       </div>
-    </div>
+    </OpeningHoursProvider>
   );
 }

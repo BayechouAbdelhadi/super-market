@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AppSettings, DEFAULT_APP_SETTINGS } from '@/lib/settings/types';
 import { updateSettingsAction, resetSettingsAction } from '@/app/admin/settings/actions';
 import { Card } from '@/components/ui/card';
+import { OpeningHoursEditor } from '@/components/admin/settings/OpeningHoursEditor';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/sonner';
 import {
@@ -12,6 +13,7 @@ import {
   Store,
   CreditCard,
   Bell,
+  Clock,
   Save,
   RotateCcw,
   Sparkles,
@@ -29,7 +31,7 @@ interface SettingsManagerProps {
 export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const router = useRouter();
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
-  const [activeTab, setActiveTab] = useState<'loyalty' | 'pos' | 'store' | 'notifications'>('loyalty');
+  const [activeTab, setActiveTab] = useState<'loyalty' | 'pos' | 'store' | 'hours' | 'notifications'>('loyalty');
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -253,7 +255,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
             Paramètres du Magasin &amp; Fidélité
           </h1>
           <p className="text-xs sm:text-sm text-[var(--color-text-muted)] max-w-2xl leading-relaxed">
-            Configurez la valeur monétaire des points de fidélité, les seuils de remise, les paramètres de caisse et l&apos;identité commerciale de votre enseigne.
+            Configurez la valeur monétaire des points de fidélité, les seuils de remise, les paramètres de caisse, l&apos;identité commerciale et les horaires d&apos;ouverture de votre enseigne.
           </p>
         </div>
 
@@ -328,6 +330,19 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
         >
           <Store className="w-4 h-4" />
           <span>Identité Magasin</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('hours')}
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all shrink-0 cursor-pointer ${
+            activeTab === 'hours'
+              ? 'bg-[var(--color-surface)] text-[var(--color-primary)] shadow-xs'
+              : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+          }`}
+        >
+          <Clock className="w-4 h-4" />
+          <span>Horaires &amp; Fermetures</span>
         </button>
 
         <button
@@ -771,7 +786,12 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
           </div>
         )}
 
-        {/* TAB 4: NOTIFICATIONS & EMAILS */}
+        {/* TAB 4: HORAIRES & FERMETURES EXCEPTIONNELLES */}
+        {activeTab === 'hours' && (
+          <OpeningHoursEditor value={settings.hours} onChange={(hours) => setSettings({ ...settings, hours })} />
+        )}
+
+        {/* TAB 5: NOTIFICATIONS & EMAILS */}
         {activeTab === 'notifications' && (
           <div className="space-y-6">
             <Card padded="lg" className="border-[var(--color-border)] bg-[var(--color-surface)] space-y-5">
@@ -945,7 +965,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 Rétablir la configuration par défaut ?
               </h3>
               <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-                Toutes les valeurs (valeur du point à 0.05 €, ratios, seuils de statuts et raccourcis de caisse) seront réinitialisées aux valeurs usine d&apos;origine.
+                Toutes les valeurs (valeur du point à 0.05 €, ratios, seuils de statuts, raccourcis de caisse, horaires d&apos;ouverture et fermetures exceptionnelles) seront réinitialisées aux valeurs usine d&apos;origine.
               </p>
             </div>
 

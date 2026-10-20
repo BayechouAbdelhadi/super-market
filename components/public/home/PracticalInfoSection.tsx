@@ -1,11 +1,19 @@
 import type { LucideIcon } from "lucide-react";
-import { Bus, CircleParking, CreditCard, Mail, MapPin, Navigation, Package, Phone } from "lucide-react";
+import { Bus, CalendarX, CircleParking, CreditCard, Mail, MapPin, Navigation, Package, Phone } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "cn";
 import { formatPhone, phoneHref } from "@/lib/store/contact";
-import { OPENING_HOURS, STORE_ACCESS, STORE_LOCATION } from "@/lib/store/config";
-import { DAY_NAMES, WEEK_ORDER, formatDayHours, type OpeningStatus } from "@/lib/store/opening-hours";
+import { STORE_ACCESS, STORE_LOCATION } from "@/lib/store/config";
+import {
+  DAY_NAMES,
+  WEEK_ORDER,
+  formatClosureDates,
+  formatDayHours,
+  type ExceptionalClosure,
+  type OpeningStatus,
+  type WeeklySchedule,
+} from "@/lib/store/opening-hours";
 import { OpenStatus } from "./OpenStatus";
 import { SectionHeading } from "./SectionHeading";
 
@@ -34,6 +42,9 @@ interface PracticalInfoSectionProps {
   phone: string;
   email: string;
   status: OpeningStatus;
+  weekly: WeeklySchedule;
+  /** Closures to announce, soonest first */
+  upcomingClosures: ExceptionalClosure[];
 }
 
 function IconTile({ icon: Icon }: { icon: LucideIcon }) {
@@ -44,7 +55,15 @@ function IconTile({ icon: Icon }: { icon: LucideIcon }) {
   );
 }
 
-export function PracticalInfoSection({ storeName, address, phone, email, status }: PracticalInfoSectionProps) {
+export function PracticalInfoSection({
+  storeName,
+  address,
+  phone,
+  email,
+  status,
+  weekly,
+  upcomingClosures,
+}: PracticalInfoSectionProps) {
   const contacts = [
     { icon: MapPin, label: address, href: STORE_LOCATION.googleMapsUrl, external: true },
     ...(phone ? [{ icon: Phone, label: formatPhone(phone), href: phoneHref(phone), external: false }] : []),
@@ -129,11 +148,27 @@ export function PracticalInfoSection({ storeName, address, phone, email, status 
                       {isToday && <span className="sr-only">(aujourd&apos;hui)</span>}
                       {isToday && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />}
                     </dt>
-                    <dd className="text-right tabular-nums">{formatDayHours(OPENING_HOURS[day])}</dd>
+                    <dd className="text-right tabular-nums">{formatDayHours(weekly[day])}</dd>
                   </div>
                 );
               })}
             </dl>
+            {upcomingClosures.length > 0 && (
+              <div className="space-y-2 rounded-[var(--radius-button)] border border-warning-border bg-warning-subtle p-3 text-sm text-warning-text">
+                <p className="flex items-center gap-2 font-semibold">
+                  <CalendarX aria-hidden className="h-4 w-4 shrink-0" />
+                  Fermetures exceptionnelles
+                </p>
+                <ul className="space-y-1">
+                  {upcomingClosures.map((closure) => (
+                    <li key={closure.id} className="flex justify-between gap-4">
+                      <span className="tabular-nums">{formatClosureDates(closure)}</span>
+                      {closure.reason && <span className="text-right">{closure.reason}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </Card>
 
           {/* Contact */}

@@ -12,7 +12,6 @@ import { StatusBadge } from '@/components/loyalty/StatusBadge'
 import { getAppSettings } from '@/lib/settings/service'
 import { SupabaseSelfProfileRepository } from '@/lib/account/adapters/supabase-self-profile-repository'
 import { resolveDisplayIdentity } from '@/lib/account/identity'
-import { OPENING_HOURS } from '@/lib/store/config'
 import { groupWeek } from '@/lib/store/opening-hours'
 import { formatPhone } from '@/lib/store/contact'
 
@@ -158,7 +157,7 @@ export default async function AccountHubPage() {
             <div className="flex gap-3">
               <Clock aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-text-muted" />
               <dl className="space-y-1">
-                {groupWeek(OPENING_HOURS).map((group) => (
+                {groupWeek(settings.hours.weekly).map((group) => (
                   <div key={group.days}>
                     <dt className="inline font-medium text-text">{group.days} : </dt>
                     <dd className="inline tabular-nums text-text-muted">{group.hours}</dd>

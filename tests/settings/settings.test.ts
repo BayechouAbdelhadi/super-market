@@ -65,6 +65,44 @@ describe('Application Settings & Configuration', () => {
       expect(result.success).toBe(false);
     });
 
+    it('fills default opening hours for settings saved before they existed', () => {
+      const legacy = { ...DEFAULT_APP_SETTINGS, hours: undefined };
+      const result = AppSettingsSchema.safeParse(legacy);
+      expect(result.success).toBe(true);
+      expect(result.success && result.data.hours).toEqual(DEFAULT_APP_SETTINGS.hours);
+    });
+
+    it('rejects an opening range that closes before it opens', () => {
+      const invalid = {
+        ...DEFAULT_APP_SETTINGS,
+        hours: { ...DEFAULT_APP_SETTINGS.hours, weekly: { ...DEFAULT_APP_SETTINGS.hours.weekly, 1: [{ open: '19:00', close: '09:00' }] } },
+      };
+      const result = AppSettingsSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+      expect(!result.success && result.error.issues[0].message).toContain('Lundi');
+    });
+
+    it('rejects overlapping opening ranges', () => {
+      const invalid = {
+        ...DEFAULT_APP_SETTINGS,
+        hours: {
+          ...DEFAULT_APP_SETTINGS.hours,
+          weekly: { ...DEFAULT_APP_SETTINGS.hours.weekly, 2: [{ open: '09:00', close: '13:00' }, { open: '12:00', close: '19:00' }] },
+        },
+      };
+      expect(AppSettingsSchema.safeParse(invalid).success).toBe(false);
+    });
+
+    it('accepts a valid exceptional closure and rejects one ending before it starts', () => {
+      const withClosure = (startDate: string, endDate: string) => ({
+        ...DEFAULT_APP_SETTINGS,
+        hours: { ...DEFAULT_APP_SETTINGS.hours, closures: [{ id: 'c1', startDate, endDate, reason: 'Noël' }] },
+      });
+      expect(AppSettingsSchema.safeParse(withClosure('2026-12-24', '2026-12-26')).success).toBe(true);
+      expect(AppSettingsSchema.safeParse(withClosure('2026-12-26', '2026-12-24')).success).toBe(false);
+      expect(AppSettingsSchema.safeParse(withClosure('2026-02-30', '2026-02-30')).success).toBe(false);
+    });
+
     it('rejects point value <= 0', () => {
       const invalid = {
         ...DEFAULT_APP_SETTINGS,

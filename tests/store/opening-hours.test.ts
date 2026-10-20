@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { formatDayHours, formatTime, getOpeningStatus, groupWeek, type WeeklySchedule } from "@/lib/store/opening-hours";
+import {
+  addDays,
+  formatClosureDates,
+  formatDayHours,
+  formatTime,
+  getOpeningStatus,
+  getUpcomingClosures,
+  groupWeek,
+  isOpenEveryDay,
+  type ExceptionalClosure,
+  type WeeklySchedule,
+} from "@/lib/store/opening-hours";
 
 const SPLIT = [{ open: "09:00", close: "12:30" }, { open: "14:00", close: "19:30" }];
 const SCHEDULE: WeeklySchedule = {
@@ -44,6 +55,66 @@ describe("getOpeningStatus", () => {
   it("uses the store time zone, not the machine's", () => {
     // 07:30 UTC is 09:30 in Paris
     expect(getOpeningStatus(at("2026-10-19T07:30:00Z"), SCHEDULE, TZ).isOpen).toBe(true);
+  });
+});
+
+describe("getOpeningStatus with exceptional closures", () => {
+  const closure = (startDate: string, endDate: string, reason = ""): ExceptionalClosure => ({
+    id: `${startDate}-${endDate}`,
+    startDate,
+    endDate,
+    reason,
+  });
+
+  it("is closed all day during a closure, even within normal hours", () => {
+    const status = getOpeningStatus(at("2026-10-19T08:00:00Z"), SCHEDULE, TZ, [closure("2026-10-19", "2026-10-19")]);
+    expect(status.isOpen).toBe(false);
+    expect(status.label).toBe("Fermeture exceptionnelle");
+    expect(status.detail).toBe("Ouvre demain à 9h");
+  });
+
+  it("skips closed days when announcing the next opening", () => {
+    // Monday evening, Tuesday and Wednesday closed → Thursday
+    const status = getOpeningStatus(at("2026-10-19T18:00:00Z"), SCHEDULE, TZ, [closure("2026-10-20", "2026-10-21")]);
+    expect(status.label).toBe("Fermé");
+    expect(status.detail).toBe("Ouvre jeudi à 9h");
+  });
+
+  it("gives a date when the next opening is a week or more away", () => {
+    const status = getOpeningStatus(at("2026-10-19T08:00:00Z"), SCHEDULE, TZ, [closure("2026-10-19", "2026-11-01")]);
+    expect(status.detail).toBe("Ouvre le 2 nov. à 9h");
+  });
+
+  it("ignores closures on other days", () => {
+    expect(getOpeningStatus(at("2026-10-19T08:00:00Z"), SCHEDULE, TZ, [closure("2026-12-25", "2026-12-25")]).isOpen).toBe(true);
+  });
+
+  it("uses the store-local date around midnight", () => {
+    // 22:30 UTC on Oct 19 is already Oct 20 in Paris
+    const status = getOpeningStatus(at("2026-10-19T22:30:00Z"), SCHEDULE, TZ, [closure("2026-10-20", "2026-10-20")]);
+    expect(status.label).toBe("Fermeture exceptionnelle");
+  });
+
+  it("lists closures not over yet within the window, soonest first", () => {
+    const closures = [closure("2026-12-25", "2026-12-25"), closure("2026-10-01", "2026-10-02"), closure("2026-10-30", "2026-11-02")];
+    expect(getUpcomingClosures(at("2026-10-19T08:00:00Z"), closures, TZ, 30).map((c) => c.startDate)).toEqual(["2026-10-30"]);
+  });
+});
+
+describe("dates", () => {
+  it("adds days across months and years", () => {
+    expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
+    expect(addDays("2026-03-28", 2)).toBe("2026-03-30");
+  });
+
+  it("formats single days and ranges", () => {
+    expect(formatClosureDates({ startDate: "2026-12-25", endDate: "2026-12-25" })).toBe("25 déc.");
+    expect(formatClosureDates({ startDate: "2026-12-31", endDate: "2027-01-02" })).toBe("31 déc. – 2 janv.");
+  });
+
+  it("knows when the store opens every day", () => {
+    expect(isOpenEveryDay(SCHEDULE)).toBe(false);
+    expect(isOpenEveryDay({ ...SCHEDULE, 0: SPLIT })).toBe(true);
   });
 });
 

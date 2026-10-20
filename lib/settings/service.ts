@@ -36,6 +36,7 @@ function toAppSettings(stored: StoredSettings | null): AppSettings | null {
     pos: { ...DEFAULT_APP_SETTINGS.pos, ...validated.data.pos },
     store: { ...DEFAULT_APP_SETTINGS.store, ...validated.data.store },
     notifications: { ...DEFAULT_APP_SETTINGS.notifications, ...validated.data.notifications },
+    hours: validated.data.hours,
     updatedAt: stored.updatedAt,
     updatedBy: stored.updatedBy,
   };

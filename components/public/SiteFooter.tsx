@@ -5,8 +5,8 @@ import { Clock, Mail, MapPin, Navigation, Phone } from "lucide-react";
 import { cn } from "cn";
 import { buttonVariants } from "@/components/ui/button";
 import { formatPhone, phoneHref } from "@/lib/store/contact";
-import { OPENING_HOURS, STORE_LOCATION } from "@/lib/store/config";
-import { groupWeek } from "@/lib/store/opening-hours";
+import { STORE_LOCATION } from "@/lib/store/config";
+import { groupWeek, isOpenEveryDay, type WeeklySchedule } from "@/lib/store/opening-hours";
 
 interface SiteFooterProps {
   storeName: string;
@@ -14,6 +14,7 @@ interface SiteFooterProps {
   address: string;
   phone: string;
   email: string;
+  weekly: WeeklySchedule;
 }
 
 const NAV_LINKS = [
@@ -46,7 +47,7 @@ function ContactRow({ icon: Icon, children }: { icon: LucideIcon; children: Reac
  * text uses `on-color` tints over the `footer` token.
  * `shrink-0` is required: a flex item with `overflow-hidden` may otherwise be squeezed to 0px in the column.
  */
-export function SiteFooter({ storeName, tagline, address, phone, email }: SiteFooterProps) {
+export function SiteFooter({ storeName, tagline, address, phone, email, weekly }: SiteFooterProps) {
   return (
     <footer className="relative shrink-0 overflow-hidden bg-footer text-on-color">
       {/* Single soft brand glow, top right */}
@@ -92,17 +93,19 @@ export function SiteFooter({ storeName, tagline, address, phone, email }: SiteFo
           <div className="space-y-4">
             <ColumnTitle>Horaires</ColumnTitle>
             <dl className="space-y-3 text-sm">
-              {groupWeek(OPENING_HOURS).map((group) => (
+              {groupWeek(weekly).map((group) => (
                 <div key={group.days}>
                   <dt className="font-medium text-on-color">{group.days}</dt>
                   <dd className="tabular-nums text-on-color/70">{group.hours}</dd>
                 </div>
               ))}
             </dl>
-            <p className="inline-flex items-center gap-2 rounded-full bg-on-color/10 px-3 py-1 text-xs font-medium">
-              <Clock aria-hidden className="h-3.5 w-3.5" />
-              Ouvert 7 jours sur 7
-            </p>
+            {isOpenEveryDay(weekly) && (
+              <p className="inline-flex items-center gap-2 rounded-full bg-on-color/10 px-3 py-1 text-xs font-medium">
+                <Clock aria-hidden className="h-3.5 w-3.5" />
+                Ouvert 7 jours sur 7
+              </p>
+            )}
           </div>
 
           {/* Contact */}

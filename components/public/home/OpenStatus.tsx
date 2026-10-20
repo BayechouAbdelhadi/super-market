@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { cn } from "cn";
 import { getOpeningStatus, type OpeningStatus } from "@/lib/store/opening-hours";
-import { OPENING_HOURS, STORE_TIME_ZONE } from "@/lib/store/config";
+import { STORE_TIME_ZONE } from "@/lib/store/config";
+import { useOpeningHours } from "@/components/public/OpeningHoursProvider";
 
 const REFRESH_MS = 60_000;
 
@@ -18,13 +19,15 @@ interface OpenStatusProps {
 /** Live open/closed pill, refreshed every minute in store-local time. */
 export function OpenStatus({ initial, variant = "full", className }: OpenStatusProps) {
   const [status, setStatus] = useState(initial);
+  const hours = useOpeningHours();
 
   useEffect(() => {
-    const refresh = () => setStatus(getOpeningStatus(new Date(), OPENING_HOURS, STORE_TIME_ZONE));
+    if (!hours) return;
+    const refresh = () => setStatus(getOpeningStatus(new Date(), hours.weekly, STORE_TIME_ZONE, hours.closures));
     refresh();
     const interval = setInterval(refresh, REFRESH_MS);
     return () => clearInterval(interval);
-  }, []);
+  }, [hours]);
 
   return (
     <span

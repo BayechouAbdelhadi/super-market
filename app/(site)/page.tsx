@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { getAppSettings } from "@/lib/settings/service";
-import { OPENING_HOURS, STORE_LOCATION, STORE_TIME_ZONE } from "@/lib/store/config";
-import { DAY_NAMES, getOpeningStatus, type DayIndex } from "@/lib/store/opening-hours";
+import { STORE_LOCATION, STORE_TIME_ZONE, UPCOMING_CLOSURES_WINDOW_DAYS } from "@/lib/store/config";
+import {
+  DAY_NAMES,
+  getOpeningStatus,
+  getUpcomingClosures,
+  type DayIndex,
+  type OpeningHours,
+} from "@/lib/store/opening-hours";
 import { HeroSection } from "@/components/public/home/HeroSection";
 import { DepartmentsSection } from "@/components/public/home/DepartmentsSection";
 import { PracticalInfoSection } from "@/components/public/home/PracticalInfoSection";
@@ -36,7 +42,10 @@ const SCHEMA_DAYS: Record<DayIndex, string> = {
 };
 
 /** schema.org data so search engines show the address and opening hours. */
-function localBusinessJsonLd(store: { storeName: string; address: string; phone: string; email: string }) {
+function localBusinessJsonLd(
+  store: { storeName: string; address: string; phone: string; email: string },
+  hours: OpeningHours
+) {
   return {
     "@context": "https://schema.org",
     "@type": "GroceryStore",
@@ -48,25 +57,35 @@ function localBusinessJsonLd(store: { storeName: string; address: string; phone:
     hasMap: STORE_LOCATION.googleMapsUrl,
     geo: { "@type": "GeoCoordinates", latitude: STORE_LOCATION.coordinates.lat, longitude: STORE_LOCATION.coordinates.lng },
     openingHoursSpecification: (Object.keys(DAY_NAMES).map(Number) as DayIndex[]).flatMap((day) =>
-      OPENING_HOURS[day].map((range) => ({
+      hours.weekly[day].map((range) => ({
         "@type": "OpeningHoursSpecification",
         dayOfWeek: SCHEMA_DAYS[day],
         opens: range.open,
         closes: range.close,
       }))
     ),
+    // Exceptional closures: same day as opens/closes "00:00" means closed (schema.org convention)
+    specialOpeningHoursSpecification: hours.closures.map((closure) => ({
+      "@type": "OpeningHoursSpecification",
+      validFrom: closure.startDate,
+      validThrough: closure.endDate,
+      opens: "00:00",
+      closes: "00:00",
+    })),
   };
 }
 
 export default async function Home() {
-  const { store, loyalty } = await getAppSettings();
-  const status = getOpeningStatus(new Date(), OPENING_HOURS, STORE_TIME_ZONE);
+  const { store, loyalty, hours } = await getAppSettings();
+  const now = new Date();
+  const status = getOpeningStatus(now, hours.weekly, STORE_TIME_ZONE, hours.closures);
+  const upcomingClosures = getUpcomingClosures(now, hours.closures, STORE_TIME_ZONE, UPCOMING_CLOSURES_WINDOW_DAYS);
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd(store)).replace(/</g, "\\u003c") }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd(store, hours)).replace(/</g, "\\u003c") }}
       />
       <HeroSection storeName={store.storeName} tagline={store.tagline} phone={store.phone} status={status} />
       <main className="mx-auto w-full max-w-6xl space-y-16 px-4 pt-16 pb-12 sm:space-y-24 sm:px-6 sm:pt-24 md:pb-16">
@@ -77,6 +96,8 @@ export default async function Home() {
           phone={store.phone}
           email={store.email}
           status={status}
+          weekly={hours.weekly}
+          upcomingClosures={upcomingClosures}
         />
         <LoyaltySection euroToPointsRatio={loyalty.euroToPointsRatio} />
       </main>

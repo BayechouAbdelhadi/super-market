@@ -1,4 +1,70 @@
 import { z } from "zod";
+import { DEFAULT_APP_SETTINGS } from "./types";
+import { OPENING_HOURS_LIMITS } from "@/lib/store/config";
+import { DAY_NAMES, type DayIndex } from "@/lib/store/opening-hours";
+
+const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** "YYYY-MM-DD" that is a real calendar day (rejects 2026-02-30). */
+const isoDate = (message: string) =>
+  z
+    .string()
+    .regex(DATE_PATTERN, message)
+    .refine((value) => new Date(`${value}T00:00:00Z`).toISOString().startsWith(value), message);
+
+/** Opening ranges of one day: valid times, close after open, sorted and not overlapping. */
+function dayRangesSchema(day: DayIndex) {
+  const name = DAY_NAMES[day];
+  return z
+    .array(
+      z
+        .object({
+          open: z.string().regex(TIME_PATTERN, `${name} : heure d'ouverture invalide (format HH:MM).`),
+          close: z.string().regex(TIME_PATTERN, `${name} : heure de fermeture invalide (format HH:MM).`),
+        })
+        .refine((range) => range.open < range.close, {
+          message: `${name} : l'heure de fermeture doit être après l'heure d'ouverture.`,
+        })
+    )
+    .max(OPENING_HOURS_LIMITS.maxRangesPerDay, `${name} : au maximum ${OPENING_HOURS_LIMITS.maxRangesPerDay} plages horaires.`)
+    .refine((ranges) => ranges.every((range, i) => i === 0 || ranges[i - 1].close <= range.open), {
+      message: `${name} : les plages horaires doivent se suivre sans se chevaucher.`,
+    });
+}
+
+export const OpeningHoursSchema = z.object({
+  weekly: z.object({
+    0: dayRangesSchema(0),
+    1: dayRangesSchema(1),
+    2: dayRangesSchema(2),
+    3: dayRangesSchema(3),
+    4: dayRangesSchema(4),
+    5: dayRangesSchema(5),
+    6: dayRangesSchema(6),
+  }),
+  closures: z
+    .array(
+      z
+        .object({
+          id: z.string().trim().min(1).max(64),
+          startDate: isoDate("Fermeture exceptionnelle : date de début invalide."),
+          endDate: isoDate("Fermeture exceptionnelle : date de fin invalide."),
+          reason: z
+            .string()
+            .trim()
+            .max(
+              OPENING_HOURS_LIMITS.maxClosureReasonLength,
+              `Le motif de fermeture ne doit pas dépasser ${OPENING_HOURS_LIMITS.maxClosureReasonLength} caractères.`
+            )
+            .default(""),
+        })
+        .refine((closure) => closure.startDate <= closure.endDate, {
+          message: "Fermeture exceptionnelle : la date de fin doit être égale ou postérieure à la date de début.",
+        })
+    )
+    .max(OPENING_HOURS_LIMITS.maxClosures, `Au maximum ${OPENING_HOURS_LIMITS.maxClosures} fermetures exceptionnelles.`),
+});
 
 export const AppSettingsSchema = z.object({
   loyalty: z.object({
@@ -86,6 +152,8 @@ export const AppSettingsSchema = z.object({
     sendWelcomeEmail: z.boolean(),
     sendCashierInviteEmail: z.boolean(),
   }),
+  // Settings saved before opening hours were editable have no `hours` section
+  hours: OpeningHoursSchema.default(DEFAULT_APP_SETTINGS.hours),
 });
 
 export type AppSettingsInput = z.infer<typeof AppSettingsSchema>;
