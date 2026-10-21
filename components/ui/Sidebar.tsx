@@ -1,23 +1,17 @@
 "use client";
 
-import { useState, useEffect, useTransition, type ReactNode } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/(site)/login/actions";
-import { ChevronLeft, ExternalLink, LogOut, Loader2, Activity, Sliders, Sparkles, QrCode } from "lucide-react";
-
-interface NavLink {
-  name: string;
-  href: string;
-  icon: ReactNode;
-  isLive?: boolean;
-}
+import { ChevronLeft, ExternalLink, LogOut, Loader2 } from "lucide-react";
+import { getNavItems, isNavItemActive, type DashboardRole } from "@/components/ui/navigation";
 
 interface SidebarProps {
-  role: "ADMIN" | "CASHIER" | "CUSTOMER";
+  role: DashboardRole;
   email: string;
   storeName?: string;
 }
@@ -34,120 +28,18 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
   };
 
   const isAdmin = role === "ADMIN";
-
-
-
-  // Navigation Links
-  const navLinks: NavLink[] = isAdmin
-    ? [
-        {
-          name: "Accueil",
-          href: "/admin",
-          icon: (
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-          ),
-        },
-        {
-          name: "Caisse Fidélité",
-          href: "/admin/pos",
-          icon: (
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-          ),
-        },
-        {
-          name: "Analytics & Ventes",
-          href: "/admin/analytics",
-          icon: (
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          ),
-        },
-        {
-          name: "Gestion Clients",
-          href: "/admin/customers",
-          icon: (
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          ),
-        },
-        {
-          name: "Gestion Caissiers",
-          href: "/admin/cashiers",
-          icon: (
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-          ),
-        },
-        {
-          name: "Affiche & QR Code",
-          href: "/admin/invite",
-          icon: <QrCode className="w-5 h-5 shrink-0" />,
-        },
-        {
-          name: "Flux en direct",
-          href: "/admin/live",
-          isLive: true,
-          icon: <Activity className="w-5 h-5 shrink-0" />,
-        },
-        {
-          name: "Bons Plans & Emails",
-          href: "/admin/deals",
-          icon: <Sparkles className="w-5 h-5 shrink-0" />,
-        },
-        {
-          name: "Paramètres",
-          href: "/admin/settings",
-          icon: <Sliders className="w-5 h-5 shrink-0" />,
-        },
-      ]
-    : [
-        {
-          name: "Accueil",
-          href: "/cashier",
-          icon: (
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-          ),
-        },
-        {
-          name: "Caisse Fidélité",
-          href: "/cashier/pos",
-          icon: (
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-          ),
-        },
-        {
-          name: "Gestion Clients",
-          href: "/cashier/customers",
-          icon: (
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          ),
-        },
-      ];
+  const navLinks = getNavItems(role);
 
   const NavContent = ({ onLinkClick }: { onLinkClick?: () => void }) => (
     <>
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {navLinks.map((link, idx) => {
-          const isActive =
-            pathname === link.href ||
-            (link.href !== "/admin" && link.href !== "/cashier" && pathname.startsWith(link.href));
+        {navLinks.map((link) => {
+          const isActive = isNavItemActive(pathname, link.href);
           const isLive = Boolean(link.isLive);
+          const Icon = link.icon;
           return (
             <Link
-              key={idx}
+              key={link.href}
               href={link.href}
               onClick={onLinkClick}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-button,10px)] text-sm font-medium transition-colors group relative ${
@@ -158,7 +50,7 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
               title={isCollapsed ? link.name : ""}
             >
               <div className="relative shrink-0 flex items-center justify-center">
-                {link.icon}
+                <Icon className="w-5 h-5 shrink-0" />
                 {isLive && isCollapsed && (
                   <span className="absolute -top-1 -right-1 flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />

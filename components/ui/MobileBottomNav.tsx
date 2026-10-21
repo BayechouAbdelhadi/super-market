@@ -15,22 +15,11 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { logout } from "@/app/(site)/login/actions";
-import {
-  CreditCard,
-  Users,
-  UserCog,
-  LayoutDashboard,
-  Menu,
-  ExternalLink,
-  LogOut,
-  X,
-  Activity,
-  Sliders,
-  Sparkles,
-} from "lucide-react";
+import { Menu, ExternalLink, LogOut, X } from "lucide-react";
+import { getNavItems, isNavItemActive, type DashboardRole } from "@/components/ui/navigation";
 
 interface MobileBottomNavProps {
-  role: "ADMIN" | "CASHIER" | "CUSTOMER";
+  role: DashboardRole;
   email: string;
   storeName?: string;
 }
@@ -48,46 +37,10 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
     });
   };
 
-  const navItems = isAdmin
-    ? [
-        {
-          name: "Accueil",
-          href: "/admin",
-          icon: <LayoutDashboard className="w-5 h-5 shrink-0" />,
-        },
-        {
-          name: "Caisse",
-          href: "/admin/pos",
-          icon: <CreditCard className="w-5 h-5 shrink-0" />,
-        },
-        {
-          name: "Clients",
-          href: "/admin/customers",
-          icon: <Users className="w-5 h-5 shrink-0" />,
-        },
-        {
-          name: "Caissiers",
-          href: "/admin/cashiers",
-          icon: <UserCog className="w-5 h-5 shrink-0" />,
-        },
-      ]
-    : [
-        {
-          name: "Accueil",
-          href: "/cashier",
-          icon: <LayoutDashboard className="w-5 h-5 shrink-0" />,
-        },
-        {
-          name: "Caisse",
-          href: "/cashier/pos",
-          icon: <CreditCard className="w-5 h-5 shrink-0" />,
-        },
-        {
-          name: "Clients",
-          href: "/cashier/customers",
-          icon: <Users className="w-5 h-5 shrink-0" />,
-        },
-      ];
+  const navItems = getNavItems(role);
+  const barItems = navItems.filter((item) => item.mobilePrimary);
+  const menuItems = navItems.filter((item) => !item.mobilePrimary);
+  const isMenuItemActive = menuItems.some((item) => isNavItemActive(pathname, item.href));
 
   return (
     <nav
@@ -95,10 +48,9 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
       className="md:hidden shrink-0 h-16 border-t border-[var(--color-border)] bg-[var(--color-surface)] flex items-stretch justify-around px-1 z-40 shadow-sm"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      {navItems.map((item) => {
-        const isActive =
-          pathname === item.href ||
-          (item.href !== "/admin" && item.href !== "/cashier" && pathname.startsWith(item.href));
+      {barItems.map((item) => {
+        const isActive = isNavItemActive(pathname, item.href);
+        const Icon = item.icon;
         return (
           <Link
             key={item.href}
@@ -114,10 +66,10 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
                 isActive ? "bg-[var(--color-primary)]/10 scale-105" : ""
               }`}
             >
-              {item.icon}
+              <Icon className="w-5 h-5 shrink-0" />
             </div>
             <span className="text-[10px] tracking-tight leading-tight mt-0.5 whitespace-nowrap">
-              {item.name}
+              {item.shortName}
             </span>
           </Link>
         );
@@ -130,7 +82,7 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
             <button
               type="button"
               className={`flex flex-col items-center justify-center flex-1 py-1 px-1 transition-colors min-h-[44px] cursor-pointer ${
-                sheetOpen
+                sheetOpen || isMenuItemActive
                   ? "text-[var(--color-primary)] font-semibold"
                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               }`}
@@ -140,7 +92,7 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
         >
           <div
             className={`p-1 rounded-xl transition-all ${
-              sheetOpen ? "bg-[var(--color-primary)]/10 scale-105" : ""
+              sheetOpen || isMenuItemActive ? "bg-[var(--color-primary)]/10 scale-105" : ""
             }`}
           >
             <Menu className="w-5 h-5 shrink-0" />
@@ -210,47 +162,39 @@ export function MobileBottomNav({ role, email, storeName }: MobileBottomNavProps
             {/* Quick Links */}
             <div className="space-y-1">
               <div className="px-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-                Accès rapide
+                Sections
               </div>
-              {isAdmin && (
-                <Link
-                  href="/admin/live"
-                  onClick={() => setSheetOpen(false)}
-                  className="flex items-center justify-between px-3 py-3 rounded-xl text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors min-h-[44px]"
-                >
-                  <div className="flex items-center gap-3">
-                    <Activity className="w-5 h-5 text-success-text" />
-                    <span>Flux en direct</span>
-                  </div>
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-success-subtle text-success-text border border-success-border uppercase shadow-2xs">
-                    <span className="flex h-1.5 w-1.5 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
-                    </span>
-                    <span>Live</span>
-                  </span>
-                </Link>
-              )}
-              {isAdmin && (
-                <Link
-                  href="/admin/deals"
-                  onClick={() => setSheetOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors min-h-[44px]"
-                >
-                  <Sparkles className="w-5 h-5 text-info-text" />
-                  <span>Bons Plans &amp; Campagnes</span>
-                </Link>
-              )}
-              {isAdmin && (
-                <Link
-                  href="/admin/settings"
-                  onClick={() => setSheetOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors min-h-[44px]"
-                >
-                  <Sliders className="w-5 h-5 text-warning-text" />
-                  <span>Configuration de l&apos;App</span>
-                </Link>
-              )}
+              {menuItems.map((item) => {
+                const isActive = isNavItemActive(pathname, item.href);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setSheetOpen(false)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`flex items-center justify-between gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-colors min-h-[44px] ${
+                      isActive
+                        ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
+                        : "text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-5 h-5 shrink-0" />
+                      <span>{item.name}</span>
+                    </div>
+                    {item.isLive && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-success-subtle text-success-text border border-success-border uppercase shadow-2xs">
+                        <span className="flex h-1.5 w-1.5 relative">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
+                        </span>
+                        <span>Live</span>
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
               <Link
                 href="/"
                 target="_blank"
