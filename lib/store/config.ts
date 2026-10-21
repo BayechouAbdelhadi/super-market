@@ -47,6 +47,11 @@ export const STORE_LOCATION = {
     "https://maps.google.com/maps?q=Super+Market+205+Avenue+Antoine+de+Saint-Exup%C3%A9ry+Calais&z=16&ie=UTF8&iwloc=&output=embed",
 } as const;
 
+/** The store's social media pages. */
+export const STORE_SOCIAL = {
+  facebookUrl: "https://www.facebook.com/supermarketcalais",
+} as const;
+
 /** Access tips shown under the map. */
 export const STORE_ACCESS = {
   landmark: "Quartier Saint-Exupéry, face aux commerces",

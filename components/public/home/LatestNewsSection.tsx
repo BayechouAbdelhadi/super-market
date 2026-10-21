@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { NewsPostCard } from "@/components/shared/news/NewsPostCard";
+import { FacebookButton } from "@/components/public/FacebookButton";
 import { NEWS_CONFIG } from "@/lib/news/config";
 import type { NewsPost } from "@/lib/news/types";
 import { SectionHeading } from "./SectionHeading";
@@ -35,10 +36,13 @@ export function LatestNewsSection({ post, storeName, now }: LatestNewsSectionPro
           // A centered flex column would otherwise shrink the card to its content
           className="w-full"
         />
-        <Link href="/actualites" className={buttonVariants({ variant: "secondary", size: "lg" })}>
-          <span>Voir plus d&apos;actualités</span>
-          <ArrowRight aria-hidden />
-        </Link>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+          <Link href="/actualites" className={buttonVariants({ variant: "secondary", size: "lg" })}>
+            <span>Voir plus d&apos;actualités</span>
+            <ArrowRight aria-hidden />
+          </Link>
+          <FacebookButton />
+        </div>
       </div>
     </section>
   );

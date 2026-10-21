@@ -5,6 +5,7 @@ import { cn } from "cn";
 import { Alert } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { NewsPostCard } from "@/components/shared/news/NewsPostCard";
+import { FacebookButton } from "@/components/public/FacebookButton";
 import { getAppSettings } from "@/lib/settings/service";
 import { NEWS_CONFIG } from "@/lib/news/config";
 import { listPublishedNews } from "@/lib/news/service";
@@ -55,6 +56,9 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
         <p className="text-base leading-relaxed text-text-muted">
           Arrivages, nouveautés et événements : suivez la vie de votre supermarché.
         </p>
+        <div className="pt-4">
+          <FacebookButton className="w-full sm:w-auto" />
+        </div>
       </div>
 
       {loadFailed ? (
