@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { LoyaltyTier } from "@/lib/loyalty/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "@/components/ui/sonner";
 import { EmailVisualizerModal } from "./EmailVisualizerModal";
 import { getParisDateString, getParisTimeString } from "@/lib/utils/timezone";
@@ -113,6 +114,7 @@ export function CampaignEditorPage({
   storePhone = "06 71 54 05 28",
 }: CampaignEditorPageProps) {
   const router = useRouter();
+  const [confirm, confirmDialog] = useConfirm();
 
   // Wizard Step State (1 to 4)
   // Step 1: Audience & Cibles
@@ -494,11 +496,13 @@ export function CampaignEditorPage({
   };
 
   // Reset Draft / Start from scratch
-  const handleResetDraft = () => {
-    if (
-      typeof window !== "undefined" &&
-      window.confirm("Voulez-vous réinitialiser le formulaire et effacer le brouillon actuel ?")
-    ) {
+  const handleResetDraft = async () => {
+    const confirmed = await confirm({
+      title: "Réinitialiser le formulaire ?",
+      description: "Le brouillon actuel sera effacé et le formulaire reviendra aux valeurs par défaut.",
+      confirmLabel: "Réinitialiser",
+    });
+    if (confirmed) {
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       campaignIdRef.current = crypto.randomUUID();
       setSelectedTiers(["GOLD", "VIP"]);
@@ -1530,6 +1534,7 @@ export function CampaignEditorPage({
         storePhone={storePhone}
         targetTiers={selectedTiers}
       />
+      {confirmDialog}
     </div>
   );
 }

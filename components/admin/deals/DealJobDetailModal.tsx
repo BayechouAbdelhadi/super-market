@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Modal } from "@/components/ui/modal";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { MarketingCampaign, CampaignRecipient } from "@/lib/marketing/types";
 import { toast } from "@/components/ui/sonner";
@@ -43,6 +44,7 @@ export function DealJobDetailModal({
   const [loadingAction, setLoadingAction] = useState(false);
   const [recipientFilter, setRecipientFilter] = useState<"ALL" | "SENT" | "FAILED" | "PENDING">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [confirm, confirmDialog] = useConfirm();
 
   if (!isOpen || !campaign) return null;
 
@@ -121,7 +123,12 @@ export function DealJobDetailModal({
   }
 
   async function handleDelete() {
-    if (!confirm(`Supprimer définitivement la campagne « ${campaign?.title} » ?`)) return;
+    const confirmed = await confirm({
+      title: "Supprimer cette campagne ?",
+      description: `La campagne « ${campaign?.title} » et son suivi d'envoi seront supprimés. Cette action est définitive.`,
+      confirmLabel: "Supprimer la campagne",
+    });
+    if (!confirmed) return;
     setLoadingAction(true);
     try {
       const res = await fetch(`/api/admin/deals/${campaign?.id}`, {
@@ -523,6 +530,7 @@ export function DealJobDetailModal({
         ctaUrl={campaign.ctaUrl || "https://supermarket-calais.fr"}
         targetTiers={campaign.targetTiers}
       />
+      {confirmDialog}
     </Modal>
   );
 }

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pagination } from "@/components/ui/Pagination";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { ALERT_LEVEL_STYLES, SiteAlertBanner } from "@/components/ui/SiteAlertBanner";
 import { ALERTS_CONFIG, ALERT_LEVEL_DESCRIPTIONS, ALERT_LEVEL_LABELS } from "@/lib/alerts/config";
 import { ALERT_LEVELS, type AlertLevel, type SiteAlert } from "@/lib/alerts/types";
@@ -47,6 +48,7 @@ export function AlertsManager({ initialAlerts, initialTotal, loadFailed }: Alert
   const [level, setLevel] = useState<AlertLevel>("INFO");
   const [submitting, setSubmitting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [confirm, confirmDialog] = useConfirm();
 
   const trimmed = message.trim();
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -107,7 +109,12 @@ export function AlertsManager({ initialAlerts, initialTotal, loadFailed }: Alert
   };
 
   const handleDelete = async (alert: SiteAlert) => {
-    if (!window.confirm("Supprimer définitivement cette alerte ?")) return;
+    const confirmed = await confirm({
+      title: "Supprimer cette alerte ?",
+      description: "Elle disparaîtra du site et de cette liste. Cette action est définitive.",
+      confirmLabel: "Supprimer",
+    });
+    if (!confirmed) return;
     setBusyId(alert.id);
     try {
       const res = await fetch(`/api/admin/alerts/${alert.id}`, { method: "DELETE" });
@@ -287,6 +294,7 @@ export function AlertsManager({ initialAlerts, initialTotal, loadFailed }: Alert
           onPageChange={loadPage}
         />
       </Card>
+      {confirmDialog}
     </div>
   );
 }

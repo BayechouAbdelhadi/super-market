@@ -8,6 +8,7 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { NewsPostCard } from "@/components/shared/news/NewsPostCard";
 import { NEWS_CONFIG } from "@/lib/news/config";
 import type { NewsPost } from "@/lib/news/types";
@@ -42,6 +43,7 @@ export function NewsManager({ initialPosts, initialTotal, loadFailed, storeName,
   const [busyId, setBusyId] = useState<string | null>(null);
   const [referenceTime, setReferenceTime] = useState(() => new Date(now));
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirm, confirmDialog] = useConfirm();
 
   // Bring the editor into view: the card it replaces may be far down the list
   useEffect(() => {
@@ -86,7 +88,15 @@ export function NewsManager({ initialPosts, initialTotal, loadFailed, storeName,
   };
 
   const handleDelete = async (post: NewsPost) => {
-    if (!window.confirm("Supprimer définitivement cette actualité et ses photos ?")) return;
+    const photos = post.images.length;
+    const confirmed = await confirm({
+      title: "Supprimer cette actualité ?",
+      description: `Elle disparaîtra du site${
+        photos > 0 ? ` et ${photos > 1 ? `ses ${photos} photos seront effacées` : "sa photo sera effacée"}` : ""
+      }. Cette action est définitive. Pour la retirer du site sans la perdre, utilisez « Masquer ».`,
+      confirmLabel: "Supprimer",
+    });
+    if (!confirmed) return;
     setBusyId(post.id);
     try {
       const res = await fetch(`/api/admin/news/${post.id}`, { method: "DELETE" });
@@ -220,6 +230,7 @@ export function NewsManager({ initialPosts, initialTotal, loadFailed, storeName,
           onPageChange={loadPage}
         />
       </section>
+      {confirmDialog}
     </div>
   );
 }
