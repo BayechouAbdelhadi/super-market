@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getAppSettings } from "@/lib/settings/service";
+import { getLatestNewsPost } from "@/lib/news/service";
 import { STORE_LOCATION, STORE_TIME_ZONE, UPCOMING_CLOSURES_WINDOW_DAYS } from "@/lib/store/config";
 import {
   DAY_NAMES,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/store/opening-hours";
 import { HeroSection } from "@/components/public/home/HeroSection";
 import { DepartmentsSection } from "@/components/public/home/DepartmentsSection";
+import { LatestNewsSection } from "@/components/public/home/LatestNewsSection";
 import { PracticalInfoSection } from "@/components/public/home/PracticalInfoSection";
 import { LoyaltySection } from "@/components/public/home/LoyaltySection";
 import { MobileActionBar } from "@/components/public/home/MobileActionBar";
@@ -76,7 +78,7 @@ function localBusinessJsonLd(
 }
 
 export default async function Home() {
-  const { store, loyalty, hours } = await getAppSettings();
+  const [{ store, loyalty, hours }, latestNews] = await Promise.all([getAppSettings(), getLatestNewsPost()]);
   const now = new Date();
   const status = getOpeningStatus(now, hours.weekly, STORE_TIME_ZONE, hours.closures);
   const upcomingClosures = getUpcomingClosures(now, hours.closures, STORE_TIME_ZONE, UPCOMING_CLOSURES_WINDOW_DAYS);
@@ -90,6 +92,8 @@ export default async function Home() {
       <HeroSection storeName={store.storeName} tagline={store.tagline} phone={store.phone} status={status} />
       <main className="mx-auto w-full max-w-6xl space-y-16 px-4 pt-16 pb-12 sm:space-y-24 sm:px-6 sm:pt-24 md:pb-16">
         <DepartmentsSection />
+        {/* Hidden until the first post is published */}
+        {latestNews && <LatestNewsSection post={latestNews} storeName={store.storeName} now={now} />}
         <PracticalInfoSection
           storeName={store.storeName}
           address={store.address}

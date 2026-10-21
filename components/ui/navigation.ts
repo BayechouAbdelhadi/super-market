@@ -4,6 +4,7 @@ import {
   CreditCard,
   LayoutDashboard,
   Megaphone,
+  Newspaper,
   QrCode,
   Sliders,
   Sparkles,
@@ -35,6 +36,7 @@ const ADMIN_NAV: NavItem[] = [
   { name: "Affiche & QR Code", shortName: "QR Code", href: "/admin/invite", icon: QrCode },
   { name: "Flux en direct", shortName: "Live", href: "/admin/live", icon: Activity, isLive: true },
   { name: "Bons Plans & Emails", shortName: "Bons Plans", href: "/admin/deals", icon: Sparkles },
+  { name: "Actualités", shortName: "Actualités", href: "/admin/news", icon: Newspaper },
   { name: "Alertes du site", shortName: "Alertes", href: "/admin/alerts", icon: Megaphone },
   { name: "Paramètres", shortName: "Paramètres", href: "/admin/settings", icon: Sliders },
 ];

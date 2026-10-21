@@ -1,6 +1,7 @@
-/** Home page sections linked from the site header (desktop bar and mobile menu). */
+/** Home page sections and site pages linked from the site header (desktop bar and mobile menu). */
 export const SITE_NAV_LINKS = [
   { href: "/#rayons", label: "Nos rayons" },
+  { href: "/actualites", label: "Actualités" },
   { href: "/#infos", label: "Infos pratiques" },
   { href: "/#fidelite", label: "Fidélité" },
 ] as const;
