@@ -11,6 +11,8 @@ export interface GalleryImage {
   url: string;
   width: number;
   height: number;
+  /** Description typed by the admin; a generic text built from `label` is used when missing. */
+  alt?: string;
 }
 
 interface NewsImageGalleryProps {
@@ -31,17 +33,25 @@ const MULTI_LAYOUTS: Record<number, { grid: string; firstCell?: string }> = {
   4: { grid: "aspect-square grid-cols-2 grid-rows-2" },
 };
 
+/** Local previews in the editor (blob: URLs) cannot go through the image optimizer. */
+const isLocalPreview = (url: string) => url.startsWith("blob:");
+
+/** Width of the news column (max-w-2xl): grid cells never get wider. */
+const COLUMN_SIZES = "(min-width: 672px) 672px, 100vw";
+const HALF_COLUMN_SIZES = "(min-width: 672px) 336px, 50vw";
+
 /**
  * Photos of a news post in a social-media grid. Tapping one opens it full size, with previous/next
- * buttons and arrow keys when the post has several. Photos are already web-sized when stored, so they
- * are served as is (`unoptimized`), which also works for local previews (blob: URLs).
+ * buttons and arrow keys when the post has several. Stored photos go through the image optimizer
+ * (a size per screen); local previews are shown as they are.
  */
 export function NewsImageGallery({ images, label, className }: NewsImageGalleryProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const count = images.length;
   if (count === 0) return null;
 
-  const altFor = (index: number) => (count > 1 ? `${label} — photo ${index + 1} sur ${count}` : label);
+  const altFor = (index: number) =>
+    images[index].alt || (count > 1 ? `${label} — photo ${index + 1} sur ${count}` : label);
   const step = (delta: number) => setOpenIndex((i) => (i === null ? i : (i + delta + count) % count));
   const handleKeyDown = (e: KeyboardEvent) => {
     if (count < 2) return;
@@ -75,7 +85,8 @@ export function NewsImageGallery({ images, label, className }: NewsImageGalleryP
               src={image.url}
               alt={altFor(index)}
               fill
-              unoptimized
+              unoptimized={isLocalPreview(image.url)}
+              sizes={count === 1 || (count === 3 && index === 0) ? COLUMN_SIZES : HALF_COLUMN_SIZES}
               className="object-cover transition-opacity duration-200 group-hover:opacity-95"
             />
           </button>
@@ -96,7 +107,8 @@ export function NewsImageGallery({ images, label, className }: NewsImageGalleryP
                   alt={altFor(openIndex)}
                   width={current.width}
                   height={current.height}
-                  unoptimized
+                  unoptimized={isLocalPreview(current.url)}
+                  sizes="(min-width: 1024px) 1024px, 100vw"
                   className="h-auto max-h-[80svh] w-auto max-w-full object-contain"
                 />
                 {count > 1 && (

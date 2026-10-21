@@ -30,7 +30,6 @@ interface EmailVisualizerModalProps {
 export function EmailVisualizerModal({
   isOpen,
   onClose,
-  title,
   subject,
   content,
   imageUrl,

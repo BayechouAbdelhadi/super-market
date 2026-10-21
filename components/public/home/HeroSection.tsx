@@ -44,11 +44,12 @@ export function HeroSection({ storeName, tagline, phone, status }: HeroSectionPr
 
         <div className="relative mx-auto w-full max-w-6xl space-y-4 px-4 pb-6 sm:px-6 sm:pb-10 md:pb-12">
           <OpenStatus initial={status} className="bg-surface shadow-md" />
-          <h1
-            id="hero-title"
-            className="max-w-3xl text-3xl font-bold tracking-tight text-on-color drop-shadow-md sm:text-4xl md:text-5xl md:leading-[1.1]"
-          >
-            {tagline}
+          {/* The fixed first line keeps the store name and city in the page title whatever the editable tagline says */}
+          <h1 id="hero-title" className="max-w-3xl space-y-2 text-on-color drop-shadow-md">
+            <span className="block text-base font-semibold sm:text-lg">{storeName}, votre supermarché à Calais</span>
+            <span className="block text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl md:leading-[1.1]">
+              {tagline}
+            </span>
           </h1>
         </div>
       </div>

@@ -4,8 +4,6 @@ import {
   toLocalDateKey,
   buildLiveOperations,
   formatCurrency,
-  formatNumber,
-  getStartOfToday,
 } from "@/lib/loyalty/analytics-domain";
 
 describe("Analytics Domain Logic (Zero Fake Data)", () => {

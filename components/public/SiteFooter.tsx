@@ -20,8 +20,10 @@ interface SiteFooterProps {
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
   { href: "/#rayons", label: "Nos rayons" },
+  { href: "/actualites", label: "Nos actualités" },
   { href: "/#infos", label: "Infos pratiques" },
   { href: "/#fidelite", label: "Programme fidélité" },
+  { href: "/#faq", label: "Questions fréquentes" },
   { href: "/login", label: "Mon compte" },
   { href: "/politique-de-confidentialite", label: "Politique de confidentialité" },
 ];

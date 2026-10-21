@@ -2,7 +2,14 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { activeTheme, themeToCss } from "@/lib/theme";
-import { BASE_OPEN_GRAPH, DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME } from "@/lib/seo/config";
+import {
+  BASE_OPEN_GRAPH,
+  DEFAULT_DESCRIPTION,
+  DEFAULT_SHARE_IMAGE,
+  DEFAULT_TITLE,
+  SITE_NAME,
+  searchEngineVerification,
+} from "@/lib/seo/config";
 import { getSiteUrl } from "@/lib/utils/app-url";
 import "./globals.css";
 
@@ -23,6 +30,8 @@ export const metadata: Metadata = {
   description: DEFAULT_DESCRIPTION,
   applicationName: SITE_NAME,
   openGraph: { ...BASE_OPEN_GRAPH, title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },
+  twitter: { card: "summary_large_image", images: [DEFAULT_SHARE_IMAGE] },
+  verification: searchEngineVerification(),
 };
 
 export default function RootLayout({

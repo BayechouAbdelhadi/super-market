@@ -3,9 +3,10 @@
 import { useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { Check, ImagePlus, Send, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, ImagePlus, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { NewsPostCard } from "@/components/shared/news/NewsPostCard";
 import { ACCEPTED_IMAGE_LABEL, NEWS_CONFIG } from "@/lib/news/config";
 import type { NewsPost } from "@/lib/news/types";
@@ -22,7 +23,7 @@ interface NewsComposerProps {
 }
 
 /** A photo in the form: already stored (kept by its path) or newly picked (uploaded on save). */
-type ComposerImage = { key: string; url: string; width: number; height: number } & (
+type ComposerImage = { key: string; url: string; width: number; height: number; alt: string } & (
   | { kind: "existing"; path: string }
   | { kind: "new"; file: File }
 );
@@ -50,7 +51,7 @@ export function NewsComposer({ storeName, post, onSaved, onCancel }: NewsCompose
   const isEdit = post !== undefined;
   const [body, setBody] = useState(post?.body ?? "");
   const [images, setImages] = useState<ComposerImage[]>(
-    () => post?.images.map((image) => ({ kind: "existing" as const, key: image.path, ...image })) ?? []
+    () => post?.images.map((image) => ({ kind: "existing" as const, key: image.path, ...image, alt: image.alt ?? "" })) ?? []
   );
   const [preparing, setPreparing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -71,7 +72,10 @@ export function NewsComposer({ storeName, post, onSaved, onCancel }: NewsCompose
     !isEdit ||
     trimmed !== post.body ||
     images.length !== post.images.length ||
-    images.some((image) => image.kind === "new");
+    images.some(
+      (image, index) =>
+        image.kind === "new" || image.path !== post.images[index].path || image.alt.trim() !== (post.images[index].alt ?? "")
+    );
   const canSave = hasContent && changed && !preparing;
 
   const handleFiles = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -89,12 +93,35 @@ export function NewsComposer({ storeName, post, onSaved, onCancel }: NewsCompose
     const results = await Promise.allSettled(files.map(prepareImage));
     const prepared = results.flatMap((result) =>
       result.status === "fulfilled"
-        ? [{ kind: "new" as const, key: result.value.key, file: result.value.file, url: result.value.previewUrl, width: result.value.width, height: result.value.height }]
+        ? [
+            {
+              kind: "new" as const,
+              key: result.value.key,
+              file: result.value.file,
+              url: result.value.previewUrl,
+              width: result.value.width,
+              height: result.value.height,
+              alt: "",
+            },
+          ]
         : []
     );
     if (prepared.length < files.length) toast.error("Certaines photos n'ont pas pu être lues.");
     setImages((current) => [...current, ...prepared]);
     setPreparing(false);
+  };
+
+  const moveImage = (from: number, to: number) => {
+    setImages((current) => {
+      if (to < 0 || to >= current.length) return current;
+      const next = [...current];
+      [next[from], next[to]] = [next[to], next[from]];
+      return next;
+    });
+  };
+
+  const setAlt = (key: string, alt: string) => {
+    setImages((current) => current.map((image) => (image.key === key ? { ...image, alt } : image)));
   };
 
   const removeImage = (removed: ComposerImage) => {
@@ -108,12 +135,16 @@ export function NewsComposer({ storeName, post, onSaved, onCancel }: NewsCompose
     setSubmitting(true);
     const fallback = isEdit ? "Erreur lors de la modification de l'actualité." : "Erreur lors de la publication de l'actualité.";
     try {
+      // Photos in display order: kept ones by path, new ones by their position among the uploaded files
       const form = new FormData();
       form.append("body", trimmed);
-      for (const image of images) {
-        if (image.kind === "existing") form.append("keepImages", image.path);
-        else form.append("images", image.file);
-      }
+      let nextFile = 0;
+      const layout = images.map((image) => {
+        if (image.kind === "existing") return { kind: "existing", path: image.path, alt: image.alt.trim() };
+        form.append("images", image.file);
+        return { kind: "new", file: nextFile++, alt: image.alt.trim() };
+      });
+      form.append("layout", JSON.stringify(layout));
       const res = await fetch(isEdit ? `/api/admin/news/${post.id}` : "/api/admin/news", {
         method: isEdit ? "PUT" : "POST",
         body: form,
@@ -164,7 +195,8 @@ export function NewsComposer({ storeName, post, onSaved, onCancel }: NewsCompose
               <div>
                 <p className="text-sm font-semibold text-[var(--color-text)]">Photos</p>
                 <p id={`${fieldId}-photos-help`} className="text-xs text-[var(--color-text-muted)]">
-                  Jusqu&apos;à {NEWS_CONFIG.maxImages} photos {ACCEPTED_IMAGE_LABEL}, redimensionnées automatiquement.
+                  Jusqu&apos;à {NEWS_CONFIG.maxImages} photos {ACCEPTED_IMAGE_LABEL}, redimensionnées automatiquement. La
+                  première est la plus grande ; décrivez chaque photo en quelques mots (accessibilité, Google).
                 </p>
               </div>
               <Button
@@ -193,21 +225,53 @@ export function NewsComposer({ storeName, post, onSaved, onCancel }: NewsCompose
             {images.length > 0 && (
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {images.map((image, index) => (
-                  <li
-                    key={image.key}
-                    className="relative aspect-square overflow-hidden rounded-[var(--radius-button,12px)] border border-[var(--color-border)] bg-[var(--color-surface-hover)]"
-                  >
-                    <Image src={image.url} alt={`Photo ${index + 1}`} fill unoptimized className="object-cover" />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="icon"
-                      onClick={() => removeImage(image)}
-                      aria-label={`Retirer la photo ${index + 1}`}
-                      className="absolute top-1.5 right-1.5 rounded-full"
-                    >
-                      <X aria-hidden />
-                    </Button>
+                  <li key={image.key} className="space-y-2">
+                    <div className="relative aspect-square overflow-hidden rounded-[var(--radius-button,12px)] border border-[var(--color-border)] bg-[var(--color-surface-hover)]">
+                      <Image src={image.url} alt={image.alt || `Photo ${index + 1}`} fill unoptimized className="object-cover" />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        onClick={() => removeImage(image)}
+                        aria-label={`Retirer la photo ${index + 1}`}
+                        className="absolute top-1.5 right-1.5 rounded-full"
+                      >
+                        <X aria-hidden />
+                      </Button>
+                      {images.length > 1 && (
+                        <div className="absolute inset-x-1.5 bottom-1.5 flex justify-between">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="icon"
+                            onClick={() => moveImage(index, index - 1)}
+                            disabled={index === 0}
+                            aria-label={`Placer la photo ${index + 1} avant`}
+                            className="rounded-full"
+                          >
+                            <ChevronLeft aria-hidden />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="icon"
+                            onClick={() => moveImage(index, index + 1)}
+                            disabled={index === images.length - 1}
+                            aria-label={`Placer la photo ${index + 1} après`}
+                            className="rounded-full"
+                          >
+                            <ChevronRight aria-hidden />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <Input
+                      value={image.alt}
+                      onChange={(e) => setAlt(image.key, e.target.value)}
+                      maxLength={NEWS_CONFIG.photoAltMaxLength}
+                      placeholder="Description"
+                      aria-label={`Description de la photo ${index + 1}`}
+                    />
                   </li>
                 ))}
               </ul>

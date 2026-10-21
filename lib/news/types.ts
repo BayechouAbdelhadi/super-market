@@ -5,6 +5,8 @@ export interface NewsImage {
   url: string;
   width: number;
   height: number;
+  /** Describes the photo for screen readers and search engines; a generic text is used when missing. */
+  alt?: string;
 }
 
 /** Store news shown on the public site, social media style: text and photos. */
@@ -40,16 +42,14 @@ export interface NewsPostPage {
 /** Photo as received from the admin, before any check. */
 export interface NewsImageUpload {
   bytes: Uint8Array;
+  /** Description typed by the admin ("" when none). */
+  alt: string;
 }
 
-/** Photo re-encoded for the web, ready for the bucket. */
-export interface ProcessedImage {
-  bytes: Uint8Array;
-  width: number;
-  height: number;
-  contentType: string;
-  extension: string;
-}
+/** One photo of an edited post, in display order: a photo already stored, or a new upload. */
+export type NewsPhotoLayoutItem =
+  | { kind: "existing"; path: string; alt: string }
+  | { kind: "new"; upload: NewsImageUpload };
 
 /** `index` is the position of the rejected photo among the new uploads. */
 export type InvalidImageError = { ok: false; reason: "INVALID_IMAGE"; index: number };

@@ -32,6 +32,15 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    rules: {
+      // "_name" marks a value ignored on purpose (e.g. a field left out of `...rest`)
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_", ignoreRestSiblings: true },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

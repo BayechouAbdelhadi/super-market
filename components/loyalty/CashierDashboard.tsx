@@ -18,6 +18,13 @@ import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 import { AppSettings } from "@/lib/settings/types";
 import { toast } from "@/components/ui/sonner";
 
+interface SearchResults {
+  query: string;
+  customers: CustomerSummary[];
+}
+
+const NO_RESULTS: SearchResults = { query: "", customers: [] };
+
 export interface CashierDashboardProps {
   settings?: AppSettings;
 }
@@ -25,12 +32,12 @@ export interface CashierDashboardProps {
 export function CashierDashboard({ settings: propSettings }: CashierDashboardProps) {
   const [currentSettings, setCurrentSettings] = useState<AppSettings | undefined>(propSettings);
 
-  // Sync state if propSettings changes
-  useEffect(() => {
-    if (propSettings) {
-      setCurrentSettings(propSettings);
-    }
-  }, [propSettings]);
+  // New settings from the server replace the current ones (adjusted during render, not in an effect)
+  const [previousPropSettings, setPreviousPropSettings] = useState(propSettings);
+  if (propSettings !== previousPropSettings) {
+    setPreviousPropSettings(propSettings);
+    if (propSettings) setCurrentSettings(propSettings);
+  }
 
   // Fetch live settings on mount to guarantee fresh rules
   useEffect(() => {
@@ -61,8 +68,11 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
     : undefined;
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, LOYALTY_CONFIG.search.debounceMs);
-  const [customers, setCustomers] = useState<CustomerSummary[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Search results, tagged with the query they answer: `loading` is "results do not match the query yet"
+  const [results, setResults] = useState<SearchResults>(NO_RESULTS);
+  const searchedQuery = debouncedSearchQuery.trim();
+  const customers = searchedQuery && results.query === searchedQuery ? results.customers : NO_RESULTS.customers;
+  const loading = searchedQuery !== "" && results.query !== searchedQuery;
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [selectedCustomerDetail, setSelectedCustomerDetail] = useState<CustomerDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -111,7 +121,7 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
     setSelectedCustomerId(null);
     setSelectedCustomerDetail(null);
     setSearchQuery("");
-    setCustomers([]);
+    setResults(NO_RESULTS);
     if (finalMsg) {
       setCompletedTxAlert(finalMsg);
       if (completedTxAlertTimerRef.current) clearTimeout(completedTxAlertTimerRef.current);
@@ -130,7 +140,7 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
     setSelectedCustomerId(null);
     setSelectedCustomerDetail(null);
     setSearchQuery("");
-    setCustomers([]);
+    setResults(NO_RESULTS);
     setIsAddPurchaseOpen(false);
     setIsRedeemOpen(false);
 
@@ -172,14 +182,9 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
   // Search effect: executes ONLY when debouncedSearchQuery changes with AbortController
   useEffect(() => {
     const trimmed = debouncedSearchQuery.trim();
-    if (!trimmed) {
-      setCustomers([]);
-      setLoading(false);
-      return;
-    }
+    if (!trimmed) return;
 
     const abortController = new AbortController();
-    setLoading(true);
 
     async function fetchCustomers() {
       try {
@@ -187,21 +192,15 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
           `/api/loyalty/customers?q=${encodeURIComponent(trimmed)}`,
           { signal: abortController.signal }
         );
-        if (res.ok) {
-          const data = await res.json();
-          if (data.customers) {
-            startTransition(() => {
-              setCustomers(data.customers);
-            });
-          }
-        }
+        const data = res.ok ? await res.json() : null;
+        startTransition(() => {
+          setResults({ query: trimmed, customers: data?.customers ?? [] });
+        });
       } catch (err) {
         if (!(err instanceof Error && err.name === "AbortError")) {
           console.error("Erreur recherche clients :", err);
-        }
-      } finally {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
+          // Ends the loading state for this query
+          setResults({ query: trimmed, customers: [] });
         }
       }
     }

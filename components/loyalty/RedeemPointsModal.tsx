@@ -98,7 +98,6 @@ export function RedeemPointsModal({
   const isExceedingBalance = isValidPoints && pointsToRedeem > customer.available_points;
   const isExceedingAmount =
     isValidPoints && isPurchaseAmountEntered && pointsToRedeem > maxPointsForAmount;
-  const isAmountMissingForPoints = isValidPoints && !isPurchaseAmountEntered;
 
   const discountEuro = isValidPoints
     ? Math.round(pointsToRedeem * pointValueInEuro * 100) / 100

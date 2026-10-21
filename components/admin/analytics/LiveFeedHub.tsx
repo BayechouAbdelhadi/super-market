@@ -1,8 +1,7 @@
 "use client";
-
 import React, { useState, useMemo, useEffect, useTransition } from "react";
 import Link from "next/link";
-import { LiveFeedData, LiveOperationRecord } from "@/lib/loyalty/analytics-types";
+import { LiveFeedData } from "@/lib/loyalty/analytics-types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/SearchInput";
@@ -19,11 +18,8 @@ import {
   Store,
   Clock,
   RefreshCw,
-  Coins,
   TrendingUp,
   CreditCard,
-  CheckCircle2,
-  Filter,
 } from "lucide-react";
 
 interface LiveFeedHubProps {

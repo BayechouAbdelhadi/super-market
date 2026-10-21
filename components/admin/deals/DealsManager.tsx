@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
@@ -13,18 +12,9 @@ import {
   Play,
   Pause,
   Send,
-  Calendar,
-  Layers,
-  Users,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
   Plus,
-  RefreshCw,
   Search,
-  ExternalLink,
   ChevronRight,
-  TrendingUp,
   Eye,
   Edit3,
 } from "lucide-react";
@@ -37,6 +27,22 @@ interface DealsSummary {
   activeJobs: number;
   totalEmailsSent: number;
   totalFailed: number;
+}
+
+interface CampaignList {
+  campaigns: MarketingCampaign[];
+  summary?: DealsSummary;
+}
+
+/** Background refresh of the list: also makes due batches run. */
+const CAMPAIGN_LIST_REFRESH_MS = 60_000;
+
+/** Campaign list from the API (null when the server answers an error status). */
+async function requestCampaignList(): Promise<CampaignList | null> {
+  const res = await fetch("/api/admin/deals");
+  if (!res.ok) return null;
+  const data = await res.json();
+  return { campaigns: data.campaigns || [], summary: data.summary };
 }
 
 interface DealsManagerProps {
@@ -66,38 +72,41 @@ export function DealsManager({
 
   const [runningActionId, setRunningActionId] = useState<string | null>(null);
 
+  const applyList = (list: CampaignList | null) => {
+    if (!list) return;
+    setCampaigns(list.campaigns);
+    if (list.summary) setSummary(list.summary);
+  };
+
+  const loadFailed = (err: unknown) => {
+    console.error("Erreur chargement campagnes:", err);
+    toast.error("Impossible de charger les campagnes.");
+  };
+
+  /** Reload with the spinner (after an action). */
   const fetchCampaigns = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await fetch("/api/admin/deals");
-      if (res.ok) {
-        const data = await res.json();
-        setCampaigns(data.campaigns || []);
-        if (data.summary) setSummary(data.summary);
-      }
+      applyList(await requestCampaignList());
     } catch (err) {
-      console.error("Erreur chargement campagnes:", err);
-      toast.error("Impossible de charger les campagnes.");
+      loadFailed(err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCampaigns();
-    // Heartbeat every 60s to automatically trigger and display due jobs
+    // `loading` starts true: the first load needs no spinner toggle
+    requestCampaignList()
+      .then(applyList)
+      .catch(loadFailed)
+      .finally(() => setLoading(false));
+    // Heartbeat every 60s to automatically trigger and display due jobs (silent on failure)
     const timer = setInterval(() => {
-      fetch("/api/admin/deals")
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data?.campaigns) {
-            setCampaigns(data.campaigns);
-            if (data.summary) setSummary(data.summary);
-          }
-        })
+      requestCampaignList()
+        .then(applyList)
         .catch(() => {});
-    }, 60000);
-
+    }, CAMPAIGN_LIST_REFRESH_MS);
     return () => clearInterval(timer);
   }, []);
 

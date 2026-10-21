@@ -1,7 +1,6 @@
 import {
   CustomerDetail,
   CustomerSummary,
-  LoyaltyTier,
   Transaction,
   MovementRecord,
   CreateCustomerInput,
@@ -10,10 +9,7 @@ import {
 import { ICustomerRepository, ITransactionRepository, Page } from "./ports";
 import { SupabaseCustomerRepository } from "./adapters/supabase-customer-repository";
 import { SupabaseTransactionRepository } from "./adapters/supabase-transaction-repository";
-import { LOYALTY_CONFIG } from "./config";
-
 import { getAppSettings } from "@/lib/settings/service";
-
 import {
   normalizePhone,
   calculatePoints,

@@ -29,78 +29,18 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { getSiteUrl } from "@/lib/utils/app-url";
+import { CAMPAIGN_PRESETS, CAMPAIGN_TIER_OPTIONS, DEFAULT_CAMPAIGN_DRAFT } from "@/lib/marketing/presets";
 
 interface CampaignEditorPageProps {
-  storeName?: string;
-  storeAddress?: string;
-  storePhone?: string;
+  /** Store identity shown in the email preview (admin settings). */
+  storeName: string;
+  storeAddress: string;
+  storePhone: string;
 }
 
-const ALL_TIERS: { id: LoyaltyTier; label: string; desc: string }[] = [
-  { id: "BRONZE", label: "Bronze", desc: "Nouveaux clients & achats réguliers" },
-  { id: "SILVER", label: "Silver", desc: "Clients fréquents (+500 pts)" },
-  { id: "GOLD", label: "Gold", desc: "Clients fidèles (+2 000 pts)" },
-  { id: "VIP", label: "VIP", desc: "Clients premium (+5 000 pts)" },
-];
-
-export const CAMPAIGN_PRESETS = [
-  {
-    name: "🥦 Primeurs & -20% Frais",
-    title: "Arrivage Primeurs Frais & -20% Week-end",
-    subject: "🔥 Bonnes Affaires : -20% sur les Primeurs et Points Doublés ce week-end !",
-    content: `Profitez de nos offres fraîches exclusives dès ce vendredi dans votre magasin Super Market Calais !\n\n- 20% de remise immédiate sur l'ensemble du rayon fruits & légumes dès 25€ d'achat\n- Vos points fidélité sont doublés sur tout votre ticket de caisse\n- Dégustation gratuite de nos nouveaux arrivages locaux ce samedi matin\n\nOffre exclusive réservée à nos membres fidélité sur simple indication de votre nom ou numéro de téléphone lors de votre passage au comptoir caisse.`,
-    imageUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
-    ctaText: "Découvrir les offres en magasin",
-    ctaUrl: getSiteUrl(),
-  },
-  {
-    name: "🍗 Poulet Frais & Charcuterie",
-    title: "Poulet Frais en Barquette & Charcuterie",
-    subject: "🍗 Poulet frais 100% Halal : arrivage du jour et points doublés ce week-end !",
-    content: `Profitez de notre arrivage quotidien de poulet frais en barquette dans votre magasin Super Market Calais :\n\n- Filets, cuisses, ailes et pilons de poulet frais 100% Halal, prêts à cuisiner\n- Notre sélection de charcuterie traditionnelle\n- Points fidélité doublés sur le rayon poulet frais & charcuterie dès 30€ d'achat\n\nIndiquez simplement votre numéro de téléphone en caisse pour activer vos réductions fidélité !`,
-    imageUrl: `${getSiteUrl()}/categories/poulet-frais-sample.jpg`,
-    ctaText: "Découvrir le rayon poulet frais",
-    ctaUrl: getSiteUrl(),
-  },
-  {
-    name: "🌙 Saveurs d'Orient & Épicerie",
-    title: "Sélection Saveurs d'Orient & Épicerie du Monde",
-    subject: "✨ Arrivage Épicerie : Dattes Medjool, Épices & Spécialités d'Orient en promo !",
-    content: `Découvrez notre nouvelle sélection d'épicerie orientale et de produits authentiques chez Super Market Calais :\n\n- 15% de remise sur nos dattes Medjool premium, fruits secs et graines\n- Sélection d'épices parfumées, thés à la menthe et douceurs traditionnelles\n- 100 points fidélité bonus crédités instantanément dès 35€ d'achat\n\nRendez-vous dès aujourd'hui en magasin pour savourer nos arrivages exclusifs !`,
-    imageUrl: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=1200&q=80",
-    ctaText: "Voir les arrivages en magasin",
-    ctaUrl: getSiteUrl(),
-  },
-  {
-    name: "⚡ Ventes Flash x3 Points",
-    title: "Journées Privilège : Points Fidélité Triplés",
-    subject: "⚡ Ventes Flash : Multipliez vos points par 3 sur tout le magasin !",
-    content: `Ce week-end seulement, transformez vos courses en avalanche de points fidélité !\n\n- Tous vos achats vous rapportent 3 fois plus de points en caisse\n- Débloquez instantanément vos prochains bons d'achat de 5€ et 10€\n- Accès prioritaire à notre comptoir caisse pour les membres Silver, Gold et VIP\n\nN'oubliez pas d'indiquer vos coordonnées à notre hôte(sse) de caisse avant la fin de votre encaissement.`,
-    imageUrl: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=80",
-    ctaText: "Voir mon solde de points fidélité",
-    ctaUrl: getSiteUrl(),
-  },
-  {
-    name: "❄️ Surgelés Hunkar & Idéal Délices",
-    title: "Rayon Surgelés : +100 Références & Exclusivités",
-    subject: "❄️ Arrivage Surgelés : Hunkar & Idéal Délices en exclusivité à prix cassés !",
-    content: `Découvrez notre rayon surgelés avec plus de 100 références à prix imbattables dans votre magasin Super Market Calais :\n\n- En exclusivité : toute la gamme de spécialités des marques Hunkar et Idéal Délices\n- Plats préparés, viandes surgelées, légumes et délices prêts à cuisiner\n- Points fidélité doublés sur tout le rayon surgelés dès 20€ d'achat\n\nRemplissez votre congélateur sans compromis sur la qualité ni sur votre budget !`,
-    imageUrl: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=1200&q=80",
-    ctaText: "Découvrir le rayon surgelés",
-    ctaUrl: getSiteUrl(),
-  },
-  {
-    name: "🥤 Boissons Pack N°1 Calais",
-    title: "N°1 des Boissons en Pack à Calais : +60 Références",
-    subject: "🥤 Spécial Boissons : Le N°1 en pack sur Calais vous régale à petits prix !",
-    content: `Super Market Calais est votre destination numéro 1 pour les boissons en pack sur Calais !\n\n- Plus de 60 références disponibles en stock permanent : sodas, jus, eaux gazeuses et thés glacés\n- Prix dégressifs et promos sur les packs familiaux\n- 50 points fidélité offerts dès 3 packs achetés\n\nFaites le plein de fraîcheur au meilleur prix de la région !`,
-    imageUrl: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=1200&q=80",
-    ctaText: "Voir les offres boissons",
-    ctaUrl: getSiteUrl(),
-  },
-];
-
 const DRAFT_STORAGE_KEY = "supermarket_deal_campaign_draft_v2";
+/** Autosave waits this long after the last change. */
+const AUTOSAVE_DELAY_MS = 400;
 
 /** "0 client", "1 client", "1 250 clients" */
 function formatClients(count: number): string {
@@ -110,9 +50,9 @@ function formatClients(count: number): string {
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function CampaignEditorPage({
-  storeName = "Super Market Calais",
-  storeAddress = "205 Avenue Antoine de Saint-Exupéry, 62100 Calais",
-  storePhone = "06 71 54 05 28",
+  storeName,
+  storeAddress,
+  storePhone,
 }: CampaignEditorPageProps) {
   const router = useRouter();
   const [confirm, confirmDialog] = useConfirm();
@@ -125,7 +65,7 @@ export function CampaignEditorPage({
   const [step, setStep] = useState<number>(1);
 
   // Audience State (Step 1)
-  const [selectedTiers, setSelectedTiers] = useState<LoyaltyTier[]>(["GOLD", "VIP"]);
+  const [selectedTiers, setSelectedTiers] = useState<LoyaltyTier[]>(() => [...DEFAULT_CAMPAIGN_DRAFT.tiers]);
   // Recipients per tier (null while loading or if the count failed); the total is derived from the selection
   const [audienceByTier, setAudienceByTier] = useState<Record<LoyaltyTier, number> | null>(null);
   const [loadingCount, setLoadingCount] = useState(true);
@@ -135,20 +75,16 @@ export function CampaignEditorPage({
   );
 
   // Dispatch Mode State (Step 2)
-  const [dispatchMode, setDispatchMode] = useState<"ALL_AT_ONCE" | "DAILY_LIMIT">("ALL_AT_ONCE");
-  const [dailyLimitStr, setDailyLimitStr] = useState<string>("50");
+  const [dispatchMode, setDispatchMode] = useState<"ALL_AT_ONCE" | "DAILY_LIMIT">(DEFAULT_CAMPAIGN_DRAFT.dispatchMode);
+  const [dailyLimitStr, setDailyLimitStr] = useState<string>(DEFAULT_CAMPAIGN_DRAFT.dailyLimit);
 
   // Content State (Step 3)
-  const [title, setTitle] = useState("Offres Exclusives Fidélité");
-  const [subject, setSubject] = useState("🔥 Vos bons plans de la semaine chez Super Market Calais !");
-  const [content, setContent] = useState(
-    "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier."
-  );
-  const [imageUrl, setImageUrl] = useState<string | null>(
-    "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80"
-  );
-  const [ctaText, setCtaText] = useState("Découvrir les offres en magasin");
-  const [ctaUrl, setCtaUrl] = useState(getSiteUrl());
+  const [title, setTitle] = useState(DEFAULT_CAMPAIGN_DRAFT.title);
+  const [subject, setSubject] = useState(DEFAULT_CAMPAIGN_DRAFT.subject);
+  const [content, setContent] = useState(DEFAULT_CAMPAIGN_DRAFT.content);
+  const [imageUrl, setImageUrl] = useState<string | null>(DEFAULT_CAMPAIGN_DRAFT.imageUrl);
+  const [ctaText, setCtaText] = useState(DEFAULT_CAMPAIGN_DRAFT.ctaText);
+  const [ctaUrl, setCtaUrl] = useState(DEFAULT_CAMPAIGN_DRAFT.ctaUrl);
 
   // Scheduling State (Step 4 - Final Step)
   const today = getParisDateString();
@@ -203,6 +139,8 @@ export function CampaignEditorPage({
   const campaignIdRef = useRef<string>(crypto.randomUUID());
 
   // 1. Restore draft on mount (from URL draftId or localStorage)
+  // localStorage does not exist during server rendering, so the draft can only be applied after hydration
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -267,34 +205,38 @@ export function CampaignEditorPage({
       setIsRestored(true);
     }
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  // 2. Autosave EVERY action done by the user into localStorage
+  // 2. Autosave the draft into localStorage, shortly after the last change (not on every keystroke)
   useEffect(() => {
     if (!isRestored) return;
 
-    try {
-      const draftData = {
-        campaignId: campaignIdRef.current,
-        selectedTiers,
-        dispatchMode,
-        dailyLimitStr,
-        title,
-        subject,
-        content,
-        imageUrl,
-        ctaText,
-        ctaUrl,
-        startDate,
-        endDate,
-        scheduledTime,
-        step,
-        savedAt: new Date().toISOString(),
-      };
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
-      setLastSavedAt(new Date());
-    } catch (e) {
-      console.warn("Autosave error:", e);
-    }
+    const timer = setTimeout(() => {
+      try {
+        const draftData = {
+          campaignId: campaignIdRef.current,
+          selectedTiers,
+          dispatchMode,
+          dailyLimitStr,
+          title,
+          subject,
+          content,
+          imageUrl,
+          ctaText,
+          ctaUrl,
+          startDate,
+          endDate,
+          scheduledTime,
+          step,
+          savedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
+        setLastSavedAt(new Date());
+      } catch (e) {
+        console.warn("Autosave error:", e);
+      }
+    }, AUTOSAVE_DELAY_MS);
+    return () => clearTimeout(timer);
   }, [
     isRestored,
     selectedTiers,
@@ -506,17 +448,15 @@ export function CampaignEditorPage({
     if (confirmed) {
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       campaignIdRef.current = crypto.randomUUID();
-      setSelectedTiers(["GOLD", "VIP"]);
-      setDispatchMode("ALL_AT_ONCE");
-      setDailyLimitStr("50");
-      setTitle("Offres Exclusives Fidélité");
-      setSubject("🔥 Vos bons plans de la semaine chez Super Market Calais !");
-      setContent(
-        "Profitez de nos offres exceptionnelles dès aujourd'hui dans votre magasin.\n\n- Remises exclusives sur une large sélection de produits frais\n- Points fidélité doublés sur votre passage en caisse\n- Dégustations et surprises au rayon primeurs\n\nPrésentez simplement votre nom ou numéro en caisse pour en bénéficier."
-      );
-      setImageUrl("https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80");
-      setCtaText("Découvrir les offres en magasin");
-      setCtaUrl(getSiteUrl());
+      setSelectedTiers([...DEFAULT_CAMPAIGN_DRAFT.tiers]);
+      setDispatchMode(DEFAULT_CAMPAIGN_DRAFT.dispatchMode);
+      setDailyLimitStr(DEFAULT_CAMPAIGN_DRAFT.dailyLimit);
+      setTitle(DEFAULT_CAMPAIGN_DRAFT.title);
+      setSubject(DEFAULT_CAMPAIGN_DRAFT.subject);
+      setContent(DEFAULT_CAMPAIGN_DRAFT.content);
+      setImageUrl(DEFAULT_CAMPAIGN_DRAFT.imageUrl);
+      setCtaText(DEFAULT_CAMPAIGN_DRAFT.ctaText);
+      setCtaUrl(DEFAULT_CAMPAIGN_DRAFT.ctaUrl);
       setStartDate(today);
       setEndDate(() => {
         const d = new Date();
@@ -753,7 +693,7 @@ export function CampaignEditorPage({
 
           {/* Tier Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {ALL_TIERS.map((t) => {
+            {CAMPAIGN_TIER_OPTIONS.map((t) => {
               const isChecked = selectedTiers.includes(t.id);
               return (
                 <button

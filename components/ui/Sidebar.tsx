@@ -30,7 +30,8 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
   const isAdmin = role === "ADMIN";
   const navLinks = getNavItems(role);
 
-  const NavContent = ({ onLinkClick }: { onLinkClick?: () => void }) => (
+  // Render helpers, not components: a component declared inside render would remount (and lose focus) every render
+  const renderNavContent = ({ onLinkClick }: { onLinkClick?: () => void } = {}) => (
     <>
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navLinks.map((link) => {
@@ -100,7 +101,7 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
     </>
   );
 
-  const UserFooter = ({ collapsed = false }: { collapsed?: boolean }) => (
+  const renderUserFooter = ({ collapsed = false }: { collapsed?: boolean } = {}) => (
     <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-surface)] shrink-0">
       <div className="flex flex-col gap-3">
         {!collapsed ? (
@@ -237,10 +238,10 @@ export function Sidebar({ role, email, storeName }: SidebarProps) {
         </div>
 
         {/* Desktop Navigation */}
-        <NavContent />
+        {renderNavContent()}
 
         {/* Desktop Footer */}
-        <UserFooter collapsed={isCollapsed} />
+        {renderUserFooter({ collapsed: isCollapsed })}
       </aside>
     </>
   );

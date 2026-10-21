@@ -1,7 +1,5 @@
 "use client";
-
 import React, { useEffect, useState, useRef } from "react";
-import Image from "next/image";
 import QRCode from "qrcode";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
@@ -10,14 +8,8 @@ import {
   Printer,
   Copy,
   Check,
-  Sparkles,
   QrCode,
   FileImage,
-  Coins,
-  Gift,
-  Tag,
-  CheckCircle2,
-  Smartphone,
 } from "lucide-react";
 import { FidelityPoster } from "./FidelityPoster";
 import {

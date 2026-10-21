@@ -9,7 +9,7 @@ export async function GET() {
     // (no sender configuration, no admin email in updatedBy).
     const { notifications: _notifications, updatedBy: _updatedBy, ...publicSettings } = await getAppSettings();
     return NextResponse.json({ settings: publicSettings });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { error: "SETTINGS_ERROR", message: "Impossible de charger la configuration." },
       { status: 500 }

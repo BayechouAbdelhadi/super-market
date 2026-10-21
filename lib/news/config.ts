@@ -1,12 +1,20 @@
+import { ACCEPTED_IMAGE_LABEL, MEDIA_CONFIG } from "@/lib/media/config";
+
+export { ACCEPTED_IMAGE_LABEL };
+
 export const NEWS_CONFIG = {
   /** Longest text an admin can publish. */
   bodyMaxLength: 2000,
   /** Most photos per post (fills the 2×2 grid). */
   maxImages: 4,
   /** Largest photo accepted by the server, after the browser has resized it. */
-  maxImageBytes: 5 * 1024 * 1024,
+  maxImageBytes: MEDIA_CONFIG.maxImageBytes,
   /** Formats accepted from the admin; every photo is re-encoded to WebP before storage. */
-  acceptedImageTypes: ["image/jpeg", "image/png", "image/webp"] as const,
+  acceptedImageTypes: MEDIA_CONFIG.acceptedImageTypes,
+  /** Longest description of a photo (alt text). */
+  photoAltMaxLength: 150,
+  /** Storage folder of the photos: news/<postId>/. */
+  storageFolder: "news",
   /** Longest side of a stored photo, in pixels. */
   imageMaxDimension: 1920,
   /** WebP quality of stored photos (0–100). */
@@ -22,4 +30,3 @@ export const NEWS_CONFIG = {
   teaserMaxLines: 6,
 } as const;
 
-export const ACCEPTED_IMAGE_LABEL = "JPG, PNG ou WEBP";

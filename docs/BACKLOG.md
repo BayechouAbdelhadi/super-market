@@ -14,9 +14,9 @@ Chaque ticket a un identifiant (`SEO-03`, `ACT-02`…) à reprendre dans les com
 | Sprint | Tickets | Résultat attendu |
 |---|---|---|
 | **1 — Fondations** ✅ | SEO-01, SEO-02, SEO-03, SEO-04, SEO-12, SEO-15 | Un seul domaine, Google peut tout explorer, plus de pages privées indexées |
-| **2 — Partage et données riches** | SEO-05, SEO-06, SEO-11, SEO-10 | Belles vignettes sur Facebook et WhatsApp, fiche Google enrichie, suivi dans la Search Console |
-| **3 — Contenu local** | SEO-08, SEO-09, SEO-07, SEO-14 | Positionnement sur « halal Calais », « produits turcs Calais »… |
-| **4 — Performance et dette** | SEO-13, TECH-01 à TECH-05 | Lighthouse ≥ 95 partout, lint propre |
+| **2 — Partage et données riches** ✅ (sauf SEO-10, hors code) | SEO-05, SEO-06, SEO-11, SEO-10 | Belles vignettes sur Facebook et WhatsApp, fiche Google enrichie, suivi dans la Search Console |
+| **3 — Contenu local** ✅ | SEO-08, SEO-09, SEO-07, SEO-14 | Positionnement sur « halal Calais », « produits turcs Calais »… |
+| **4 — Performance et dette** ✅ | SEO-13, TECH-01 à TECH-05 | Lighthouse ≥ 95 partout, lint propre |
 | **En continu** | ACT-* | Actualités plus engageantes |
 
 ---
@@ -72,20 +72,23 @@ Le code mélange `https://supermarket-calais.fr` (`PRODUCTION_APP_URL` dans `lib
 - [ ] `robots: { index: false, follow: false }` dans les métadonnées de ces pages : `robots.txt` seul n'empêche pas l'indexation d'une URL trouvée via un lien.
 - **Fait quand** : aucune page d'authentification ou de compte n'apparaît dans un `site:` sur Google, une fois Google repassé.
 
-### SEO-05 · Vignettes de partage (Open Graph et Twitter) — **P1 · S**
+### SEO-05 · Vignettes de partage (Open Graph et Twitter) — **P1 · S** — ✅ fait le 21/10/2026
+- **Réalisé** : Image `public/og-image.jpg` (1200×630) déclarée dans `BASE_OPEN_GRAPH` (`lib/seo/config.ts`) pour toutes les pages ; carte Twitter `summary_large_image` ; chaque actualité et chaque rayon partagent leur propre photo.
 - [ ] `app/opengraph-image.tsx` (ou une image statique) en 1200×630 JPG : la devanture avec l'enseigne « Super Market Calais ».
 - [ ] `twitter: { card: "summary_large_image" }`, `siteName`, `locale: "fr_FR"`, `url`.
 - [ ] Image propre à `/actualites` et à chaque actualité (SEO-07).
 - **Fait quand** : le [débogueur de partage Facebook](https://developers.facebook.com/tools/debug/) affiche la bonne image, le bon titre et la bonne description sans avertissement.
 
-### SEO-06 · Données structurées complètes (JSON-LD) — **P1 · M**
+### SEO-06 · Données structurées complètes (JSON-LD) — **P1 · M** — ✅ fait le 21/10/2026
+- **Réalisé** : `lib/seo/structured-data.ts` (testé) : `GroceryStore` complet (adresse structurée, téléphone `+33…`, `sameAs` Facebook, `paymentAccepted`, horaires et fermetures), `WebSite`, `FAQPage`, `BreadcrumbList`, `BlogPosting`, rendus par `components/shared/JsonLd.tsx`.
 - [ ] `GroceryStore` : URL absolues, `url`, `logo`, `image` (plusieurs photos), `sameAs: [Facebook]`, `priceRange: "€"`, adresse en `PostalAddress` (rue, code postal, ville, pays), téléphone au format `+33…`, `areaServed: "Calais"`, `paymentAccepted`, `currenciesAccepted`, horaires (déjà présents).
 - [ ] `WebSite` et `Organization` sur l'accueil.
 - [ ] `BlogPosting` pour chaque actualité (SEO-07), `BreadcrumbList` sur les pages internes, `FAQPage` (SEO-09).
 - [ ] Un test unitaire qui vérifie que le JSON-LD généré est valide et que ses URL sont absolues.
 - **Fait quand** : le [test des résultats enrichis](https://search.google.com/test/rich-results) passe sans erreur sur toutes les pages publiques.
 
-### SEO-07 · Une page par actualité — **P1 · M**
+### SEO-07 · Une page par actualité — **P1 · M** — ✅ fait le 21/10/2026
+- **Réalisé** : `/actualites/<slug>-<id>` : redirection 301 si le texte change, 404 si masquée, image de partage = 1re photo, bouton « Partager », date de chaque carte cliquable, actualités dans le sitemap (500 max).
 - [ ] Route `/actualites/[id]-[slug]`, le slug venant de la première ligne du texte, avec une redirection 301 si le slug change.
 - [ ] `generateMetadata` : titre tiré du texte, description = 155 premiers caractères, `og:image` = première photo.
 - [ ] JSON-LD `BlogPosting` et fil d'Ariane, bouton « Partager » (Web Share API, sinon copie du lien).
@@ -93,7 +96,8 @@ Le code mélange `https://supermarket-calais.fr` (`PRODUCTION_APP_URL` dans `lib
 - [ ] Une actualité masquée ou supprimée renvoie 404 (`notFound()`).
 - **Fait quand** : partager une actualité sur WhatsApp affiche sa photo et son texte.
 
-### SEO-08 · Pages par rayon (SEO local) — **P1 · L**
+### SEO-08 · Pages par rayon (SEO local) — **P1 · L** — ✅ fait le 21/10/2026
+- **Réalisé** : `/rayons/[slug]` pour les 7 rayons, données centralisées dans `lib/store/departments.ts` (source unique avec l'accueil). Les textes reprennent uniquement les faits déjà publiés sur le site : **à relire et enrichir** (photos réelles du rayon, marques, prix) — c'est ce qui fera la différence sur Google.
 Le levier le plus fort : chaque page cible une recherche locale précise.
 - [ ] `/rayons/[slug]` pour chaque rayon de `DepartmentsSection` : « Poulet frais halal à Calais », « Produits turcs et marocains à Calais », « Boissons en pack pas chères à Calais », « Pâtisserie orientale à Calais », « Surgelés Hunkar et Idéal Délices à Calais », « Fruits et légumes à Calais ».
 - [ ] Les données des rayons quittent le composant pour une configuration centrale (`lib/store/departments.ts`), source unique pour l'accueil et les pages.
@@ -101,16 +105,18 @@ Le levier le plus fort : chaque page cible une recherche locale précise.
 - [ ] Les cartes de l'accueil mènent à ces pages.
 - **Fait quand** : chaque page a un H1 avec le mot-clé et « Calais », un JSON-LD, et figure dans le sitemap.
 
-### SEO-09 · FAQ sur l'accueil — **P2 · S**
+### SEO-09 · FAQ sur l'accueil — **P2 · S** — ✅ fait le 21/10/2026
+- **Réalisé** : 9 questions construites à partir des réglages réels (`lib/store/faq.ts`) : horaires, dimanche, adresse, parking, halal, produits turcs et marocains, colis, paiements, fidélité.
 - [ ] 6 à 8 questions réelles : horaires du dimanche, viande halal, parking, moyens de paiement, relais Pickup, fonctionnement de la fidélité, livraison.
 - [ ] Accordéon accessible (`<details>` / `<summary>`) et JSON-LD `FAQPage`.
 
-### SEO-10 · Référencement local hors du site — **P1 · M** (hors code)
+### SEO-10 · Référencement local hors du site — **P1 · M** (hors code) — ⏳ à faire par le magasin
 - [ ] **Fiche Google Business Profile** : catégories « Supermarché », « Épicerie orientale », « Boucherie halal » ; 10 photos ou plus ; horaires identiques au site ; lien vers le site ; publier les actualités aussi sur la fiche.
 - [ ] **Coordonnées identiques partout** (nom, adresse, téléphone) : Facebook, Pages Jaunes, Apple Plans (Business Connect), Bing Places, Waze.
 - [ ] **Avis Google** : un lien « Laisser un avis » dans l'espace fidélité et dans les e-mails ; répondre à chaque avis.
 
-### SEO-11 · Search Console et Bing Webmaster Tools — **P1 · S**
+### SEO-11 · Search Console et Bing Webmaster Tools — **P1 · S** — ✅ fait le 21/10/2026
+- **Réalisé** : Variables `GOOGLE_SITE_VERIFICATION` et `BING_SITE_VERIFICATION` (lues au build). **À faire** : créer les propriétés, renseigner les codes dans Coolify, reconstruire, puis déclarer `https://supermarketcalais.com/sitemap.xml`.
 - [ ] Champ `verification` des métadonnées, alimenté par des variables d'environnement (`GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`).
 - [ ] Déclarer le sitemap ; suivre l'indexation et les Core Web Vitals chaque mois.
 
@@ -119,12 +125,14 @@ Le levier le plus fort : chaque page cible une recherche locale précise.
 - [ ] `app/manifest.ts` : nom, nom court, `theme_color` issue du thème, icônes 192 et 512.
 - **Fait quand** : le favicon est net dans l'onglet et dans les résultats Google sur mobile.
 
-### SEO-13 · Performance (Core Web Vitals) — **P2 · M**
+### SEO-13 · Performance (Core Web Vitals) — **P2 · M** — ✅ fait le 21/10/2026
+- **Réalisé** : Photos des actualités servies par l'optimiseur de Next (`remotePatterns` Supabase, tailles adaptées), carte Google déjà en chargement différé. **Reste** : mesurer avec Lighthouse une fois en production.
 - [ ] Photos des actualités passées par l'optimiseur de Next (`images.remotePatterns` pour le domaine Supabase) au lieu de `unoptimized`, pour servir des tailles adaptées.
 - [ ] Mesurer avec Lighthouse sur mobile : objectif ≥ 95 en Performance, SEO, Accessibilité et Bonnes pratiques ; LCP < 2,5 s, CLS < 0,1.
 - [ ] Vérifier que la carte Google Maps ne se charge qu'au défilement (`loading="lazy"`).
 
-### SEO-14 · Contenu et sémantique de l'accueil — **P2 · S**
+### SEO-14 · Contenu et sémantique de l'accueil — **P2 · S** — ✅ fait le 21/10/2026
+- **Réalisé** : H1 de l'accueil : ligne fixe « Super Market Calais, votre supermarché à Calais » + sous-titre ; liens « Nos actualités » et « Questions fréquentes » dans le pied de page ; textes alternatifs par photo (ACT-02).
 - [ ] Le H1 de l'accueil vient du « sous-titre » des paramètres : imposer « Calais » (ou le nom du magasin) dans ce champ, ou ajouter un H1 fixe et passer le sous-titre en paragraphe.
 - [ ] Texte alternatif propre à chaque photo d'actualité (ACT-02).
 - [ ] Pied de page : liens vers les rayons et les actualités (maillage interne).
@@ -138,20 +146,20 @@ Le levier le plus fort : chaque page cible une recherche locale précise.
 
 | ID | Ticket | Prio | Effort |
 |---|---|---|---|
-| ACT-01 | **Point rouge intelligent** : affiché seulement s'il y a une actualité de moins de 7 jours non vue (mémorisé dans `localStorage`), au lieu d'un point permanent qu'on finit par ignorer | P2 | S |
-| ACT-02 | **Texte alternatif par photo**, saisi dans l'éditeur (accessibilité et SEO) | P2 | S |
-| ACT-03 | **Réordonner les photos** dans l'éditeur (choisir la photo principale de la grille) | P3 | S |
-| ACT-04 | Option : **section actualités toujours visible** à l'accueil, même vide, avec le bouton Facebook | P3 | S |
+| ACT-01 | ❓ **À décider** (le point permanent a été demandé) — **Point rouge intelligent** : affiché seulement s'il y a une actualité de moins de 7 jours non vue (mémorisé dans `localStorage`), au lieu d'un point permanent qu'on finit par ignorer | P2 | S |
+| ACT-02 | ✅ **Texte alternatif par photo**, saisi dans l'éditeur (accessibilité et SEO) | P2 | S |
+| ACT-03 | ✅ **Réordonner les photos** dans l'éditeur (choisir la photo principale de la grille) | P3 | S |
+| ACT-04 | ❓ **À décider** — Option : **section actualités toujours visible** à l'accueil, même vide, avec le bouton Facebook | P3 | S |
 | ACT-05 | **Programmer une publication** à une date et une heure (`publish_at`, filtrée à la lecture) | P3 | M |
-| ACT-06 | **Prévenir les clients fidélité par e-mail** d'une nouvelle actualité, via le système d'envoi des campagnes | P3 | M |
-| ACT-07 | **Publier automatiquement sur Facebook** (API Meta Graph, nécessite un accès développeur à la page) | P3 | L |
+| ACT-06 | ❓ **À valider** (envoie des e-mails aux clients) — **Prévenir les clients fidélité par e-mail** d'une nouvelle actualité, via le système d'envoi des campagnes | P3 | M |
+| ACT-07 | ❓ **À valider** (publie sur la page Facebook ; un jeton `NEXT_META_API_KEY` existe déjà) — **Publier automatiquement sur Facebook** (API Meta Graph, nécessite un accès développeur à la page) | P3 | L |
 
 ## Épic Dette technique
 
 | ID | Ticket | Prio | Effort |
 |---|---|---|---|
-| TECH-01 | **Envoi d'images des campagnes** (`app/api/admin/deals/upload-image`) : appelle Supabase directement depuis la route (contraire à l'architecture), ne vérifie pas le vrai format des fichiers, écrit dans `public/` en secours, ce qui est perdu au redémarrage dans Docker. Réutiliser le système des actualités : `detectImageType`, sharp, port de stockage | P1 | M |
-| TECH-02 | **Valeurs écrites en dur dans l'éditeur de campagne** (nom, adresse, téléphone, textes et image Unsplash par défaut) → paramètres admin et `lib/marketing/config.ts` | P2 | S |
-| TECH-03 | **Lint** : 3 erreurs `react-hooks/set-state-in-effect` (`CampaignEditorPage.tsx`, `DealsManager.tsx`) et une quarantaine d'imports inutilisés | P2 | S |
-| TECH-04 | **Images inutilisées dans `public/`** : environ 8 Mo, dont 7 photos de rayons en double (`categories/*.jpg` sans `-sample`), `logo.png` (580 Ko), les SVG du modèle Next (`next.svg`, `vercel.svg`, `file.svg`, `globe.svg`, `window.svg`, `test-icon.svg`). Vérifier qu'aucun e-mail déjà envoyé ne pointe vers l'une d'elles avant de supprimer | P3 | S |
-| TECH-05 | **Type obsolète** dans `.next/types/validator.ts` (route `deals/recipients-count` supprimée) : disparaît avec un `next build` propre ; vérifier la CI | P3 | S |
+| TECH-01 | ✅ **Envoi d'images des campagnes** — module partagé `lib/media` (port + adaptateurs), JPEG pour les e-mails, plus de copie locale. Avant : (`app/api/admin/deals/upload-image`) : appelle Supabase directement depuis la route (contraire à l'architecture), ne vérifie pas le vrai format des fichiers, écrit dans `public/` en secours, ce qui est perdu au redémarrage dans Docker. Réutiliser le système des actualités : `detectImageType`, sharp, port de stockage | P1 | M |
+| TECH-02 | ✅ **Valeurs écrites en dur dans l'éditeur de campagne** (→ `lib/marketing/presets.ts`, seuils des paliers depuis `LOYALTY_CONFIG`) (nom, adresse, téléphone, textes et image Unsplash par défaut) → paramètres admin et `lib/marketing/config.ts` | P2 | S |
+| TECH-03 | ✅ **Lint** : 0 erreur, 0 avertissement sur tout le projet (71 problèmes avant, dont 9 erreurs : effets de la caisse, composants recréés à chaque rendu dans `Sidebar`). Avant : 3 erreurs `react-hooks/set-state-in-effect` (`CampaignEditorPage.tsx`, `DealsManager.tsx`) et une quarantaine d'imports inutilisés | P2 | S |
+| TECH-04 | ✅ **Images inutilisées dans `public/`** (26 fichiers, 7,4 Mo supprimés) : environ 8 Mo, dont 7 photos de rayons en double (`categories/*.jpg` sans `-sample`), `logo.png` (580 Ko), les SVG du modèle Next (`next.svg`, `vercel.svg`, `file.svg`, `globe.svg`, `window.svg`, `test-icon.svg`). Vérifier qu'aucun e-mail déjà envoyé ne pointe vers l'une d'elles avant de supprimer | P3 | S |
+| TECH-05 | ⏳ **Type obsolète** dans `.next/types/validator.ts` (route `deals/recipients-count` supprimée) : disparaît avec un `next build` propre ; vérifier la CI | P3 | S |

@@ -47,6 +47,12 @@ export const STORE_LOCATION = {
     "https://maps.google.com/maps?q=Super+Market+205+Avenue+Antoine+de+Saint-Exup%C3%A9ry+Calais&z=16&ie=UTF8&iwloc=&output=embed",
 } as const;
 
+/** Payment methods accepted at the till (practical info, FAQ, structured data), as they read mid-sentence. */
+export const STORE_PAYMENT_METHODS = ["carte bancaire", "sans contact", "Apple Pay", "Google Pay", "espèces"] as const;
+
+/** Parcel carriers of the in-store pickup point. */
+export const STORE_PICKUP_CARRIERS = "La Poste, Chronopost et partenaires";
+
 /** The store's social media pages. */
 export const STORE_SOCIAL = {
   facebookUrl: "https://www.facebook.com/supermarketcalais",

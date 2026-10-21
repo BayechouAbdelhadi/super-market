@@ -137,13 +137,15 @@ Set these on the app in Coolify (**Environment Variables**).
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | **Yes** | Public URL of Supabase's Kong, e.g. `https://supabase.supermarketcalais.com` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | **Yes** | Supabase anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | No | Supabase service-role key. Server only. |
-| `NEXT_PUBLIC_APP_URL` | Yes | **Yes** | Public URL of the app, used in emailed links |
+| `NEXT_PUBLIC_APP_URL` | Yes | **Yes** | `https://supermarketcalais.com`. Used in emailed links, and as the canonical URL for SEO (sitemap, share previews, QR codes) |
 | `AUTH_TOKEN_SECRET` | Yes | No | 64 hex characters: `openssl rand -hex 32`. Signs activation, reset and unsubscribe links. |
 | `NEXT_BREVO_API_KEY` | Yes | No | Brevo API key. Keep it set even with `AUTH_TOKEN_SECRET`: links emailed before the switch were signed with it. |
 | `BREVO_SENDER_EMAIL` | Yes | No | A sender verified in Brevo |
 | `BREVO_SENDER_NAME` | Yes | No | `Super Market Calais` |
 | `DATABASE_URL` | Yes | No | The value printed in step 3 |
 | `APP_URL` | No | No | Server-side override of `NEXT_PUBLIC_APP_URL` |
+| `GOOGLE_SITE_VERIFICATION` | No | **Yes** | Google Search Console code ("HTML tag" method, the `content` value only) |
+| `BING_SITE_VERIFICATION` | No | **Yes** | Bing Webmaster Tools code (`msvalidate.01` tag, the `content` value only) |
 
 **Build variable:** Next.js writes `NEXT_PUBLIC_*` values into the browser code during the build. Tick **Build Variable** (sometimes "Available at Buildtime") for them, or the browser gets empty values. Changing one requires a rebuild, not just a restart.
 

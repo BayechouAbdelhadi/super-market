@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import PrivacyPolicyContent from "@/components/public/PrivacyPolicyContent";
 import { getAppSettings } from "@/lib/settings/service";
+import { BASE_OPEN_GRAPH, SITE_NAME } from "@/lib/seo/config";
 
 export const metadata: Metadata = {
   title: "Politique de confidentialité",
@@ -10,11 +11,10 @@ export const metadata: Metadata = {
     canonical: "/politique-de-confidentialite",
   },
   openGraph: {
-    title: "Politique de confidentialité — Super Market Calais",
+    ...BASE_OPEN_GRAPH,
+    title: `Politique de confidentialité — ${SITE_NAME}`,
     description: "Protection de vos données personnelles et conditions de traitement conformément au RGPD.",
     url: "/politique-de-confidentialite",
-    type: "website",
-    locale: "fr_FR",
   },
 };
 

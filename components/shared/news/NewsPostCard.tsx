@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "cn";
 import { Card } from "@/components/ui/card";
@@ -15,6 +16,8 @@ export interface NewsPostCardProps {
   storeName: string;
   /** Reference time for "il y a …" (passed in so server and browser render the same text). */
   now: Date;
+  /** The post's own page: the date links to it, social media style. */
+  href?: string;
   /** Cuts the text after this many lines (home page teaser). */
   maxLines?: number;
   /** Top-right slot, e.g. a status badge in the admin list. */
@@ -35,6 +38,7 @@ export function NewsPostCard({
   updatedAt,
   storeName,
   now,
+  href,
   maxLines,
   headerAside,
   footer,
@@ -51,9 +55,17 @@ export function NewsPostCard({
         <div className="min-w-0 flex-1">
           <p className="truncate text-base font-semibold text-text">{storeName}</p>
           <p className="text-sm text-text-muted">
-            <time dateTime={createdAt} title={formatNewsFullDate(createdAt)}>
-              {shortDate}
-            </time>
+            {href ? (
+              <Link href={href} className="underline-offset-4 hover:text-text hover:underline">
+                <time dateTime={createdAt} title={formatNewsFullDate(createdAt)}>
+                  {shortDate}
+                </time>
+              </Link>
+            ) : (
+              <time dateTime={createdAt} title={formatNewsFullDate(createdAt)}>
+                {shortDate}
+              </time>
+            )}
             {updatedAt && (
               <>
                 {" · "}

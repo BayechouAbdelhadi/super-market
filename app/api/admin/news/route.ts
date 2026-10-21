@@ -4,6 +4,7 @@ import { parsePageParams } from "@/lib/loyalty/pagination";
 import { ACCEPTED_IMAGE_LABEL, NEWS_CONFIG } from "@/lib/news/config";
 import { CreateNewsPostSchema } from "@/lib/news/validation";
 import { createNewsPost, listNews } from "@/lib/news/service";
+import { readFiles } from "@/lib/utils/form-files";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,10 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/** Multipart form: `body` (text) and `images` (0 to NEWS_CONFIG.maxImages files). */
+/**
+ * Multipart form: `body` (text), `images` (0 to NEWS_CONFIG.maxImages files) and optionally `layout`
+ * (JSON: their display order and descriptions).
+ */
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(["ADMIN"]);
   if (!auth.authorized) return auth.response;
@@ -43,9 +47,11 @@ export async function POST(req: NextRequest) {
   }
 
   const body = form.get("body");
+  const layout = form.get("layout");
   const parsed = CreateNewsPostSchema.safeParse({
     body: typeof body === "string" ? body : "",
     images: form.getAll("images"),
+    layout: typeof layout === "string" ? layout : undefined,
   });
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
@@ -56,8 +62,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const images = await Promise.all(
-      parsed.data.images.map(async (file) => ({ bytes: new Uint8Array(await file.arrayBuffer()) }))
+    const files = await readFiles(parsed.data.images);
+    // Photos in display order, each with its description (the schema only allows new files here)
+    const images = parsed.data.layout.flatMap((item) =>
+      item.kind === "new" ? [{ bytes: files[item.file], alt: item.alt }] : []
     );
     const result = await createNewsPost({ body: parsed.data.body, images }, auth.user.email ?? null);
     if (!result.ok) {

@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/loyalty/api-auth";
 import { ACCEPTED_IMAGE_LABEL, NEWS_CONFIG } from "@/lib/news/config";
 import { NewsPostIdSchema, UpdateNewsPostContentSchema, UpdateNewsPostSchema } from "@/lib/news/validation";
 import { deleteNewsPost, setNewsPostPublished, updateNewsPost } from "@/lib/news/service";
+import { readFiles } from "@/lib/utils/form-files";
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +18,8 @@ function validationError(message: string) {
 const NOT_FOUND = { error: "NOT_FOUND", message: "Actualité introuvable ou déjà supprimée." };
 
 /**
- * Edits the text and photos. Multipart form: `body`, `keepImages` (storage paths of the current photos to keep)
- * and `images` (new files, added after the kept ones).
+ * Edits the text and photos. Multipart form: `body`, `images` (new files) and `layout` (JSON: every photo of the
+ * post in display order, kept ones by storage path and new ones by file position, each with its description).
  */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
   const auth = await requireAuth(["ADMIN"]);
@@ -31,21 +32,23 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
   if (!form) return validationError("Formulaire de modification invalide.");
 
   const body = form.get("body");
+  const layout = form.get("layout");
   const parsed = UpdateNewsPostContentSchema.safeParse({
     body: typeof body === "string" ? body : "",
-    keepImages: form.getAll("keepImages"),
     images: form.getAll("images"),
+    layout: typeof layout === "string" ? layout : "",
   });
   if (!parsed.success) return validationError(parsed.error.issues[0]?.message || "Modification invalide.");
 
   try {
-    const newImages = await Promise.all(
-      parsed.data.images.map(async (file) => ({ bytes: new Uint8Array(await file.arrayBuffer()) }))
-    );
+    const files = await readFiles(parsed.data.images);
     const result = await updateNewsPost(id.data, {
       body: parsed.data.body,
-      keepImagePaths: parsed.data.keepImages,
-      newImages,
+      photos: parsed.data.layout.map((item) =>
+        item.kind === "existing"
+          ? { kind: "existing", path: item.path, alt: item.alt }
+          : { kind: "new", upload: { bytes: files[item.file], alt: item.alt } }
+      ),
     });
     if (result.ok) return NextResponse.json({ success: true, post: result.post, message: "Actualité modifiée." });
 

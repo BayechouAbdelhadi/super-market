@@ -4,7 +4,8 @@ import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "cn";
 import { formatPhone, phoneHref } from "@/lib/store/contact";
-import { STORE_ACCESS, STORE_LOCATION } from "@/lib/store/config";
+import { STORE_ACCESS, STORE_LOCATION, STORE_PAYMENT_METHODS, STORE_PICKUP_CARRIERS } from "@/lib/store/config";
+import { formatList } from "@/lib/store/faq";
 import {
   DAY_NAMES,
   WEEK_ORDER,
@@ -27,12 +28,12 @@ const SERVICES: { icon: LucideIcon; title: string; text: string }[] = [
   {
     icon: Package,
     title: "Point relais Pickup",
-    text: "Déposez et retirez vos colis La Poste, Chronopost et partenaires.",
+    text: `Déposez et retirez vos colis ${STORE_PICKUP_CARRIERS}.`,
   },
   {
     icon: CreditCard,
     title: "Tous les paiements",
-    text: "Carte bancaire, sans contact, Apple Pay, Google Pay et espèces.",
+    text: `${formatList(STORE_PAYMENT_METHODS)}.`,
   },
 ];
 

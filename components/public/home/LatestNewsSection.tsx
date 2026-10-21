@@ -4,6 +4,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { NewsPostCard } from "@/components/shared/news/NewsPostCard";
 import { FacebookButton } from "@/components/public/FacebookButton";
 import { NEWS_CONFIG } from "@/lib/news/config";
+import { newsPostPath } from "@/lib/news/permalink";
 import type { NewsPost } from "@/lib/news/types";
 import { SectionHeading } from "./SectionHeading";
 
@@ -30,6 +31,7 @@ export function LatestNewsSection({ post, storeName, now }: LatestNewsSectionPro
           images={post.images}
           createdAt={post.createdAt}
           updatedAt={post.updatedAt}
+          href={newsPostPath(post)}
           storeName={storeName}
           now={now}
           maxLines={NEWS_CONFIG.teaserMaxLines}

@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppSettings, DEFAULT_APP_SETTINGS } from '@/lib/settings/types';
@@ -16,12 +15,10 @@ import {
   Clock,
   Save,
   RotateCcw,
-  Sparkles,
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
   Calculator,
-  ArrowRight,
 } from 'lucide-react';
 
 interface SettingsManagerProps {

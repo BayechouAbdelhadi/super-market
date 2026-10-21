@@ -19,7 +19,7 @@ describe("Search debounce configuration & timing logic", () => {
   it("debounces rapid sequential keystrokes so only the last one fires", () => {
     const callback = vi.fn();
 
-    let timeoutId: any = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     const triggerDebounced = (val: string) => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
@@ -54,7 +54,7 @@ describe("Search debounce configuration & timing logic", () => {
   it("cancels debounce when search is cleared", () => {
     const callback = vi.fn();
 
-    let timeoutId: any = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     const triggerDebounced = (val: string) => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {

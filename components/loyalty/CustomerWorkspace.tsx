@@ -35,11 +35,12 @@ export function CustomerWorkspace({
 }: CustomerWorkspaceProps) {
   const [currentSettings, setCurrentSettings] = useState<AppSettings | undefined>(propSettings);
 
-  useEffect(() => {
-    if (propSettings) {
-      setCurrentSettings(propSettings);
-    }
-  }, [propSettings]);
+  // New settings from the server replace the current ones (adjusted during render, not in an effect)
+  const [previousPropSettings, setPreviousPropSettings] = useState(propSettings);
+  if (propSettings !== previousPropSettings) {
+    setPreviousPropSettings(propSettings);
+    if (propSettings) setCurrentSettings(propSettings);
+  }
 
   useEffect(() => {
     async function loadSettings() {

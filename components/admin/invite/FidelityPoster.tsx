@@ -1,7 +1,6 @@
 "use client";
-
+/* eslint-disable @next/next/no-img-element -- printable poster: plain <img> elements are captured as-is by print and PNG export */
 import React, { forwardRef } from "react";
-import Image from "next/image";
 
 interface FidelityPosterProps {
   qrDataUrl: string;
@@ -16,7 +15,6 @@ export const FidelityPoster = forwardRef<HTMLDivElement, FidelityPosterProps>(
   function FidelityPoster(
     {
       qrDataUrl,
-      finalUrl,
       className = "",
     },
     ref

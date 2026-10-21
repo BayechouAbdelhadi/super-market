@@ -8,13 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function NewDealCampaignPage() {
-  const settings = await getAppSettings();
+  const { store } = await getAppSettings();
 
-  return (
-    <CampaignEditorPage
-      storeName={settings.store?.storeName}
-      storeAddress={settings.store?.address}
-      storePhone={settings.store?.phone}
-    />
-  );
+  return <CampaignEditorPage storeName={store.storeName} storeAddress={store.address} storePhone={store.phone} />;
 }

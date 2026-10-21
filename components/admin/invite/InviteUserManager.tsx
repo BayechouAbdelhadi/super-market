@@ -1,7 +1,5 @@
 "use client";
-
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { Card } from "@/components/ui/card";
@@ -16,11 +14,6 @@ import {
   Sparkles,
   Store,
   Layers,
-  Coins,
-  Gift,
-  Tag,
-  CheckCircle2,
-  Smartphone,
 } from "lucide-react";
 import { FidelityPoster } from "./FidelityPoster";
 import {

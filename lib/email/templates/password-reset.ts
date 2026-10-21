@@ -8,7 +8,7 @@ import { escapeHtml } from "./escape-html";
 export function renderPasswordResetEmail(
   props: PasswordResetEmailProps
 ): EmailTemplateResult {
-  const { name, resetLink, resetCode, expiresInMinutes = 15 } = props;
+  const { name, resetLink, expiresInMinutes = 15 } = props;
   const greeting = name ? `Bonjour ${name},` : "Bonjour,";
   // HTML version: the name is user-supplied (public signup), never inject it raw
   const htmlGreeting = name ? `Bonjour ${escapeHtml(name)},` : "Bonjour,";

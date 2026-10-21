@@ -1,10 +1,9 @@
 "use client";
-
 import React, { useState } from "react";
 import { DailySalesRecord } from "@/lib/loyalty/analytics-types";
 import { Card } from "@/components/ui/card";
 import { formatCurrency, formatNumber } from "@/lib/loyalty/analytics-domain";
-import { Calendar, TrendingUp } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 interface DailySalesChartProps {
   data: DailySalesRecord[];

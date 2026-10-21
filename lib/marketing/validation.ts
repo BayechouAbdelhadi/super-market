@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ACCEPTED_IMAGE_LABEL, MEDIA_CONFIG } from "@/lib/media/config";
 
 /** SECURITY: only http(s) links in emails — `z.url()` alone also accepts `javascript:` and `data:` URLs. */
 const isHttpUrl = (value: string) => /^https?:\/\//i.test(value);
@@ -126,3 +127,19 @@ export const CreateCampaignSchema = z
   );
 
 export type CreateCampaignSchemaType = z.infer<typeof CreateCampaignSchema>;
+
+/** Multipart body of a campaign image upload: the file, and the campaign it belongs to (optional for a draft). */
+export const CampaignImageUploadSchema = z.object({
+  file: z
+    .instanceof(File, { message: "Aucun fichier fourni." })
+    .refine((file) => file.size > 0, "Le fichier est vide.")
+    .refine(
+      (file) => file.size <= MEDIA_CONFIG.maxImageBytes,
+      `L'image ne doit pas dépasser ${MEDIA_CONFIG.maxImageBytes / (1024 * 1024)} Mo.`
+    )
+    .refine(
+      (file) => (MEDIA_CONFIG.acceptedImageTypes as readonly string[]).includes(file.type.toLowerCase()),
+      `Format d'image non supporté. Formats acceptés : ${ACCEPTED_IMAGE_LABEL}.`
+    ),
+  campaignId: z.string().uuid("Identifiant de campagne invalide.").optional(),
+});

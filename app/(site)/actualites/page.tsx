@@ -8,6 +8,7 @@ import { NewsPostCard } from "@/components/shared/news/NewsPostCard";
 import { FacebookButton } from "@/components/public/FacebookButton";
 import { getAppSettings } from "@/lib/settings/service";
 import { NEWS_CONFIG } from "@/lib/news/config";
+import { newsPostPath } from "@/lib/news/permalink";
 import { listPublishedNews } from "@/lib/news/service";
 import type { NewsPostPage } from "@/lib/news/types";
 import { NewsFeedPageSchema } from "@/lib/news/validation";
@@ -83,6 +84,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                   images={post.images}
                   createdAt={post.createdAt}
                   updatedAt={post.updatedAt}
+                  href={newsPostPath(post)}
                   storeName={store.storeName}
                   now={now}
                 />

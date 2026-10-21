@@ -1,6 +1,4 @@
-import { NEWS_CONFIG } from "./config";
-
-export type AcceptedImageType = (typeof NEWS_CONFIG.acceptedImageTypes)[number];
+import type { AcceptedImageType } from "./config";
 
 function startsWith(bytes: Uint8Array, signature: number[], offset = 0): boolean {
   return signature.every((byte, i) => bytes[offset + i] === byte);

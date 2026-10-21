@@ -164,7 +164,6 @@ export class SupabaseCustomerRepository implements ICustomerRepository {
       purchases: transactions.map(toPurchaseRecord),
       movements: transactions.map((t) => {
         const isEarn = (t.points_earned || 0) > 0;
-        const isRedeem = (t.points_redeemed || 0) > 0;
         const amountTotal = Number(t.amount_total) || 0;
         const defaultRedeemReason = amountTotal > 0
           ? `Remise fidélité (Achat de ${amountTotal.toFixed(2)} €)`

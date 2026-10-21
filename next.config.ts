@@ -3,6 +3,10 @@ import { PRODUCTION_APP_URL, REDIRECTED_HOSTS } from "./lib/utils/app-url";
 
 const isDev = process.env.NODE_ENV !== "production";
 
+/** Public files of the Supabase bucket (news photos), as an images.remotePatterns entry. */
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim().replace(/\/+$/, "");
+const supabasePublicStorage = supabaseUrl ? new URL(`${supabaseUrl}/storage/v1/object/public/**`) : null;
+
 /**
  * Content Security Policy, built from what the pages actually load:
  * - scripts: only this origin (Next.js inline bootstrap needs 'unsafe-inline'; no third-party scripts);
@@ -46,8 +50,12 @@ const nextConfig: NextConfig = {
   // LAN origins allowed to reach `next dev` (comma-separated), e.g. ALLOWED_DEV_ORIGINS=192.168.1.69
   allowedDevOrigins: (process.env.ALLOWED_DEV_ORIGINS ?? "192.168.1.69").split(",").map((o) => o.trim()).filter(Boolean),
   poweredByHeader: false,
-  // 90: the home hero photo, where compression artifacts show at full width
-  images: { qualities: [75, 90] },
+  images: {
+    // 90: the home hero photo, where compression artifacts show at full width
+    qualities: [75, 90],
+    // News photos live in Supabase Storage: let the optimizer resize them for each screen
+    remotePatterns: supabasePublicStorage ? [supabasePublicStorage] : [],
+  },
   // One canonical URL per page; old paths keep working (query strings are passed through)
   async redirects() {
     return [

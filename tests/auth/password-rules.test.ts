@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import {
   evaluatePasswordCriteria,
   PasswordSchema,
-  PASSWORD_CRITERIA,
 } from "@/lib/auth/password-rules";
 
 describe("Password Rules & Criteria", () => {

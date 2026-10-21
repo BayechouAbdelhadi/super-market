@@ -1,4 +1,4 @@
-import type { NewNewsPost, NewsImage, NewsPost, NewsPostContent, NewsPostPage, ProcessedImage } from "./types";
+import type { NewNewsPost, NewsPost, NewsPostContent, NewsPostPage } from "./types";
 
 /**
  * Domain Port: storage of the news posts.
@@ -19,18 +19,4 @@ export interface INewsRepository {
   delete(id: string): Promise<NewsPost | null>;
 }
 
-/**
- * Domain Port: public file storage of the news photos.
- */
-export interface INewsImageStore {
-  upload(postId: string, index: number, image: ProcessedImage): Promise<NewsImage>;
-  remove(paths: string[]): Promise<void>;
-}
-
-/**
- * Domain Port: turns an uploaded photo into a web-ready one (oriented, resized, metadata stripped).
- */
-export interface IImageProcessor {
-  /** Throws when the bytes are not a decodable image. */
-  process(bytes: Uint8Array): Promise<ProcessedImage>;
-}
+// Photos go through the shared media ports (lib/media/ports.ts): IImageProcessor, IPublicImageStore.

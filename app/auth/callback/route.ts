@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   if (redirectTo.origin !== requestUrl.origin) {
     redirectTo.href = new URL('/reset-password', request.url).href
   }
-  let response = NextResponse.redirect(redirectTo)
+  const response = NextResponse.redirect(redirectTo)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

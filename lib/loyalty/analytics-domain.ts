@@ -1,7 +1,6 @@
 import {
   DailySalesRecord,
   LiveOperationRecord,
-  RealDashboardData,
 } from "./analytics-types";
 import { LoyaltyTier } from "./types";
 import type { DailySalesTotals } from "./ports";

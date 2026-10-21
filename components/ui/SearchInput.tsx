@@ -30,10 +30,12 @@ export function SearchInput({
   const [isDebouncing, setIsDebouncing] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync localValue when parent value changes externally (e.g. reset/cleared from outside)
-  useEffect(() => {
+  // Follow the parent value when it changes externally (e.g. reset/cleared from outside), during render
+  const [previousValue, setPreviousValue] = useState(value);
+  if (value !== previousValue) {
+    setPreviousValue(value);
     setLocalValue(value);
-  }, [value]);
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const nextVal = e.target.value;

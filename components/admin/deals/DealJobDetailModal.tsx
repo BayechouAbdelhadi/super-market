@@ -1,10 +1,9 @@
 "use client";
-
 import React, { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
-import { MarketingCampaign, CampaignRecipient } from "@/lib/marketing/types";
+import { MarketingCampaign } from "@/lib/marketing/types";
 import { toast } from "@/components/ui/sonner";
 import { renderDealEmailHtml } from "@/lib/marketing/templates/deal-email";
 import { EmailVisualizerModal } from "./EmailVisualizerModal";
@@ -17,13 +16,8 @@ import {
   CheckCircle2,
   Clock,
   Users,
-  Calendar,
-  Layers,
-  ChevronDown,
-  RefreshCw,
   Search,
   Eye,
-  FileText,
 } from "lucide-react";
 import { getSiteUrl } from "@/lib/utils/app-url";
 
