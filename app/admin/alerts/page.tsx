@@ -5,7 +5,7 @@ import type { SiteAlertPage } from "@/lib/alerts/types";
 import { AlertsManager } from "@/components/admin/alerts/AlertsManager";
 
 export const metadata: Metadata = {
-  title: "Alertes du site — Super Market Calais",
+  title: "Alertes du site",
   description: "Bannières d'information, d'avertissement ou critiques affichées en haut du site public",
 };
 

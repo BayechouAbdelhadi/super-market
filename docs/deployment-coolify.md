@@ -124,7 +124,7 @@ The user lives in the database volume, so it survives Supabase redeploys and upd
 | Build command | `npm run build` (default) |
 | Start command | `npm run start` (default) |
 | Port | `3000` |
-| Domain | Your public domain, e.g. `https://supermarket-calais.fr` |
+| Domain | Your public domain, e.g. `https://supermarketcalais.com` |
 
 The `Dockerfile` in the repository is not used by this Coolify setup. It stays for building the image without Coolify.
 
@@ -134,7 +134,7 @@ Set these on the app in Coolify (**Environment Variables**).
 
 | Variable | Required | Build variable | Value |
 | --- | --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | **Yes** | Public URL of Supabase's Kong, e.g. `https://supabase.supermarket-calais.fr` |
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | **Yes** | Public URL of Supabase's Kong, e.g. `https://supabase.supermarketcalais.com` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | **Yes** | Supabase anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | No | Supabase service-role key. Server only. |
 | `NEXT_PUBLIC_APP_URL` | Yes | **Yes** | Public URL of the app, used in emailed links |

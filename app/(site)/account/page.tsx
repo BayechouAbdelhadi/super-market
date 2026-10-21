@@ -15,7 +15,8 @@ import { resolveDisplayIdentity } from '@/lib/account/identity'
 import { groupWeek } from '@/lib/store/opening-hours'
 import { formatPhone } from '@/lib/store/contact'
 
-export const metadata: Metadata = { title: 'Mon espace' }
+export const metadata: Metadata = { title: 'Mon espace', robots: PRIVATE_PAGE_ROBOTS };
+import { PRIVATE_PAGE_ROBOTS } from "@/lib/seo/config";
 
 export default async function AccountHubPage() {
   const supabase = await createClient()

@@ -5,7 +5,7 @@ import { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "SuperMarket Calais — Flux des Opérations en Direct",
+  title: "Flux des opérations en direct",
   description: "Suivi en temps réel de tous les passages en caisse, achats et mouvements de points fidélité.",
 };
 

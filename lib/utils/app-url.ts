@@ -3,7 +3,26 @@ interface HeaderReader {
 }
 
 /** Canonical public origin of the production site. */
-export const PRODUCTION_APP_URL = "https://supermarket-calais.fr";
+export const PRODUCTION_APP_URL = "https://supermarketcalais.com";
+
+/**
+ * Other domains serving the site. They redirect permanently to PRODUCTION_APP_URL (next.config.ts),
+ * so search engines index a single domain.
+ */
+export const REDIRECTED_HOSTS = ["www.supermarketcalais.com", "supermarketcalais.fr", "www.supermarketcalais.fr"] as const;
+
+function configuredOrigin(value: string | undefined): string | undefined {
+  return value?.trim().replace(/\/+$/, "") || undefined;
+}
+
+/**
+ * Canonical public URL of the site, for anything that outlives the request: SEO metadata, sitemap,
+ * structured data, QR codes, default links in emails. NEXT_PUBLIC_APP_URL when set (inlined in the browser
+ * bundle), else the production domain. Safe in client components.
+ */
+export function getSiteUrl(): string {
+  return configuredOrigin(process.env.NEXT_PUBLIC_APP_URL) ?? PRODUCTION_APP_URL;
+}
 
 /**
  * Public origin used to build links sent by email (activation, password reset).
@@ -16,7 +35,7 @@ export const PRODUCTION_APP_URL = "https://supermarket-calais.fr";
  * 3. in development only, the request Host header (localhost / LAN testing).
  */
 export function getAppOrigin(requestHeaders: HeaderReader): string {
-  const configured = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL)?.trim().replace(/\/+$/, "");
+  const configured = configuredOrigin(process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL);
   if (configured) {
     return configured;
   }

@@ -7,7 +7,8 @@ import { ConfirmAccountForm } from '@/components/auth/ConfirmAccountForm'
 import { verifyActivationToken } from '@/lib/email/otp-security'
 import { AlertCircle, ArrowLeft } from 'lucide-react'
 
-export const metadata: Metadata = { title: 'Activer votre compte' }
+export const metadata: Metadata = { title: 'Activer votre compte', robots: PRIVATE_PAGE_ROBOTS };
+import { PRIVATE_PAGE_ROBOTS } from "@/lib/seo/config";
 
 export default async function ConfirmAccountPage({
   searchParams,

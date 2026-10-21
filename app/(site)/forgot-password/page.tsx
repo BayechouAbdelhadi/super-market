@@ -9,7 +9,8 @@ import { buttonVariants } from '@/components/ui/button'
 import { OtpSubmitButton } from '@/components/auth/OtpSubmitButton'
 import { AuthShell, authLinkClass } from '@/components/public/AuthShell'
 
-export const metadata: Metadata = { title: 'Mot de passe oublié' }
+export const metadata: Metadata = { title: 'Mot de passe oublié', robots: PRIVATE_PAGE_ROBOTS };
+import { PRIVATE_PAGE_ROBOTS } from "@/lib/seo/config";
 
 export default async function ForgotPasswordPage({
   searchParams,

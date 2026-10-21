@@ -28,6 +28,7 @@ import {
   Eye,
   Edit3,
 } from "lucide-react";
+import { getSiteUrl } from "@/lib/utils/app-url";
 
 type StatusFilter = "ALL" | "ACTIVE" | "DRAFT" | "COMPLETED" | "PAUSED";
 
@@ -543,7 +544,7 @@ export function DealsManager({
           content={previewingCampaign.content}
           imageUrl={previewingCampaign.imageUrl}
           ctaText={previewingCampaign.ctaText || "Découvrir les offres en magasin"}
-          ctaUrl={previewingCampaign.ctaUrl || "https://supermarket-calais.fr"}
+          ctaUrl={previewingCampaign.ctaUrl || getSiteUrl()}
           storeName={storeName}
           storeAddress={storeAddress}
           storePhone={storePhone}

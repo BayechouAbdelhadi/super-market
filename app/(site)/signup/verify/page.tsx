@@ -6,7 +6,8 @@ import { Alert } from '@/components/ui/alert'
 import { OtpSubmitButton } from '@/components/auth/OtpSubmitButton'
 import { AuthShell, authLinkClass } from '@/components/public/AuthShell'
 
-export const metadata: Metadata = { title: 'Vérifiez votre email' }
+export const metadata: Metadata = { title: 'Vérifiez votre email', robots: PRIVATE_PAGE_ROBOTS };
+import { PRIVATE_PAGE_ROBOTS } from "@/lib/seo/config";
 
 export default async function SignUpVerifyPage({
   searchParams,

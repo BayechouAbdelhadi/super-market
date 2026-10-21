@@ -29,6 +29,7 @@ import {
   printFidelityFlyer,
 } from "./exportFlyerCanvas";
 import { QR_COLORS } from "./qr-colors";
+import { getSiteUrl } from "@/lib/utils/app-url";
 
 export function InviteUserManager() {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
@@ -36,10 +37,8 @@ export function InviteUserManager() {
   const [isExporting, setIsExporting] = useState(false);
   const printableRef = useRef<HTMLDivElement>(null);
 
-  const publicInviteUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/invite`
-      : "https://supermarket-calais.fr/invite";
+  // Always the canonical domain: printed posters outlive the host the admin happens to be on
+  const publicInviteUrl = `${getSiteUrl()}/invite`;
 
   // Generate ultra-crisp QR Code for the public invite URL
   useEffect(() => {

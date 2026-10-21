@@ -2,7 +2,7 @@ import { CustomersList } from "@/components/loyalty/CustomersList";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "SuperMarket — Gestion des Clients",
+  title: "Clients",
   description: "Gestion et CRUD des profils clients de votre magasin",
 };
 

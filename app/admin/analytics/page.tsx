@@ -6,7 +6,7 @@ import { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "SuperMarket Calais — Analytics & Indicateurs",
+  title: "Analytics & indicateurs",
   description: "Indicateurs d'activité commerciale, ventes du jour et flux des passages en caisse.",
 };
 

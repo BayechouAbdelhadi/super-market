@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { PRODUCTION_APP_URL, REDIRECTED_HOSTS } from "./lib/utils/app-url";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -50,6 +51,13 @@ const nextConfig: NextConfig = {
   // One canonical URL per page; old paths keep working (query strings are passed through)
   async redirects() {
     return [
+      // One canonical domain: www and the .fr domain move permanently to supermarketcalais.com, same path
+      ...REDIRECTED_HOSTS.map((host) => ({
+        source: "/:path*",
+        has: [{ type: "host" as const, value: host.replaceAll(".", "\\.") }],
+        destination: `${PRODUCTION_APP_URL}/:path*`,
+        permanent: true,
+      })),
       { source: "/privacy", destination: "/politique-de-confidentialite", permanent: true },
       { source: "/confidentialite", destination: "/politique-de-confidentialite", permanent: true },
       { source: "/loyalty", destination: "/cashier/pos", permanent: true },

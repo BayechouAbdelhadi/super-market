@@ -5,7 +5,8 @@ import { AuthShell } from '@/components/public/AuthShell'
 import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm'
 import { verifyPasswordResetToken } from '@/lib/email/otp-security'
 
-export const metadata: Metadata = { title: 'Nouveau mot de passe' }
+export const metadata: Metadata = { title: 'Nouveau mot de passe', robots: PRIVATE_PAGE_ROBOTS };
+import { PRIVATE_PAGE_ROBOTS } from "@/lib/seo/config";
 
 export default async function ResetPasswordPage({
   searchParams,

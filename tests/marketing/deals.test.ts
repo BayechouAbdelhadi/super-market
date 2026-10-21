@@ -111,7 +111,7 @@ describe('Marketing Deals & Email Campaigns', () => {
         content: 'Venez profiter de nos promotions exceptionnelles au rayon boucherie.',
         imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e',
         ctaText: 'Voir les promos',
-        ctaUrl: 'https://supermarket-calais.fr/promos',
+        ctaUrl: 'https://supermarketcalais.com/promos',
       };
 
       const result = CreateCampaignSchema.safeParse(valid);
@@ -227,7 +227,7 @@ describe('Marketing Deals & Email Campaigns', () => {
         content: 'Bénéficiez de 10€ offerts dès 50€ d’achat.',
         imageUrl: 'https://example.com/promo.jpg',
         ctaText: 'En profiter en magasin',
-        ctaUrl: 'https://supermarket-calais.fr',
+        ctaUrl: 'https://supermarketcalais.com',
         storeName: 'Super Market Calais',
         storeAddress: '205 Avenue Antoine de Saint-Exupéry, 62100 Calais',
         storePhone: '06 71 54 05 28',
@@ -842,11 +842,11 @@ describe('Marketing Deals & Email Campaigns', () => {
         content: 'Découvrez nos offres',
         storeName: 'Super Market Calais',
         storeAddress: '205 Avenue Saint-Exupéry',
-        unsubscribeUrl: 'https://supermarket-calais.fr/unsubscribe?email=samir%40test.com',
+        unsubscribeUrl: 'https://supermarketcalais.com/unsubscribe?email=samir%40test.com',
       });
 
       // Must be at the bottom and contain the unsubscribe link
-      expect(html).toContain('https://supermarket-calais.fr/unsubscribe?email=samir%40test.com');
+      expect(html).toContain('https://supermarketcalais.com/unsubscribe?email=samir%40test.com');
       expect(html).toContain('Se désinscrire');
       expect(html).toContain('font-size: 10px');
     });

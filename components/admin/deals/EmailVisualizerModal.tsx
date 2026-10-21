@@ -10,6 +10,7 @@ import {
 import { LoyaltyTier } from "@/lib/loyalty/types";
 import { renderDealEmailHtml } from "@/lib/marketing/templates/deal-email";
 import { X, Wifi } from "lucide-react";
+import { getSiteUrl } from "@/lib/utils/app-url";
 
 interface EmailVisualizerModalProps {
   isOpen: boolean;
@@ -34,7 +35,7 @@ export function EmailVisualizerModal({
   content,
   imageUrl,
   ctaText = "Découvrir les offres en magasin",
-  ctaUrl = "https://supermarket-calais.fr",
+  ctaUrl = getSiteUrl(),
   storeName = "Super Market Calais",
   storeAddress = "205 Avenue Antoine de Saint-Exupéry, 62100 Calais",
   storePhone = "06 71 54 05 28",

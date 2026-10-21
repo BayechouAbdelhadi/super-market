@@ -22,7 +22,7 @@ import { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "SuperMarket Calais — Console Administration",
+  title: "Administration",
   description: "Portail des applications et modules d'administration",
 };
 

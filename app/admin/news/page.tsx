@@ -6,7 +6,7 @@ import type { NewsPostPage } from "@/lib/news/types";
 import { NewsManager } from "@/components/admin/news/NewsManager";
 
 export const metadata: Metadata = {
-  title: "Actualités — Super Market Calais",
+  title: "Actualités",
   description: "Publications (texte et photos) affichées sur la page d'accueil et dans la section « Nos actualités »",
 };
 

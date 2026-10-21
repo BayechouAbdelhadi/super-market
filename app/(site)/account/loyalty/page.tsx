@@ -13,7 +13,8 @@ import { SupabaseSelfProfileRepository } from '@/lib/account/adapters/supabase-s
 import { resolveDisplayIdentity } from '@/lib/account/identity'
 import { formatPhone } from '@/lib/store/contact'
 
-export const metadata: Metadata = { title: 'Mon espace fidélité' }
+export const metadata: Metadata = { title: 'Mon espace fidélité', robots: PRIVATE_PAGE_ROBOTS };
+import { PRIVATE_PAGE_ROBOTS } from "@/lib/seo/config";
 
 export default async function CustomerLoyaltyAppPage() {
   const supabase = await createClient()

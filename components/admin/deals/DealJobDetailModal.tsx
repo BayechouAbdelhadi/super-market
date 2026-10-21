@@ -25,6 +25,7 @@ import {
   Eye,
   FileText,
 } from "lucide-react";
+import { getSiteUrl } from "@/lib/utils/app-url";
 
 interface DealJobDetailModalProps {
   isOpen: boolean;
@@ -252,7 +253,7 @@ export function DealJobDetailModal({
                   content: campaign.content,
                   imageUrl: campaign.imageUrl,
                   ctaText: campaign.ctaText || "Découvrir les offres en magasin",
-                  ctaUrl: campaign.ctaUrl || "https://supermarket-calais.fr",
+                  ctaUrl: campaign.ctaUrl || getSiteUrl(),
                   storeName: "Super Market Calais",
                   storeAddress: "205 Avenue Antoine de Saint-Exupéry, 62100 Calais",
                   storePhone: "06 71 54 05 28",
@@ -527,7 +528,7 @@ export function DealJobDetailModal({
         content={campaign.content}
         imageUrl={campaign.imageUrl}
         ctaText={campaign.ctaText || "Découvrir les offres en magasin"}
-        ctaUrl={campaign.ctaUrl || "https://supermarket-calais.fr"}
+        ctaUrl={campaign.ctaUrl || getSiteUrl()}
         targetTiers={campaign.targetTiers}
       />
       {confirmDialog}

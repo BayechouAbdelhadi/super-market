@@ -4,7 +4,8 @@ import { AuthShell } from '@/components/public/AuthShell'
 import { SignUpForm } from '@/components/auth/SignUpForm'
 import { verifySignedToken, PENDING_SIGNUP_COOKIE } from '@/lib/email/otp-security'
 
-export const metadata: Metadata = { title: 'Créer un compte' }
+export const metadata: Metadata = { title: 'Créer un compte', robots: PRIVATE_PAGE_ROBOTS };
+import { PRIVATE_PAGE_ROBOTS } from "@/lib/seo/config";
 
 interface PendingSignUpPayload {
   first_name: string

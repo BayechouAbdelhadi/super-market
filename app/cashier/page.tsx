@@ -15,7 +15,7 @@ import {
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "SuperMarket Calais — Espace Caisse",
+  title: "Espace caisse",
   description: "Portail des applications et outils pour les caissiers",
 }
 

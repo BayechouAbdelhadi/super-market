@@ -8,8 +8,9 @@ import { ConfirmAccountForm } from "@/components/auth/ConfirmAccountForm";
 import { AuthShell, authLinkClass } from "@/components/public/AuthShell";
 import { getAppSettings } from "@/lib/settings/service";
 import { verifyActivationToken } from "@/lib/email/otp-security";
+import { PRIVATE_PAGE_ROBOTS } from "@/lib/seo/config";
 
-export const metadata: Metadata = { title: "Invitation" };
+export const metadata: Metadata = { title: "Invitation", robots: PRIVATE_PAGE_ROBOTS };
 
 const backToLogin = (
   <Link href="/login" className={authLinkClass}>

@@ -3,7 +3,7 @@ import { getAppSettings } from "@/lib/settings/service";
 import { DealsManager } from "@/components/admin/deals/DealsManager";
 
 export const metadata: Metadata = {
-  title: "Bons Plans & Campagnes E-mails — Super Market Calais",
+  title: "Bons plans & campagnes e-mail",
   description: "Création et programmation de campagnes e-mails bons plans ciblées par palier fidélité",
 };
 

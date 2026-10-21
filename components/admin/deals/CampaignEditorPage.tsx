@@ -28,6 +28,7 @@ import {
   Save,
   RotateCcw,
 } from "lucide-react";
+import { getSiteUrl } from "@/lib/utils/app-url";
 
 interface CampaignEditorPageProps {
   storeName?: string;
@@ -50,16 +51,16 @@ export const CAMPAIGN_PRESETS = [
     content: `Profitez de nos offres fraîches exclusives dès ce vendredi dans votre magasin Super Market Calais !\n\n- 20% de remise immédiate sur l'ensemble du rayon fruits & légumes dès 25€ d'achat\n- Vos points fidélité sont doublés sur tout votre ticket de caisse\n- Dégustation gratuite de nos nouveaux arrivages locaux ce samedi matin\n\nOffre exclusive réservée à nos membres fidélité sur simple indication de votre nom ou numéro de téléphone lors de votre passage au comptoir caisse.`,
     imageUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
     ctaText: "Découvrir les offres en magasin",
-    ctaUrl: "https://supermarket-calais.fr",
+    ctaUrl: getSiteUrl(),
   },
   {
     name: "🍗 Poulet Frais & Charcuterie",
     title: "Poulet Frais en Barquette & Charcuterie",
     subject: "🍗 Poulet frais 100% Halal : arrivage du jour et points doublés ce week-end !",
     content: `Profitez de notre arrivage quotidien de poulet frais en barquette dans votre magasin Super Market Calais :\n\n- Filets, cuisses, ailes et pilons de poulet frais 100% Halal, prêts à cuisiner\n- Notre sélection de charcuterie traditionnelle\n- Points fidélité doublés sur le rayon poulet frais & charcuterie dès 30€ d'achat\n\nIndiquez simplement votre numéro de téléphone en caisse pour activer vos réductions fidélité !`,
-    imageUrl: "https://supermarket-calais.fr/categories/poulet-frais-sample.jpg",
+    imageUrl: `${getSiteUrl()}/categories/poulet-frais-sample.jpg`,
     ctaText: "Découvrir le rayon poulet frais",
-    ctaUrl: "https://supermarket-calais.fr",
+    ctaUrl: getSiteUrl(),
   },
   {
     name: "🌙 Saveurs d'Orient & Épicerie",
@@ -68,7 +69,7 @@ export const CAMPAIGN_PRESETS = [
     content: `Découvrez notre nouvelle sélection d'épicerie orientale et de produits authentiques chez Super Market Calais :\n\n- 15% de remise sur nos dattes Medjool premium, fruits secs et graines\n- Sélection d'épices parfumées, thés à la menthe et douceurs traditionnelles\n- 100 points fidélité bonus crédités instantanément dès 35€ d'achat\n\nRendez-vous dès aujourd'hui en magasin pour savourer nos arrivages exclusifs !`,
     imageUrl: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=1200&q=80",
     ctaText: "Voir les arrivages en magasin",
-    ctaUrl: "https://supermarket-calais.fr",
+    ctaUrl: getSiteUrl(),
   },
   {
     name: "⚡ Ventes Flash x3 Points",
@@ -77,7 +78,7 @@ export const CAMPAIGN_PRESETS = [
     content: `Ce week-end seulement, transformez vos courses en avalanche de points fidélité !\n\n- Tous vos achats vous rapportent 3 fois plus de points en caisse\n- Débloquez instantanément vos prochains bons d'achat de 5€ et 10€\n- Accès prioritaire à notre comptoir caisse pour les membres Silver, Gold et VIP\n\nN'oubliez pas d'indiquer vos coordonnées à notre hôte(sse) de caisse avant la fin de votre encaissement.`,
     imageUrl: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=80",
     ctaText: "Voir mon solde de points fidélité",
-    ctaUrl: "https://supermarket-calais.fr",
+    ctaUrl: getSiteUrl(),
   },
   {
     name: "❄️ Surgelés Hunkar & Idéal Délices",
@@ -86,7 +87,7 @@ export const CAMPAIGN_PRESETS = [
     content: `Découvrez notre rayon surgelés avec plus de 100 références à prix imbattables dans votre magasin Super Market Calais :\n\n- En exclusivité : toute la gamme de spécialités des marques Hunkar et Idéal Délices\n- Plats préparés, viandes surgelées, légumes et délices prêts à cuisiner\n- Points fidélité doublés sur tout le rayon surgelés dès 20€ d'achat\n\nRemplissez votre congélateur sans compromis sur la qualité ni sur votre budget !`,
     imageUrl: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=1200&q=80",
     ctaText: "Découvrir le rayon surgelés",
-    ctaUrl: "https://supermarket-calais.fr",
+    ctaUrl: getSiteUrl(),
   },
   {
     name: "🥤 Boissons Pack N°1 Calais",
@@ -95,7 +96,7 @@ export const CAMPAIGN_PRESETS = [
     content: `Super Market Calais est votre destination numéro 1 pour les boissons en pack sur Calais !\n\n- Plus de 60 références disponibles en stock permanent : sodas, jus, eaux gazeuses et thés glacés\n- Prix dégressifs et promos sur les packs familiaux\n- 50 points fidélité offerts dès 3 packs achetés\n\nFaites le plein de fraîcheur au meilleur prix de la région !`,
     imageUrl: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=1200&q=80",
     ctaText: "Voir les offres boissons",
-    ctaUrl: "https://supermarket-calais.fr",
+    ctaUrl: getSiteUrl(),
   },
 ];
 
@@ -147,7 +148,7 @@ export function CampaignEditorPage({
     "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80"
   );
   const [ctaText, setCtaText] = useState("Découvrir les offres en magasin");
-  const [ctaUrl, setCtaUrl] = useState("https://supermarket-calais.fr");
+  const [ctaUrl, setCtaUrl] = useState(getSiteUrl());
 
   // Scheduling State (Step 4 - Final Step)
   const today = getParisDateString();
@@ -467,7 +468,7 @@ export function CampaignEditorPage({
         content: content.trim(),
         imageUrl: imageUrl?.trim() || null,
         ctaText: ctaText.trim() || "Découvrir les offres en magasin",
-        ctaUrl: ctaUrl.trim() || "https://supermarket-calais.fr",
+        ctaUrl: ctaUrl.trim() || getSiteUrl(),
       };
 
       const res = await fetch("/api/admin/deals", {
@@ -515,7 +516,7 @@ export function CampaignEditorPage({
       );
       setImageUrl("https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80");
       setCtaText("Découvrir les offres en magasin");
-      setCtaUrl("https://supermarket-calais.fr");
+      setCtaUrl(getSiteUrl());
       setStartDate(today);
       setEndDate(() => {
         const d = new Date();
@@ -554,7 +555,7 @@ export function CampaignEditorPage({
         content: content.trim(),
         imageUrl: imageUrl?.trim() || null,
         ctaText: ctaText.trim() || "Découvrir les offres en magasin",
-        ctaUrl: ctaUrl.trim() || "https://supermarket-calais.fr",
+        ctaUrl: ctaUrl.trim() || getSiteUrl(),
       };
 
       const res = await fetch("/api/admin/deals", {
@@ -1182,7 +1183,7 @@ export function CampaignEditorPage({
                 type="url"
                 value={ctaUrl}
                 onChange={(e) => setCtaUrl(e.target.value)}
-                placeholder="https://supermarket-calais.fr"
+                placeholder={getSiteUrl()}
                 className="w-full h-11 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               />
             </div>

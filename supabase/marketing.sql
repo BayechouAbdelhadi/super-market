@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS marketing_campaigns (
     content TEXT NOT NULL,
     image_url TEXT,
     cta_text TEXT DEFAULT 'Découvrir les offres en magasin',
-    cta_url TEXT DEFAULT 'https://supermarket-calais.fr',
+    cta_url TEXT DEFAULT 'https://supermarketcalais.com',
     stats JSONB NOT NULL DEFAULT '{"totalTargets":0,"sentCount":0,"failedCount":0,"remainingCount":0,"progressPercentage":0}'::jsonb,
     recipients JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_by TEXT,

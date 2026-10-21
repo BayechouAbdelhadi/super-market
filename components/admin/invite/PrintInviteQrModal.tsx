@@ -26,6 +26,7 @@ import {
   printFidelityFlyer,
 } from "./exportFlyerCanvas";
 import { QR_COLORS } from "./qr-colors";
+import { getSiteUrl } from "@/lib/utils/app-url";
 
 interface PrintInviteQrModalProps {
   isOpen: boolean;
@@ -43,11 +44,7 @@ export function PrintInviteQrModal({
   const [isExporting, setIsExporting] = useState(false);
   const printableRef = useRef<HTMLDivElement>(null);
 
-  const finalUrl =
-    inviteUrl ||
-    (typeof window !== "undefined"
-      ? `${window.location.origin}/invite`
-      : "https://supermarket-calais.fr/invite");
+  const finalUrl = inviteUrl || `${getSiteUrl()}/invite`;
 
   useEffect(() => {
     if (isOpen && finalUrl) {

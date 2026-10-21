@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { getAppOrigin, PRODUCTION_APP_URL } from "@/lib/utils/app-url";
+import { getAppOrigin, getSiteUrl, PRODUCTION_APP_URL } from "@/lib/utils/app-url";
 
 const attackerHeaders = new Headers({ host: "evil.tld", "x-forwarded-proto": "https" });
 
@@ -23,5 +23,19 @@ describe("getAppOrigin (emailed links)", () => {
     vi.stubEnv("APP_URL", "");
     vi.stubEnv("NODE_ENV", "development");
     expect(getAppOrigin(new Headers({ host: "localhost:3000" }))).toBe("http://localhost:3000");
+  });
+});
+
+describe("getSiteUrl (SEO, QR codes)", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("is the production domain by default", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
+    expect(getSiteUrl()).toBe("https://supermarketcalais.com");
+  });
+
+  it("uses the configured URL, without trailing slash", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", " https://staging.example/ ");
+    expect(getSiteUrl()).toBe("https://staging.example");
   });
 });

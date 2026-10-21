@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getAppSettings } from "@/lib/settings/service";
 import { getLatestNewsPost } from "@/lib/news/service";
+import { BASE_OPEN_GRAPH, DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME } from "@/lib/seo/config";
 import { STORE_LOCATION, STORE_TIME_ZONE, UPCOMING_CLOSURES_WINDOW_DAYS } from "@/lib/store/config";
 import {
   DAY_NAMES,
@@ -20,15 +21,14 @@ import { MobileActionBar } from "@/components/public/home/MobileActionBar";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: { absolute: "Super Market Calais — Supermarché de quartier ouvert 7j/7" },
-  description:
-    "Supermarché de proximité à Calais Saint-Exupéry : produits méditerranéens (Turquie, Maroc), volailles fraîches halal, primeur, surgelés, pâtisserie orientale, boissons en pack, relais Pickup et fidélité sans carte.",
+  title: { absolute: DEFAULT_TITLE },
+  description: DEFAULT_DESCRIPTION,
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Super Market Calais",
+    ...BASE_OPEN_GRAPH,
+    title: SITE_NAME,
     description: "Votre supermarché de quartier à Calais, ouvert 7 jours sur 7.",
-    type: "website",
-    locale: "fr_FR",
+    url: "/",
     images: ["/super-market-calais-banner-hd.webp"],
   },
 };

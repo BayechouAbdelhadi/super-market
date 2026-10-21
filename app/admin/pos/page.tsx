@@ -5,7 +5,7 @@ import { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "SuperMarket Fidélité — Caisse",
+  title: "Caisse fidélité",
   description: "Recherche client et gestion des points de fidélité au comptoir",
 };
 

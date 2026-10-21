@@ -27,7 +27,12 @@ const SECTIONS = [
   { id: "contact-dpo", label: "Contact et réclamation" },
 ];
 
-export function PrivacyPolicyContent() {
+interface PrivacyPolicyContentProps {
+  /** Contact and DPO address, from the store settings. */
+  contactEmail: string;
+}
+
+export function PrivacyPolicyContent({ contactEmail }: PrivacyPolicyContentProps) {
   return (
     <div className="w-full flex-1">
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-10 sm:px-6 md:py-16 lg:grid-cols-[220px_1fr] lg:gap-16">
@@ -122,7 +127,7 @@ export function PrivacyPolicyContent() {
                 <p><strong>Raison sociale :</strong> Super Market Calais</p>
                 <p><strong>Adresse de l’établissement :</strong> 205 Avenue Antoine de Saint-Exupéry, 62100 Calais, France</p>
                 <p><strong>Téléphone :</strong> 06 71 54 05 28</p>
-                <p><strong>E-mail de contact &amp; DPO :</strong> <a href="mailto:contact@supermarket-calais.fr" className="text-[var(--color-primary)] hover:underline font-semibold">contact@supermarket-calais.fr</a></p>
+                <p><strong>E-mail de contact &amp; DPO :</strong> <a href={`mailto:${contactEmail}`} className="text-[var(--color-primary)] hover:underline font-semibold">{contactEmail}</a></p>
               </div>
             </section>
 
@@ -316,7 +321,7 @@ export function PrivacyPolicyContent() {
                     Vous pouvez simplement nous envoyer un e-mail à :
                   </p>
                   <p className="font-mono font-bold text-sm text-[var(--color-primary)] bg-surface-hover p-2 rounded-lg inline-block">
-                    contact@supermarket-calais.fr
+                    {contactEmail}
                   </p>
                   <p className="text-[var(--color-text-muted)]">
                     avec pour objet <em>« Demande de suppression de mes données personnelles »</em>, en mentionnant votre nom et le numéro de téléphone associé à votre compte. 
@@ -355,7 +360,7 @@ export function PrivacyPolicyContent() {
                     <span>Contact électronique</span>
                   </div>
                   <p className="text-[var(--color-text-muted)]">
-                    E-mail : <a href="mailto:contact@supermarket-calais.fr" className="text-[var(--color-primary)] hover:underline font-semibold">contact@supermarket-calais.fr</a>
+                    E-mail : <a href={`mailto:${contactEmail}`} className="text-[var(--color-primary)] hover:underline font-semibold">{contactEmail}</a>
                   </p>
                   <p className="text-[var(--color-text-muted)]">Délai de réponse moyen : 48 à 72 heures ouvrées.</p>
                 </div>

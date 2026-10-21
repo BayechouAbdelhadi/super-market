@@ -11,19 +11,21 @@ import { NEWS_CONFIG } from "@/lib/news/config";
 import { listPublishedNews } from "@/lib/news/service";
 import type { NewsPostPage } from "@/lib/news/types";
 import { NewsFeedPageSchema } from "@/lib/news/validation";
+import { BASE_OPEN_GRAPH, SITE_NAME } from "@/lib/seo/config";
 
 // New posts show up immediately, and "il y a …" depends on the request time
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: { absolute: "Nos actualités — Super Market Calais" },
-  description: "Arrivages, nouveautés, promotions et événements de Super Market Calais, votre supermarché de quartier.",
+  title: "Nos actualités",
+  description:
+    "Arrivages, nouveautés, promotions et événements de Super Market Calais, votre supermarché de quartier à Calais Saint-Exupéry.",
   alternates: { canonical: "/actualites" },
   openGraph: {
-    title: "Nos actualités — Super Market Calais",
+    ...BASE_OPEN_GRAPH,
+    title: `Nos actualités — ${SITE_NAME}`,
     description: "Suivez la vie de votre supermarché de quartier à Calais.",
-    type: "website",
-    locale: "fr_FR",
+    url: "/actualites",
   },
 };
 

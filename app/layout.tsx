@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { activeTheme, themeToCss } from "@/lib/theme";
+import { BASE_OPEN_GRAPH, DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME } from "@/lib/seo/config";
+import { getSiteUrl } from "@/lib/utils/app-url";
 import "./globals.css";
 
 const inter = Inter({
@@ -10,21 +12,17 @@ const inter = Inter({
   display: "swap",
 });
 
+// Icons come from the app/ files (favicon.ico, icon.svg, apple-icon.png) and app/manifest.ts
 export const metadata: Metadata = {
+  // Makes relative URLs (canonical, Open Graph images) absolute, on the canonical domain
+  metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "SuperMarket — Alimentation Générale & Produits Frais",
-    template: "%s | SuperMarket",
+    default: DEFAULT_TITLE,
+    template: `%s — ${SITE_NAME}`,
   },
-  description:
-    "SuperMarket : Vos courses du quotidien, produits frais tous les jours et service caisse de proximité.",
-  icons: {
-    icon: [
-      { url: "/logo.jpeg" },
-    ],
-    apple: [
-      { url: "/logo.jpeg" },
-    ],
-  },
+  description: DEFAULT_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: { ...BASE_OPEN_GRAPH, title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },
 };
 
 export default function RootLayout({

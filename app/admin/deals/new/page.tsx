@@ -3,7 +3,7 @@ import { getAppSettings } from "@/lib/settings/service";
 import { CampaignEditorPage } from "@/components/admin/deals/CampaignEditorPage";
 
 export const metadata: Metadata = {
-  title: "Créer une Campagne E-mail — Super Market Calais",
+  title: "Nouvelle campagne e-mail",
   description: "Création et configuration d'une campagne de bons plans par e-mail ciblée par palier fidélité",
 };
 
