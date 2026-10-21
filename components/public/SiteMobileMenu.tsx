@@ -12,7 +12,8 @@ import { formatPhone, phoneHref } from "@/lib/store/contact";
 import { STORE_LOCATION } from "@/lib/store/config";
 import type { OpeningStatus } from "@/lib/store/opening-hours";
 import { OpenStatus } from "@/components/public/home/OpenStatus";
-import { SITE_NAV_LINKS, type AccountLink } from "./site-nav";
+import { SITE_NAV_HAS_DOT, SITE_NAV_LINKS, type AccountLink } from "./site-nav";
+import { NavDot } from "./NavDot";
 
 interface SiteMobileMenuProps {
   storeName: string;
@@ -33,9 +34,10 @@ export function SiteMobileMenu({ storeName, phone, status, account }: SiteMobile
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         aria-label="Ouvrir le menu"
-        className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "lg:hidden text-text")}
+        className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "relative lg:hidden text-text")}
       >
         <Menu className="size-6" />
+        {SITE_NAV_HAS_DOT && <NavDot className="absolute top-2 right-2" />}
       </SheetTrigger>
 
       <SheetContent side="right" showCloseButton={false} className="gap-0">
@@ -72,7 +74,10 @@ export function SiteMobileMenu({ storeName, phone, status, account }: SiteMobile
                     onClick={close}
                     className="flex min-h-12 items-center justify-between rounded-[var(--radius-button)] px-3 text-lg font-medium text-text transition-colors hover:bg-surface-hover"
                   >
-                    {link.label}
+                    <span className="relative">
+                      {link.label}
+                      {link.dot && <NavDot className="absolute -top-0.5 -right-3" />}
+                    </span>
                     <ChevronRight aria-hidden className="h-5 w-5 text-text-muted" />
                   </a>
                 </li>

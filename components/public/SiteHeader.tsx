@@ -9,6 +9,7 @@ import type { OpeningStatus } from "@/lib/store/opening-hours";
 import { OpenStatus } from "@/components/public/home/OpenStatus";
 import { SiteMobileMenu } from "./SiteMobileMenu";
 import { SITE_NAV_LINKS, type AccountLink } from "./site-nav";
+import { NavDot } from "./NavDot";
 
 export type { AccountLink };
 
@@ -43,7 +44,10 @@ export function SiteHeader({ storeName, phone, status, account }: SiteHeaderProp
               href={link.href}
               className="inline-flex h-11 items-center rounded-[var(--radius-button)] px-3 text-sm font-medium text-text-muted transition-colors hover:bg-surface-hover hover:text-text"
             >
-              {link.label}
+              <span className="relative">
+                {link.label}
+                {link.dot && <NavDot className="absolute -top-1 -right-2.5" />}
+              </span>
             </a>
           ))}
         </nav>

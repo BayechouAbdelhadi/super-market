@@ -21,8 +21,9 @@ export function LatestNewsSection({ post, storeName, now }: LatestNewsSectionPro
         eyebrow="Nos actualités"
         title="Quoi de neuf au magasin ?"
         description="Arrivages, nouveautés et événements : suivez la vie de votre supermarché."
+        align="center"
       />
-      <div className="max-w-2xl space-y-6">
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-6">
         <NewsPostCard
           body={post.body}
           images={post.images}
@@ -31,6 +32,8 @@ export function LatestNewsSection({ post, storeName, now }: LatestNewsSectionPro
           storeName={storeName}
           now={now}
           maxLines={NEWS_CONFIG.teaserMaxLines}
+          // A centered flex column would otherwise shrink the card to its content
+          className="w-full"
         />
         <Link href="/actualites" className={buttonVariants({ variant: "secondary", size: "lg" })}>
           <span>Voir plus d&apos;actualités</span>

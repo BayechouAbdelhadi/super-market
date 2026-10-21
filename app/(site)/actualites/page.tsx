@@ -49,7 +49,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 space-y-8 px-4 pt-10 pb-16 sm:px-6 sm:pt-16">
-      <div className="space-y-2">
+      <div className="space-y-2 text-center">
         <p className="text-sm font-semibold text-primary-ink">Nos actualités</p>
         <h1 className="text-3xl font-bold tracking-tight text-text sm:text-4xl">Quoi de neuf au magasin ?</h1>
         <p className="text-base leading-relaxed text-text-muted">
