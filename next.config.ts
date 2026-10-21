@@ -45,6 +45,8 @@ const nextConfig: NextConfig = {
   // LAN origins allowed to reach `next dev` (comma-separated), e.g. ALLOWED_DEV_ORIGINS=192.168.1.69
   allowedDevOrigins: (process.env.ALLOWED_DEV_ORIGINS ?? "192.168.1.69").split(",").map((o) => o.trim()).filter(Boolean),
   poweredByHeader: false,
+  // 90: the home hero photo, where compression artifacts show at full width
+  images: { qualities: [75, 90] },
   // One canonical URL per page; old paths keep working (query strings are passed through)
   async redirects() {
     return [

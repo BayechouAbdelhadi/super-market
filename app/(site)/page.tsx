@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     description: "Votre supermarché de quartier à Calais, ouvert 7 jours sur 7.",
     type: "website",
     locale: "fr_FR",
-    images: ["/super-market-calais-storefront.webp"],
+    images: ["/super-market-calais-banner-hd.webp"],
   },
 };
 
@@ -53,7 +53,7 @@ function localBusinessJsonLd(
     address: store.address,
     telephone: store.phone,
     email: store.email,
-    image: "/super-market-calais-storefront.webp",
+    image: "/super-market-calais-banner-hd.webp",
     hasMap: STORE_LOCATION.googleMapsUrl,
     geo: { "@type": "GeoCoordinates", latitude: STORE_LOCATION.coordinates.lat, longitude: STORE_LOCATION.coordinates.lng },
     openingHoursSpecification: (Object.keys(DAY_NAMES).map(Number) as DayIndex[]).flatMap((day) =>

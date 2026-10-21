@@ -27,14 +27,16 @@ interface HeroSectionProps {
 export function HeroSection({ storeName, tagline, phone, status }: HeroSectionProps) {
   return (
     <section aria-labelledby="hero-title">
-      <div className="relative flex aspect-[4/3] max-h-[520px] min-h-[320px] w-full flex-col justify-end overflow-hidden bg-scrim sm:aspect-[21/9] md:aspect-[24/9]">
+      {/* From sm up the banner keeps the photo's own 81:33 ratio, so the whole storefront shows uncropped */}
+      <div className="relative flex aspect-[4/3] max-h-[800px] min-h-[320px] w-full flex-col justify-end overflow-hidden bg-scrim sm:aspect-[81/33]">
         <Image
-          src="/super-market-calais-storefront.webp"
+          src="/super-market-calais-banner-hd.webp"
           alt={`Devanture du ${storeName}, 205 avenue Antoine de Saint-Exupéry à Calais`}
           fill
-          priority
+          preload
+          quality={90}
           sizes="100vw"
-          className="object-cover object-center"
+          className="object-cover object-top"
         />
         {/* Darken bottom and left, where the title sits, for contrast on any photo */}
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-transparent via-scrim/10 to-scrim/80" />
