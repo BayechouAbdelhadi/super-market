@@ -6,6 +6,7 @@ import { getOpeningStatus } from "@/lib/store/opening-hours";
 import { SiteHeader, type AccountLink } from "@/components/public/SiteHeader";
 import { SiteFooter } from "@/components/public/SiteFooter";
 import { OpeningHoursProvider } from "@/components/public/OpeningHoursProvider";
+import { SiteAlerts } from "@/components/public/SiteAlerts";
 
 const ACCOUNT_LINKS: Record<AppRole, AccountLink> = {
   CUSTOMER: { href: "/account", label: "Mon espace" },
@@ -40,6 +41,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         {/* Header, page parts and footer are direct children, so the sticky header stays pinned over the footer too.
             `*:shrink-0` keeps any child (footer included) from being squeezed by the column. */}
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto motion-safe:scroll-smooth *:shrink-0">
+          <SiteAlerts />
           <SiteHeader storeName={store.storeName} phone={store.phone} status={status} account={account} />
           {children}
           <SiteFooter

@@ -21,6 +21,8 @@ const badgeVariants = cva(
           "bg-success-subtle text-success-text border-success-border",
         warning:
           "bg-warning-subtle text-warning-text border-warning-border",
+        info:
+          "bg-info-subtle text-info-text border-info-border",
         brand:
           "bg-[var(--color-primary)] text-on-color border-transparent",
         neutral:
