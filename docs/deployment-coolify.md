@@ -85,6 +85,9 @@ Keep the quotes in `<<'SQL'`. Without them, bash rewrites the `$$` in function b
 | `dashboard_analytics.sql` | Dashboard KPIs and 7-day trend computed in SQL | Applied |
 | `campaign_locks.sql` | Per-campaign send lock, so a campaign is never sent by two runs at once | **Before** deploying the code that uses it |
 | `site_alerts.sql` | Alert banners shown at the top of the public site | **Before** deploying the code that uses it |
+| `marketing_recipients_unique.sql` | Unique keys on campaign recipients (saving a campaign fails with `42P10` without them). Fails if duplicates exist: remove them first | **Before** deploying the code that uses it (databases created before these keys) |
+| `marketing_audience_counts.sql` | Campaign audience size per loyalty tier, counted in SQL | **Before** deploying the code that uses it |
+| `news_posts.sql` | Store news (`news_posts`), shown on the public site; photos in the `super-market` bucket | **Before** deploying the code that uses it |
 | `storage_rls.sql` | Storage bucket policies | New database only |
 | `create_admin.sql` | First admin account (edit email and password first) | New database only |
 | `update_admin_password.sql` | Reset the admin password | When needed |

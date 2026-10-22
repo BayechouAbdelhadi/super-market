@@ -1,0 +1,41 @@
+name: CI
+
+# Lint, tests and type check on every push and pull request: catches a regression whoever wrote the change
+# (human, Copilot or Claude). Needs no secret: the tests use in-memory repositories.
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Same major version as the Dockerfile
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      - name: Type check
+        run: npx tsc --noEmit -p .
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
