@@ -1,1 +1,0 @@
-{"nodes": [{"id": "$graphify-root$_supabase_update_admin_password_sql", "label": "update_admin_password.sql", "file_type": "code", "source_file": "supabase/update_admin_password.sql", "source_location": null}], "edges": []}

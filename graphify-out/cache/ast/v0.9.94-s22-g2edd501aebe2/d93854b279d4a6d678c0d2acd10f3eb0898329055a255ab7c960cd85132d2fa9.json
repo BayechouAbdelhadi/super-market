@@ -1,1 +1,0 @@
-{"nodes": [{"id": "$graphify-root$_supabase_security_role_source_sql", "label": "security_role_source.sql", "file_type": "code", "source_file": "supabase/security_role_source.sql", "source_location": null}], "edges": []}
