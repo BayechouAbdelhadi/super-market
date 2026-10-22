@@ -30,6 +30,9 @@ async function getAccountLink(): Promise<AccountLink | null> {
  * Pages render their root as `flex-1` (short pages push the footer down) and have no header of their own.
  * The shell uses `overflow-clip`, not `overflow-hidden`: a hidden box can still be scrolled by anchor
  * jumps (#fidelite), which pushed the whole page up and hid the header; a clipped box cannot.
+ * The shell is `fixed inset-0` rather than `h-full`: iOS browsers can show more than `100svh` (on first load
+ * the toolbars may already be collapsed), which left a blank band under the mobile action bar. A fixed box
+ * always matches the visible viewport. Only html/body must not be fixed (§ 25.1).
  */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const [{ store, hours }, account] = await Promise.all([getAppSettings(), getAccountLink()]);
@@ -37,7 +40,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <OpeningHoursProvider hours={hours}>
-      <div className="flex h-full w-full flex-col overflow-clip bg-background text-text">
+      <div className="fixed inset-0 flex flex-col overflow-clip bg-background text-text">
         {/* Header, page parts and footer are direct children, so the sticky header stays pinned over the footer too.
             `*:shrink-0` keeps any child (footer included) from being squeezed by the column. */}
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto motion-safe:scroll-smooth *:shrink-0">
