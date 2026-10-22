@@ -1,0 +1,36 @@
+{"nodes":[
+{"id":"app_icon_brand_mark","label":"Brand Mark SVG (Twin Heart Apples)","file_type":"image","source_file":"/home/abdelhadi/Documents/super-market/app/icon.svg","source_location":null,"source_url":null,"captured_at":null,"author":null,"contributor":null,"rationale":"Vector favicon source for the Next.js app/icon.svg convention; two overlapping heart-shaped apples (green #2ECC40 left, red #EB2F3A right) with green stems/leaves and light highlight overlays, conveying fresh produce + customer love/loyalty for a supermarket loyalty app."},
+{"id":"app_icon_green_apple","label":"Green Heart Apple","file_type":"image","source_file":"/home/abdelhadi/Documents/super-market/app/icon.svg","source_location":"L2-L6,L17-L19","source_url":null,"captured_at":null,"author":null,"contributor":null},
+{"id":"app_icon_red_apple","label":"Red Heart Apple","file_type":"image","source_file":"/home/abdelhadi/Documents/super-market/app/icon.svg","source_location":"L8-L15","source_url":null,"captured_at":null,"author":null,"contributor":null},
+{"id":"app_apple_icon_icon","label":"Apple Icon (Next.js app/apple-icon.png)","file_type":"image","source_file":"/home/abdelhadi/Documents/super-market/app/apple-icon.png","source_location":null,"source_url":null,"captured_at":null,"author":null,"contributor":null,"rationale":"Raster iOS home-screen icon served via Next.js apple-icon file convention; twin heart apples on white background."},
+{"id":"public_apple_touch_icon_icon","label":"Apple Touch Icon (public)","file_type":"image","source_file":"/home/abdelhadi/Documents/super-market/public/apple-touch-icon.png","source_location":null,"source_url":null,"captured_at":null,"author":null,"contributor":null,"rationale":"Static apple-touch-icon in public/ for iOS bookmarks; visually identical to app/apple-icon.png."},
+{"id":"public_icon_192_icon","label":"PWA Icon 192x192","file_type":"image","source_file":"/home/abdelhadi/Documents/super-market/public/icon-192.png","source_location":null,"source_url":null,"captured_at":null,"author":null,"contributor":null,"rationale":"PWA manifest icon (192px) with the twin heart apples brand mark on white."},
+{"id":"public_icon_512_icon","label":"PWA Icon 512x512","file_type":"image","source_file":"/home/abdelhadi/Documents/super-market/public/icon-512.png","source_location":null,"source_url":null,"captured_at":null,"author":null,"contributor":null,"rationale":"PWA manifest icon (512px, purpose any) with the brand mark filling most of the canvas."},
+{"id":"public_icon_maskable_512_icon","label":"PWA Maskable Icon 512x512","file_type":"image","source_file":"/home/abdelhadi/Documents/super-market/public/icon-maskable-512.png","source_location":null,"source_url":null,"captured_at":null,"author":null,"contributor":null,"rationale":"Maskable PWA icon: same brand mark scaled down with extra white padding so it stays inside the Android adaptive-icon safe zone."}
+],
+"edges":[
+{"source":"app_icon_brand_mark","target":"app_icon_green_apple","relation":"references","confidence":"EXTRACTED","confidence_score":1.0,"source_file":"/home/abdelhadi/Documents/super-market/app/icon.svg","source_location":"L17-L19","weight":1.0},
+{"source":"app_icon_brand_mark","target":"app_icon_red_apple","relation":"references","confidence":"EXTRACTED","confidence_score":1.0,"source_file":"/home/abdelhadi/Documents/super-market/app/icon.svg","source_location":"L13-L15","weight":1.0},
+{"source":"app_apple_icon_icon","target":"app_icon_brand_mark","relation":"semantically_similar_to","confidence":"INFERRED","confidence_score":0.95,"source_file":"/home/abdelhadi/Documents/super-market/app/apple-icon.png","source_location":null,"weight":1.0},
+{"source":"public_apple_touch_icon_icon","target":"app_apple_icon_icon","relation":"semantically_similar_to","confidence":"INFERRED","confidence_score":0.95,"source_file":"/home/abdelhadi/Documents/super-market/public/apple-touch-icon.png","source_location":null,"weight":1.0},
+{"source":"public_apple_touch_icon_icon","target":"app_icon_brand_mark","relation":"semantically_similar_to","confidence":"INFERRED","confidence_score":0.95,"source_file":"/home/abdelhadi/Documents/super-market/public/apple-touch-icon.png","source_location":null,"weight":1.0},
+{"source":"public_icon_192_icon","target":"app_icon_brand_mark","relation":"semantically_similar_to","confidence":"INFERRED","confidence_score":0.95,"source_file":"/home/abdelhadi/Documents/super-market/public/icon-192.png","source_location":null,"weight":1.0},
+{"source":"public_icon_512_icon","target":"app_icon_brand_mark","relation":"semantically_similar_to","confidence":"INFERRED","confidence_score":0.95,"source_file":"/home/abdelhadi/Documents/super-market/public/icon-512.png","source_location":null,"weight":1.0},
+{"source":"public_icon_512_icon","target":"public_icon_192_icon","relation":"semantically_similar_to","confidence":"INFERRED","confidence_score":0.95,"source_file":"/home/abdelhadi/Documents/super-market/public/icon-512.png","source_location":null,"weight":1.0},
+{"source":"public_icon_maskable_512_icon","target":"public_icon_512_icon","relation":"semantically_similar_to","confidence":"INFERRED","confidence_score":0.85,"source_file":"/home/abdelhadi/Documents/super-market/public/icon-maskable-512.png","source_location":null,"weight":1.0},
+{"source":"public_icon_maskable_512_icon","target":"app_icon_brand_mark","relation":"semantically_similar_to","confidence":"INFERRED","confidence_score":0.95,"source_file":"/home/abdelhadi/Documents/super-market/public/icon-maskable-512.png","source_location":null,"weight":1.0}
+],
+"hyperedges":[
+{"id":"twin_heart_apples_brand_icon_set","label":"Twin Heart Apples Brand Icon Set","nodes":["app_icon_brand_mark","app_apple_icon_icon","public_apple_touch_icon_icon","public_icon_192_icon","public_icon_512_icon","public_icon_maskable_512_icon"],"relation":"form","confidence":"INFERRED","confidence_score":0.95,"source_file":"/home/abdelhadi/Documents/super-market/app/icon.svg"},
+{"id":"pwa_manifest_icons","label":"PWA Manifest Icons","nodes":["public_icon_192_icon","public_icon_512_icon","public_icon_maskable_512_icon"],"relation":"participate_in","confidence":"INFERRED","confidence_score":0.85,"source_file":"/home/abdelhadi/Documents/super-market/public/icon-512.png"},
+{"id":"ios_home_screen_icons","label":"iOS Home Screen Icons","nodes":["app_apple_icon_icon","public_apple_touch_icon_icon"],"relation":"participate_in","confidence":"INFERRED","confidence_score":0.85,"source_file":"/home/abdelhadi/Documents/super-market/app/apple-icon.png"}
+],
+"input_tokens":0,"output_tokens":0,
+"coverage":{
+"/home/abdelhadi/Documents/super-market/app/apple-icon.png":1,
+"/home/abdelhadi/Documents/super-market/app/icon.svg":20,
+"/home/abdelhadi/Documents/super-market/public/apple-touch-icon.png":1,
+"/home/abdelhadi/Documents/super-market/public/icon-192.png":1,
+"/home/abdelhadi/Documents/super-market/public/icon-512.png":1,
+"/home/abdelhadi/Documents/super-market/public/icon-maskable-512.png":1
+}}
