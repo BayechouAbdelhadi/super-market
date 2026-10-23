@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { Sidebar } from '@/components/ui/Sidebar'
 import { MobileBottomNav } from '@/components/ui/MobileBottomNav'
+import { PullToRefresh } from '@/components/ui/PullToRefresh'
 import { getAppSettings } from '@/lib/settings/service'
 
 interface DashboardLayoutProps {
@@ -25,12 +26,13 @@ export async function DashboardLayout({ children, role, email, storeName }: Dash
     <div className="h-full w-full overflow-hidden bg-[var(--color-background)] flex flex-col md:flex-row">
       <Sidebar role={role} email={email} storeName={effectiveStoreName} />
 
-      {/* Main Content Area — flex-1 + min-h-0 ensures it doesn't blow past the viewport */}
-      <main className="flex-1 min-h-0 min-w-0 overflow-y-auto">
+      {/* Main Content Area — flex-1 + min-h-0 ensures it doesn't blow past the viewport.
+          Pull down to reload on tablets, for the staff screens only */}
+      <PullToRefresh enabled={role !== 'CUSTOMER'} className="flex-1 min-h-0 min-w-0 overflow-y-auto">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           {children}
         </div>
-      </main>
+      </PullToRefresh>
 
       {/* Mobile Bottom Navigation Bar (thumb-friendly for phones) */}
       <MobileBottomNav role={role} email={email} storeName={effectiveStoreName} />

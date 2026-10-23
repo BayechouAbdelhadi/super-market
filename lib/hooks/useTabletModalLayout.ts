@@ -1,7 +1,5 @@
-import { useState, useEffect, useSyncExternalStore, type CSSProperties } from "react";
-
-/** Touch device at least as wide as the `md:` breakpoint: tablets, not phones or desktops. */
-const TABLET_QUERY = "(pointer: coarse) and (min-width: 768px)";
+import { useState, useEffect, type CSSProperties } from "react";
+import { useIsTablet } from "./useIsTablet";
 
 /** Height difference (px) between layout and visual viewport above which the keyboard is considered open. */
 const KEYBOARD_THRESHOLD_PX = 150;
@@ -15,12 +13,6 @@ const EDGE_GAP_PX = 16;
 /** Last keyboard height measured, reused so the next dialog is sized before the keyboard opens. */
 let lastKeyboardHeight: number | null = null;
 
-function subscribeTablet(onChange: () => void) {
-  const query = window.matchMedia(TABLET_QUERY);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-}
-
 /**
  * Tablet layout for dialogs: from the first render, the dialog is anchored to the top,
  * uses the full width and never grows past the area the on-screen keyboard leaves visible,
@@ -33,11 +25,7 @@ export function useTabletModalLayout(active: boolean): {
   isTablet: boolean;
   style: CSSProperties | undefined;
 } {
-  const isTablet = useSyncExternalStore(
-    subscribeTablet,
-    () => window.matchMedia(TABLET_QUERY).matches,
-    () => false
-  );
+  const isTablet = useIsTablet();
   const [visibleHeight, setVisibleHeight] = useState<number | null>(null);
 
   useEffect(() => {
