@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { parseLoyaltyCardCode } from "@/lib/loyalty/card-code";
+import { playScanBeep } from "@/lib/loyalty/scan-beep";
 
 interface CardScannerModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ export function CardScannerModal({ isOpen, onClose, onCustomerScanned }: CardSca
             return;
           }
           scanner?.stop();
+          playScanBeep();
           onScannedRef.current(customerId);
         },
         { preferredCamera: "environment", highlightScanRegion: true, returnDetailedScanResult: true }

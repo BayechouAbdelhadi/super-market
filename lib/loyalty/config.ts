@@ -59,6 +59,8 @@ export const LOYALTY_CONFIG = {
   card: {
     // Prefix of the QR code shown on the digital loyalty card, followed by the customer id
     qrPrefix: "LOYALTY:",
+    // Confirmation beep played when a card is scanned (checkout scanner style)
+    scanBeep: { frequencyHz: 1800, durationMs: 120, volume: 0.25 },
   },
   search: {
     debounceMs: 300,

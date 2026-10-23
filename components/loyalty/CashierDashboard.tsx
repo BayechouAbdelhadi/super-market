@@ -10,6 +10,7 @@ import { NewCustomerModal } from "./NewCustomerModal";
 import { AddPurchaseModal } from "./AddPurchaseModal";
 import { RedeemPointsModal } from "./RedeemPointsModal";
 import { CardScannerModal } from "./CardScannerModal";
+import { unlockScanBeep } from "@/lib/loyalty/scan-beep";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
@@ -314,7 +315,10 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
             onChange={setSearchQuery}
             loading={loading || (searchQuery.trim() !== "" && searchQuery !== debouncedSearchQuery)}
             onOpenNewCustomer={() => setIsNewCustomerOpen(true)}
-            onOpenScanner={() => setIsScannerOpen(true)}
+            onOpenScanner={() => {
+              unlockScanBeep();
+              setIsScannerOpen(true);
+            }}
           />
 
           {/* Results Section */}
