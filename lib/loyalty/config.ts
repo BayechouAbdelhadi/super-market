@@ -56,6 +56,10 @@ export const LOYALTY_CONFIG = {
     // Tier assigned to every new loyalty account
     tier: "BRONZE" as const,
   },
+  card: {
+    // Prefix of the QR code shown on the digital loyalty card, followed by the customer id
+    qrPrefix: "LOYALTY:",
+  },
   search: {
     debounceMs: 300,
     minQueryLength: 1,

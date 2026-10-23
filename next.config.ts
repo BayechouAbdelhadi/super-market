@@ -12,6 +12,7 @@ const supabasePublicStorage = supabaseUrl ? new URL(`${supabaseUrl}/storage/v1/o
  * - scripts: only this origin (Next.js inline bootstrap needs 'unsafe-inline'; no third-party scripts);
  * - images: this origin, data:/blob: (QR codes, flyer export) and any https source (Supabase storage,
  *   Unsplash, admin-provided campaign images);
+ * - workers: blob: for the loyalty card QR scanner (qr-scanner builds its decoder worker from a blob);
  * - frames: the Google Maps embed on the home page (+ srcdoc email previews, same origin);
  * - fetch/XHR: this origin only (all data goes through the Next.js BFF).
  * Development adds what hot reload needs ('unsafe-eval', websockets).
@@ -22,6 +23,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
+  "worker-src 'self' blob:",
   `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
   "frame-src 'self' https://maps.google.com https://www.google.com",
   "frame-ancestors 'self'",
@@ -38,7 +40,8 @@ const securityHeaders = [
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+  // Camera: same origin only, for the loyalty card scanner at the checkout
+  { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(), payment=()" },
   // Ignored by browsers on plain-http responses (local / LAN development)
   { key: "Strict-Transport-Security", value: "max-age=31536000" },
 ];

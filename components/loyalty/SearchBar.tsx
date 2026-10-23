@@ -1,6 +1,7 @@
 import React from "react";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Button } from "@/components/ui/button";
+import { ScanLine } from "lucide-react";
 
 interface SearchBarProps {
   query: string;
@@ -8,6 +9,7 @@ interface SearchBarProps {
   onDebouncedChange?: (query: string) => void;
   debounceMs?: number;
   onOpenNewCustomer: () => void;
+  onOpenScanner?: () => void;
   loading?: boolean;
 }
 
@@ -17,6 +19,7 @@ export function SearchBar({
   onDebouncedChange,
   debounceMs,
   onOpenNewCustomer,
+  onOpenScanner,
   loading = false,
 }: SearchBarProps) {
   return (
@@ -34,6 +37,19 @@ export function SearchBar({
             autoFocus
           />
         </div>
+
+        {onOpenScanner && (
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={onOpenScanner}
+            className="shrink-0"
+            aria-label="Scanner une carte"
+          >
+            <ScanLine className="w-4 h-4" aria-hidden />
+            <span className="hidden sm:inline">Scanner</span>
+          </Button>
+        )}
 
         <Button
           variant="primary"

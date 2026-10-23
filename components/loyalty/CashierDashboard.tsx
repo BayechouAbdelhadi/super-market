@@ -9,6 +9,7 @@ import { CustomerDetailView } from "./CustomerDetailView";
 import { NewCustomerModal } from "./NewCustomerModal";
 import { AddPurchaseModal } from "./AddPurchaseModal";
 import { RedeemPointsModal } from "./RedeemPointsModal";
+import { CardScannerModal } from "./CardScannerModal";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
@@ -90,6 +91,7 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
 
   // Modals state
   const [isNewCustomerOpen, setIsNewCustomerOpen] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isAddPurchaseOpen, setIsAddPurchaseOpen] = useState(false);
   const [isRedeemOpen, setIsRedeemOpen] = useState(false);
 
@@ -219,6 +221,9 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
       const data = await res.json();
       if (data.customer) {
         setSelectedCustomerDetail(data.customer);
+      } else {
+        setSelectedCustomerId(null);
+        toast.error(res.status === 404 ? "Carte non reconnue : client introuvable." : data.message || "Impossible de charger le client.");
       }
     } catch (err) {
       console.error("Erreur chargement détail client :", err);
@@ -309,6 +314,7 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
             onChange={setSearchQuery}
             loading={loading || (searchQuery.trim() !== "" && searchQuery !== debouncedSearchQuery)}
             onOpenNewCustomer={() => setIsNewCustomerOpen(true)}
+            onOpenScanner={() => setIsScannerOpen(true)}
           />
 
           {/* Results Section */}
@@ -395,6 +401,16 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
           </div>
         </div>
       )}
+
+      {/* Loyalty card scan: opens the scanned customer */}
+      <CardScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onCustomerScanned={(customerId) => {
+          setIsScannerOpen(false);
+          loadCustomerDetail(customerId);
+        }}
+      />
 
       {/* Modal 1: Nouveau Client */}
       <NewCustomerModal
