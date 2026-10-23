@@ -111,10 +111,13 @@ export function DigitalLoyaltyCard({
 
       {/* Main Physical Bank Card (Light pearlescent body with crisp darker text) */}
       <div
-        className={`relative w-full rounded-2xl bg-gradient-to-br ${theme.cardBg} ${theme.border} border p-5 sm:p-6 ${theme.shadow} ${theme.textColor} overflow-hidden flex flex-col justify-between aspect-[1.586/1] min-h-[220px] transition-transform duration-300 hover:scale-[1.02]`}
+        className={`relative w-full rounded-2xl bg-gradient-to-br ${theme.cardBg} ${theme.border} border p-5 sm:p-6 ${theme.shadow} ${theme.textColor} flex flex-col justify-between aspect-[1.586/1] min-h-[220px] transition-transform duration-300 hover:scale-[1.02]`}
       >
         {/* Specular Diagonal Sheen (Real Plastic/Metal Card Reflection) */}
-        <div className="pointer-events-none absolute -inset-full bg-gradient-to-tr from-transparent via-white/50 to-transparent rotate-12" />
+        {/* Clipped in its own layer so the card can grow taller than its aspect ratio on narrow screens */}
+        <div className="pointer-events-none absolute inset-0 rounded-2xl overflow-hidden">
+          <div className="absolute -inset-full bg-gradient-to-tr from-transparent via-white/50 to-transparent rotate-12" />
+        </div>
 
         {/* Top Header: Logo + Contactless Symbol + Status */}
         <div className="flex items-center justify-between relative z-10">
@@ -202,7 +205,7 @@ export function DigitalLoyaltyCard({
         </div>
 
         {/* Bottom Section: Real Join Date + Real Points Balance */}
-        <div className={`flex items-end justify-between relative z-10 pt-2 border-t ${theme.divider}`}>
+        <div className={`flex items-end justify-between gap-3 relative z-10 pt-2 border-t ${theme.divider}`}>
           <div>
             <span className={`text-[9px] uppercase tracking-widest font-bold block ${theme.labelColor}`}>
               MEMBRE DEPUIS
