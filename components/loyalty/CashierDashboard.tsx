@@ -9,7 +9,6 @@ import { CustomerDetailView } from "./CustomerDetailView";
 import { NewCustomerModal } from "./NewCustomerModal";
 import { AddPurchaseModal } from "./AddPurchaseModal";
 import { RedeemPointsModal } from "./RedeemPointsModal";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
@@ -57,7 +56,6 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
     loadSettings();
   }, []);
 
-  const euroRatio = currentSettings?.loyalty?.euroToPointsRatio ?? LOYALTY_CONFIG.conversion.euroToPointsRatio;
   const pointValueInEuro = currentSettings?.loyalty?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
   const tierThresholds = currentSettings?.loyalty
     ? {
@@ -306,53 +304,19 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
             </div>
           )}
 
-          {/* Search Bar Card */}
-          <Card padded="lg" className="space-y-5">
-            <div className="space-y-1">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
-                Caisse &amp; Points de Fidélité
-              </h1>
-              <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-                Recherchez un client au comptoir par nom, téléphone ou email pour consulter ses points, enregistrer un achat (1 € = {euroRatio} pt{euroRatio > 1 ? "s" : ""}) ou utiliser ses points fidélité.
-              </p>
-            </div>
-
-            <SearchBar
-              query={searchQuery}
-              onChange={setSearchQuery}
-              loading={loading || (searchQuery.trim() !== "" && searchQuery !== debouncedSearchQuery)}
-              onOpenNewCustomer={() => setIsNewCustomerOpen(true)}
-            />
-          </Card>
+          <SearchBar
+            query={searchQuery}
+            onChange={setSearchQuery}
+            loading={loading || (searchQuery.trim() !== "" && searchQuery !== debouncedSearchQuery)}
+            onOpenNewCustomer={() => setIsNewCustomerOpen(true)}
+          />
 
           {/* Results Section */}
           <div className="space-y-3">
             {searchQuery.trim() === "" ? (
-              <div className="border border-[var(--color-border)] rounded-[var(--radius-card,16px)] p-8 sm:p-12 text-center bg-gradient-to-b from-[var(--color-surface)] to-[var(--color-surface-hover)] space-y-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
-                <div className="inline-flex p-4 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-3xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                  🔎
-                </div>
-                <div className="space-y-1.5 max-w-md mx-auto">
-                  <h3 className="text-lg font-bold text-[var(--color-text)] tracking-tight">
-                    Recherche client au comptoir
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">
-                    Saisissez un nom, prénom, numéro de téléphone ou adresse email pour retrouver instantanément un compte client ou en créer un nouveau.
-                  </p>
-                </div>
-
-                <div className="pt-2 flex flex-wrap items-center justify-center gap-2 max-w-lg mx-auto text-xs">
-                  <span className="px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium">
-                    ⚡ Recherche instantanée
-                  </span>
-                  <span className="px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium">
-                    🎟️ 1 € dépensé = {euroRatio} point{euroRatio > 1 ? "s" : ""}
-                  </span>
-                  <span className="px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium">
-                    👑 Paliers Bronze à VIP
-                  </span>
-                </div>
-              </div>
+              <p className="py-12 text-center text-sm text-[var(--color-text-muted)]">
+                Recherchez un client pour commencer.
+              </p>
             ) : (
               <>
                 <div className="flex items-center justify-between text-xs px-1 text-[var(--color-text-muted)]">
@@ -364,29 +328,26 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
                 </div>
 
                 {loading || searchQuery !== debouncedSearchQuery ? (
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                     {[1, 2, 3].map((i) => (
                       <div
                         key={i}
-                        className="p-4 sm:p-5 rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse flex items-center justify-between"
+                        className="rounded-[var(--radius-card,16px)] bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse overflow-hidden"
                       >
-                        <div className="flex items-center gap-3.5">
-                          <div className="h-11 w-11 rounded-full bg-[var(--color-border)]/60 shrink-0" />
-                          <div className="space-y-2">
-                            <div className="h-4 w-36 bg-[var(--color-border)]/80 rounded-md" />
-                            <div className="h-3 w-52 bg-[var(--color-border)]/50 rounded-md" />
-                          </div>
+                        <div className="px-3 py-1.5 border-b border-[var(--color-border)] bg-[var(--color-surface-hover)]">
+                          <div className="h-5 w-14 bg-[var(--color-border)]/60 rounded-full" />
                         </div>
-                        <div className="hidden sm:flex items-center gap-3">
-                          <div className="h-6 w-20 bg-[var(--color-border)]/60 rounded-full" />
-                          <div className="h-10 w-28 bg-[var(--color-border)]/70 rounded-[var(--radius-button,12px)]" />
+                        <div className="px-3 py-2 space-y-2">
+                          <div className="h-4 w-32 bg-[var(--color-border)]/80 rounded-md" />
+                          <div className="h-3 w-24 bg-[var(--color-border)]/50 rounded-md" />
+                          <div className="h-3 w-40 bg-[var(--color-border)]/50 rounded-md" />
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : customers.length > 0 ? (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                       {paginatedCustomers.map((c) => (
                         <CustomerCard
                           key={c.id}
