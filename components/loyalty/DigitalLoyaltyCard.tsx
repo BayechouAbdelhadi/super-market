@@ -111,7 +111,7 @@ export function DigitalLoyaltyCard({
 
       {/* Main Physical Bank Card (Light pearlescent body with crisp darker text) */}
       <div
-        className={`relative w-full rounded-2xl bg-gradient-to-br ${theme.cardBg} ${theme.border} border p-5 sm:p-6 ${theme.shadow} ${theme.textColor} flex flex-col justify-between aspect-[1.586/1] min-h-[220px] transition-transform duration-300 hover:scale-[1.02]`}
+        className={`relative w-full rounded-2xl bg-gradient-to-br ${theme.cardBg} ${theme.border} border p-5 sm:p-6 ${theme.shadow} ${theme.textColor} flex flex-col justify-between gap-3 min-h-[220px] transition-transform duration-300 hover:scale-[1.02]`}
       >
         {/* Specular Diagonal Sheen (Real Plastic/Metal Card Reflection) */}
         {/* Clipped in its own layer so the card can grow taller than its aspect ratio on narrow screens */}
@@ -163,7 +163,7 @@ export function DigitalLoyaltyCard({
         </div>
 
         {/* Middle Section: Real EMV Smart Chip + Real Member Identifier */}
-        <div className="flex items-center justify-between relative z-10 my-2">
+        <div className="flex items-center justify-between relative z-10">
           {/* Authentic Metallic EMV Chip with Circuit Lines */}
           <div
             className={`w-11 h-8 rounded-md bg-gradient-to-br ${theme.chipGradient} ${theme.chipBorder} border shadow-xs flex flex-col justify-between p-1 relative overflow-hidden`}
