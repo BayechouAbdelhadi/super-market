@@ -37,8 +37,6 @@ export const LOYALTY_CONFIG = {
     purchaseAmounts: [12.5, 45.8, 75.5, 120.0],
     // Standard purchase amounts in redemption flow
     redeemAmounts: [15, 30, 50, 100],
-    // Quick loyalty point reduction presets
-    redeemPoints: [50, 100, 250, 500],
   },
   pagination: {
     defaultPageSize: 20,

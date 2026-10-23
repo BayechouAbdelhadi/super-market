@@ -91,6 +91,7 @@ export function AddPurchaseModal({
 
   return (
     <Modal
+      fitOnTablet
       isOpen={isOpen}
       onClose={handleClose}
       title="Enregistrer un achat"

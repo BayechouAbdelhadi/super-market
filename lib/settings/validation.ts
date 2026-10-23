@@ -112,10 +112,6 @@ export const AppSettingsSchema = z.object({
       .array(z.number().positive("Les montants rapides doivent être supérieurs à 0."))
       .min(1, "Au moins un montant d'achat rapide est requis.")
       .max(8, "Au maximum 8 raccourcis de montants sont acceptés."),
-    quickRedeemPoints: z
-      .array(z.number().int().positive("Les points rapides doivent être supérieurs à 0."))
-      .min(1, "Au moins un raccourci de points est requis.")
-      .max(8, "Au maximum 8 raccourcis de points sont acceptés."),
     defaultRedeemReason: z
       .string()
       .trim()

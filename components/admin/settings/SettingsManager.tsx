@@ -61,9 +61,6 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const [quickAmountsStr, setQuickAmountsStr] = useState(
     initialSettings.pos.quickPurchaseAmounts.join(', ')
   );
-  const [quickPointsStr, setQuickPointsStr] = useState(
-    initialSettings.pos.quickRedeemPoints.join(', ')
-  );
 
   // Live conversion simulator helpers (supports both dot and comma decimal input)
   const simulatedPointValue = parseFloat(pointValueStr.trim().replace(',', '.')) || 0;
@@ -160,11 +157,6 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       .map((s) => parseFloat(s.trim().replace(',', '.')))
       .filter((n) => !isNaN(n) && n > 0);
 
-    const parsedPoints = quickPointsStr
-      .split(',')
-      .map((s) => parseInt(s.trim(), 10))
-      .filter((n) => !isNaN(n) && n > 0);
-
     const updatedSettings: AppSettings = {
       ...settings,
       loyalty: {
@@ -179,7 +171,6 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       pos: {
         ...settings.pos,
         quickPurchaseAmounts: parsedAmounts.length > 0 ? parsedAmounts : DEFAULT_APP_SETTINGS.pos.quickPurchaseAmounts,
-        quickRedeemPoints: parsedPoints.length > 0 ? parsedPoints : DEFAULT_APP_SETTINGS.pos.quickRedeemPoints,
       },
     };
 
@@ -225,7 +216,6 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
         setTierGoldStr(res.settings.loyalty.tierGoldMinPoints.toString());
         setTierVipStr(res.settings.loyalty.tierVipMinPoints.toString());
         setQuickAmountsStr(res.settings.pos.quickPurchaseAmounts.join(', '));
-        setQuickPointsStr(res.settings.pos.quickRedeemPoints.join(', '));
         setShowResetConfirm(false);
         toast.success("Configuration réinitialisée aux valeurs par défaut !");
         router.refresh();
@@ -635,22 +625,6 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   />
                   <span className="text-[11px] text-[var(--color-text-muted)] block">
                     Séparez les montants par des virgules (ex: 10, 25, 50, 100).
-                  </span>
-                </div>
-
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="block text-xs font-semibold text-[var(--color-text)]">
-                    Boutons de raccourcis de points à déduire (pts)
-                  </label>
-                  <input
-                    type="text"
-                    value={quickPointsStr}
-                    onChange={(e) => setQuickPointsStr(e.target.value)}
-                    placeholder="50, 100, 250, 500"
-                    className="w-full h-11 text-sm font-mono rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  />
-                  <span className="text-[11px] text-[var(--color-text-muted)] block">
-                    Séparez les nombres de points par des virgules (ex: 50, 100, 200, 500).
                   </span>
                 </div>
               </div>

@@ -24,8 +24,6 @@ export interface PosSettings {
   defaultCashierStation: string;
   /** Quick purchase amount preset buttons in POS (€) */
   quickPurchaseAmounts: number[];
-  /** Quick points redemption preset buttons in POS (points) */
-  quickRedeemPoints: number[];
   /** Default reason text shown on receipt for points deduction */
   defaultRedeemReason: string;
 }
@@ -78,7 +76,6 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   pos: {
     defaultCashierStation: LOYALTY_CONFIG.defaults.cashierName,
     quickPurchaseAmounts: [...LOYALTY_CONFIG.presets.purchaseAmounts],
-    quickRedeemPoints: [...LOYALTY_CONFIG.presets.redeemPoints],
     defaultRedeemReason: LOYALTY_CONFIG.defaults.redeemReason,
   },
   store: {

@@ -462,7 +462,6 @@ export function CashierDashboard({ settings: propSettings, initialCustomerId }: 
         pointValueInEuro={currentSettings?.loyalty?.pointValueInEuro}
         euroToPointsRatio={currentSettings?.loyalty?.euroToPointsRatio}
         quickPurchaseAmounts={currentSettings?.pos?.quickPurchaseAmounts}
-        quickRedeemPoints={currentSettings?.pos?.quickRedeemPoints}
         minPointsToRedeem={currentSettings?.loyalty?.minPointsToRedeem}
         maxDiscountPerTransactionEuro={currentSettings?.loyalty?.maxDiscountPerTransactionEuro}
         defaultRedeemReason={currentSettings?.pos?.defaultRedeemReason}

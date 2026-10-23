@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { cn } from "cn";
 import { CustomerDetail } from "@/lib/loyalty/types";
 import { Modal, ModalDetails, modalSplitLayout, type ModalAlert } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,6 @@ interface RedeemPointsModalProps {
   pointValueInEuro?: number;
   euroToPointsRatio?: number;
   quickPurchaseAmounts?: number[];
-  quickRedeemPoints?: number[];
   minPointsToRedeem?: number;
   maxDiscountPerTransactionEuro?: number;
   defaultRedeemReason?: string;
@@ -40,7 +40,6 @@ export function RedeemPointsModal({
   pointValueInEuro = LOYALTY_CONFIG.conversion.pointValueInEuro,
   euroToPointsRatio = LOYALTY_CONFIG.conversion.euroToPointsRatio,
   quickPurchaseAmounts,
-  quickRedeemPoints,
   minPointsToRedeem = 50,
   maxDiscountPerTransactionEuro = 50.0,
   defaultRedeemReason = LOYALTY_CONFIG.defaults.redeemReason,
@@ -66,10 +65,6 @@ export function RedeemPointsModal({
     : [...LOYALTY_CONFIG.presets.redeemAmounts];
   // Filter out any 0 € presets since a purchase amount > 0 is mandatory to apply points
   const purchasePresets = rawPurchasePresets.filter((p) => p > 0);
-
-  const pointsPresets = quickRedeemPoints && quickRedeemPoints.length > 0
-    ? quickRedeemPoints
-    : [...LOYALTY_CONFIG.presets.redeemPoints];
 
   // Amount parsing & validation (must be > 0 to redeem points: no money given back)
   const rawAmount = amountStr.trim().replace(",", ".");
@@ -290,6 +285,7 @@ export function RedeemPointsModal({
 
   return (
     <Modal
+      fitOnTablet
       isOpen={isOpen}
       onClose={handleClose}
       title="Achat avec utilisation de points"
@@ -311,11 +307,11 @@ export function RedeemPointsModal({
         </span>
       }
     >
-      <form onSubmit={handleSubmit} className={`p-6 tablet:p-4 ${modalSplitLayout.form}`}>
-        <div className={modalSplitLayout.main}>
-          <div className={modalSplitLayout.inputs}>
+      <form onSubmit={handleSubmit} className={cn("px-6 py-4 tablet:p-4", modalSplitLayout.form, "gap-4")}>
+        <div className={cn(modalSplitLayout.main, "gap-3")}>
+          <div className={cn(modalSplitLayout.inputs, "gap-3")}>
             {/* 1. MONTANT DU TICKET */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label
                 htmlFor="redeem-amount-input"
                 className="block text-sm font-semibold text-[var(--color-text)]"
@@ -331,7 +327,7 @@ export function RedeemPointsModal({
                   value={amountStr}
                   onChange={(e) => changeAmount(e.target.value)}
                   placeholder="0,00"
-                  className="w-full h-14 tablet:h-12 text-2xl tablet:text-xl font-bold rounded-[var(--radius-input,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] py-3 pl-4 pr-12 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all"
+                  className="w-full h-12 text-xl font-bold rounded-[var(--radius-input,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] py-3 pl-4 pr-12 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xl font-bold text-[var(--color-text-muted)] select-none pointer-events-none">
                   €
@@ -352,7 +348,7 @@ export function RedeemPointsModal({
             </div>
 
             {/* 2. POINTS À UTILISER */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-baseline justify-between gap-2">
                 <label
                   htmlFor="redeem-points-input"
@@ -383,7 +379,7 @@ export function RedeemPointsModal({
                         ? "Saisir le montant d'abord"
                         : "0"
                   }
-                  className="w-full h-14 tablet:h-12 text-2xl tablet:text-xl font-bold rounded-[var(--radius-input,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] py-3 pl-4 pr-14 text-[var(--color-text)] placeholder:text-base placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:bg-[var(--color-surface-hover)] disabled:cursor-not-allowed transition-all"
+                  className="w-full h-12 text-xl font-bold rounded-[var(--radius-input,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] py-3 pl-4 pr-14 text-[var(--color-text)] placeholder:text-base placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:bg-[var(--color-surface-hover)] disabled:cursor-not-allowed transition-all"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[var(--color-text-muted)] select-none pointer-events-none">
                   pts
@@ -417,25 +413,6 @@ export function RedeemPointsModal({
                       Max · -{(maxAllowedPointsForTx * pointValueInEuro).toFixed(2)} €
                     </button>
                   )}
-                  {pointsPresets
-                    .filter((preset) => preset <= maxAllowedPointsForTx)
-                    .map((preset) => (
-                      <button
-                        key={preset}
-                        type="button"
-                        onClick={() => {
-                          if (minPointsToRedeem > 0 && preset < minPointsToRedeem) {
-                            toast.error(
-                              `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise.`
-                            );
-                          }
-                          changePoints(preset.toString());
-                        }}
-                        className="min-h-[44px] px-4 rounded-[var(--radius-button,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text)] text-sm font-semibold transition-colors cursor-pointer"
-                      >
-                        {preset} pts
-                      </button>
-                    ))}
                 </div>
               )}
             </div>
@@ -444,7 +421,7 @@ export function RedeemPointsModal({
           <div className={modalSplitLayout.details}>
             <ModalDetails alert={alert}>
               {/* Ticket summary: what the cashier collects */}
-              <div className="p-5 tablet:p-3 rounded-[var(--radius-card,16px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-3 tablet:space-y-0 tablet:grid tablet:grid-cols-4 tablet:gap-3">
+              <div className="p-4 tablet:p-3 rounded-[var(--radius-card,16px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-2 tablet:space-y-0 tablet:grid tablet:grid-cols-4 tablet:gap-3">
                 <div className="flex items-center justify-between text-sm tablet:flex-col tablet:items-start tablet:justify-start tablet:gap-0.5">
                   <span className="text-[var(--color-text-muted)]">Montant du ticket</span>
                   <span className="font-semibold text-[var(--color-text)]">
@@ -462,15 +439,15 @@ export function RedeemPointsModal({
                     <span className="text-[var(--color-text-muted)]">
                       Remise fidélité{isValidPoints ? ` (${pointsToRedeem} pts)` : ""}
                     </span>
-                    <span className={`text-3xl tablet:text-2xl font-extrabold ${isValidPoints ? "text-success-text" : "text-[var(--color-text-muted)]"}`}>
+                    <span className={`text-2xl font-extrabold ${isValidPoints ? "text-success-text" : "text-[var(--color-text-muted)]"}`}>
                       -{formatEuro(discountEuro)}
                     </span>
                   </div>
                 )}
 
-                <div className="pt-3 border-t border-[var(--color-border)] flex items-end justify-between gap-3 tablet:pt-0 tablet:border-t-0 tablet:flex-col tablet:items-start tablet:justify-start tablet:gap-0.5">
+                <div className="pt-2 border-t border-[var(--color-border)] flex items-end justify-between gap-3 tablet:pt-0 tablet:border-t-0 tablet:flex-col tablet:items-start tablet:justify-start tablet:gap-0.5">
                   <span className="text-sm font-semibold text-[var(--color-text)] pb-1 tablet:pb-0">À encaisser</span>
-                  <span className={`text-3xl tablet:text-2xl font-extrabold ${isExceedingAmount ? "text-danger-text line-through" : "text-[var(--color-primary)]"}`}>
+                  <span className={`text-2xl font-extrabold ${isExceedingAmount ? "text-danger-text line-through" : "text-[var(--color-primary)]"}`}>
                     {formatEuro(cannotRedeem ? (isPurchaseAmountEntered ? parsedAmount : 0) : netPayable)}
                   </span>
                 </div>

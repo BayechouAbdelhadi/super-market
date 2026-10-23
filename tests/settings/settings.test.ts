@@ -41,7 +41,6 @@ describe('Application Settings & Configuration', () => {
 
     it('includes default POS presets and store identity', () => {
       expect(DEFAULT_APP_SETTINGS.pos.quickPurchaseAmounts.length).toBeGreaterThan(0);
-      expect(DEFAULT_APP_SETTINGS.pos.quickRedeemPoints.length).toBeGreaterThan(0);
       expect(DEFAULT_APP_SETTINGS.store.storeName).toBe('Super Market Calais');
       expect(DEFAULT_APP_SETTINGS.notifications.sendWelcomeEmail).toBe(true);
       expect(DEFAULT_APP_SETTINGS.notifications.senderEmail).toContain('@');

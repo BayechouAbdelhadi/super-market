@@ -71,6 +71,8 @@ export interface ModalProps {
   icon?: string;
   /** `full`: fills the screen (16px margin), for views shown without the keyboard such as a camera */
   maxWidth?: "sm" | "md" | "lg" | "full";
+  /** Tablet: no scroll, the content must fit above the keyboard (forms using `modalSplitLayout`) */
+  fitOnTablet?: boolean;
   children: React.ReactNode;
 }
 
@@ -81,6 +83,7 @@ export function Modal({
   description,
   icon,
   maxWidth = "md",
+  fitOnTablet = false,
   children,
 }: ModalProps) {
   const maxWidthClass = {
@@ -117,7 +120,7 @@ export function Modal({
             )}
           </DialogHeader>
         )}
-        <div className="overflow-y-auto overflow-x-hidden flex-1 min-h-0 tablet:overflow-hidden">
+        <div className={`overflow-y-auto overflow-x-hidden flex-1 min-h-0 ${fitOnTablet ? "tablet:overflow-hidden" : ""}`}>
           {children}
         </div>
       </DialogContent>
