@@ -69,7 +69,8 @@ export interface ModalProps {
   title?: string;
   description?: React.ReactNode;
   icon?: string;
-  maxWidth?: "sm" | "md" | "lg";
+  /** `full`: fills the screen (16px margin), for views shown without the keyboard such as a camera */
+  maxWidth?: "sm" | "md" | "lg" | "full";
   children: React.ReactNode;
 }
 
@@ -86,8 +87,11 @@ export function Modal({
     sm: "sm:max-w-md",
     md: "sm:max-w-lg",
     lg: "sm:max-w-2xl",
+    full: "top-4 left-4 right-4 bottom-4 translate-x-0 translate-y-0 w-auto max-w-none sm:max-w-none max-h-none",
   }[maxWidth];
-  const tabletLayout = useTabletModalLayout(isOpen);
+  const isFull = maxWidth === "full";
+  // Full-screen modals never sit above the keyboard: no keyboard-bound sizing
+  const tabletLayout = useTabletModalLayout(isOpen && !isFull);
 
   return (
     <Dialog
@@ -113,7 +117,7 @@ export function Modal({
             )}
           </DialogHeader>
         )}
-        <div className="overflow-y-auto overflow-x-hidden flex-1 tablet:overflow-hidden">
+        <div className="overflow-y-auto overflow-x-hidden flex-1 min-h-0 tablet:overflow-hidden">
           {children}
         </div>
       </DialogContent>

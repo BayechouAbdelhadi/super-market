@@ -65,10 +65,10 @@ export function CardScannerModal({ isOpen, onClose, onCustomerScanned }: CardSca
       onClose={onClose}
       title="Scanner une carte"
       description="Placez le QR code de la carte du client devant la caméra."
-      maxWidth="md"
+      maxWidth="full"
     >
-      <div className="p-4 space-y-3">
-        <div className="relative w-full aspect-[4/3] rounded-[var(--radius-card,16px)] overflow-hidden bg-[var(--color-surface-hover)] border border-[var(--color-border)]">
+      <div className="p-4 h-full flex flex-col gap-3">
+        <div className="relative w-full flex-1 min-h-0 rounded-[var(--radius-card,16px)] overflow-hidden bg-[var(--color-surface-hover)] border border-[var(--color-border)]">
           <video ref={setVideo} className="w-full h-full object-cover" muted playsInline />
         </div>
         {errorMsg && (
