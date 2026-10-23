@@ -23,6 +23,8 @@ export interface Transaction {
   points_earned: number;
   points_redeemed: number;
   created_at: string;
+  edited_at?: string | null;
+  edited_by?: string | null;
 }
 
 export interface PurchaseRecord {

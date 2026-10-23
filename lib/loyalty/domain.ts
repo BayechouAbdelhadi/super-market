@@ -1,5 +1,6 @@
-import { LoyaltyTier, PurchaseRecord, Transaction } from "./types";
+import { LoyaltyTier, PurchaseRecord, Transaction, UserRole } from "./types";
 import { LOYALTY_CONFIG } from "./config";
+import { getParisDateString } from "@/lib/utils/timezone";
 
 /**
  * Normalizes phone numbers to standard French 10-digit format (0X...)
@@ -264,5 +265,76 @@ export function toPurchaseRecord(t: Transaction): PurchaseRecord {
     points_redeemed: Number(t.points_redeemed) || 0,
     transaction_date: t.created_at,
     created_by: t.cashier_id ? `Caissier (${t.cashier_id.slice(0, 6)})` : LOYALTY_CONFIG.defaults.cashierName,
+  };
+}
+
+/**
+ * Edit rights on a recorded transaction: admins can edit any transaction,
+ * cashiers only the ones recorded today (store local day).
+ */
+export function canEditTransaction(
+  role: UserRole | null | undefined,
+  createdAt: string,
+  now: Date = new Date()
+): boolean {
+  if (role === "ADMIN") return true;
+  if (role !== "CASHIER") return false;
+  const created = new Date(createdAt);
+  if (isNaN(created.getTime())) return false;
+  return getParisDateString(created) === getParisDateString(now);
+}
+
+/**
+ * Pure calculation for correcting a recorded transaction.
+ * The customer's balance moves by the difference between the old and the new points
+ * (earned points added back or removed, redeemed points refunded or charged).
+ * A redemption stays a redemption (0 points earned) and keeps the redemption rules.
+ */
+export function applyTransactionEdit(
+  before: { amount: number; pointsEarned: number; pointsRedeemed: number },
+  input: { amount: number; pointsRedeemed?: number },
+  customer: { availablePoints: number; historicalPoints: number },
+  ratio: number,
+  tiers?: TierThresholds,
+  rules?: RedemptionRulesConfig
+):
+  | {
+      valid: true;
+      pointsEarned: number;
+      pointsRedeemed: number;
+      available_points: number;
+      historical_points: number;
+      tier: LoyaltyTier;
+    }
+  | { valid: false; error: string } {
+  const isRedemption = before.pointsRedeemed > 0;
+  const pointsEarned = isRedemption ? calculateRedemptionPointsEarned(input.amount) : calculatePoints(input.amount, ratio);
+  const pointsRedeemed = isRedemption ? input.pointsRedeemed ?? before.pointsRedeemed : 0;
+
+  if (isRedemption) {
+    // Points of this transaction are refunded before checking the new redemption
+    const balanceWithoutTx = customer.availablePoints + before.pointsRedeemed - before.pointsEarned;
+    const validation = validateRedemption(pointsRedeemed, balanceWithoutTx, rules, input.amount);
+    if (!validation.valid) {
+      return { valid: false, error: validation.error || "Correction invalide." };
+    }
+  }
+
+  const available = customer.availablePoints + (pointsEarned - before.pointsEarned) - (pointsRedeemed - before.pointsRedeemed);
+  if (available < 0) {
+    return {
+      valid: false,
+      error: "Correction refusée : le client a déjà utilisé ces points, son solde deviendrait négatif.",
+    };
+  }
+
+  const historical = Math.max(0, customer.historicalPoints + (pointsEarned - before.pointsEarned));
+  return {
+    valid: true,
+    pointsEarned,
+    pointsRedeemed,
+    available_points: available,
+    historical_points: historical,
+    tier: calculateTier(historical, tiers),
   };
 }

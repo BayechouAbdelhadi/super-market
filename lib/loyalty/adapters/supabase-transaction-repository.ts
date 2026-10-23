@@ -48,6 +48,45 @@ export class SupabaseTransactionRepository implements ITransactionRepository {
     return tx as Transaction;
   }
 
+  async getById(id: string): Promise<Transaction | null> {
+    const sb = await this.getClient();
+    const { data, error } = await sb.from("transactions").select("*").eq("id", id).maybeSingle();
+
+    if (error) {
+      console.error("[SupabaseTransactionRepository] getById error:", error);
+      return null;
+    }
+
+    return (data as Transaction) ?? null;
+  }
+
+  async update(
+    id: string,
+    data: { amount: number; pointsEarned: number; pointsRedeemed: number; editedBy: string }
+  ): Promise<Transaction> {
+    const sb = await this.getClient();
+    const { data: tx, error } = await sb
+      .from("transactions")
+      .update({
+        amount_total: data.amount,
+        points_earned: data.pointsEarned,
+        points_redeemed: data.pointsRedeemed,
+        edited_by: data.editedBy,
+        edited_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !tx) {
+      console.error("[SupabaseTransactionRepository] update error:", error);
+      // Never surface raw database messages to clients (already logged above)
+      throw new Error("Impossible de modifier la transaction.");
+    }
+
+    return tx as Transaction;
+  }
+
   async getByCustomerId(
     customerId: string,
     limit: number = LOYALTY_CONFIG.pagination.maxPageSize

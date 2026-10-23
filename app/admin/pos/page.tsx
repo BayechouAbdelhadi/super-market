@@ -9,7 +9,12 @@ export const metadata: Metadata = {
   description: "Recherche client et gestion des points de fidélité au comptoir",
 };
 
-export default async function AdminPosPage() {
+interface AdminPosPageProps {
+  searchParams?: Promise<{ customer?: string }>;
+}
+
+export default async function AdminPosPage({ searchParams }: AdminPosPageProps) {
+  const params = searchParams ? await searchParams : {};
   const settings = await getAppSettings();
-  return <CashierDashboard settings={settings} />;
+  return <CashierDashboard settings={settings} initialCustomerId={params.customer} />;
 }

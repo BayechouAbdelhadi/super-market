@@ -44,3 +44,24 @@ export type RedeemPointsPayload = z.infer<typeof RedeemPointsSchema>;
  * Zod schema for the `[id]` route segment of customer endpoints (auth user UUID)
  */
 export const CustomerIdSchema = z.string().uuid("Identifiant client invalide.");
+
+/**
+ * Zod schema correcting a recorded transaction (points are only sent for redemptions)
+ */
+export const EditTransactionSchema = z.object({
+  amount: z
+    .number({ message: "Le montant doit être un nombre valide." })
+    .min(0, "Le montant ne peut pas être négatif."),
+  points_redeemed: z
+    .number({ message: "Les points doivent être un nombre entier." })
+    .int("Les points doivent être un entier.")
+    .positive("Le nombre de points déduits doit être strictement supérieur à 0.")
+    .optional(),
+});
+
+export type EditTransactionPayload = z.infer<typeof EditTransactionSchema>;
+
+/**
+ * Zod schema `[id]` route segment transaction endpoints
+ */
+export const TransactionIdSchema = z.string().uuid("Identifiant de transaction invalide.");

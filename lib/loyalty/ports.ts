@@ -41,6 +41,12 @@ export interface ITransactionRepository {
     pointsEarned: number;
     pointsRedeemed: number;
   }): Promise<Transaction>;
+  getById(id: string): Promise<Transaction | null>;
+  /** Corrects a recorded transaction and stamps who edited it. */
+  update(
+    id: string,
+    data: { amount: number; pointsEarned: number; pointsRedeemed: number; editedBy: string }
+  ): Promise<Transaction>;
   getByCustomerId(customerId: string, limit?: number): Promise<Transaction[]>;
   /** Database-side pagination (newest first): `total` is the exact count. */
   getPageByCustomerId(customerId: string, limit: number, offset: number): Promise<Page<Transaction>>;

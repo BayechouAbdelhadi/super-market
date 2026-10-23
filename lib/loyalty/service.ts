@@ -5,6 +5,7 @@ import {
   MovementRecord,
   CreateCustomerInput,
   PurchaseRecord,
+  UserRole,
 } from "./types";
 import { ICustomerRepository, ITransactionRepository, Page } from "./ports";
 import { SupabaseCustomerRepository } from "./adapters/supabase-customer-repository";
@@ -20,6 +21,8 @@ import {
   applyRedeemPoints,
   calculateRedemptionPointsEarned,
   toPurchaseRecord,
+  canEditTransaction,
+  applyTransactionEdit,
 } from "./domain";
 
 export {
@@ -317,5 +320,98 @@ export async function redeemPoints(
     };
   } catch (err) {
     return { success: false, error: (err instanceof Error && err.message) || "Impossible d'enregistrer la déduction des points." };
+  }
+}
+
+/**
+ * Loads a transaction for the edit screen.
+ */
+export async function getTransaction(
+  transactionId: string,
+  txRepo: ITransactionRepository = defaultTransactionRepo
+): Promise<Transaction | null> {
+  return await txRepo.getById(transactionId);
+}
+
+export type EditTransactionResult =
+  | { success: true; transaction: Transaction; customer: CustomerDetail }
+  | { success: false; error: string; code: "NOT_FOUND" | "FORBIDDEN" | "INVALID" | "ERROR" };
+
+/**
+ * Corrects a recorded transaction (wrong amount or points) and moves the customer's
+ * balance by the difference. Admins can edit any transaction, cashiers only today's.
+ */
+export async function editTransaction(
+  transactionId: string,
+  input: { amount: number; pointsRedeemed?: number },
+  caller: { id: string; role: UserRole },
+  customerRepo: ICustomerRepository = defaultCustomerRepo,
+  txRepo: ITransactionRepository = defaultTransactionRepo
+): Promise<EditTransactionResult> {
+  const before = await txRepo.getById(transactionId);
+  if (!before) {
+    return { success: false, code: "NOT_FOUND", error: "Transaction introuvable." };
+  }
+
+  if (!canEditTransaction(caller.role, before.created_at)) {
+    return {
+      success: false,
+      code: "FORBIDDEN",
+      error: "Seules les transactions du jour peuvent être modifiées par un caissier.",
+    };
+  }
+
+  const oldRedeemed = Number(before.points_redeemed) || 0;
+  if (oldRedeemed === 0 && input.amount <= 0) {
+    return { success: false, code: "INVALID", error: "Le montant de l'achat doit être strictement supérieur à 0 €." };
+  }
+
+  const customer = await customerRepo.getById(before.customer_id);
+  if (!customer) {
+    return { success: false, code: "NOT_FOUND", error: "Client introuvable." };
+  }
+
+  const settings = await getAppSettings();
+  const edit = applyTransactionEdit(
+    {
+      amount: Number(before.amount_total) || 0,
+      pointsEarned: Number(before.points_earned) || 0,
+      pointsRedeemed: oldRedeemed,
+    },
+    input,
+    { availablePoints: customer.available_points, historicalPoints: customer.historical_points },
+    settings.loyalty.euroToPointsRatio,
+    {
+      silver: settings.loyalty.tierSilverMinPoints,
+      gold: settings.loyalty.tierGoldMinPoints,
+      vip: settings.loyalty.tierVipMinPoints,
+    },
+    {
+      minPointsToRedeem: settings.loyalty.minPointsToRedeem,
+      maxDiscountPerTransactionEuro: settings.loyalty.maxDiscountPerTransactionEuro,
+      pointValueInEuro: settings.loyalty.pointValueInEuro,
+    }
+  );
+
+  if (!edit.valid) {
+    return { success: false, code: "INVALID", error: edit.error };
+  }
+
+  try {
+    const tx = await txRepo.update(transactionId, {
+      amount: input.amount,
+      pointsEarned: edit.pointsEarned,
+      pointsRedeemed: edit.pointsRedeemed,
+      editedBy: caller.id,
+    });
+    await customerRepo.updateLoyaltyPoints(before.customer_id, edit.available_points, edit.tier);
+    const updatedDetail = await customerRepo.getById(before.customer_id);
+    return { success: true, transaction: tx, customer: updatedDetail! };
+  } catch (err) {
+    return {
+      success: false,
+      code: "ERROR",
+      error: (err instanceof Error && err.message) || "Impossible de modifier la transaction.",
+    };
   }
 }

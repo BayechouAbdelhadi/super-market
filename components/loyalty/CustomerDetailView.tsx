@@ -11,6 +11,9 @@ import { usePagination } from "@/lib/hooks/usePagination";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 import { toast } from "@/components/ui/sonner";
 import { tierAvatarClasses } from "./tier-styles";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { canEditTransaction } from "@/lib/loyalty/domain";
 
 interface CustomerDetailViewProps {
   customer: CustomerDetail;
@@ -40,6 +43,9 @@ export function CustomerDetailView({
   },
 }: CustomerDetailViewProps) {
   const [activeTab, setActiveTab] = useState<"purchases" | "movements">("purchases");
+  // Admin and cashier dashboards share this view; the API enforces the same edit rule
+  const isAdminArea = usePathname().startsWith("/admin");
+  const editBasePath = isAdminArea ? "/admin" : "/cashier";
 
   const euroDiscount = (customer.available_points * pointValueInEuro).toFixed(2);
 
@@ -286,6 +292,7 @@ export function CustomerDetailView({
                         <th className="pb-3">Montant du ticket</th>
                         <th className="pb-3">Points</th>
                         <th className="pb-3">Caissier</th>
+                        <th className="pb-3 sr-only">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y border-[var(--color-border)]">
@@ -331,6 +338,20 @@ export function CustomerDetailView({
                               )}
                             </td>
                             <td className="py-3 text-[var(--color-text-muted)]">{p.created_by}</td>
+                            <td className="py-1 text-right">
+                              {canEditTransaction(isAdminArea ? "ADMIN" : "CASHIER", p.transaction_date) && (
+                                <Link
+                                  href={`${editBasePath}/transactions/${p.id}`}
+                                  aria-label={`Modifier la transaction du ${dateFormatted}`}
+                                  title="Modifier"
+                                  className="inline-flex items-center justify-center h-11 w-11 rounded-[var(--radius-button,12px)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M4 20h4L18.768 9.232a2.5 2.5 0 00-3.536-3.536L4.5 16.5 4 20z" />
+                                  </svg>
+                                </Link>
+                              )}
+                            </td>
                           </tr>
                         );
                       })}

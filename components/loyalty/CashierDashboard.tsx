@@ -28,9 +28,11 @@ const NO_RESULTS: SearchResults = { query: "", customers: [] };
 
 export interface CashierDashboardProps {
   settings?: AppSettings;
+  /** Customer reopened on arrival (e.g. back from a transaction edit) */
+  initialCustomerId?: string;
 }
 
-export function CashierDashboard({ settings: propSettings }: CashierDashboardProps) {
+export function CashierDashboard({ settings: propSettings, initialCustomerId }: CashierDashboardProps) {
   const [currentSettings, setCurrentSettings] = useState<AppSettings | undefined>(propSettings);
 
   // New settings from the server replace the current ones (adjusted during render, not in an effect)
@@ -232,6 +234,14 @@ export function CashierDashboard({ settings: propSettings }: CashierDashboardPro
       setLoadingDetail(false);
     }
   }
+
+  // Reopens the customer named in the URL once, on arrival
+  const initialCustomerLoaded = useRef(false);
+  useEffect(() => {
+    if (!initialCustomerId || initialCustomerLoaded.current) return;
+    initialCustomerLoaded.current = true;
+    loadCustomerDetail(initialCustomerId);
+  }, [initialCustomerId]);
 
   const content = (
     <div className="space-y-6">
