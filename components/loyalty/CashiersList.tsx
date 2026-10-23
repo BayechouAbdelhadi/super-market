@@ -19,6 +19,7 @@ export async function CashiersList() {
         <UserManager 
           initialUsers={cashiers} 
           roleToManage="CASHIER" 
+          canToggleStatus
           title="Gestion des Caissiers" 
           description="Ajoutez ou modifiez les profils des caissiers de votre établissement." 
         />

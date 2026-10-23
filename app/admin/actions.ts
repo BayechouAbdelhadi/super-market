@@ -183,6 +183,38 @@ export async function editUser(formData: FormData) {
   return { success: true };
 }
 
+const SetUserDisabledSchema = z.object({
+  user_id: z.string().uuid("L'ID de l'utilisateur est invalide."),
+  disabled: z.boolean(),
+});
+
+export async function setUserDisabled(input: { user_id: string; disabled: boolean }) {
+  const parsed = SetUserDisabledSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || "Données invalides." };
+  }
+  const { user_id, disabled } = parsed.data;
+
+  const caller = await getSessionCaller(['ADMIN']);
+  if (!caller.ok) {
+    return { error: caller.reason === 'UNAUTHENTICATED' ? "Non autorisé. Veuillez vous connecter." : "Accès refusé." };
+  }
+
+  // An admin disabling their own account would lock themselves out
+  if (user_id === caller.user.id) {
+    return { error: "Vous ne pouvez pas désactiver votre propre compte." };
+  }
+
+  const result = await accounts.setDisabled(user_id, disabled);
+  if (result.error) {
+    return { error: "Impossible de modifier l'état du compte." };
+  }
+
+  revalidatePath('/admin/cashiers');
+  revalidatePath('/admin/customers');
+  return { success: true };
+}
+
 const InviteUserSchema = z.object({
   email: z.string().trim().email("L'adresse email est invalide."),
   role: z.enum(['CUSTOMER', 'CASHIER']).default('CUSTOMER'),

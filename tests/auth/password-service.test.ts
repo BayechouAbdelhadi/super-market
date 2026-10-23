@@ -25,6 +25,9 @@ class FakeAccounts implements IUserAccountRepository {
     this.passwords.set(userId, password);
     return {};
   }
+  async setDisabled() {
+    return {};
+  }
 }
 
 class FakeTokenUses implements ITokenUseRepository {

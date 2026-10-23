@@ -13,6 +13,8 @@ interface CustomersListProps {
   initialPage?: number
   initialLimit?: number
   initialQuery?: string
+  /** Admin only: show the disable / enable account button */
+  canToggleStatus?: boolean
 }
 
 export async function CustomersList({
@@ -21,6 +23,7 @@ export async function CustomersList({
   initialPage,
   initialLimit,
   initialQuery,
+  canToggleStatus,
 }: CustomersListProps = {}) {
   const [profiles, settings] = await Promise.all([
     directory.listRecentCustomers(BACK_OFFICE_LIST_LIMIT),
@@ -37,6 +40,7 @@ export async function CustomersList({
       phone_number: p.phone_number ?? null,
       role: p.role ?? null,
       created_at: p.created_at,
+      disabled_at: p.disabled_at ?? null,
       loyalty_points: cust?.loyalty_points ?? 0,
       status: (cust?.status as LoyaltyTier | undefined) ?? LOYALTY_CONFIG.defaults.tier,
     };
@@ -51,6 +55,7 @@ export async function CustomersList({
       initialLimit={initialLimit}
       initialQuery={initialQuery}
       settings={settings}
+      canToggleStatus={canToggleStatus}
     />
   )
 }

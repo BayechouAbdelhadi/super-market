@@ -45,6 +45,8 @@ export interface IUserAccountRepository {
   findUserIdByEmail(email: string): Promise<string | null>;
   /** Sets a new password; `confirmEmail` also marks the email as verified. */
   setPassword(userId: string, password: string, options?: { confirmEmail?: boolean }): Promise<{ error?: string }>;
+  /** Blocks (or restores) sign-in for the account and records the state on its profile. */
+  setDisabled(userId: string, disabled: boolean): Promise<{ error?: string }>;
 }
 
 /**

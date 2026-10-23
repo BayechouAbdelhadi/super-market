@@ -4,6 +4,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 
 const AUTH_USERS_PAGE_SIZE = 1000;
+/** GoTrue has no permanent ban: ~100 years. */
+const PERMANENT_BAN_DURATION = "876000h";
 
 /** Random initial password for accounts activated later through an emailed link. */
 function generateInitialPassword(): string {
@@ -144,5 +146,28 @@ export class SupabaseUserAccountRepository implements IUserAccountRepository {
       ...(options?.confirmEmail ? { email_confirm: true } : {}),
     });
     return error ? { error: error.message } : {};
+  }
+
+  async setDisabled(userId: string, disabled: boolean): Promise<{ error?: string }> {
+    const adminClient = createAdminClient();
+    const { error: authError } = await adminClient.auth.admin.updateUserById(userId, {
+      ban_duration: disabled ? PERMANENT_BAN_DURATION : "none",
+    });
+    if (authError) {
+      console.error(`[UserAccountRepository] ban update error (${userId}):`, authError.message);
+      return { error: authError.message };
+    }
+
+    const { error: profileError } = await adminClient
+      .from("profiles")
+      .update({ disabled_at: disabled ? new Date().toISOString() : null })
+      .eq("id", userId);
+    if (profileError) {
+      console.error(`[UserAccountRepository] disabled_at update error (${userId}):`, profileError.message);
+      // Keep auth and profile consistent
+      await adminClient.auth.admin.updateUserById(userId, { ban_duration: disabled ? "none" : PERMANENT_BAN_DURATION }).catch(() => null);
+      return { error: profileError.message };
+    }
+    return {};
   }
 }

@@ -62,6 +62,7 @@ export interface ProfileWithCustomerRow {
   phone_number?: string | null;
   created_at?: string;
   role?: UserRole | null;
+  disabled_at?: string | null;
   customers?: { loyalty_points: number; status: string; updated_at?: string } | Array<{ loyalty_points: number; status: string; updated_at?: string }> | null;
 }
 
@@ -74,6 +75,8 @@ export interface DirectoryUser {
   phone_number: string | null;
   role: UserRole | null;
   created_at?: string;
+  /** Set when an admin disabled the account */
+  disabled_at?: string | null;
   loyalty_points?: number;
   status?: LoyaltyTier;
 }

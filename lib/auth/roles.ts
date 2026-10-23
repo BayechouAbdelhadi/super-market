@@ -33,3 +33,8 @@ export async function resolveUserRole(supabase: SupabaseClient, user: User): Pro
 
   return asAppRole(profile?.role) ?? asAppRole(user.app_metadata?.role) ?? "CUSTOMER";
 }
+
+/** Disabled accounts keep a valid access token until it expires: reject them right away. */
+export function isBanned(user: User): boolean {
+  return !!user.banned_until && new Date(user.banned_until).getTime() > Date.now();
+}

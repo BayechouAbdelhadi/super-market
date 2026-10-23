@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { resolveUserRole } from '@/lib/auth/roles'
+import { isBanned, resolveUserRole } from '@/lib/auth/roles'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -29,7 +29,9 @@ export async function updateSession(request: NextRequest) {
   )
 
   // Refresh session if expired
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const { data: { user: sessionUser }, error: userError } = await supabase.auth.getUser()
+  // Disabled accounts are treated as signed out
+  const user = sessionUser && !isBanned(sessionUser) ? sessionUser : null
 
   // "Auth session missing" is the normal state of anonymous visitors: only log real failures
   if (userError && userError.name !== 'AuthSessionMissingError') {

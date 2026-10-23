@@ -68,6 +68,9 @@ export async function login(
         error: "Adresse email ou mot de passe incorrect. Veuillez vérifier vos identifiants.",
       }
     }
+    if (error.code === 'user_banned') {
+      return { error: "Ce compte a été désactivé. Contactez un administrateur." }
+    }
     if (error.message.includes('Email not confirmed')) {
       return {
         error:

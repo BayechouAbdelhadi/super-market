@@ -23,6 +23,7 @@ interface CustomerWorkspaceProps {
   initialLimit?: number
   initialQuery?: string
   settings?: AppSettings
+  canToggleStatus?: boolean
 }
 
 export function CustomerWorkspace({
@@ -32,6 +33,7 @@ export function CustomerWorkspace({
   initialLimit,
   initialQuery = "",
   settings: propSettings,
+  canToggleStatus,
 }: CustomerWorkspaceProps) {
   const [currentSettings, setCurrentSettings] = useState<AppSettings | undefined>(propSettings);
 
@@ -312,6 +314,7 @@ export function CustomerWorkspace({
               defaultPageSize={initialLimit || LOYALTY_CONFIG.pagination.tablePageSize}
               pageSizeOptions={[5, 10, 20, 50]}
               alwaysShowPagination={true}
+              canToggleStatus={canToggleStatus}
             />
           </Card>
         </div>

@@ -11,7 +11,7 @@ export class SupabaseDirectoryRepository implements IDirectoryRepository {
     const { data } = await sb
       .from("profiles")
       .select(`
-        id, first_name, last_name, email, phone_number, created_at, role,
+        id, first_name, last_name, email, phone_number, created_at, role, disabled_at,
         customers ( loyalty_points, status )
       `)
       .eq("role", "CUSTOMER")
@@ -24,7 +24,7 @@ export class SupabaseDirectoryRepository implements IDirectoryRepository {
     const sb = await createServerClient();
     const { data } = await sb
       .from("profiles")
-      .select("id, first_name, last_name, email, phone_number, role, created_at")
+      .select("id, first_name, last_name, email, phone_number, role, created_at, disabled_at")
       .eq("role", role)
       .order("created_at", { ascending: false })
       .limit(limit);

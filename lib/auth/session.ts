@@ -1,6 +1,6 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { resolveUserRole, type AppRole } from "./roles";
+import { isBanned, resolveUserRole, type AppRole } from "./roles";
 
 export type SessionCaller =
   | { ok: true; supabase: SupabaseClient; user: User; role: AppRole }
@@ -16,7 +16,7 @@ export async function getSessionCaller(allowedRoles?: readonly AppRole[]): Promi
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 
-  if (error || !user) {
+  if (error || !user || isBanned(user)) {
     return { ok: false, reason: "UNAUTHENTICATED" };
   }
 

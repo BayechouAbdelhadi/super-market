@@ -25,6 +25,7 @@ export default async function AdminCustomersPage({
       initialPage={initialPage}
       initialLimit={initialLimit}
       initialQuery={initialQuery}
+      canToggleStatus
     />
   );
 }

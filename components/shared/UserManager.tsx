@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Modal } from '@/components/ui/modal'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 import { PaginatedList } from '@/components/ui/PaginatedList'
 import { StatusBadge } from '@/components/loyalty/StatusBadge'
 import { NewCustomerModal } from '@/components/loyalty/NewCustomerModal'
-import { createUser, editUser } from '@/app/admin/actions'
+import { createUser, editUser, setUserDisabled } from '@/app/admin/actions'
 import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
 import { toast } from '@/components/ui/sonner'
 import type { DirectoryUser } from '@/lib/loyalty/types'
@@ -22,6 +23,8 @@ interface UserManagerProps {
   defaultPageSize?: number;
   pageSizeOptions?: number[];
   alwaysShowPagination?: boolean;
+  /** Admin only: show the disable / enable account button */
+  canToggleStatus?: boolean;
 }
 
 export function UserManager({
@@ -34,6 +37,7 @@ export function UserManager({
   defaultPageSize = LOYALTY_CONFIG.pagination.tablePageSize,
   pageSizeOptions = [5, 10, 20, 50],
   alwaysShowPagination = true,
+  canToggleStatus = false,
 }: UserManagerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false)
@@ -41,6 +45,35 @@ export function UserManager({
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [loading, setLoading] = useState(false)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [confirm, confirmDialog] = useConfirm()
+
+  async function toggleDisabled(user: DirectoryUser) {
+    const disable = !user.disabled_at
+    const name = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim()
+    const confirmed = await confirm(disable
+      ? {
+          title: `Désactiver ${name} ?`,
+          description: "Le compte sera déconnecté et ne pourra plus se connecter tant que son compte reste désactivé.",
+          confirmLabel: "Désactiver",
+        }
+      : {
+          title: `Réactiver ${name} ?`,
+          description: "Le compte pourra de nouveau se connecter.",
+          confirmLabel: "Réactiver",
+          tone: "default",
+        })
+    if (!confirmed) return
+
+    setTogglingId(user.id)
+    const result = await setUserDisabled({ user_id: user.id, disabled: disable })
+    setTogglingId(null)
+    if (result.error) {
+      toast.error(result.error)
+    } else {
+      toast.success(disable ? "Compte désactivé." : "Compte réactivé.")
+    }
+  }
 
   function openCreate() {
     if (roleToManage === 'CUSTOMER') {
@@ -135,9 +168,15 @@ export function UserManager({
                     {roleToManage === 'CUSTOMER' && (
                       <StatusBadge status={tier} size="sm" />
                     )}
-                    <span className="text-[10px] px-2 py-0.5 bg-success-subtle text-success-text border border-success-border rounded-full font-semibold">
-                      Actif
-                    </span>
+                    {u.disabled_at ? (
+                      <span className="text-[10px] px-2 py-0.5 bg-danger-subtle text-danger-text border border-danger-border rounded-full font-semibold">
+                        Désactivé
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-0.5 bg-success-subtle text-success-text border border-success-border rounded-full font-semibold">
+                        Actif
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--color-text-muted)]">
@@ -172,6 +211,16 @@ export function UserManager({
                 >
                   Modifier
                 </Button>
+                {canToggleStatus && (
+                  <Button
+                    variant={u.disabled_at ? 'secondary' : 'destructive'}
+                    onClick={() => toggleDisabled(u)}
+                    loading={togglingId === u.id}
+                    className="px-3 py-1.5 text-xs min-h-[38px] h-auto"
+                  >
+                    {u.disabled_at ? 'Réactiver' : 'Désactiver'}
+                  </Button>
+                )}
               </div>
             </div>
           );
@@ -245,6 +294,8 @@ export function UserManager({
           </div>
         </Modal>
       )}
+
+      {confirmDialog}
 
       {/* Unified Customer Creation Modal (fallback if not handled by parent) */}
       {roleToManage === 'CUSTOMER' && !onAddCustomer && (
