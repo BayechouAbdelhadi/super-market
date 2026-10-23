@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useFormStatus } from 'react-dom'
 import Link from 'next/link'
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { resetPassword } from '@/app/(site)/reset-password/actions'
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { PasswordCriteriaChecklist } from '@/components/auth/PasswordCriteriaChecklist'
+import { evaluatePasswordCriteria } from '@/lib/auth/password-rules'
 
 interface ResetPasswordFormProps {
   email: string
@@ -24,16 +26,12 @@ export function ResetPasswordForm({
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword
+  const canSubmit = evaluatePasswordCriteria(password).isComplete && passwordsMatch
 
   return (
-    <form
-      action={(formData) => {
-        setIsSubmitting(true)
-        resetPassword(formData)
-      }}
-      className="space-y-4"
-    >
+    <form action={resetPassword} className="space-y-4">
       <input type="hidden" name="email" value={email} />
       <input type="hidden" name="token" value={token} />
 
@@ -90,19 +88,15 @@ export function ResetPasswordForm({
         }
       />
 
+      {confirmPassword.length > 0 && !passwordsMatch && (
+        <p className="text-xs text-danger-text">Les mots de passe ne correspondent pas.</p>
+      )}
+
       {errorMessage && (
         <Alert variant="danger">{errorMessage}</Alert>
       )}
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="lg"
-        loading={isSubmitting}
-        className="w-full font-bold mt-2"
-      >
-        {isSubmitting ? 'Enregistrement...' : 'Enregistrer mon nouveau mot de passe'}
-      </Button>
+      <SubmitButton disabled={!canSubmit} />
 
       <div className="pt-3 text-center border-t border-[var(--color-border)]">
         <Link
@@ -114,5 +108,24 @@ export function ResetPasswordForm({
         </Link>
       </div>
     </form>
+  )
+}
+
+// useFormStatus clears `pending` once the action settles, including when it
+// redirects back to this same page with an error (no remount happens then).
+function SubmitButton({ disabled }: { disabled: boolean }) {
+  const { pending } = useFormStatus()
+
+  return (
+    <Button
+      type="submit"
+      variant="primary"
+      size="lg"
+      loading={pending}
+      disabled={disabled || pending}
+      className="w-full font-bold mt-2"
+    >
+      {pending ? 'Enregistrement...' : 'Enregistrer mon nouveau mot de passe'}
+    </Button>
   )
 }
