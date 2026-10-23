@@ -20,6 +20,9 @@ import {
   Eye,
 } from "lucide-react";
 import { getSiteUrl } from "@/lib/utils/app-url";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
+import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 
 interface DealJobDetailModalProps {
   isOpen: boolean;
@@ -41,17 +44,7 @@ export function DealJobDetailModal({
   const [searchQuery, setSearchQuery] = useState("");
   const [confirm, confirmDialog] = useConfirm();
 
-  if (!isOpen || !campaign) return null;
-
-  const stats = campaign.stats || {
-    totalTargets: 0,
-    sentCount: 0,
-    failedCount: 0,
-    remainingCount: 0,
-    progressPercentage: 0,
-  };
-
-  const recipients = campaign.recipients || [];
+  const recipients = campaign?.recipients || [];
 
   const filteredRecipients = recipients.filter((r) => {
     if (recipientFilter !== "ALL" && r.status !== recipientFilter) return false;
@@ -65,6 +58,26 @@ export function DealJobDetailModal({
     }
     return true;
   });
+
+  const {
+    paginatedItems: paginatedRecipients,
+    page: recipientsPage,
+    pageSize: recipientsPageSize,
+    totalPages: recipientsTotalPages,
+    totalItems: recipientsTotalItems,
+    setPage: setRecipientsPage,
+    setPageSize: setRecipientsPageSize,
+  } = usePagination(filteredRecipients, { defaultPageSize: LOYALTY_CONFIG.pagination.defaultPageSize });
+
+  if (!isOpen || !campaign) return null;
+
+  const stats = campaign.stats || {
+    totalTargets: 0,
+    sentCount: 0,
+    failedCount: 0,
+    remainingCount: 0,
+    progressPercentage: 0,
+  };
 
   async function handleRunBatch() {
     setLoadingAction(true);
@@ -418,7 +431,10 @@ export function DealJobDetailModal({
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setRecipientFilter(tab.id)}
+                  onClick={() => {
+                    setRecipientFilter(tab.id);
+                    setRecipientsPage(1);
+                  }}
                   className={`px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer whitespace-nowrap ${
                     recipientFilter === tab.id
                       ? "bg-[var(--color-primary)] text-on-color shadow-xs font-bold"
@@ -435,7 +451,10 @@ export function DealJobDetailModal({
                 type="text"
                 placeholder="Filtrer client ou email..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setRecipientsPage(1);
+                }}
                 className="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
               <Search className="w-3.5 h-3.5 text-[var(--color-text-muted)] absolute left-2.5 top-2.5 pointer-events-none" />
@@ -459,7 +478,7 @@ export function DealJobDetailModal({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--color-border)]">
-                  {filteredRecipients.map((r) => (
+                  {paginatedRecipients.map((r) => (
                     <tr key={r.customerId} className="hover:bg-[var(--color-surface-hover)]/50 transition-colors">
                       <td className="p-3">
                         <strong className="block text-[var(--color-text)] font-semibold">{r.fullName}</strong>
@@ -501,6 +520,18 @@ export function DealJobDetailModal({
               </table>
             )}
           </div>
+
+          {filteredRecipients.length > 0 && (
+            <Pagination
+              page={recipientsPage}
+              totalPages={recipientsTotalPages}
+              totalItems={recipientsTotalItems}
+              pageSize={recipientsPageSize}
+              onPageChange={setRecipientsPage}
+              onPageSizeChange={setRecipientsPageSize}
+              pageSizeOptions={[10, 20, 50]}
+            />
+          )}
         </div>
       </div>
     )}
