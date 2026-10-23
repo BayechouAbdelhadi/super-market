@@ -6,8 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { resolveUserRole } from '@/lib/auth/roles'
 import { Card } from '@/components/ui/card'
 import { StatusBadge } from '@/components/loyalty/StatusBadge'
-import { DigitalLoyaltyCard } from '@/components/loyalty/DigitalLoyaltyCard'
-import { LoyaltyCardQrButton } from '@/components/loyalty/LoyaltyCardQrButton'
+import { FlippableLoyaltyCard } from '@/components/loyalty/FlippableLoyaltyCard'
 import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
 import { getAppSettings } from '@/lib/settings/service'
 import { SupabaseSelfProfileRepository } from '@/lib/account/adapters/supabase-self-profile-repository'
@@ -158,19 +157,16 @@ export default async function CustomerLoyaltyAppPage() {
         </Card>
 
         {/* Digital card */}
-        <div className="space-y-4">
-          <DigitalLoyaltyCard
-            fullName={fullName}
-            phone={phone}
-            email={email}
-            points={points}
-            tier={tier}
-            userId={user.id}
-            createdAt={user.created_at}
-            pointValueInEuro={pointValueInEuro}
-          />
-          <LoyaltyCardQrButton customerId={user.id} fullName={fullName} />
-        </div>
+        <FlippableLoyaltyCard
+          customerId={user.id}
+          fullName={fullName}
+          phone={phone}
+          email={email}
+          points={points}
+          tier={tier}
+          createdAt={user.created_at}
+          pointValueInEuro={pointValueInEuro}
+        />
       </div>
 
       {/* History */}
