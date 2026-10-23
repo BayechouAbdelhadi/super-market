@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { CustomerDetail } from "@/lib/loyalty/types";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalDetails, modalSplitLayout, type ModalAlert } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 import {
@@ -11,6 +11,10 @@ import {
   calculateMaxRedeemablePoints,
 } from "@/lib/loyalty/domain";
 import { toast } from "@/components/ui/sonner";
+
+function formatEuro(value: number): string {
+  return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+}
 
 interface RedeemPointsModalProps {
   isOpen: boolean;
@@ -116,6 +120,29 @@ export function RedeemPointsModal({
     !isNaN(parsedAmount) && parsedAmount > 0
       ? calculatePoints(parsedAmount, euroToPointsRatio)
       : 0;
+
+  // One message at a time, shown in place of the ticket summary
+  const alert: ModalAlert | null = errorMsg
+    ? { message: errorMsg, tone: "danger" }
+    : isExceedingBalance
+      ? { message: `Solde insuffisant : ${customer.available_points} pts disponibles.`, tone: "danger" }
+      : isExceedingAmount
+        ? {
+            message: `Remise supérieure au ticket (pas de rendu de monnaie). Maximum : ${maxPointsForAmount} pts.`,
+            tone: "warning",
+          }
+        : null;
+
+  // Any edit clears the last error so the summary comes back
+  function changeAmount(value: string) {
+    setErrorMsg("");
+    setAmountStr(value);
+  }
+
+  function changePoints(value: string) {
+    setErrorMsg("");
+    setPointsStr(value);
+  }
 
   async function handleNormalPurchase(e?: React.FormEvent) {
     if (e) e.preventDefault();
@@ -284,254 +311,183 @@ export function RedeemPointsModal({
         </span>
       }
     >
-      <form onSubmit={handleSubmit} className="p-6 space-y-5">
-        {errorMsg && (
-          <div className="p-3 rounded-[var(--radius-button,12px)] bg-danger-subtle border border-danger-border text-xs text-danger-text font-medium">
-            {errorMsg}
-          </div>
-        )}
-
-        {/* 1. MONTANT DE L'ACHAT */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor="redeem-amount-input"
-              className="block text-xs font-semibold text-[var(--color-text)] tracking-wide"
-            >
-              1. Montant de l&apos;achat (€) *
-            </label>
-            <span className="text-[11px] text-[var(--color-text-muted)]">
-              (Plafond de points calculé sur ce montant)
-            </span>
-          </div>
-
-          <div className="relative">
-            <input
-              id="redeem-amount-input"
-              type="text"
-              inputMode="decimal"
-              value={amountStr}
-              onChange={(e) => setAmountStr(e.target.value)}
-              placeholder="0,00"
-              className="w-full h-13 text-xl sm:text-2xl font-bold rounded-[var(--radius-input,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] py-2.5 pl-4 pr-10 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all"
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg font-bold text-[var(--color-text-muted)] select-none pointer-events-none">
-              €
-            </span>
-          </div>
-
-          {/* Preset amount chips */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
-            <span className="text-[var(--color-text-muted)] text-[11px] font-medium mr-1">Raccourcis montant :</span>
-            {purchasePresets.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                onClick={() => setAmountStr(preset.toString())}
-                className="px-2.5 py-1 min-h-[30px] rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text)] font-mono text-[11px] transition-colors cursor-pointer"
+      <form onSubmit={handleSubmit} className={`p-6 tablet:p-4 ${modalSplitLayout.form}`}>
+        <div className={modalSplitLayout.main}>
+          <div className={modalSplitLayout.inputs}>
+            {/* 1. MONTANT DU TICKET */}
+            <div className="space-y-2">
+              <label
+                htmlFor="redeem-amount-input"
+                className="block text-sm font-semibold text-[var(--color-text)]"
               >
-                {preset} €
-              </button>
-            ))}
-          </div>
-        </div>
+                1. Montant du ticket
+              </label>
+              <div className="relative">
+                <input
+                  id="redeem-amount-input"
+                  type="text"
+                  inputMode="decimal"
+                  autoFocus
+                  value={amountStr}
+                  onChange={(e) => changeAmount(e.target.value)}
+                  placeholder="0,00"
+                  className="w-full h-14 tablet:h-12 text-2xl tablet:text-xl font-bold rounded-[var(--radius-input,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] py-3 pl-4 pr-12 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xl font-bold text-[var(--color-text-muted)] select-none pointer-events-none">
+                  €
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {purchasePresets.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => changeAmount(preset.toString())}
+                    className="min-h-[44px] px-4 rounded-[var(--radius-button,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text)] text-sm font-semibold transition-colors cursor-pointer"
+                  >
+                    {preset} €
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* 2. NOMBRE DE POINTS À DÉDUIRE */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor="redeem-points-input"
-              className="block text-xs font-semibold text-[var(--color-text)] tracking-wide"
-            >
-              2. Nombre de points à utiliser *
-            </label>
-            <span className="text-[11px] text-[var(--color-text-muted)] font-mono">
-              {isPurchaseAmountEntered
-                ? `Max pour cet achat : ${Math.min(customer.available_points, maxPointsForAmount)} pts`
-                : `Solde : ${customer.available_points} pts`}
-            </span>
-          </div>
-
-          <div className="relative">
-            <input
-              id="redeem-points-input"
-              type="number"
-              min={minPointsToRedeem > 0 ? minPointsToRedeem : 1}
-              max={isPurchaseAmountEntered ? Math.min(customer.available_points, maxPointsForAmount) : customer.available_points}
-              step={1}
-              required
-              disabled={cannotRedeem || !isPurchaseAmountEntered}
-              value={cannotRedeem ? "" : pointsStr}
-              onChange={(e) => setPointsStr(e.target.value)}
-              placeholder={
-                cannotRedeem
-                  ? "Points indisponibles"
-                  : !isPurchaseAmountEntered
-                    ? "Saisir le montant d'abord"
-                    : "0"
-              }
-              className="w-full h-13 text-xl sm:text-2xl font-bold rounded-[var(--radius-input,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] py-2.5 pl-4 pr-12 text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:bg-[var(--color-surface-hover)] disabled:cursor-not-allowed transition-all"
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--color-text-muted)] select-none pointer-events-none">
-              pts
-            </span>
-          </div>
-
-          {cannotRedeem && (
-            <p className="text-xs text-warning-text font-medium flex items-center gap-1.5 pt-1">
-              <span>🔒</span>
-              <span>
-                {customer.available_points <= 0
-                  ? "Solde de points épuisé (0 pt disponible)."
-                  : `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise (solde : ${customer.available_points} pts).`}
-              </span>
-            </p>
-          )}
-
-          {!cannotRedeem && !isPurchaseAmountEntered && (
-            <p className="text-xs text-[var(--color-text-muted)] font-medium flex items-center gap-1.5 pt-1">
-              <span>💡</span>
-              <span>Indiquez le montant de l&apos;achat pour débloquer l&apos;utilisation des points (aucun rendu de monnaie).</span>
-            </p>
-          )}
-
-          {/* Quick point chips */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
-            <span className="text-[var(--color-text-muted)] text-[11px] font-medium mr-1">Raccourcis points :</span>
-            {pointsPresets.map((preset) => {
-              const isDisabled =
-                cannotRedeem ||
-                !isPurchaseAmountEntered ||
-                preset > customer.available_points ||
-                preset > maxPointsForAmount;
-              return (
-                <button
-                  key={preset}
-                  type="button"
-                  disabled={isDisabled}
-                  onClick={() => {
-                    if (minPointsToRedeem > 0 && preset < minPointsToRedeem) {
-                      toast.error(
-                        `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise.`
-                      );
-                    }
-                    setPointsStr(preset.toString());
-                  }}
-                  className="px-2.5 py-1 min-h-[30px] rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text)] font-mono text-[11px] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            {/* 2. POINTS À UTILISER */}
+            <div className="space-y-2">
+              <div className="flex items-baseline justify-between gap-2">
+                <label
+                  htmlFor="redeem-points-input"
+                  className="block text-sm font-semibold text-[var(--color-text)]"
                 >
-                  -{preset} pts
-                </button>
-              );
-            })}
-            {customer.available_points > 0 && isPurchaseAmountEntered && maxAllowedPointsForTx > 0 && (
-              <button
-                type="button"
-                disabled={cannotRedeem}
-                onClick={() => {
-                  if (minPointsToRedeem > 0 && maxAllowedPointsForTx < minPointsToRedeem) {
-                    toast.error(
-                      `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise.`
-                    );
+                  2. Points à utiliser
+                </label>
+                {!cannotRedeem && isPurchaseAmountEntered && (
+                  <span className="text-sm text-[var(--color-text-muted)]">
+                    Max : {maxAllowedPointsForTx.toLocaleString("fr-FR")} pts
+                  </span>
+                )}
+              </div>
+              <div className="relative">
+                <input
+                  id="redeem-points-input"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  required
+                  disabled={cannotRedeem || !isPurchaseAmountEntered}
+                  value={cannotRedeem ? "" : pointsStr}
+                  onChange={(e) => changePoints(e.target.value.replace(/\D/g, ""))}
+                  placeholder={
+                    cannotRedeem
+                      ? "Points indisponibles"
+                      : !isPurchaseAmountEntered
+                        ? "Saisir le montant d'abord"
+                        : "0"
                   }
-                  setPointsStr(maxAllowedPointsForTx.toString());
-                }}
-                className="px-2.5 py-1 min-h-[30px] rounded-full border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-semibold text-[11px] hover:bg-[var(--color-primary)]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              >
-                {customer.available_points <= maxPointsForAmount
-                  ? `Tout le solde (${customer.available_points} pts)`
-                  : `Max possible (${maxAllowedPointsForTx} pts · -${(maxAllowedPointsForTx * pointValueInEuro).toFixed(2)} €)`}
-              </button>
-            )}
-          </div>
-        </div>
+                  className="w-full h-14 tablet:h-12 text-2xl tablet:text-xl font-bold rounded-[var(--radius-input,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] py-3 pl-4 pr-14 text-[var(--color-text)] placeholder:text-base placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:bg-[var(--color-surface-hover)] disabled:cursor-not-allowed transition-all"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[var(--color-text-muted)] select-none pointer-events-none">
+                  pts
+                </span>
+              </div>
 
-        {/* Warning if exceeding balance */}
-        {isExceedingBalance && (
-          <div className="p-3 rounded-[var(--radius-button,12px)] bg-danger-subtle border border-danger-border text-xs text-danger-text font-bold flex items-center gap-2">
-            <span>⚠️</span>
-            <span>
-              Solde insuffisant ! Le client ne dispose que de {customer.available_points} points.
-            </span>
-          </div>
-        )}
+              {cannotRedeem && (
+                <p className="text-sm text-warning-text font-medium">
+                  🔒{" "}
+                  {customer.available_points <= 0
+                    ? "Aucun point disponible : enregistrez un achat normal."
+                    : `Minimum ${minPointsToRedeem} pts requis (solde : ${customer.available_points} pts) : enregistrez un achat normal.`}
+                </p>
+              )}
 
-        {/* Warning if exceeding purchase amount (no money given) */}
-        {isExceedingAmount && (
-          <div className="p-3 rounded-[var(--radius-button,12px)] bg-warning-subtle border border-warning-border text-xs text-warning-text font-medium flex items-start gap-2">
-            <span className="shrink-0 text-sm">⚠️</span>
-            <div>
-              <strong className="block font-semibold">Aucun rendu de monnaie autorisé</strong>
-              La remise calculée ({discountEuro.toFixed(2)} €) dépasse le montant du ticket ({parsedAmount.toFixed(2)} €).
-              Pour cet achat, le maximum utilisable est de <strong>{maxPointsForAmount} points</strong> (soit {(maxPointsForAmount * pointValueInEuro).toFixed(2)} € de remise max).
+              {!cannotRedeem && isPurchaseAmountEntered && (
+                <div className="flex flex-wrap gap-2">
+                  {maxAllowedPointsForTx > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (minPointsToRedeem > 0 && maxAllowedPointsForTx < minPointsToRedeem) {
+                          toast.error(
+                            `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise.`
+                          );
+                        }
+                        changePoints(maxAllowedPointsForTx.toString());
+                      }}
+                      className="min-h-[44px] px-4 rounded-[var(--radius-button,12px)] border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-sm font-bold hover:bg-[var(--color-primary)]/20 transition-colors cursor-pointer"
+                    >
+                      Max · -{(maxAllowedPointsForTx * pointValueInEuro).toFixed(2)} €
+                    </button>
+                  )}
+                  {pointsPresets
+                    .filter((preset) => preset <= maxAllowedPointsForTx)
+                    .map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => {
+                          if (minPointsToRedeem > 0 && preset < minPointsToRedeem) {
+                            toast.error(
+                              `Seuil minimum non atteint : un minimum de ${minPointsToRedeem} points est requis pour utiliser une remise.`
+                            );
+                          }
+                          changePoints(preset.toString());
+                        }}
+                        className="min-h-[44px] px-4 rounded-[var(--radius-button,12px)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text)] text-sm font-semibold transition-colors cursor-pointer"
+                      >
+                        {preset} pts
+                      </button>
+                    ))}
+                </div>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Compact Live Transaction Summary Bar */}
-        <div className="p-3 sm:p-3.5 rounded-[var(--radius-card,16px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] grid grid-cols-3 gap-2 items-center text-center">
-          {cannotRedeem ? (
-            <>
-              <div className="text-left sm:text-center">
-                <span className="text-[11px] font-medium text-[var(--color-text-muted)] block">Points gagnés</span>
-                <span className="text-xs sm:text-sm font-mono font-bold text-success-text">
-                  +{normalPointsEarned} pts
-                </span>
-              </div>
-
-              <div className="px-2 py-1.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">
-                  Total à encaisser
-                </span>
-                <span className="text-sm sm:text-base font-mono font-extrabold text-[var(--color-text)]">
-                  {isPurchaseAmountEntered ? `${parsedAmount.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "0,00 €"}
-                </span>
-              </div>
-
-              <div className="text-right sm:text-center">
-                <span className="text-[11px] font-medium text-[var(--color-text-muted)] block">Nouveau solde</span>
-                <span className="text-xs sm:text-sm font-mono font-bold text-[var(--color-text)]">
-                  {(customer.available_points + normalPointsEarned).toLocaleString("fr-FR")} pts
-                </span>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="text-left sm:text-center">
-                <span className="text-[11px] font-medium text-[var(--color-text-muted)] block">Remise</span>
-                <div className="flex flex-col sm:items-center">
-                  <span className={`text-xs sm:text-sm font-mono font-bold ${isValidPoints ? "text-success-text" : "text-[var(--color-text-muted)]"}`}>
-                    {isValidPoints ? `-${discountEuro.toFixed(2)} €` : "0,00 €"}
+          <div className={modalSplitLayout.details}>
+            <ModalDetails alert={alert}>
+              {/* Ticket summary: what the cashier collects */}
+              <div className="p-5 tablet:p-3 rounded-[var(--radius-card,16px)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] space-y-3 tablet:space-y-0 tablet:grid tablet:grid-cols-4 tablet:gap-3">
+                <div className="flex items-center justify-between text-sm tablet:flex-col tablet:items-start tablet:justify-start tablet:gap-0.5">
+                  <span className="text-[var(--color-text-muted)]">Montant du ticket</span>
+                  <span className="font-semibold text-[var(--color-text)]">
+                    {formatEuro(isPurchaseAmountEntered ? parsedAmount : 0)}
                   </span>
-                  {isValidPoints && (
-                    <span className="text-[10px] text-[var(--color-text-muted)] font-mono">
-                      (-{pointsToRedeem} pts)
+                </div>
+
+                {cannotRedeem ? (
+                  <div className="flex items-center justify-between text-sm tablet:flex-col tablet:items-start tablet:justify-start tablet:gap-0.5">
+                    <span className="text-[var(--color-text-muted)]">Points gagnés</span>
+                    <span className="font-semibold text-success-text">+{normalPointsEarned} pts</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between text-sm tablet:flex-col tablet:items-start tablet:justify-start tablet:gap-0.5">
+                    <span className="text-[var(--color-text-muted)]">
+                      Remise fidélité{isValidPoints ? ` (${pointsToRedeem} pts)` : ""}
                     </span>
-                  )}
+                    <span className={`text-3xl tablet:text-2xl font-extrabold ${isValidPoints ? "text-success-text" : "text-[var(--color-text-muted)]"}`}>
+                      -{formatEuro(discountEuro)}
+                    </span>
+                  </div>
+                )}
+
+                <div className="pt-3 border-t border-[var(--color-border)] flex items-end justify-between gap-3 tablet:pt-0 tablet:border-t-0 tablet:flex-col tablet:items-start tablet:justify-start tablet:gap-0.5">
+                  <span className="text-sm font-semibold text-[var(--color-text)] pb-1 tablet:pb-0">À encaisser</span>
+                  <span className={`text-3xl tablet:text-2xl font-extrabold ${isExceedingAmount ? "text-danger-text line-through" : "text-[var(--color-primary)]"}`}>
+                    {formatEuro(cannotRedeem ? (isPurchaseAmountEntered ? parsedAmount : 0) : netPayable)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-sm tablet:flex-col tablet:items-start tablet:justify-start tablet:gap-0.5">
+                  <span className="text-[var(--color-text-muted)]">Nouveau solde client</span>
+                  <span className="font-semibold text-[var(--color-text)]">
+                    {(cannotRedeem ? customer.available_points + normalPointsEarned : remainingPoints).toLocaleString("fr-FR")} pts
+                  </span>
                 </div>
               </div>
-
-              <div className="px-2 py-1.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">
-                  Reste à payer
-                </span>
-                <span className={`text-sm sm:text-base font-mono font-black ${isExceedingAmount ? "text-danger-text line-through" : "text-[var(--color-text)]"}`}>
-                  {isPurchaseAmountEntered ? `${netPayable.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "0,00 €"}
-                </span>
-              </div>
-
-              <div className="text-right sm:text-center">
-                <span className="text-[11px] font-medium text-[var(--color-text-muted)] block">Nouveau solde</span>
-                <span className="text-xs sm:text-sm font-mono font-bold text-[var(--color-text)]">
-                  {remainingPoints.toLocaleString("fr-FR")} pts
-                </span>
-              </div>
-            </>
-          )}
+            </ModalDetails>
+          </div>
         </div>
 
-
         {/* Footer Actions */}
-        <div className="pt-3 flex items-center justify-end gap-3 border-t border-[var(--color-border)]">
+        <div className={modalSplitLayout.actions}>
           <Button
             variant="secondary"
             type="button"
@@ -546,19 +502,10 @@ export function RedeemPointsModal({
               variant="primary"
               type="button"
               loading={loading}
-              disabled={!isValidAmount || parsedAmount <= 0}
+              disabled={!isPurchaseAmountEntered}
               onClick={() => handleNormalPurchase()}
             >
-              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-              </svg>
-              <span>
-                {loading
-                  ? "Enregistrement de l'achat..."
-                  : isValidAmount && parsedAmount > 0
-                    ? `Valider l'achat normal (${parsedAmount.toFixed(2)} € · +${normalPointsEarned} pts)`
-                    : "Saisir un montant d'achat"}
-              </span>
+              {loading ? "Enregistrement..." : `Achat normal (+${normalPointsEarned} pts)`}
             </Button>
           ) : (
             <Button
@@ -566,10 +513,8 @@ export function RedeemPointsModal({
               type="submit"
               loading={loading}
               disabled={
-                cannotRedeem ||
                 !isValidPoints ||
                 isExceedingBalance ||
-                !isValidAmount ||
                 !isPurchaseAmountEntered ||
                 isExceedingAmount
               }
@@ -577,8 +522,8 @@ export function RedeemPointsModal({
               {loading
                 ? "Enregistrement..."
                 : isValidPoints && isPurchaseAmountEntered && !isExceedingAmount
-                  ? `Valider (${parsedAmount.toFixed(2)} € · -${pointsToRedeem} pts · Reste : ${netPayable.toFixed(2)} €)`
-                  : "Saisir montant et points"}
+                  ? `Valider · ${formatEuro(netPayable)}`
+                  : "Valider"}
             </Button>
           )}
         </div>

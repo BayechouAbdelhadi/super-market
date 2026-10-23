@@ -3,6 +3,8 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+/* Dialogs rendered with the tablet layout (see lib/hooks/useTabletModalLayout.ts) */
+@custom-variant tablet (&:where([data-layout="tablet"], [data-layout="tablet"] *));
 
 :root {
   /* Semantic Design Tokens (AGENTS.md § 10).

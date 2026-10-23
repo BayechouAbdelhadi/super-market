@@ -66,12 +66,12 @@ function DialogContent({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="absolute top-4 right-4 h-8 w-8 rounded-full text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+                className="absolute top-3 right-3 tablet:top-1.5 h-10 w-10 rounded-full text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
                 aria-label="Fermer"
               />
             }
           >
-            <XIcon className="w-4 h-4" />
+            <XIcon className="w-5 h-5" />
             <span className="sr-only">Fermer</span>
           </DialogPrimitive.Close>
         )}
