@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getAppSettings } from "@/lib/settings/service";
+import { getAccountLink } from "@/lib/auth/account-link";
 import { getLatestNewsPost } from "@/lib/news/service";
 import { isArrivalsCustomerEnabled } from "@/lib/arrivals/flags";
 import { getVisibleArrivals } from "@/lib/arrivals/service";
@@ -36,10 +37,11 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const now = new Date();
-  const [{ store, loyalty, hours }, latestNews, arrivals] = await Promise.all([
+  const [{ store, loyalty, hours }, latestNews, arrivals, account] = await Promise.all([
     getAppSettings(),
     getLatestNewsPost(),
     isArrivalsCustomerEnabled() ? getVisibleArrivals(now) : null,
+    getAccountLink(),
   ]);
   const status = getOpeningStatus(now, hours.weekly, STORE_TIME_ZONE, hours.closures);
   const upcomingClosures = getUpcomingClosures(now, hours.closures, STORE_TIME_ZONE, UPCOMING_CLOSURES_WINDOW_DAYS);
@@ -72,7 +74,7 @@ export default async function Home() {
         <LoyaltySection euroToPointsRatio={loyalty.euroToPointsRatio} />
         <FaqSection items={faq} />
       </main>
-      <MobileActionBar phone={store.phone} />
+      <MobileActionBar phone={store.phone} account={account} />
     </>
   );
 }

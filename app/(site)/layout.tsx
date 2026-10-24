@@ -1,28 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
-import { resolveUserRole, type AppRole } from "@/lib/auth/roles";
+import { getAccountLink } from "@/lib/auth/account-link";
 import { getAppSettings } from "@/lib/settings/service";
 import { STORE_TIME_ZONE } from "@/lib/store/config";
 import { getOpeningStatus } from "@/lib/store/opening-hours";
-import { SiteHeader, type AccountLink } from "@/components/public/SiteHeader";
+import { SiteHeader } from "@/components/public/SiteHeader";
 import { SiteFooter } from "@/components/public/SiteFooter";
 import { OpeningHoursProvider } from "@/components/public/OpeningHoursProvider";
 import { SiteAlerts } from "@/components/public/SiteAlerts";
-
-const ACCOUNT_LINKS: Record<AppRole, AccountLink> = {
-  CUSTOMER: { href: "/account", label: "Mon espace" },
-  CASHIER: { href: "/cashier", label: "Ma caisse" },
-  ADMIN: { href: "/admin", label: "Administration" },
-};
-
-/** The signed-in visitor's space, or null when nobody is signed in. */
-async function getAccountLink(): Promise<AccountLink | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  return ACCOUNT_LINKS[await resolveUserRole(supabase, user)];
-}
 
 /**
  * Shell of the public pages (home, auth, legal): one scroll container (§ 25.1)

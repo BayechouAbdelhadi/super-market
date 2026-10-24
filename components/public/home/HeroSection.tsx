@@ -70,7 +70,7 @@ export function HeroSection({ storeName, tagline, phone, status }: HeroSectionPr
           </ul>
         </div>
 
-        {/* Phones get the same two actions in the bottom bar (MobileActionBar) */}
+        {/* Phones get the call action in the bottom bar (MobileActionBar); directions stay in the footer */}
         <div className="hidden gap-3 md:flex md:flex-col">
           <a
             href={STORE_LOCATION.googleMapsUrl}
