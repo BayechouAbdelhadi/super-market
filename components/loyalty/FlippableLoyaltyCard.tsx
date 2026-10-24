@@ -1,37 +1,23 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import QRCode from "qrcode";
 import { QrCode, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DigitalLoyaltyCard } from "./DigitalLoyaltyCard";
-import { encodeLoyaltyCardCode } from "@/lib/loyalty/card-code";
-import { QR_COLORS } from "@/components/admin/invite/qr-colors";
+import { useStoreCardQr } from "./useStoreCardQr";
 
 type FlippableLoyaltyCardProps = React.ComponentProps<typeof DigitalLoyaltyCard> & {
   customerId: string;
 };
 
 /**
- * Digital loyalty card that flips over to reveal its QR code, scanned at the checkout
+ * Store card that flips over to reveal its QR code, scanned at the checkout
  * to find the account. Both faces share one grid cell so the card keeps the front's height.
  */
 export function FlippableLoyaltyCard({ customerId, ...cardProps }: FlippableLoyaltyCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const [qrDataUrl, setQrDataUrl] = useState("");
-
-  useEffect(() => {
-    if (!isFlipped || qrDataUrl) return;
-    QRCode.toDataURL(encodeLoyaltyCardCode(customerId), {
-      width: 640,
-      margin: 2,
-      color: QR_COLORS,
-      errorCorrectionLevel: "M",
-    })
-      .then(setQrDataUrl)
-      .catch((err) => console.error("Failed to generate loyalty card QR code:", err));
-  }, [isFlipped, qrDataUrl, customerId]);
+  const qrDataUrl = useStoreCardQr(customerId, isFlipped);
 
   return (
     <div className="space-y-4">
@@ -56,7 +42,7 @@ export function FlippableLoyaltyCard({ customerId, ...cardProps }: FlippableLoya
               {qrDataUrl ? (
                 <Image
                   src={qrDataUrl}
-                  alt="QR code de la carte de fidélité"
+                  alt="QR code de la carte du magasin"
                   width={320}
                   height={320}
                   unoptimized
@@ -79,7 +65,7 @@ export function FlippableLoyaltyCard({ customerId, ...cardProps }: FlippableLoya
         ) : (
           <QrCode className="w-4 h-4" aria-hidden />
         )}
-        {isFlipped ? "Retourner la carte" : "Afficher ma carte en caisse"}
+        {isFlipped ? "Retourner la carte" : "Présenter ma carte en caisse"}
       </Button>
     </div>
   );

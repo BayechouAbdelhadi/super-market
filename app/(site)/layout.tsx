@@ -25,8 +25,8 @@ async function getAccountLink(): Promise<AccountLink | null> {
 }
 
 /**
- * Shell of the customer-facing pages (home, auth, account, legal): one scroll container (§ 25.1)
- * holding the shared header, the page, then the shared footer. Admin and cashier dashboards have their own shells.
+ * Shell of the public pages (home, auth, legal): one scroll container (§ 25.1)
+ * holding the shared header, the page, then the shared footer. The customer space (app/(customer)), admin and cashier dashboards have their own shells.
  * Pages render their root as `flex-1` (short pages push the footer down) and have no header of their own.
  * The shell uses `overflow-clip`, not `overflow-hidden`: a hidden box can still be scrolled by anchor
  * jumps (#fidelite), which pushed the whole page up and hid the header; a clipped box cannot.

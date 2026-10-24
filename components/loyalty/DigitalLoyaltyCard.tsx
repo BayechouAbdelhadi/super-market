@@ -136,7 +136,7 @@ export function DigitalLoyaltyCard({
                 SUPER MARKET CALAIS
               </span>
               <span className={`text-[10px] font-bold tracking-wider uppercase block ${theme.labelColor}`}>
-                CARTE DE FIDÉLITÉ
+                CARTE DU MAGASIN
               </span>
             </div>
           </div>

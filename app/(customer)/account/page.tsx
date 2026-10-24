@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowRight, Clock, Mail, MapPin, Phone, Sparkles, Tag, User } from 'lucide-react'
+import { ArrowRight, Clock, MapPin, Sparkles, Tag } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { resolveUserRole } from '@/lib/auth/roles'
 import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
@@ -9,11 +9,11 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { StatusBadge } from '@/components/loyalty/StatusBadge'
+import { DigitalLoyaltyCard } from '@/components/loyalty/DigitalLoyaltyCard'
 import { getAppSettings } from '@/lib/settings/service'
 import { SupabaseSelfProfileRepository } from '@/lib/account/adapters/supabase-self-profile-repository'
 import { resolveDisplayIdentity } from '@/lib/account/identity'
 import { groupWeek } from '@/lib/store/opening-hours'
-import { formatPhone } from '@/lib/store/contact'
 
 export const metadata: Metadata = { title: 'Mon espace', robots: PRIVATE_PAGE_ROBOTS };
 import { PRIVATE_PAGE_ROBOTS } from "@/lib/seo/config";
@@ -49,31 +49,33 @@ export default async function AccountHubPage() {
   const euroDiscount = (points * pointValueInEuro).toFixed(2)
 
 
-  const profileRows = [
-    { icon: User, label: 'Nom', value: fullName },
-    { icon: Phone, label: 'Téléphone', value: phone ? formatPhone(phone) : 'Non renseigné' },
-    { icon: Mail, label: 'Email', value: email },
-  ]
-
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 space-y-12 px-4 py-10 sm:px-6 md:py-14">
-      {/* Greeting + balance */}
-      <section className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
-        <div className="space-y-2">
-          <p className="text-sm font-semibold text-primary-ink">Mon espace</p>
-          <h1 className="text-3xl font-bold tracking-tight text-text sm:text-4xl">Bonjour {firstName || fullName}</h1>
-          <p className="text-lg text-text-muted">Retrouvez vos points, vos avantages et vos informations.</p>
-        </div>
-        <Card padded="md" className="gap-1 md:min-w-72">
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-text-muted">Solde disponible</span>
-            <StatusBadge status={tier} size="sm" />
+      {/* Greeting + store card, shown first: it identifies the customer at the checkout */}
+      <section className="grid gap-6 md:grid-cols-[1fr_minmax(0,22rem)] md:items-center">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-primary-ink">Mon espace</p>
+            <h1 className="text-3xl font-bold tracking-tight text-text sm:text-4xl">Bonjour {firstName || fullName}</h1>
+            <p className="text-lg text-text-muted">Présentez votre carte du magasin en caisse pour être identifié.</p>
           </div>
-          <p className="text-3xl font-bold tracking-tight text-text tabular-nums">
-            {points} <span className="text-lg font-semibold text-text-muted">pts</span>
-          </p>
-          <p className="text-sm text-text-muted">soit {euroDiscount} € de remise en caisse</p>
-        </Card>
+          <div className="flex flex-wrap items-center gap-3">
+            <StatusBadge status={tier} size="sm" />
+            <p className="text-base text-text-muted">
+              <strong className="font-semibold text-text tabular-nums">{points} pts</strong> · soit {euroDiscount} € de remise en caisse
+            </p>
+          </div>
+        </div>
+        <DigitalLoyaltyCard
+          userId={user.id}
+          fullName={fullName}
+          phone={phone}
+          email={email}
+          points={points}
+          tier={tier}
+          createdAt={user.created_at}
+          pointValueInEuro={pointValueInEuro}
+        />
       </section>
 
       {/* Services */}
@@ -120,31 +122,8 @@ export default async function AccountHubPage() {
         </div>
       </section>
 
-      {/* Profile + store */}
-      <section className="grid gap-6 md:grid-cols-3">
-        <Card padded="lg" className="gap-5 md:col-span-2">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold tracking-tight text-text">Mes informations</h2>
-            <p className="text-sm text-text-muted">Elles permettent au caissier de vous retrouver.</p>
-          </div>
-          <dl className="grid gap-4 sm:grid-cols-3">
-            {profileRows.map(({ icon: Icon, label, value }) => (
-              <div key={label} className="min-w-0 space-y-1">
-                <dt className="flex items-center gap-1.5 text-sm text-text-muted">
-                  <Icon aria-hidden className="h-4 w-4" />
-                  {label}
-                </dt>
-                <dd className="truncate text-base font-medium text-text" title={value}>
-                  {value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <p className="border-t border-border pt-4 text-sm text-text-muted">
-            Pour modifier ces informations, adressez-vous à l&apos;accueil du magasin.
-          </p>
-        </Card>
-
+      {/* Store */}
+      <section>
         <Card padded="lg" className="gap-4">
           <h2 className="text-lg font-semibold tracking-tight text-text">Mon magasin</h2>
           <div className="space-y-4 text-sm">
