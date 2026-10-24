@@ -9,13 +9,17 @@ import { Input } from '@/components/ui/input'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/sonner'
+import { NEXT_PARAM, safeNextPath, withNextParam } from '@/lib/auth/redirect'
 
 interface LoginFormProps {
   initialMessage?: string
   initialSuccess?: string
+  /** Page to open after logging in (customers only). */
+  next?: string
 }
 
-export function LoginForm({ initialMessage, initialSuccess }: LoginFormProps) {
+export function LoginForm({ initialMessage, initialSuccess, next }: LoginFormProps) {
+  const nextPath = safeNextPath(next)
   const [state, formAction, isPending] = useActionState<AuthActionResult, FormData>(
     login,
     { error: initialMessage || null }
@@ -41,6 +45,7 @@ export function LoginForm({ initialMessage, initialSuccess }: LoginFormProps) {
 
   return (
     <form action={formAction} className="space-y-5">
+      {nextPath && <input type="hidden" name={NEXT_PARAM} value={nextPath} />}
       <Input
         id="email"
         name="email"
@@ -109,7 +114,7 @@ export function LoginForm({ initialMessage, initialSuccess }: LoginFormProps) {
         <p className="text-sm text-[var(--color-text-muted)]">
           Pas encore de compte client ?{' '}
           <Link
-            href="/signup"
+            href={withNextParam('/signup', nextPath)}
             className="font-semibold text-primary-ink underline-offset-4 hover:underline ml-1"
           >
             Créer un compte

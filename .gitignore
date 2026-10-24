@@ -48,3 +48,5 @@ scripts/change-admin-password.mjs
 
 # graphify knowledge graph (regenerate with /graphify --update)
 /graphify-out/
+# Playwright CLI output (may contain credentials)
+.playwright-cli/

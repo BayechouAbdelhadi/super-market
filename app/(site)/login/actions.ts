@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { resolveUserRole } from '@/lib/auth/roles'
 import { RATE_LIMITS, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
 import { enforceRateLimits } from '@/lib/security/enforce'
+import { NEXT_PARAM, safeNextPath } from '@/lib/auth/redirect'
 
 const LoginSchema = z.object({
   email: z.string().trim().toLowerCase().min(1, "L'adresse email est obligatoire."),
@@ -90,10 +91,11 @@ export async function login(
   } else if (role === 'CASHIER') {
     redirectPath = '/cashier'
   } else {
-    redirectPath = '/account'
+    // Back to the page that asked to log in (e.g. an arrival to reserve)
+    redirectPath = safeNextPath(formData.get(NEXT_PARAM)) ?? '/account'
   }
 
-  revalidatePath(redirectPath, 'layout')
+  revalidatePath('/', 'layout')
   redirect(redirectPath)
 }
 

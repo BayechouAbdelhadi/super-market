@@ -19,6 +19,7 @@ import { PasswordSchema } from '@/lib/auth/password-rules'
 import { authFailureMessage } from '@/lib/auth/auth-errors'
 import { RATE_LIMITS, getClientIp, rateLimitMessage } from '@/lib/security/rate-limit'
 import { enforceRateLimits } from '@/lib/security/enforce'
+import { NEXT_PARAM, safeNextPath } from '@/lib/auth/redirect'
 import { z } from 'zod'
 
 export type SignUpActionResult = {
@@ -46,6 +47,8 @@ interface PendingSignUpPayload {
   password: string;
   otpHash: string;
   expiresAt: number;
+  /** Page to open once the account is confirmed (e.g. an arrival to reserve). */
+  next?: string | null;
 }
 
 /**
@@ -146,6 +149,7 @@ export async function signup(
     password,
     otpHash,
     expiresAt,
+    next: safeNextPath(formData.get(NEXT_PARAM)),
   };
 
   const signedToken = createEncryptedToken(payload);
@@ -237,7 +241,7 @@ export async function confirmSignUpOtp(formData: FormData) {
   });
 
   if (!signInError) {
-    redirect('/account');
+    redirect(safeNextPath(pendingData.next) ?? '/account');
   }
 
   redirect(`/login?success=${encodeURIComponent("Votre compte a été confirmé avec succès ! Vous pouvez maintenant vous connecter.")}`)

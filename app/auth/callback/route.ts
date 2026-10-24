@@ -1,17 +1,15 @@
 import { createServerClient } from '@supabase/ssr'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
+import { NEXT_PARAM, safeNextPath } from '@/lib/auth/redirect'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const token_hash = requestUrl.searchParams.get('token_hash')
   const type = requestUrl.searchParams.get('type')
-  const next = requestUrl.searchParams.get('next') || '/reset-password'
-
   // SECURITY: only same-origin relative paths ("/x"), never "//evil.tld" or "https://evil.tld" (open redirect)
-  const isSafeNext = next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\')
-  const redirectTo = new URL(isSafeNext ? next : '/reset-password', request.url)
+  const redirectTo = new URL(safeNextPath(requestUrl.searchParams.get(NEXT_PARAM)) ?? '/reset-password', request.url)
   if (redirectTo.origin !== requestUrl.origin) {
     redirectTo.href = new URL('/reset-password', request.url).href
   }

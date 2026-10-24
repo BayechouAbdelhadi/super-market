@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/ui/StatCard";
 import { StatusBadge } from "./StatusBadge";
+import { CheckoutReservationPanel } from "@/components/arrivals/CheckoutReservationPanel";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
@@ -246,6 +247,9 @@ export function CustomerDetailView({
           </div>
         )}
       </Card>
+
+      {/* Arrival reservation to hand over (hidden when there is none) */}
+      <CheckoutReservationPanel customerId={customer.id} />
 
       {/* History Sections */}
       <Card padded={false} className="overflow-hidden">

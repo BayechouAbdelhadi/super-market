@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { signup } from '@/app/(site)/signup/actions'
 import type { SignUpActionResult } from '@/app/(site)/signup/actions'
+import { NEXT_PARAM, safeNextPath, withNextParam } from '@/lib/auth/redirect'
 import { PasswordCriteriaChecklist } from '@/components/auth/PasswordCriteriaChecklist'
 import { Input } from '@/components/ui/input'
 import { Alert } from '@/components/ui/alert'
@@ -19,9 +20,12 @@ interface SignUpFormProps {
     email?: string
     phone?: string
   }
+  /** Page to open once the account is confirmed. */
+  next?: string
 }
 
-export function SignUpForm({ initialMessage, initialData }: SignUpFormProps) {
+export function SignUpForm({ initialMessage, initialData, next }: SignUpFormProps) {
+  const nextPath = safeNextPath(next)
   const [state, formAction, isPending] = useActionState<SignUpActionResult, FormData>(
     signup,
     { error: initialMessage || null }
@@ -44,6 +48,7 @@ export function SignUpForm({ initialMessage, initialData }: SignUpFormProps) {
 
   return (
     <form action={formAction} className="space-y-4">
+      {nextPath && <input type="hidden" name={NEXT_PARAM} value={nextPath} />}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Input
           id="first_name"
@@ -141,7 +146,7 @@ export function SignUpForm({ initialMessage, initialData }: SignUpFormProps) {
         <p className="text-sm text-[var(--color-text-muted)]">
           Déjà un compte ?{' '}
           <Link
-            href="/login"
+            href={withNextParam('/login', nextPath)}
             className="font-semibold text-primary-ink underline-offset-4 hover:underline ml-1"
           >
             Se connecter

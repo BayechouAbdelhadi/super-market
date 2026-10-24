@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isBanned, resolveUserRole } from '@/lib/auth/roles'
+import { NEXT_PARAM, safeNextPath } from '@/lib/auth/redirect'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -63,6 +64,9 @@ export async function updateSession(request: NextRequest) {
     console.log(`[Middleware] Blocked unauthenticated access to ${request.nextUrl.pathname} -> Redirecting to /login`)
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    url.search = ''
+    // Customer pages come back after logging in
+    if (isAccountRoute) url.searchParams.set(NEXT_PARAM, request.nextUrl.pathname)
     return NextResponse.redirect(url)
   }
 
@@ -85,9 +89,8 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
       }
       if (role === 'CUSTOMER') {
-        const url = request.nextUrl.clone()
-        url.pathname = '/account'
-        return NextResponse.redirect(url)
+        const next = safeNextPath(request.nextUrl.searchParams.get(NEXT_PARAM))
+        return NextResponse.redirect(new URL(next ?? '/account', request.url))
       }
     }
 

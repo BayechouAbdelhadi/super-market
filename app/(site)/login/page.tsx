@@ -8,13 +8,13 @@ import { PRIVATE_PAGE_ROBOTS } from "@/lib/seo/config";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ message?: string; success?: string }>
+  searchParams: Promise<{ message?: string; success?: string; next?: string }>
 }) {
   const params = await searchParams
 
   return (
     <AuthShell title="Bon retour parmi nous" description="Connectez-vous pour suivre vos points et vos remises fidélité.">
-      <LoginForm initialMessage={params?.message} initialSuccess={params?.success} />
+      <LoginForm initialMessage={params?.message} initialSuccess={params?.success} next={params?.next} />
     </AuthShell>
   )
 }

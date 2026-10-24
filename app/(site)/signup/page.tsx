@@ -17,7 +17,7 @@ interface PendingSignUpPayload {
 export default async function SignUpPage({
   searchParams,
 }: {
-  searchParams: Promise<{ message?: string }>
+  searchParams: Promise<{ message?: string; next?: string }>
 }) {
   const params = await searchParams
   const cookieStore = await cookies()
@@ -38,7 +38,7 @@ export default async function SignUpPage({
       title="Créer votre compte"
       description="Rejoignez le programme fidélité gratuit et cumulez des points à chaque passage en caisse."
     >
-      <SignUpForm initialMessage={params?.message} initialData={initialData} />
+      <SignUpForm initialMessage={params?.message} initialData={initialData} next={params?.next} />
     </AuthShell>
   )
 }
