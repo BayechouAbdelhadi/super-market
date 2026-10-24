@@ -11,6 +11,7 @@ export const CUSTOMER_HOME_LINK: CustomerNavLink = { href: "/account", label: "A
 
 /** Entries of the quick access menu of the mobile bottom bar (logout is added after them). */
 export const CUSTOMER_MENU_LINKS: readonly CustomerNavLink[] = [
+  { href: "/account/loyalty", label: "Ma fidélité", icon: Sparkles },
   { href: "/account/profile", label: "Mon profil", icon: User },
   { href: "/account/reservations", label: "Mes réservations", icon: CalendarCheck },
 ];
