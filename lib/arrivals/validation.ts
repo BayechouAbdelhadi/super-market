@@ -5,13 +5,16 @@ import { ARRIVAL_CATEGORIES, RESERVATION_STATUSES, STAFF_RESERVATION_STATUSES } 
 
 const C = ARRIVALS_CONFIG;
 
+/** Error when the body is not a JSON object at all (malformed JSON, array, null). */
+const INVALID_BODY = { message: "Requête invalide : le contenu doit être un objet JSON." };
+
 export const ArrivalIdSchema = z.string().uuid("Identifiant d'arrivage invalide.");
 export const ReservationIdSchema = z.string().uuid("Identifiant de réservation invalide.");
 
 const ArrivalItemSchema = z.object({
   id: z.string().uuid("Identifiant d'article invalide.").optional(),
   // Checked against the category's products in ArrivalSchema
-  name: z.string().trim().min(1, "Le nom de l'article est obligatoire."),
+  name: z.string({ message: "Le nom de l'article est obligatoire." }).trim().min(1, "Le nom de l'article est obligatoire."),
   weightGrams: z
     .number({ message: "Le poids doit être un nombre." })
     .int("Le poids doit être un nombre entier de grammes.")
@@ -32,30 +35,30 @@ const ArrivalItemSchema = z.object({
     .int("La limite par client doit être un nombre entier.")
     .positive("La limite par client doit être supérieure à 0.")
     .nullable(),
-}).transform((item) => ({ ...item, unitLabel: unitLabelFor(item.weightGrams) }));
+}, { message: "Article invalide." }).transform((item) => ({ ...item, unitLabel: unitLabelFor(item.weightGrams) }));
 
 export const ArrivalSchema = z
   .object({
     title: z
-      .string()
+      .string({ message: "Le titre est obligatoire." })
       .trim()
       .min(1, "Le titre est obligatoire.")
       .max(C.titleMaxLength, `Le titre ne doit pas dépasser ${C.titleMaxLength} caractères.`),
     description: z
-      .string()
+      .string({ message: "La description doit être un texte." })
       .trim()
       .max(C.descriptionMaxLength, `La description ne doit pas dépasser ${C.descriptionMaxLength} caractères.`)
-      .nullable()
+      .nullish()
       .transform((v) => v || null),
     category: z.enum(ARRIVAL_CATEGORIES, { message: "Catégorie invalide." }).default(C.defaultCategory),
-    reservationOpensAt: z.string().datetime({ offset: true, message: "Date d'ouverture invalide." }),
-    reservationClosesAt: z.string().datetime({ offset: true, message: "Date de clôture invalide." }),
-    pickupDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date d'arrivage invalide."),
+    reservationOpensAt: z.string({ message: "Date d'ouverture invalide." }).datetime({ offset: true, message: "Date d'ouverture invalide." }),
+    reservationClosesAt: z.string({ message: "Date de clôture invalide." }).datetime({ offset: true, message: "Date de clôture invalide." }),
+    pickupDate: z.string({ message: "Date d'arrivage invalide." }).regex(/^\d{4}-\d{2}-\d{2}$/, "Date d'arrivage invalide."),
     items: z
-      .array(ArrivalItemSchema)
+      .array(ArrivalItemSchema, { message: "Ajoutez au moins un article." })
       .min(1, "Ajoutez au moins un article.")
       .max(C.maxItems, `Un arrivage ne peut pas avoir plus de ${C.maxItems} articles.`),
-  })
+  }, INVALID_BODY)
   .refine((a) => new Date(a.reservationOpensAt) < new Date(a.reservationClosesAt), {
     message: "La clôture des réservations doit être après leur ouverture.",
     path: ["reservationClosesAt"],
@@ -81,21 +84,22 @@ export const CreateReservationSchema = z.object({
   lines: z
     .array(
       z.object({
-        itemId: z.string().uuid("Article invalide."),
+        itemId: z.string({ message: "Article invalide." }).uuid("Article invalide."),
         quantity: z
           .number({ message: "Quantité invalide." })
           .int("La quantité doit être un nombre entier.")
           .min(1, "La quantité doit être d'au moins 1.")
           .max(C.maxQuantityPerLine, `La quantité ne doit pas dépasser ${C.maxQuantityPerLine}.`),
-      })
+      }),
+      { message: "Choisissez au moins un article." }
     )
     .min(1, "Choisissez au moins un article.")
     .max(C.maxItems, "Trop d'articles dans la réservation."),
-});
+}, INVALID_BODY);
 
 export const UpdateReservationStatusSchema = z.object({
   status: z.enum(STAFF_RESERVATION_STATUSES, { message: "Statut de réservation invalide." }),
-});
+}, INVALID_BODY);
 
 export const ReservationStatusFilterSchema = z.enum(RESERVATION_STATUSES).nullable().catch(null);
 

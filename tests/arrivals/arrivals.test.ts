@@ -310,6 +310,16 @@ describe('Arrivals', () => {
       expect(ArrivalSchema.safeParse({ ...valid, items: [{ ...valid.items[0], stockTotal: -1 }] }).success).toBe(false);
     });
 
+    it('answers in French when the body is not an object', () => {
+      for (const schema of [ArrivalSchema, CreateReservationSchema, UpdateReservationStatusSchema]) {
+        expect(schema.safeParse(null).error?.issues[0].message).toBe('Requête invalide : le contenu doit être un objet JSON.');
+      }
+      expect(ArrivalSchema.safeParse({ ...valid, items: [null] }).error?.issues[0].message).toBe('Article invalide.');
+      const messages = (r: { error?: { issues: { message: string }[] } }) => r.error?.issues.map((i) => i.message) ?? [];
+      expect(messages(ArrivalSchema.safeParse({}))).not.toContainEqual(expect.stringMatching(/Invalid input/));
+      expect(messages(CreateReservationSchema.safeParse({}))).toEqual(['Choisissez au moins un article.']);
+    });
+
     it('validates reservation lines and staff statuses', () => {
       expect(CreateReservationSchema.safeParse({ lines: [{ itemId: ITEM_ID, quantity: 2 }] }).success).toBe(true);
       expect(CreateReservationSchema.safeParse({ lines: [{ itemId: ITEM_ID, quantity: 0 }] }).success).toBe(false);
