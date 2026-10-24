@@ -14,6 +14,7 @@ import { SupabaseUserAccountRepository } from "@/lib/auth/adapters/supabase-user
 import { authFailureMessage } from "@/lib/auth/auth-errors";
 import { normalizePhone, calculateTier, toPurchaseRecord } from "../domain";
 import { LOYALTY_CONFIG } from "../config";
+import { normalizeSearchTerm } from "./search-term";
 
 /**
  * Infrastructure Adapter implementing ICustomerRepository via Supabase.
@@ -26,15 +27,8 @@ export class SupabaseCustomerRepository implements ICustomerRepository {
     return await createServerClient();
   }
 
-  /** Strips PostgREST filter syntax from a search term (see `buildSearchQuery`). */
-  private normalizeSearchTerm(query: string): string {
-    // SECURITY: strip PostgREST filter syntax (",", "(", ")", quotes, backslash) so the
-    // search term cannot add or break conditions inside the `.or()` filter.
-    return query.replace(/[,()"\\]/g, " ").trim().toLowerCase();
-  }
-
   private buildSearchQuery(sb: SupabaseClient, query: string, withCount: boolean) {
-    const trimmed = this.normalizeSearchTerm(query);
+    const trimmed = normalizeSearchTerm(query);
 
     let dbQuery = sb
       .from("profiles")

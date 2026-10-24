@@ -23,6 +23,16 @@ export interface PaginatedListProps<T> {
   listClassName?: string;
   /** Always show pagination even on single page. Default true. */
   alwaysShow?: boolean;
+  /** Server-side pagination: `items` is already the current page, the server owns page and total. */
+  serverPagination?: ServerPagination;
+}
+
+export interface ServerPagination {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
 }
 
 /**
@@ -46,7 +56,9 @@ export function PaginatedList<T>({
   showPageSizePicker = true,
   listClassName = "space-y-3",
   alwaysShow = true,
+  serverPagination,
 }: PaginatedListProps<T>) {
+  const local = usePagination(items, { defaultPageSize });
   const {
     paginatedItems,
     page,
@@ -55,16 +67,26 @@ export function PaginatedList<T>({
     totalItems,
     setPage,
     setPageSize,
-  } = usePagination(items, { defaultPageSize });
+  } = serverPagination
+    ? {
+        paginatedItems: items,
+        page: serverPagination.page,
+        pageSize: serverPagination.pageSize,
+        totalPages: Math.max(1, Math.ceil(serverPagination.totalItems / serverPagination.pageSize)),
+        totalItems: serverPagination.totalItems,
+        setPage: serverPagination.onPageChange,
+        setPageSize: serverPagination.onPageSizeChange,
+      }
+    : local;
 
   // Reset to page 1 when items array reference or query result changes
   const prevItemsRef = React.useRef(items);
   React.useEffect(() => {
-    if (prevItemsRef.current !== items) {
+    if (!serverPagination && prevItemsRef.current !== items) {
       prevItemsRef.current = items;
       setPage(1);
     }
-  }, [items, setPage]);
+  }, [items, setPage, serverPagination]);
 
   if (items.length === 0) {
     return (

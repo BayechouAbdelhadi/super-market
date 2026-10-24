@@ -5,7 +5,7 @@ import { DirectoryUser, LoyaltyTier, ProfileWithCustomerRow } from '@/lib/loyalt
 import { getAppSettings } from '@/lib/settings/service'
 
 const directory = new SupabaseDirectoryRepository()
-const BACK_OFFICE_LIST_LIMIT = LOYALTY_CONFIG.pagination.backOfficeListLimit
+const { tablePageSize, maxPageSize } = LOYALTY_CONFIG.pagination
 
 interface CustomersListProps {
   title?: string
@@ -25,8 +25,11 @@ export async function CustomersList({
   initialQuery,
   canToggleStatus,
 }: CustomersListProps = {}) {
-  const [profiles, settings] = await Promise.all([
-    directory.listRecentCustomers(BACK_OFFICE_LIST_LIMIT),
+  const page = Math.max(1, initialPage || 1)
+  const limit = Math.min(maxPageSize, Math.max(1, initialLimit || tablePageSize))
+  const query = initialQuery ?? ''
+  const [{ items: profiles, total }, settings] = await Promise.all([
+    directory.listCustomersPage(query, limit, (page - 1) * limit),
     getAppSettings(),
   ])
 
@@ -51,9 +54,10 @@ export async function CustomersList({
       initialCustomers={customers}
       title={title}
       subtitle={subtitle}
-      initialPage={initialPage}
-      initialLimit={initialLimit}
-      initialQuery={initialQuery}
+      totalCustomers={total}
+      page={page}
+      limit={limit}
+      query={query}
       settings={settings}
       canToggleStatus={canToggleStatus}
     />

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Modal } from '@/components/ui/modal'
 import { useConfirm } from '@/components/ui/confirm-dialog'
-import { PaginatedList } from '@/components/ui/PaginatedList'
+import { PaginatedList, type ServerPagination } from '@/components/ui/PaginatedList'
 import { StatusBadge } from '@/components/loyalty/StatusBadge'
 import { NewCustomerModal } from '@/components/loyalty/NewCustomerModal'
 import { createUser, editUser, setUserDisabled } from '@/app/admin/actions'
@@ -25,6 +25,8 @@ interface UserManagerProps {
   alwaysShowPagination?: boolean;
   /** Admin only: show the disable / enable account button */
   canToggleStatus?: boolean;
+  /** `initialUsers` is one page fetched by the server */
+  serverPagination?: ServerPagination;
 }
 
 export function UserManager({
@@ -38,6 +40,7 @@ export function UserManager({
   pageSizeOptions = [5, 10, 20, 50],
   alwaysShowPagination = true,
   canToggleStatus = false,
+  serverPagination,
 }: UserManagerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false)
@@ -149,6 +152,7 @@ export function UserManager({
         defaultPageSize={defaultPageSize}
         pageSizeOptions={pageSizeOptions}
         alwaysShow={alwaysShowPagination}
+        serverPagination={serverPagination}
         renderItem={(u) => {
           const tier = u.status || 'BRONZE';
           const points = u.loyalty_points ?? 0;

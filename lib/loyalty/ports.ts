@@ -119,8 +119,8 @@ export interface IAnalyticsRepository {
  * Domain Port (Interface) for back-office lists of accounts (RLS-scoped to the caller).
  */
 export interface IDirectoryRepository {
-  /** Most recently created customers with their loyalty record. */
-  listRecentCustomers(limit: number): Promise<ProfileWithCustomerRow[]>;
+  /** One page of customers (newest first) matching `query`, with the exact database-side total. */
+  listCustomersPage(query: string, limit: number, offset: number): Promise<Page<ProfileWithCustomerRow>>;
   /** Most recently created profiles with the given role. */
   listRecentProfilesByRole(role: UserRole, limit: number): Promise<DirectoryUser[]>;
 }

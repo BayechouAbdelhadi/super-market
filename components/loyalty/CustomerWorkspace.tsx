@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { SearchInput } from '@/components/ui/SearchInput'
@@ -14,24 +14,30 @@ import { CustomerDetail, DirectoryUser } from '@/lib/loyalty/types'
 import { LOYALTY_CONFIG } from '@/lib/loyalty/config'
 import { AppSettings } from '@/lib/settings/types'
 import { toast } from '@/components/ui/sonner'
+import { useDebounce } from '@/lib/hooks/useDebounce'
 
 interface CustomerWorkspaceProps {
+  /** Current page of customers, fetched by the server */
   initialCustomers?: DirectoryUser[]
+  /** Exact number of customers matching `query` */
+  totalCustomers: number
+  page: number
+  limit: number
+  query: string
   title?: string
   subtitle?: string
-  initialPage?: number
-  initialLimit?: number
-  initialQuery?: string
   settings?: AppSettings
   canToggleStatus?: boolean
 }
 
 export function CustomerWorkspace({
   initialCustomers = [],
+  totalCustomers,
+  page,
+  limit,
+  query,
   title = "Gestion des Clients",
   subtitle = "Consultez, modifiez et gérez l'ensemble des profils clients de votre magasin.",
-  initialLimit,
-  initialQuery = "",
   settings: propSettings,
   canToggleStatus,
 }: CustomerWorkspaceProps) {
@@ -69,8 +75,8 @@ export function CustomerWorkspace({
         vip: currentSettings.loyalty.tierVipMinPoints,
       }
     : undefined;
-  const [searchQuery, setSearchQuery] = useState(initialQuery)
-  const [createdCustomers, setCreatedCustomers] = useState<DirectoryUser[]>([])
+  const [searchQuery, setSearchQuery] = useState(query)
+  const debouncedQuery = useDebounce(searchQuery)
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
   const [selectedCustomerDetail, setSelectedCustomerDetail] = useState<CustomerDetail | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
@@ -82,6 +88,23 @@ export function CustomerWorkspace({
 
   // Auto-redirect countdown to caisse
   const router = useRouter()
+  const pathname = usePathname()
+
+  // Page, page size and search live in the URL: the server fetches the matching page
+  const navigateToPage = (nextPage: number, nextLimit: number, nextQuery: string) => {
+    const params = new URLSearchParams({ page: String(nextPage), limit: String(nextLimit) })
+    const trimmed = nextQuery.trim()
+    if (trimmed) params.set('q', trimmed)
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  useEffect(() => {
+    if (debouncedQuery.trim() !== query) {
+      navigateToPage(1, limit, debouncedQuery)
+    }
+    // Only a new debounced search term triggers a navigation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQuery])
   const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null)
   const redirectTimerRef = useRef<NodeJS.Timeout | null>(null)
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -128,18 +151,8 @@ export function CustomerWorkspace({
     setIsNewCustomerOpen(false)
     toast.success(`Client ${newCustomer.full_name} créé avec succès !`)
 
-    const newListItem: DirectoryUser = {
-      id: newCustomer.id,
-      first_name: newCustomer.first_name,
-      last_name: newCustomer.last_name,
-      email: newCustomer.email,
-      phone_number: newCustomer.phone,
-      role: 'CUSTOMER',
-      created_at: newCustomer.created_at,
-      loyalty_points: newCustomer.available_points,
-      status: newCustomer.tier,
-    }
-    setCreatedCustomers((prev) => [newListItem, ...prev.filter((c) => c.id !== newCustomer.id)])
+    // Reload the current page so the new customer is counted
+    router.refresh()
 
     // Open detail immediately
     setSelectedCustomerId(newCustomer.id)
@@ -161,21 +174,6 @@ export function CustomerWorkspace({
       setLoadingDetail(false)
     }
   }
-
-  const allCustomers = useMemo(() => {
-    const createdIds = new Set(createdCustomers.map((c) => c.id))
-    return [...createdCustomers, ...initialCustomers.filter((c) => !createdIds.has(c.id))]
-  }, [createdCustomers, initialCustomers])
-
-  const filteredCustomers = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim()
-    if (!q) return allCustomers
-    return allCustomers.filter((c) =>
-      [c.first_name, c.last_name, c.email, c.phone_number]
-        .filter(Boolean)
-        .some((field) => field!.toLowerCase().includes(q))
-    )
-  }, [allCustomers, searchQuery])
 
   return (
     <div className="space-y-6">
@@ -300,18 +298,24 @@ export function CustomerWorkspace({
 
           <Card className="p-6">
             <UserManager
-              initialUsers={filteredCustomers}
+              initialUsers={initialCustomers}
               roleToManage="CUSTOMER"
               title="Nouveau Client"
               description={
-                searchQuery
-                  ? `${filteredCustomers.length} résultat(s) pour « ${searchQuery} »`
-                  : `${filteredCustomers.length} profil(s) client(s) au total dans votre établissement.`
+                query
+                  ? `${totalCustomers} résultat(s) pour « ${query} »`
+                  : `${totalCustomers} profil(s) client(s) au total dans votre établissement.`
               }
               onViewDetail={handleViewDetail}
               onAddCustomer={() => setIsNewCustomerOpen(true)}
-              defaultPageSize={initialLimit || LOYALTY_CONFIG.pagination.tablePageSize}
-              pageSizeOptions={[5, 10, 20, 50]}
+              pageSizeOptions={LOYALTY_CONFIG.pagination.pageSizeOptions}
+              serverPagination={{
+                page,
+                pageSize: limit,
+                totalItems: totalCustomers,
+                onPageChange: (nextPage) => navigateToPage(nextPage, limit, query),
+                onPageSizeChange: (nextLimit) => navigateToPage(1, nextLimit, query),
+              }}
               alwaysShowPagination={true}
               canToggleStatus={canToggleStatus}
             />
