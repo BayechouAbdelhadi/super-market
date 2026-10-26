@@ -3,6 +3,7 @@
 import React from 'react'
 import Image from 'next/image'
 import { StatusBadge } from './StatusBadge'
+import { TIER_SURFACE } from './tier-surface'
 import { LoyaltyTier } from '@/lib/loyalty/types'
 
 interface DigitalLoyaltyCardProps {
@@ -43,8 +44,8 @@ export function DigitalLoyaltyCard({
   // Authentic light luxury colors that match the tier with crisp, darker text
   const tierThemes = {
     GOLD: {
-      cardBg: 'from-[#fffdf5] via-[#fef7e2] to-[#faeec7]',
-      border: 'border-[#ebd18f]',
+      cardBg: TIER_SURFACE.GOLD.gradient,
+      border: TIER_SURFACE.GOLD.border,
       shadow: 'shadow-[0_12px_32px_rgba(180,122,22,0.12)]',
       glow: 'from-amber-200/40 via-yellow-100/30 to-amber-200/20',
       textColor: 'text-[#241704]',
@@ -57,8 +58,8 @@ export function DigitalLoyaltyCard({
       chipBorder: 'border-amber-600/30',
     },
     SILVER: {
-      cardBg: 'from-[#ffffff] via-[#f8fafc] to-[#e2e8f0]',
-      border: 'border-slate-300',
+      cardBg: TIER_SURFACE.SILVER.gradient,
+      border: TIER_SURFACE.SILVER.border,
       shadow: 'shadow-[0_12px_32px_rgba(100,116,139,0.12)]',
       glow: 'from-slate-200/40 via-slate-100/30 to-slate-200/20',
       textColor: 'text-slate-900',
@@ -71,8 +72,8 @@ export function DigitalLoyaltyCard({
       chipBorder: 'border-slate-400/40',
     },
     BRONZE: {
-      cardBg: 'from-[#fffaf5] via-[#ffedd5] to-[#fbdcb9]',
-      border: 'border-[#f5c7a3]',
+      cardBg: TIER_SURFACE.BRONZE.gradient,
+      border: TIER_SURFACE.BRONZE.border,
       shadow: 'shadow-[0_12px_32px_rgba(194,65,12,0.12)]',
       glow: 'from-orange-200/40 via-orange-100/30 to-amber-100/20',
       textColor: 'text-[#2f1005]',
@@ -85,8 +86,8 @@ export function DigitalLoyaltyCard({
       chipBorder: 'border-amber-700/30',
     },
     VIP: {
-      cardBg: 'from-[#fdfaff] via-[#f5e8ff] to-[#edd3fc]',
-      border: 'border-purple-200',
+      cardBg: TIER_SURFACE.VIP.gradient,
+      border: TIER_SURFACE.VIP.border,
       shadow: 'shadow-[0_12px_32px_rgba(126,34,206,0.12)]',
       glow: 'from-purple-200/40 via-fuchsia-100/30 to-purple-200/20',
       textColor: 'text-[#22073d]',

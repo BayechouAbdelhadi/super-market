@@ -4,6 +4,7 @@ import { SupabaseSelfProfileRepository } from "@/lib/account/adapters/supabase-s
 import { resolveDisplayIdentity } from "@/lib/account/identity";
 import { CustomerHeader } from "@/components/customer/CustomerHeader";
 import { CustomerBottomNav } from "@/components/customer/CustomerBottomNav";
+import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
 
 /**
  * Shell of the signed-in customer space (/account): its own header instead of the public site navigation,
@@ -14,14 +15,17 @@ import { CustomerBottomNav } from "@/components/customer/CustomerBottomNav";
 export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const [{ store }, { data: { user } }] = await Promise.all([getAppSettings(), supabase.auth.getUser()]);
-  const profile = user ? await new SupabaseSelfProfileRepository(supabase).getProfile(user.id) : null;
+  const selfProfile = new SupabaseSelfProfileRepository(supabase);
+  const [profile, loyalty] = user
+    ? await Promise.all([selfProfile.getProfile(user.id), selfProfile.getLoyalty(user.id)])
+    : [null, null];
   const fullName = user ? resolveDisplayIdentity(profile, user).fullName || user.email || "Client" : "";
 
   return (
     <div className="fixed inset-0 flex flex-col overflow-clip bg-background text-text">
       <CustomerHeader storeName={store.storeName} customer={user ? { id: user.id, fullName } : null} />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto *:shrink-0">{children}</div>
-      {user && <CustomerBottomNav customerId={user.id} fullName={fullName} />}
+      {user && <CustomerBottomNav customerId={user.id} fullName={fullName} tier={loyalty?.tier ?? LOYALTY_CONFIG.defaults.tier} />}
     </div>
   );
 }
