@@ -175,5 +175,6 @@ export async function setReservationStatus(
   if (!current) throw new ArrivalError("RESERVATION_NOT_FOUND");
   if (!canTransition(current.status, status)) throw new ArrivalError("INVALID_TRANSITION");
   await repo.setStatus(id, status, actor);
-  return { ...current, status, statusChangedAt: new Date().toISOString() };
+  const at = new Date().toISOString();
+  return { ...current, status, statusChangedAt: at, history: [...current.history, { status, at }] };
 }

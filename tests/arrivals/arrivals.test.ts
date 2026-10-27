@@ -148,6 +148,7 @@ class MemoryReservationRepository implements IReservationRepository {
       totalAmount: 0,
       createdAt: new Date().toISOString(),
       statusChangedAt: new Date().toISOString(),
+      history: [{ status: 'CONFIRMED', at: new Date().toISOString() }],
       lines: [],
       arrival: a,
       customer: { id: customerId, fullName: 'Client', phone: null, email: null },

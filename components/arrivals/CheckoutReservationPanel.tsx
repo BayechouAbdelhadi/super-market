@@ -8,7 +8,8 @@ import type { Reservation } from "@/lib/arrivals/types";
 import { ReservationActions } from "./ReservationActions";
 import { ReservationLines } from "./ReservationLines";
 import { ReservationStatusBadge } from "./ReservationStatusBadge";
-import { formatDay } from "./format";
+import { ReservationTimeline } from "./ReservationTimeline";
+import { formatDateTime, formatDay } from "./format";
 
 /**
  * Customer's latest reservation waiting for pickup, on the checkout customer page
@@ -43,10 +44,15 @@ export function CheckoutReservationPanel({ customerId }: { customerId: string })
             <p className="text-sm font-semibold text-primary-ink">Réservation</p>
             <h2 className="text-lg font-bold text-text">{reservation.arrival.title}</h2>
             <p className="text-sm text-text-muted">Retrait le {formatDay(reservation.arrival.pickupDate)}</p>
+            {reservation.history.length < 2 && (
+              <p className="text-xs text-text-muted">Réservée le {formatDateTime(reservation.createdAt)}</p>
+            )}
           </div>
         </div>
         <ReservationStatusBadge status={reservation.status} />
       </div>
+
+      <ReservationTimeline history={reservation.history} orientation="horizontal" />
 
       <ReservationLines lines={reservation.lines} totalAmount={reservation.totalAmount} />
 

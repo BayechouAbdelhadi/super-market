@@ -37,7 +37,7 @@ export const ARRIVAL_CATEGORY_LABELS: Record<ArrivalCategory, string> = {
 
 /** Products an admin can include in an arrival, by category. */
 export const ARRIVAL_PRODUCTS: Record<ArrivalCategory, readonly string[]> = {
-  CHICKEN: ["Filet de poulet", "Ailes de poulet", "Cuisse de poulet", "Pilon de poulet"],
+  CHICKEN: ["Filet de poulet", "Ailes de poulet", "Cuisse de poulet", "Pilon de poulet", "Filet de dinde"],
 };
 
 export interface ArrivalImage {
@@ -54,6 +54,7 @@ export const ARRIVAL_CATEGORY_IMAGES: Record<ArrivalCategory, ArrivalImage> = {
 export const ARRIVAL_PRODUCT_IMAGES: Partial<Record<string, ArrivalImage>> = {
   "Filet de poulet": { src: "/arrivals/filet-de-poulet.webp", alt: "Filets de poulet frais" },
   "Cuisse de poulet": { src: "/arrivals/cuisse-de-poulet.webp", alt: "Cuisse de poulet fraîche" },
+  "Filet de dinde": { src: "/arrivals/filet-de-dinde.webp", alt: "Filets de dinde frais" },
 };
 
 export function arrivalProductImage(category: ArrivalCategory, productName: string): ArrivalImage {

@@ -13,6 +13,7 @@ import { canCustomerCancel } from "@/lib/arrivals/domain";
 import type { Reservation } from "@/lib/arrivals/types";
 import { ReservationLines } from "./ReservationLines";
 import { ReservationStatusBadge } from "./ReservationStatusBadge";
+import { ReservationTimeline } from "./ReservationTimeline";
 import { formatDateTime, formatDay } from "./format";
 
 interface CustomerReservationsListProps {
@@ -102,10 +103,14 @@ export function CustomerReservationsList({ initialReservations, initialTotal, lo
                     <ShoppingBasket aria-hidden className="size-4 shrink-0" />
                     Retrait le {formatDay(reservation.arrival.pickupDate)}
                   </p>
-                  <p className="text-xs text-text-muted">Réservée le {formatDateTime(reservation.createdAt)}</p>
+                  {reservation.history.length < 2 && (
+                    <p className="text-xs text-text-muted">Réservée le {formatDateTime(reservation.createdAt)}</p>
+                  )}
                 </div>
                 <ReservationStatusBadge status={reservation.status} />
               </div>
+
+              <ReservationTimeline history={reservation.history} />
 
               <ReservationLines lines={reservation.lines} totalAmount={reservation.totalAmount} />
 

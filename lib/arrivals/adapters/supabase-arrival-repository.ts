@@ -28,6 +28,7 @@ const ARRIVAL_COLUMNS =
 const RESERVATION_COLUMNS =
   "id, arrival_id, status, total_amount, created_at, status_changed_at, " +
   "lines:arrival_reservation_lines(item_id, item_name, unit_label, unit_price, quantity), " +
+  "events:arrival_reservation_events(status, created_at), " +
   "arrival:arrivals(id, title, pickup_date, reservation_closes_at, closed_at), " +
   "customer:customers(id, profile:profiles(first_name, last_name, phone_number, email))";
 
@@ -77,6 +78,7 @@ interface ReservationRow {
   created_at: string;
   status_changed_at: string;
   lines: { item_id: string; item_name: string; unit_label: string; unit_price: number | string; quantity: number }[] | null;
+  events: { status: ReservationStatus; created_at: string }[] | null;
   arrival: { id: string; title: string; pickup_date: string; reservation_closes_at: string; closed_at: string | null } | null;
   customer: {
     id: string;
@@ -137,6 +139,9 @@ function toReservation(row: ReservationRow): Reservation {
     totalAmount: Number(row.total_amount),
     createdAt: row.created_at,
     statusChangedAt: row.status_changed_at,
+    history: (row.events ?? [])
+      .map((e) => ({ status: e.status, at: e.created_at }))
+      .sort((a, b) => a.at.localeCompare(b.at)),
     lines: (row.lines ?? []).map((l) => ({
       itemId: l.item_id,
       itemName: l.item_name,

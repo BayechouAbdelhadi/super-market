@@ -88,6 +88,12 @@ export interface ReservationCustomer {
   email: string | null;
 }
 
+/** One status change of a reservation, oldest first in `Reservation.history`. */
+export interface ReservationEvent {
+  status: ReservationStatus;
+  at: string;
+}
+
 export interface Reservation {
   id: string;
   arrivalId: string;
@@ -95,6 +101,7 @@ export interface Reservation {
   totalAmount: number;
   createdAt: string;
   statusChangedAt: string;
+  history: ReservationEvent[];
   lines: ReservationLine[];
   arrival: Pick<Arrival, "id" | "title" | "pickupDate" | "reservationClosesAt" | "closedAt">;
   customer: ReservationCustomer;
