@@ -73,7 +73,7 @@ export const RESERVATION_STATUS_LABELS: Record<ReservationStatus, string> = {
   REMINDED: "Client relancé",
   COLLECTED: "Récupérée",
   CANCELLED: "Annulée",
-  NO_SHOW: "Non récupérée",
+  NO_SHOW: "Manquée",
 };
 
 /** Label of the button that moves a reservation to the status. */
@@ -81,7 +81,7 @@ export const RESERVATION_ACTION_LABELS: Record<Exclude<ReservationStatus, "CONFI
   REMINDED: "Marquer relancé",
   COLLECTED: "Marquer récupérée",
   CANCELLED: "Annuler",
-  NO_SHOW: "Non récupérée",
+  NO_SHOW: "Marquer manquée",
 };
 
 /** French message for each business error, shown to customers and staff. */

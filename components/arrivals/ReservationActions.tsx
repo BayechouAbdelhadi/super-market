@@ -34,9 +34,9 @@ export function ReservationActions({ reservation, onChanged, compact = false }: 
             }
           : status === "NO_SHOW"
             ? {
-                title: "Marquer non récupérée ?",
+                title: "Marquer manquée ?",
                 description: "Le client n'est pas venu chercher sa commande. Le statut ne pourra plus être changé.",
-                confirmLabel: "Non récupérée",
+                confirmLabel: "Marquer manquée",
               }
             : {
                 title: "Annuler la réservation ?",
