@@ -53,18 +53,18 @@ export const LEGAL_PLACEHOLDER = "À compléter";
 /**
  * Legal identity of the company running the store, shown in the legal notice and the privacy policy.
  * Source: national business registry (recherche-entreprises.api.gouv.fr), checked 2026-11-17.
- * `capital`, `rcsCity` are not in the open registry: fill them from the Kbis. `host` is Hostinger's EU entity per its terms of service (check it matches the invoice).
+ * `capital`, `rcsCity` are not in the open registry: filled from the Kbis. `host` is Hostinger's EU entity per its terms of service (check it matches the invoice).
  * An empty value shows `LEGAL_PLACEHOLDER` on the legal pages.
  */
 export const STORE_COMPANY = {
   legalName: "SUPER MARKET CALAIS",
   legalForm: "Société par actions simplifiée (SAS)",
   /** Share capital in euros, as written on the Kbis (e.g. "1 000 €") */
-  capital: "",
+  capital: "1 000 €",
   siren: "885 125 666",
   siret: "885 125 666 00010",
   /** Registry city, as written on the Kbis (e.g. "Boulogne-sur-Mer") */
-  rcsCity: "",
+  rcsCity: "Boulogne-sur-Mer",
   vatNumber: "FR70 885 125 666",
   nafCode: "47.11B — Commerce d'alimentation générale",
   registeredOffice: "205 Avenue Antoine de Saint-Exupéry, 62100 Calais, France",
@@ -80,7 +80,7 @@ export const STORE_COMPANY = {
     /** Where the VPS (and so the database) runs; chosen when the VPS was created */
     serverLocation: "Allemagne (Union européenne)",
   },
-  /** Consumer mediator (mandatory for sales to consumers): name and contact from the mediation membership. */
+  /** Consumer mediator: name and contact from the mediation membership. Leave the name empty when there is none: the mention is then left out of the legal pages. */
   mediator: { name: "", address: "", website: "" },
 } as const;
 

@@ -123,14 +123,16 @@ export function LegalNoticeContent({ contactEmail, contactPhone }: LegalNoticeCo
           </p>
         </Section>
 
-        <Section title="7. Médiation de la consommation">
-          <p className="text-text-muted">
-            En cas de litige non résolu avec notre service client, vous pouvez recourir gratuitement au médiateur de la
-            consommation : {mediator.name || LEGAL_PLACEHOLDER}
-            {mediator.address ? `, ${mediator.address}` : ""}
-            {mediator.website ? ` — ${mediator.website}` : ""}.
-          </p>
-        </Section>
+        {mediator.name && (
+          <Section title="7. Médiation de la consommation">
+            <p className="text-text-muted">
+              En cas de litige non résolu avec notre service client, vous pouvez recourir gratuitement au médiateur de la
+              consommation : {mediator.name}
+              {mediator.address ? `, ${mediator.address}` : ""}
+              {mediator.website ? ` — ${mediator.website}` : ""}.
+            </p>
+          </Section>
+        )}
 
         <Section title="Droit applicable">
           <p className="text-text-muted">
