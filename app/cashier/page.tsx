@@ -32,6 +32,9 @@ export default async function CashierHubPage() {
   const displayName = identity.fullName || user?.email || 'Caissier'
 
   const euroRatio = settings.loyalty.euroToPointsRatio
+  const euroFormat = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
+  const pointsPerDiscountUnit = Math.round(1 / settings.loyalty.pointValueInEuro)
+  const discountUnitValue = euroFormat.format(pointsPerDiscountUnit * settings.loyalty.pointValueInEuro)
 
   return (
     <div className="space-y-8">
@@ -190,10 +193,10 @@ export default async function CashierHubPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-[var(--color-text-muted)]">
             <p>
-              • <strong>Attribution des points</strong> : demandez le numéro de téléphone ou le nom du client avant de finaliser l&apos;encaissement. 1 € dépensé = 1 point fidélité.
+              • <strong>Attribution des points</strong> : demandez le numéro de téléphone ou le nom du client avant de finaliser l&apos;encaissement. 1 € dépensé = {euroRatio} point{euroRatio > 1 ? 's' : ''} fidélité.
             </p>
             <p>
-              • <strong>Déduction des remises</strong> : 100 points donnent droit à 5 € de réduction immédiate sur le total du ticket du client.
+              • <strong>Déduction des remises</strong> : {pointsPerDiscountUnit} points donnent droit à {discountUnitValue} de réduction immédiate sur le total du ticket du client.
             </p>
           </div>
         </Card>

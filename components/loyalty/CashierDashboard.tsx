@@ -27,19 +27,19 @@ interface SearchResults {
 const NO_RESULTS: SearchResults = { query: "", customers: [] };
 
 export interface CashierDashboardProps {
-  settings?: AppSettings;
+  settings: AppSettings;
   /** Customer reopened on arrival (e.g. back from a transaction edit) */
   initialCustomerId?: string;
 }
 
 export function CashierDashboard({ settings: propSettings, initialCustomerId }: CashierDashboardProps) {
-  const [currentSettings, setCurrentSettings] = useState<AppSettings | undefined>(propSettings);
+  const [currentSettings, setCurrentSettings] = useState<AppSettings>(propSettings);
 
   // New settings from the server replace the current ones (adjusted during render, not in an effect)
   const [previousPropSettings, setPreviousPropSettings] = useState(propSettings);
   if (propSettings !== previousPropSettings) {
     setPreviousPropSettings(propSettings);
-    if (propSettings) setCurrentSettings(propSettings);
+    setCurrentSettings(propSettings);
   }
 
   // Fetch live settings on mount to guarantee fresh rules
@@ -60,7 +60,7 @@ export function CashierDashboard({ settings: propSettings, initialCustomerId }: 
     loadSettings();
   }, []);
 
-  const pointValueInEuro = currentSettings?.loyalty?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
+  const pointValueInEuro = currentSettings.loyalty.pointValueInEuro;
   const tierThresholds = currentSettings?.loyalty
     ? {
         silver: currentSettings.loyalty.tierSilverMinPoints,
@@ -459,7 +459,7 @@ export function CashierDashboard({ settings: propSettings, initialCustomerId }: 
         isOpen={isRedeemOpen}
         customer={selectedCustomerDetail}
         onClose={() => setIsRedeemOpen(false)}
-        pointValueInEuro={currentSettings?.loyalty?.pointValueInEuro}
+        pointValueInEuro={currentSettings.loyalty.pointValueInEuro}
         euroToPointsRatio={currentSettings?.loyalty?.euroToPointsRatio}
         quickPurchaseAmounts={currentSettings?.pos?.quickPurchaseAmounts}
         minPointsToRedeem={currentSettings?.loyalty?.minPointsToRedeem}

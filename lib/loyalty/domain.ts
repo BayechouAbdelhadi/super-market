@@ -22,7 +22,8 @@ export interface TierThresholds {
 export interface RedemptionRulesConfig {
   minPointsToRedeem?: number;
   maxDiscountPerTransactionEuro?: number;
-  pointValueInEuro?: number;
+  /** Value of 1 point in euros, from the admin loyalty settings */
+  pointValueInEuro: number;
   purchaseAmount?: number;
 }
 
@@ -64,7 +65,7 @@ export function calculateTier(
  */
 export function calculateMaxPointsForAmount(
   amount: number,
-  pointValueInEuro: number = LOYALTY_CONFIG.conversion.pointValueInEuro
+  pointValueInEuro: number
 ): number {
   if (amount <= 0 || isNaN(amount) || pointValueInEuro <= 0) {
     return 0;
@@ -83,15 +84,15 @@ export function calculateMaxPointsForAmount(
 export function calculateMaxRedeemablePoints(
   availablePoints: number,
   purchaseAmount: number,
-  rules?: RedemptionRulesConfig
+  rules: RedemptionRulesConfig
 ): number {
   if (availablePoints <= 0 || isNaN(availablePoints)) return 0;
-  const pointValue = rules?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
+  const pointValue = rules.pointValueInEuro;
 
   const maxFromAmount = calculateMaxPointsForAmount(purchaseAmount, pointValue);
   let maxPoints = Math.min(availablePoints, maxFromAmount);
 
-  const maxDiscountEuro = rules?.maxDiscountPerTransactionEuro ?? 0;
+  const maxDiscountEuro = rules.maxDiscountPerTransactionEuro ?? 0;
   if (maxDiscountEuro > 0) {
     const maxFromCap = Math.floor((maxDiscountEuro + 1e-9) / pointValue);
     maxPoints = Math.min(maxPoints, maxFromCap);
@@ -115,7 +116,7 @@ export function canRedeemPoints(availablePoints: number, pointsToRedeem: number)
 export function validateRedemption(
   pointsToRedeem: number,
   availablePoints: number,
-  rules?: RedemptionRulesConfig,
+  rules: RedemptionRulesConfig,
   purchaseAmount?: number
 ): { valid: boolean; error?: string } {
   if (pointsToRedeem <= 0 || isNaN(pointsToRedeem)) {
@@ -128,11 +129,11 @@ export function validateRedemption(
     };
   }
 
-  const pointValue = rules?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
+  const pointValue = rules.pointValueInEuro;
 
   // Business Rule: No money given back. Points discount cannot exceed the purchase amount:
   // amount - (points * pointValue) >= 0
-  const effectiveAmount = purchaseAmount !== undefined ? purchaseAmount : rules?.purchaseAmount;
+  const effectiveAmount = purchaseAmount !== undefined ? purchaseAmount : rules.purchaseAmount;
   if (effectiveAmount !== undefined) {
     if (isNaN(effectiveAmount) || effectiveAmount < 0) {
       return {
@@ -150,7 +151,7 @@ export function validateRedemption(
     }
   }
 
-  const minPoints = rules?.minPointsToRedeem ?? 0;
+  const minPoints = rules.minPointsToRedeem ?? 0;
   if (minPoints > 0 && pointsToRedeem < minPoints) {
     return {
       valid: false,
@@ -158,7 +159,7 @@ export function validateRedemption(
     };
   }
 
-  const maxDiscountEuro = rules?.maxDiscountPerTransactionEuro ?? 0;
+  const maxDiscountEuro = rules.maxDiscountPerTransactionEuro ?? 0;
   if (maxDiscountEuro > 0) {
     const discountEuro = pointsToRedeem * pointValue;
     if (discountEuro > maxDiscountEuro) {
@@ -210,8 +211,8 @@ export function applyRedeemPoints(
   availablePoints: number,
   historicalPoints: number,
   pointsToRedeem: number,
-  tiers?: TierThresholds,
-  rules?: RedemptionRulesConfig,
+  tiers: TierThresholds | undefined,
+  rules: RedemptionRulesConfig,
   purchaseAmount?: number
 ) {
   const validation = validateRedemption(pointsToRedeem, availablePoints, rules, purchaseAmount);
@@ -295,8 +296,8 @@ export function applyTransactionEdit(
   input: { amount: number; pointsRedeemed?: number },
   customer: { availablePoints: number; historicalPoints: number },
   ratio: number,
-  tiers?: TierThresholds,
-  rules?: RedemptionRulesConfig
+  tiers: TierThresholds | undefined,
+  rules: RedemptionRulesConfig
 ):
   | {
       valid: true;

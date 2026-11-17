@@ -354,7 +354,7 @@ export default async function AdminHubPage() {
                       Configuration de l&apos;App
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
-                      Valeur monétaire des points (0.05 €), seuils de remises, paramètres de caisse et identité commerciale.
+                      Valeur monétaire des points ({settings.loyalty.pointValueInEuro.toFixed(2)} €), seuils de remises, paramètres de caisse et identité commerciale.
                     </p>
                   </div>
                 </div>

@@ -19,6 +19,6 @@ export const metadata: Metadata = {
 };
 
 export default async function ReglementFidelitePage() {
-  const { store } = await getAppSettings();
-  return <LoyaltyRulesContent contactEmail={store.email} />;
+  const { store, loyalty } = await getAppSettings();
+  return <LoyaltyRulesContent contactEmail={store.email} loyalty={loyalty} />;
 }

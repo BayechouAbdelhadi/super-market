@@ -14,7 +14,7 @@ interface DigitalLoyaltyCardProps {
   tier: LoyaltyTier
   userId?: string
   createdAt?: string
-  pointValueInEuro?: number
+  pointValueInEuro: number
 }
 
 export function DigitalLoyaltyCard({
@@ -25,7 +25,7 @@ export function DigitalLoyaltyCard({
   tier = 'BRONZE',
   userId = '',
   createdAt,
-  pointValueInEuro = 0.05,
+  pointValueInEuro,
 }: DigitalLoyaltyCardProps) {
   // Real Member reference from actual Supabase ID (first 8 hex characters, no invented numbers)
   const memberNumber = userId

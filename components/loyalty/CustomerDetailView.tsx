@@ -21,7 +21,7 @@ interface CustomerDetailViewProps {
   onBack: () => void;
   onOpenAddPurchase: () => void;
   onOpenRedeemPoints: () => void;
-  pointValueInEuro?: number;
+  pointValueInEuro: number;
   minPointsToRedeem?: number;
   tierThresholds?: {
     silver: number;
@@ -35,7 +35,7 @@ export function CustomerDetailView({
   onBack,
   onOpenAddPurchase,
   onOpenRedeemPoints,
-  pointValueInEuro = LOYALTY_CONFIG.conversion.pointValueInEuro,
+  pointValueInEuro,
   minPointsToRedeem = 50,
   tierThresholds = {
     silver: LOYALTY_CONFIG.tiers.SILVER.minHistoricalPoints,

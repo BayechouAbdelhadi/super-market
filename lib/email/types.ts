@@ -51,6 +51,8 @@ export interface AccountActivationEmailProps {
   activationLink: string;
   role: 'CUSTOMER' | 'CASHIER' | 'ADMIN';
   expiresInDays?: number;
+  /** Points earned per euro spent, from the admin loyalty settings */
+  euroToPointsRatio: number;
   sender?: EmailSender;
 }
 

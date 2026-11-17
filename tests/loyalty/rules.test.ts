@@ -68,7 +68,7 @@ describe("Règles métier de fidélité (§ 20)", () => {
   describe("Déduction des points et contrôle du solde disponible", () => {
     it("autorise une déduction inférieure ou égale au solde disponible (100 - 50 = 50)", () => {
       expect(canRedeemPoints(100, 50)).toBe(true);
-      const result = applyRedeemPoints(100, 500, 50);
+      const result = applyRedeemPoints(100, 500, 50, undefined, { pointValueInEuro: 0.05 });
       expect(result.available_points).toBe(50);
       expect(result.historical_points).toBe(500);
       expect(result.tier).toBe("SILVER");
@@ -76,7 +76,7 @@ describe("Règles métier de fidélité (§ 20)", () => {
 
     it("refuse une déduction supérieure au solde disponible (100 disponibles - 150 demandés = refusé)", () => {
       expect(canRedeemPoints(100, 150)).toBe(false);
-      expect(() => applyRedeemPoints(100, 500, 150)).toThrow("Opération refusée : solde disponible insuffisant");
+      expect(() => applyRedeemPoints(100, 500, 150, undefined, { pointValueInEuro: 0.05 })).toThrow("Opération refusée : solde disponible insuffisant");
     });
 
     it("garantit qu'un client GOLD reste GOLD après utilisation de ses points (immutabilité du statut)", () => {
@@ -85,7 +85,7 @@ describe("Règles métier de fidélité (§ 20)", () => {
       expect(initialTier).toBe("GOLD");
 
       // Déduction de 500 points
-      const result = applyRedeemPoints(750, 2450, 500);
+      const result = applyRedeemPoints(750, 2450, 500, undefined, { pointValueInEuro: 0.05 });
 
       // Solde disponible réduit à 250
       expect(result.available_points).toBe(250);
@@ -101,7 +101,7 @@ describe("Règles métier de fidélité (§ 20)", () => {
       expect(calculateRedemptionPointsEarned(15.5)).toBe(0);
       expect(calculateRedemptionPointsEarned(120.0)).toBe(0);
 
-      const result = applyRedeemPoints(200, 1000, 50);
+      const result = applyRedeemPoints(200, 1000, 50, undefined, { pointValueInEuro: 0.05 });
       expect(result.points_earned).toBe(0);
       expect(result.available_points).toBe(150);
       expect(result.historical_points).toBe(1000);

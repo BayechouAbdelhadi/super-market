@@ -1,22 +1,21 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
+import type { LoyaltySettings } from "@/lib/settings/types";
 import { STORE_COMPANY } from "@/lib/store/config";
 
 interface LoyaltyRulesContentProps {
   /** Contact address, from the store settings. */
   contactEmail: string;
+  /** Loyalty rules configured by the admin. */
+  loyalty: LoyaltySettings;
 }
 
-const { conversion, tiers } = LOYALTY_CONFIG;
+const { tiers } = LOYALTY_CONFIG;
 
 const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
 const number = new Intl.NumberFormat("fr-FR");
 
-/** Points needed for a 1 € discount, derived from the point value. */
-const POINTS_PER_EURO_DISCOUNT = Math.round(1 / conversion.pointValueInEuro);
-
-const TIER_LIST = [tiers.BRONZE, tiers.SILVER, tiers.GOLD, tiers.VIP];
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -27,8 +26,16 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-/** Terms of the loyalty program (règlement). Every figure comes from `LOYALTY_CONFIG`. */
-export function LoyaltyRulesContent({ contactEmail }: LoyaltyRulesContentProps) {
+/** Terms of the loyalty program (règlement). Every figure comes from the admin loyalty settings. */
+export function LoyaltyRulesContent({ contactEmail, loyalty }: LoyaltyRulesContentProps) {
+  /** Points needed for a 1 € discount, derived from the point value. */
+  const pointsPerEuroDiscount = Math.round(1 / loyalty.pointValueInEuro);
+  const tierList = [
+    { name: tiers.BRONZE.name, label: tiers.BRONZE.label, minPoints: tiers.BRONZE.minHistoricalPoints },
+    { name: tiers.SILVER.name, label: tiers.SILVER.label, minPoints: loyalty.tierSilverMinPoints },
+    { name: tiers.GOLD.name, label: tiers.GOLD.label, minPoints: loyalty.tierGoldMinPoints },
+    { name: tiers.VIP.name, label: tiers.VIP.label, minPoints: loyalty.tierVipMinPoints },
+  ];
   const mailLink = (
     <a href={`mailto:${contactEmail}`} className="font-semibold text-primary-ink hover:underline">
       {contactEmail}
@@ -60,7 +67,7 @@ export function LoyaltyRulesContent({ contactEmail }: LoyaltyRulesContentProps) 
 
         <Section title="2. Gagner des points">
           <p>
-            Chaque achat en magasin enregistré en caisse avec votre compte rapporte {number.format(conversion.euroToPointsRatio)}{" "}
+            Chaque achat en magasin enregistré en caisse avec votre compte rapporte {number.format(loyalty.euroToPointsRatio)}{" "}
             point par euro dépensé, arrondi à l’entier inférieur. Présentez votre carte (QR code) ou votre numéro de
             téléphone avant le paiement : les points ne sont pas ajoutés après coup sans justificatif.
           </p>
@@ -68,8 +75,8 @@ export function LoyaltyRulesContent({ contactEmail }: LoyaltyRulesContentProps) 
 
         <Section title="3. Utiliser ses points">
           <p>
-            {number.format(POINTS_PER_EURO_DISCOUNT)} points donnent droit à une remise de {euro.format(1)} sur vos
-            achats, soit {euro.format(conversion.pointValueInEuro)} par point. Les points s’utilisent en caisse, sur
+            {number.format(pointsPerEuroDiscount)} points donnent droit à une remise de {euro.format(1)} sur vos
+            achats, soit {euro.format(loyalty.pointValueInEuro)} par point. Les points s’utilisent en caisse, sur
             demande, avant l’encaissement. Ils ne sont ni remboursables, ni échangeables contre de l’argent, ni
             cessibles.
           </p>
@@ -78,9 +85,9 @@ export function LoyaltyRulesContent({ contactEmail }: LoyaltyRulesContentProps) 
         <Section title="4. Statuts">
           <p>Votre statut dépend du total de points gagnés depuis l’ouverture du compte. Utiliser des points ne le baisse pas.</p>
           <ul className="list-disc space-y-1 pl-5">
-            {TIER_LIST.map((tier) => (
+            {tierList.map((tier) => (
               <li key={tier.name}>
-                <strong className="text-text">{tier.label}</strong> : à partir de {number.format(tier.minHistoricalPoints)} points gagnés
+                <strong className="text-text">{tier.label}</strong> : à partir de {number.format(tier.minPoints)} points gagnés
               </li>
             ))}
           </ul>

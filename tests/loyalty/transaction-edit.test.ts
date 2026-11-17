@@ -31,7 +31,8 @@ describe("applyTransactionEdit", () => {
       { amount: 10 },
       { availablePoints: 600, historicalPoints: 600 },
       1,
-      { silver: 500, gold: 2000, vip: 5000 }
+      { silver: 500, gold: 2000, vip: 5000 },
+      rules
     );
     expect(result).toEqual({
       valid: true,
@@ -48,7 +49,9 @@ describe("applyTransactionEdit", () => {
       { amount: 100, pointsEarned: 100, pointsRedeemed: 0 },
       { amount: 10 },
       { availablePoints: 20, historicalPoints: 100 },
-      1
+      1,
+      undefined,
+      rules
     );
     expect(result.valid).toBe(false);
   });

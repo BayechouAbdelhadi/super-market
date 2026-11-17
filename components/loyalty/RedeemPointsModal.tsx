@@ -23,7 +23,7 @@ interface RedeemPointsModalProps {
   onClose: () => void;
   onPointsRedeemed: (updatedCustomer: CustomerDetail) => void;
   onPurchaseRecorded?: (updatedCustomer: CustomerDetail) => void;
-  pointValueInEuro?: number;
+  pointValueInEuro: number;
   euroToPointsRatio?: number;
   quickPurchaseAmounts?: number[];
   minPointsToRedeem?: number;
@@ -37,7 +37,7 @@ export function RedeemPointsModal({
   onClose,
   onPointsRedeemed,
   onPurchaseRecorded,
-  pointValueInEuro = LOYALTY_CONFIG.conversion.pointValueInEuro,
+  pointValueInEuro,
   euroToPointsRatio = LOYALTY_CONFIG.conversion.euroToPointsRatio,
   quickPurchaseAmounts,
   minPointsToRedeem = 50,

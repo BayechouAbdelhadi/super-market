@@ -26,7 +26,7 @@ interface CustomerWorkspaceProps {
   query: string
   title?: string
   subtitle?: string
-  settings?: AppSettings
+  settings: AppSettings
   canToggleStatus?: boolean
 }
 
@@ -41,13 +41,13 @@ export function CustomerWorkspace({
   settings: propSettings,
   canToggleStatus,
 }: CustomerWorkspaceProps) {
-  const [currentSettings, setCurrentSettings] = useState<AppSettings | undefined>(propSettings);
+  const [currentSettings, setCurrentSettings] = useState<AppSettings>(propSettings);
 
   // New settings from the server replace the current ones (adjusted during render, not in an effect)
   const [previousPropSettings, setPreviousPropSettings] = useState(propSettings);
   if (propSettings !== previousPropSettings) {
     setPreviousPropSettings(propSettings);
-    if (propSettings) setCurrentSettings(propSettings);
+    setCurrentSettings(propSettings);
   }
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export function CustomerWorkspace({
     loadSettings();
   }, []);
 
-  const pointValueInEuro = currentSettings?.loyalty?.pointValueInEuro ?? LOYALTY_CONFIG.conversion.pointValueInEuro;
+  const pointValueInEuro = currentSettings.loyalty.pointValueInEuro;
   const tierThresholds = currentSettings?.loyalty
     ? {
         silver: currentSettings.loyalty.tierSilverMinPoints,
@@ -249,7 +249,7 @@ export function CustomerWorkspace({
             isOpen={isRedeemOpen}
             customer={selectedCustomerDetail}
             onClose={() => setIsRedeemOpen(false)}
-            pointValueInEuro={currentSettings?.loyalty?.pointValueInEuro}
+            pointValueInEuro={currentSettings.loyalty.pointValueInEuro}
             euroToPointsRatio={currentSettings?.loyalty?.euroToPointsRatio}
             quickPurchaseAmounts={currentSettings?.pos?.quickPurchaseAmounts}
             minPointsToRedeem={currentSettings?.loyalty?.minPointsToRedeem}

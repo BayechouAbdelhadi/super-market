@@ -71,6 +71,7 @@ describe("Email Templates", () => {
         name: "Alexandre Dumas",
         activationLink: "https://supermarketcalais.com/confirm-account?token=xyz",
         role: "CUSTOMER",
+        euroToPointsRatio: 2,
       });
 
       expect(template.subject).toContain("Activez votre compte fidélité");
@@ -79,6 +80,7 @@ describe("Email Templates", () => {
       expect(template.html).toContain("https://supermarketcalais.com/confirm-account?token=xyz");
       expect(template.html).toContain("Confirmer et activer mon compte");
       expect(template.text).toContain("passage à la caisse");
+      expect(template.text).toContain("1 € dépensé = 2 points");
     });
 
     it("renders cashier invitation email mentioning collaboration", () => {
@@ -87,6 +89,7 @@ describe("Email Templates", () => {
         name: "Sophie Germain",
         activationLink: "https://supermarketcalais.com/confirm-account?token=cashier_token",
         role: "CASHIER",
+        euroToPointsRatio: 1,
       });
 
       expect(template.subject).toContain("Invitation à rejoindre l'équipe caisse");

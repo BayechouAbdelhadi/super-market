@@ -9,7 +9,7 @@ import { escapeHtml } from "./escape-html";
 export function renderAccountActivationEmail(
   props: AccountActivationEmailProps
 ): EmailTemplateResult {
-  const { name, activationLink, role, expiresInDays = 7 } = props;
+  const { name, activationLink, role, expiresInDays = 7, euroToPointsRatio } = props;
   const isCashier = role === 'CASHIER';
   const greeting = name ? `Bonjour ${name},` : "Bonjour,";
   // HTML version: the name is user-supplied (public signup), never inject it raw
@@ -26,7 +26,7 @@ export function renderAccountActivationEmail(
 
   const mainParagraph = isCashier
     ? "Un administrateur vous a invité(e) en tant que caissier(e) à collaborer sur la plateforme Super Market Calais pour enregistrer les achats et gérer le programme fidélité de nos clients."
-    : "Votre compte fidélité Super Market Calais a été créé lors de votre dernier passage à la caisse. Grâce à lui, vous cumulez automatiquement des points à chaque achat (1 € dépensé = 1 point fidélité) et bénéficiez de réductions exclusives.";
+    : `Votre compte fidélité Super Market Calais a été créé lors de votre dernier passage à la caisse. Grâce à lui, vous cumulez automatiquement des points à chaque achat (1 € dépensé = ${euroToPointsRatio} point${euroToPointsRatio > 1 ? "s" : ""} fidélité) et bénéficiez de réductions exclusives.`;
 
   const callToActionText = isCashier
     ? "Pour finaliser votre accès et commencer à utiliser votre espace caisse, veuillez définir votre mot de passe :"

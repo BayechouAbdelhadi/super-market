@@ -39,6 +39,7 @@ export function sendActivationEmail(
     activationLink: createActivationLink(origin, account.email, account.role),
     role: account.role,
     expiresInDays: AUTH_CONFIG.activationLinkTtlDays,
+    euroToPointsRatio: settings.loyalty.euroToPointsRatio,
     sender: activationSender(settings),
   });
 }
