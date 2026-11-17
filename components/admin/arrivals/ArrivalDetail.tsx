@@ -173,7 +173,7 @@ export function ArrivalDetail({ arrival, stats, initialReservations, initialTota
         <StatCard
           label="Taux de récupération"
           value={stats.collectionRate === null ? "—" : percent(stats.collectionRate)}
-          description={`${stats.byStatus.COLLECTED} récupérée(s) · ${stats.byStatus.NO_SHOW} non récupérée(s)`}
+          description={`${stats.byStatus.COLLECTED} récupérée(s) sur ${stats.totalReservations}`}
         />
         <StatCard
           label="Panier moyen"
