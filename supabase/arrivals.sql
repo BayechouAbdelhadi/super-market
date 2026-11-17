@@ -341,7 +341,7 @@ AS $$
     'daily', COALESCE((
       SELECT jsonb_agg(jsonb_build_object('day', day, 'count', n) ORDER BY day) FROM (
         SELECT (created_at AT TIME ZONE p_tz)::date AS day, COUNT(*) AS n
-        FROM arrival_reservations WHERE arrival_id = p_arrival_id GROUP BY 1
+        FROM arrival_reservations WHERE arrival_id = p_arrival_id AND status <> 'CANCELLED' GROUP BY 1
       ) d
     ), '[]'::jsonb)
   );

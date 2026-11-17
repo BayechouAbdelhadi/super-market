@@ -133,7 +133,6 @@ export function buildArrivalStats(raw: RawArrivalStats): ArrivalStats {
     (sum, s) => sum + byStatus[s],
     0
   );
-  const finished = byStatus.COLLECTED + byStatus.NO_SHOW;
   const billable = totalReservations - byStatus.NO_SHOW;
   return {
     byStatus,
@@ -141,7 +140,7 @@ export function buildArrivalStats(raw: RawArrivalStats): ArrivalStats {
     customers: raw.customers,
     expectedRevenue: raw.expectedRevenue,
     collectedRevenue: raw.collectedRevenue,
-    collectionRate: finished > 0 ? byStatus.COLLECTED / finished : null,
+    collectionRate: totalReservations > 0 ? byStatus.COLLECTED / totalReservations : null,
     averageBasket: billable > 0 ? Math.round((raw.expectedRevenue / billable) * 100) / 100 : null,
     items: raw.items,
     daily: raw.daily,

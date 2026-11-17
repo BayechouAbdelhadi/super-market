@@ -200,7 +200,7 @@ export function ArrivalDetail({ arrival, stats, initialReservations, initialTota
                   </span>
                   <span className="tabular-nums text-[var(--color-text-muted)]">
                     {item.stockReserved} / {item.stockTotal} réservé(s) ({percent(ratio)}) · {item.collectedQuantity}{" "}
-                    récupéré(s) · {Math.max(0, item.stockTotal - item.stockReserved)} restant(s)
+                    récupéré(s) · {Math.max(0, item.stockTotal - item.stockReserved)} non réservé(s)
                   </span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-border)]" aria-hidden>

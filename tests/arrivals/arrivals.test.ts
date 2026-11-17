@@ -257,7 +257,7 @@ describe('Arrivals', () => {
       });
       expect(stats.totalReservations).toBe(6);
       expect(stats.byStatus.REMINDED).toBe(0);
-      expect(stats.collectionRate).toBe(0.75);
+      expect(stats.collectionRate).toBe(0.5);
       expect(stats.averageBasket).toBe(20);
     });
 
