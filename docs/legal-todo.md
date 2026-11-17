@@ -1,7 +1,7 @@
 # Conformité légale : à remplir et à confirmer
 
 Dernière vérification des données du registre : 17/11/2026.
-Les informations de la société sont dans `STORE_COMPANY`, fichier `lib/store/config.ts`. Une valeur vide masque sa ligne sur la page publique.
+Les informations de la société sont dans `STORE_COMPANY`, fichier `lib/store/config.ts`. Une valeur vide affiche « À compléter » sur la page publique.
 
 ## À remplir (absent du registre public)
 
@@ -11,13 +11,13 @@ Les informations de la société sont dans `STORE_COMPANY`, fichier `lib/store/c
 | `rcsCity` | Kbis (ville du greffe) | Mention obligatoire : « RCS <ville> 885 125 666 » |
 | `mediator` | Choisir un médiateur de la consommation et adhérer (gratuit pour le client, payant pour le commerce) | Obligatoire pour toute vente à des consommateurs. Le nom et le site du médiateur doivent être affichés |
 
-La section « Médiation » de `/mentions-legales` n'apparaît que si `mediator.name` est rempli.
+Tant qu'une valeur est vide, les pages affichent « À compléter » (constante `LEGAL_PLACEHOLDER`). Chercher ce texte avant la mise en ligne.
 
 ## À confirmer
 
 - **Directeur de la publication** : `Aydogan Karaaslan`, directeur général d'après le registre. Confirmer que c'est la bonne personne.
 - **Entité Hostinger** : `Hostinger International Ltd.` (Chypre) est l'entité par défaut pour l'UE, d'après les conditions d'utilisation de Hostinger. Vérifier sur la facture. Si c'est l'entité du Luxembourg, remplacer `host.name` par `HOSTINGER Global S.à r.l` et `host.address` par `6 Avenue Pasteur, L-2310 Luxembourg`.
-- **Téléphone de l'hébergeur** : aucun trouvé, la ligne est masquée. À ajouter seulement s'il figure sur le contrat.
+- **Téléphone de l'hébergeur** : aucun trouvé, la page affiche « À compléter ». La LCEN demande le téléphone de l'hébergeur : le prendre sur le contrat ou la facture Hostinger.
 - **Localisation des serveurs** : `Allemagne (Union européenne)`, choisie à la création du VPS. Déjà affichée sur les mentions légales et la politique de confidentialité.
 
 ## Fait

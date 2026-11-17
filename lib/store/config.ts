@@ -47,11 +47,14 @@ export const STORE_LOCATION = {
     "https://maps.google.com/maps?q=Super+Market+205+Avenue+Antoine+de+Saint-Exup%C3%A9ry+Calais&z=16&ie=UTF8&iwloc=&output=embed",
 } as const;
 
+/** Shown on legal pages in place of a `STORE_COMPANY` value that is still empty. Search the site for it before launch. */
+export const LEGAL_PLACEHOLDER = "À compléter";
+
 /**
  * Legal identity of the company running the store, shown in the legal notice and the privacy policy.
  * Source: national business registry (recherche-entreprises.api.gouv.fr), checked 2026-11-17.
  * `capital`, `rcsCity` are not in the open registry: fill them from the Kbis. `host` is Hostinger's EU entity per its terms of service (check it matches the invoice).
- * An empty value hides its line on the legal notice.
+ * An empty value shows `LEGAL_PLACEHOLDER` on the legal pages.
  */
 export const STORE_COMPANY = {
   legalName: "SUPER MARKET CALAIS",

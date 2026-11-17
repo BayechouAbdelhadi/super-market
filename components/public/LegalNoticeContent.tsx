@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
-import { STORE_COMPANY } from "@/lib/store/config";
+import { LEGAL_PLACEHOLDER, STORE_COMPANY } from "@/lib/store/config";
 
 interface LegalNoticeContentProps {
   /** Contact address, from the store settings. */
@@ -26,14 +26,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Facts({ rows }: { rows: Row[] }) {
   return (
     <dl className="space-y-1.5 rounded-[var(--radius-button)] border border-border bg-surface-hover p-4 text-sm">
-      {rows
-        .filter((row) => row.value)
-        .map((row) => (
-          <div key={row.label} className="flex flex-col gap-0.5 sm:flex-row sm:gap-2">
-            <dt className="font-semibold text-text sm:w-56 sm:shrink-0">{row.label}</dt>
-            <dd className="min-w-0 break-words text-text-muted">{row.value}</dd>
-          </div>
-        ))}
+      {rows.map((row) => (
+        <div key={row.label} className="flex flex-col gap-0.5 sm:flex-row sm:gap-2">
+          <dt className="font-semibold text-text sm:w-56 sm:shrink-0">{row.label}</dt>
+          <dd className="min-w-0 break-words text-text-muted">{row.value || LEGAL_PLACEHOLDER}</dd>
+        </div>
+      ))}
     </dl>
   );
 }
@@ -41,7 +39,7 @@ function Facts({ rows }: { rows: Row[] }) {
 /** Legal notice (LCEN art. 6-III): publisher, hosting, intellectual property, liability. */
 export function LegalNoticeContent({ contactEmail, contactPhone }: LegalNoticeContentProps) {
   const company = STORE_COMPANY;
-  const registry = company.rcsCity ? `RCS ${company.rcsCity} ${company.siren}` : "";
+  const registry = `RCS ${company.rcsCity || LEGAL_PLACEHOLDER} ${company.siren}`;
   const { host, mediator } = company;
 
   return (
@@ -83,8 +81,7 @@ export function LegalNoticeContent({ contactEmail, contactPhone }: LegalNoticeCo
           </p>
         </Section>
 
-        {host.name ? (
-          <Section title="3. Hébergement">
+        <Section title="3. Hébergement">
             <Facts
               rows={[
                 { label: "Hébergeur", value: host.name },
@@ -94,8 +91,7 @@ export function LegalNoticeContent({ contactEmail, contactPhone }: LegalNoticeCo
                 { label: "Localisation des serveurs", value: host.serverLocation },
               ]}
             />
-          </Section>
-        ) : null}
+        </Section>
 
         <Section title="4. Propriété intellectuelle">
           <p className="text-text-muted">
@@ -127,16 +123,14 @@ export function LegalNoticeContent({ contactEmail, contactPhone }: LegalNoticeCo
           </p>
         </Section>
 
-        {mediator.name ? (
-          <Section title="7. Médiation de la consommation">
-            <p className="text-text-muted">
-              En cas de litige non résolu avec notre service client, vous pouvez recourir gratuitement au médiateur de
-              la consommation : {mediator.name}
-              {mediator.address ? `, ${mediator.address}` : ""}
-              {mediator.website ? ` — ${mediator.website}` : ""}.
-            </p>
-          </Section>
-        ) : null}
+        <Section title="7. Médiation de la consommation">
+          <p className="text-text-muted">
+            En cas de litige non résolu avec notre service client, vous pouvez recourir gratuitement au médiateur de la
+            consommation : {mediator.name || LEGAL_PLACEHOLDER}
+            {mediator.address ? `, ${mediator.address}` : ""}
+            {mediator.website ? ` — ${mediator.website}` : ""}.
+          </p>
+        </Section>
 
         <Section title="Droit applicable">
           <p className="text-text-muted">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { LOYALTY_CONFIG } from "@/lib/loyalty/config";
-import { STORE_COMPANY } from "@/lib/store/config";
+import { LEGAL_PLACEHOLDER, STORE_COMPANY } from "@/lib/store/config";
 
 interface LoyaltyRulesContentProps {
   /** Contact address, from the store settings. */
@@ -131,9 +131,7 @@ export function LoyaltyRulesContent({ contactEmail }: LoyaltyRulesContentProps) 
         <Section title="10. Réclamations et droit applicable">
           <p>
             Pour toute réclamation, écrivez à {mailLink}. Ce règlement est soumis au droit français.
-            {STORE_COMPANY.mediator.name
-              ? ` En cas de litige non résolu, vous pouvez saisir gratuitement le médiateur de la consommation : ${STORE_COMPANY.mediator.name}.`
-              : ""}
+            {` En cas de litige non résolu, vous pouvez saisir gratuitement le médiateur de la consommation : ${STORE_COMPANY.mediator.name || LEGAL_PLACEHOLDER}.`}
           </p>
         </Section>
       </main>
