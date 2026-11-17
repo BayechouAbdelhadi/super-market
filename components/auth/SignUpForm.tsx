@@ -142,6 +142,18 @@ export function SignUpForm({ initialMessage, initialData, next }: SignUpFormProp
         {isPending ? 'Création en cours...' : 'Créer mon compte'}
       </Button>
 
+      <p className="text-center text-sm text-[var(--color-text-muted)]">
+        En créant un compte, vous acceptez le{' '}
+        <Link href="/reglement-fidelite" target="_blank" className="font-semibold text-primary-ink underline-offset-4 hover:underline">
+          règlement du programme
+        </Link>{' '}
+        et notre{' '}
+        <Link href="/politique-de-confidentialite" target="_blank" className="font-semibold text-primary-ink underline-offset-4 hover:underline">
+          politique de confidentialité
+        </Link>
+        .
+      </p>
+
       <div className="pt-5 text-center border-t border-[var(--color-border)]">
         <p className="text-sm text-[var(--color-text-muted)]">
           Déjà un compte ?{' '}

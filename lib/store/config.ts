@@ -47,6 +47,40 @@ export const STORE_LOCATION = {
     "https://maps.google.com/maps?q=Super+Market+205+Avenue+Antoine+de+Saint-Exup%C3%A9ry+Calais&z=16&ie=UTF8&iwloc=&output=embed",
 } as const;
 
+/**
+ * Legal identity of the company running the store, shown in the legal notice and the privacy policy.
+ * Source: national business registry (recherche-entreprises.api.gouv.fr), checked 2026-11-17.
+ * `capital`, `rcsCity` are not in the open registry: fill them from the Kbis. `host` is Hostinger's EU entity per its terms of service (check it matches the invoice).
+ * An empty value hides its line on the legal notice.
+ */
+export const STORE_COMPANY = {
+  legalName: "SUPER MARKET CALAIS",
+  legalForm: "Société par actions simplifiée (SAS)",
+  /** Share capital in euros, as written on the Kbis (e.g. "1 000 €") */
+  capital: "",
+  siren: "885 125 666",
+  siret: "885 125 666 00010",
+  /** Registry city, as written on the Kbis (e.g. "Boulogne-sur-Mer") */
+  rcsCity: "",
+  vatNumber: "FR70 885 125 666",
+  nafCode: "47.11B — Commerce d'alimentation générale",
+  registeredOffice: "205 Avenue Antoine de Saint-Exupéry, 62100 Calais, France",
+  /** Legal representative named as publication director */
+  publicationDirector: "Aydogan Karaaslan",
+  publicationDirectorRole: "Directeur général",
+  /** Hosting provider (legal notice requirement): the VPS provider. */
+  host: {
+    name: "Hostinger International Ltd.",
+    address: "61 Lordou Vironos Str., 6023 Larnaca, Chypre",
+    phone: "",
+    website: "https://www.hostinger.fr",
+    /** Where the VPS (and so the database) runs; chosen when the VPS was created */
+    serverLocation: "Allemagne (Union européenne)",
+  },
+  /** Consumer mediator (mandatory for sales to consumers): name and contact from the mediation membership. */
+  mediator: { name: "", address: "", website: "" },
+} as const;
+
 /** Payment methods accepted at the till (practical info, FAQ, structured data), as they read mid-sentence. */
 export const STORE_PAYMENT_METHODS = ["carte bancaire", "sans contact", "Apple Pay", "Google Pay", "espèces"] as const;
 

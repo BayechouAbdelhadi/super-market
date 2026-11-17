@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { STORE_COMPANY } from "@/lib/store/config";
 import {
   Lock,
   Eye,
@@ -68,7 +69,7 @@ export function PrivacyPolicyContent({ contactEmail }: PrivacyPolicyContentProps
             </h1>
             <p className="text-lg text-[var(--color-text-muted)] leading-relaxed">
               Protection et gestion de vos données personnelles chez <strong>Super Market Calais</strong>. 
-              Cette politique décrit en toute transparence comment nous traitons, sécurisons et respectons vos données conformément au Règlement Général sur la Protection des Données (RGPD) et aux exigences des plateformes tierces (Meta / Facebook).
+              Cette politique décrit en toute transparence comment nous traitons, sécurisons et respectons vos données conformément au Règlement Général sur la Protection des Données (RGPD).
             </p>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--color-text-muted)] pt-4 border-t border-[var(--color-border)]">
               <span>Dernière mise à jour : <strong>17 Octobre 2026</strong></span>
@@ -124,8 +125,9 @@ export function PrivacyPolicyContent({ contactEmail }: PrivacyPolicyContentProps
                 Le responsable du traitement des données personnelles collectées dans le cadre de l’utilisation du site internet, du programme de fidélité et des applications associées est :
               </p>
               <div className="p-4 rounded-[var(--radius-button)] bg-surface-hover border border-[var(--color-border)] space-y-1.5 text-sm">
-                <p><strong>Raison sociale :</strong> Super Market Calais</p>
-                <p><strong>Adresse de l’établissement :</strong> 205 Avenue Antoine de Saint-Exupéry, 62100 Calais, France</p>
+                <p><strong>Raison sociale :</strong> {STORE_COMPANY.legalName} ({STORE_COMPANY.legalForm})</p>
+                <p><strong>SIREN :</strong> {STORE_COMPANY.siren}</p>
+                <p><strong>Siège social :</strong> {STORE_COMPANY.registeredOffice}</p>
                 <p><strong>Téléphone :</strong> 06 71 54 05 28</p>
                 <p><strong>E-mail de contact &amp; DPO :</strong> <a href={`mailto:${contactEmail}`} className="text-[var(--color-primary)] hover:underline font-semibold">{contactEmail}</a></p>
               </div>
@@ -159,12 +161,6 @@ export function PrivacyPolicyContent({ contactEmail }: PrivacyPolicyContentProps
                   <CheckCircle2 className="w-4 h-4 text-success-text shrink-0 mt-0.5" />
                   <div>
                     <strong>Données techniques de connexion :</strong> Adresse IP, type et version de navigateur, horodatage de connexion à des fins strictes de journalisation de sécurité et prévention des abus.
-                  </div>
-                </li>
-                <li className="flex items-start gap-2.5 text-base">
-                  <CheckCircle2 className="w-4 h-4 text-success-text shrink-0 mt-0.5" />
-                  <div>
-                    <strong>Données provenant des plateformes Meta / Facebook (le cas échéant) :</strong> Si vous choisissez d’interagir avec notre application via les fonctionnalités de connexion Facebook (Meta Login) ou les widgets associés, nous ne recevons que l’identifiant utilisateur Facebook public (Facebook User ID) et l’adresse e-mail autorisée par vos soins. Aucune publication sur votre profil n’est effectuée sans votre accord explicite.
                   </div>
                 </li>
               </ul>
@@ -241,7 +237,7 @@ export function PrivacyPolicyContent({ contactEmail }: PrivacyPolicyContentProps
                 Pour assurer le fonctionnement technique du service, nous faisons appel à des prestataires de confiance opérant en conformité avec le RGPD :
               </p>
               <ul className="list-disc list-inside space-y-1 text-base text-[var(--color-text-muted)]">
-                <li><strong>Hébergement des bases de données :</strong> Serveurs cloud certifiés situés au sein de l’Union Européenne (RGPD compliant).</li>
+                <li><strong>Hébergement des bases de données :</strong> Serveur privé virtuel hébergé par {STORE_COMPANY.host.name}, situé en {STORE_COMPANY.host.serverLocation}. Vos données restent dans l’Union Européenne.</li>
                 <li><strong>Routage des e-mails transactionnels et newsletters :</strong> Brevo (prestataire français certifié conforme aux standards européens de protection des données).</li>
               </ul>
             </section>
@@ -285,7 +281,7 @@ export function PrivacyPolicyContent({ contactEmail }: PrivacyPolicyContentProps
               </div>
             </section>
 
-            {/* 7. INSTRUCTIONS DE SUPPRESSION DES DONNÉES (Exigence Meta / Facebook & RGPD) */}
+            {/* 7. INSTRUCTIONS DE SUPPRESSION DES DONNÉES (RGPD) */}
             <section
               id="suppression-donnees"
               className="scroll-mt-24 rounded-[var(--radius-card)] border border-warning-border bg-warning-subtle p-6 sm:p-8 space-y-4"
@@ -297,8 +293,8 @@ export function PrivacyPolicyContent({ contactEmail }: PrivacyPolicyContentProps
                 </h2>
               </div>
               <p className="text-base text-warning-text/90 leading-relaxed">
-                Conformément aux exigences de la plateforme pour développeurs <strong>Meta (Facebook Platform Terms)</strong> et aux règles du <strong>RGPD</strong>, 
-                vous avez le plein pouvoir de supprimer à tout moment l’ensemble des données personnelles associées à votre compte ou transmises via Facebook.
+                Conformément aux règles du <strong>RGPD</strong>,
+                vous avez le plein pouvoir de supprimer à tout moment l’ensemble des données personnelles associées à votre compte.
               </p>
 
               <div className="space-y-3 pt-1">

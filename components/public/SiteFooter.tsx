@@ -25,6 +25,8 @@ const NAV_LINKS = [
   { href: "/#fidelite", label: "Programme fidélité" },
   { href: "/#faq", label: "Questions fréquentes" },
   { href: "/login", label: "Mon compte" },
+  { href: "/reglement-fidelite", label: "Règlement fidélité" },
+  { href: "/mentions-legales", label: "Mentions légales" },
   { href: "/politique-de-confidentialite", label: "Politique de confidentialité" },
 ];
 
